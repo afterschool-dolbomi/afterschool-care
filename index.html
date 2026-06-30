@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V6.1</title>
+    <title>방과후 지원금 돌보미 V6.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -565,7 +565,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V6.1</span>
+                <span class="brand-version">V6.2</span>
             </div>
             
             <div class="stat-section">
@@ -1000,27 +1000,7 @@
         </div>
     </div>
 
-    <div class="slide-panel-overlay" id="updateOverlay" style="z-index: 3000;"></div>
-    <div class="detail-modal subject" id="updateModal" style="width: 400px; z-index: 3001;">
-        <div class="detail-header" style="background: #0ea5e9;">
-            <h3 style="font-size:16px;">🚀 업데이트 확인 안내</h3>
-            <button class="close-btn" onclick="closeUpdateModal()">&times;</button>
-        </div>
-        <div class="detail-body" style="text-align: center; padding: 30px 20px;">
-            <div style="font-size: 40px; margin-bottom: 15px;">🎁</div>
-            <h4 style="color: var(--text-dark); margin-bottom: 10px;">새로운 버전이 출시되었을 수 있습니다!</h4>
-            <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 20px; line-height: 1.5;">
-                현재 사용 중인 프로그램보다 기능이 추가되거나<br>오류가 개선된 최신 버전이 있을 수 있습니다.<br>배포 사이트(노션)를 확인해 보시겠습니까?
-            </p>
-            <button class="btn-save" style="background: #0ea5e9; width: 100%; height: 45px; font-size: 14px; margin-bottom: 10px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank'); closeUpdateModal();">노션 사이트로 이동하여 확인하기</button>
-            <div style="text-align: right;">
-                <label style="font-size: 12px; color: #9ca3af; cursor: pointer;">
-                    <input type="checkbox" id="hideUpdateCheck"> 한달(30일) 동안 이 창 보지 않기
-                </label>
-            </div>
-        </div>
-    </div>
-
+    
     <script>
         let db = [];
         let currentTab = 'all';
@@ -1395,24 +1375,11 @@
             checkUpdatePopup();
         }
 
-       function checkUpdatePopup() {
-            let lastCheck = localStorage.getItem('hideUpdateCheckDate');
-            let now = new Date().getTime();
-            
-            // 15일(1296000000)에서 30일(2592000000)로 수정 완료
-            if (!lastCheck || (now - lastCheck) > 2592000000) {
-                document.getElementById('updateOverlay').classList.add('active');
-                document.getElementById('updateModal').style.display = 'flex';
-            }
-        }
-
-        function closeUpdateModal() {
-            if(document.getElementById('hideUpdateCheck').checked) {
-                localStorage.setItem('hideUpdateCheckDate', new Date().getTime());
-            }
-            document.getElementById('updateOverlay').classList.remove('active');
-            document.getElementById('updateModal').style.display = 'none';
-        }
+      
+	  
+	     // ✨ 앱 배포 방식 전환으로 불필요해진 업데이트 팝업 로직 비활성화
+       function checkUpdatePopup() {}
+       function closeUpdateModal() {}
 
         function persistSubjects() {
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
@@ -1974,8 +1941,11 @@
                 if(fName && !r.name.toLowerCase().includes(fName)) return false;
                 if(fGrade && String(r.grade) !== fGrade) return false;
                 
-                if (currentTab !== 'all') {
-                    if (c[currentTab].status === '미사용' || c[currentTab].exp === 0) return false;
+               if (currentTab !== 'all') {
+                    // ✨ 0원이어도 수강 과목 이름이 1개라도 존재하면 해당 분기에 표시되도록 허용
+                    let hasSubject = r[currentTab] && r[currentTab].subs && r[currentTab].subs.some(s => s.name && s.name.trim() !== '');
+                    let hasExp = c[currentTab].exp > 0;
+                    if (!hasSubject && !hasExp) return false;
                 }
 
                 if(fStatus) {
