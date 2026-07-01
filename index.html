@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V6.2</title>
+    <title>방과후 지원금 돌보미 V6.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -565,7 +565,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V6.2</span>
+                <span class="brand-version">V6.5</span>
             </div>
             
             <div class="stat-section">
@@ -619,7 +619,8 @@
                 
                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')">✏️ 학생 개별 입력</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="background:transparent; border:1px solid var(--sidebar-accent);" onclick="openSubjectManager()">⚙️ 과목 목록 관리</button>
-                <button class="btn-3d btn-side" id="btn-neis-manage" style="background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe;" onclick="openNeisModal()">🎓 자유수강자 명단 관리 (NEIS)</button>
+                 <button class="btn-3d btn-side" id="btn-neis-manage" style="background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe;" onclick="openNeisModal()">🎓 자유수강자 명단 관리 (NEIS)</button>
+                <button class="btn-3d btn-side" id="btn-special-manage" style="background:#fff7ed; color:#b45309; border:1px solid #fed7aa;" onclick="openSpecialModal()">🏫 특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-upload" onclick="document.getElementById('excelUpload').click()">📥 단체 명단 엑셀 업로드</button>
                 <button class="btn-3d btn-side" id="btn-excel-export" onclick="exportExcel()">📤 전체 명단 백업(엑셀 저장)</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 샘플 엑셀 다운로드</button>
@@ -913,7 +914,42 @@
             </div>
         </div>
     </div>
+              
+			  
+			  <div class="slide-panel-overlay" id="specialOverlay" onclick="closeSpecialModal()" style="z-index: 2400;"></div>
+    <div class="detail-modal subject" id="specialModal" style="width: 550px; max-height: 80vh; z-index: 2401;">
+        <div class="detail-header" style="background: #f59e0b;">
+            <h3 style="font-size:16px;">🏫 특수학급(특수교육대상자) 명단 사전 등록</h3>
+            <button class="close-btn" onclick="closeSpecialModal()">&times;</button>
+        </div>
+        <div class="detail-body">
+            <div style="font-size: 12px; color: var(--text-gray); margin-bottom: 12px; line-height: 1.5;">
+                ※ 여기에 특수학급 학생 명단을 한 번만 등록해 두면 1년 내내 유지됩니다.<br>
+                ※ 자유수강자 엑셀 명단을 올릴 때, <b>이 학번과 일치하는 학생은 자동으로 [특수반]으로 분류되어 프로그램에 중복 등록되는 것을 원천 차단</b>합니다.
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom: 16px; background:#fffbeb; padding:12px; border-radius:6px; border:1px solid #fde68a;">
+                <input type="number" id="sp_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="number" id="sp_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="number" id="sp_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="text" id="sp_name" placeholder="이름" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <button class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:0 14px; font-weight:bold;" onclick="addSpecialStudent()">추가</button>
+            </div>
+            <div style="overflow-y:auto; max-height:350px; border:1px solid var(--border-color); border-radius:6px;">
+               
 
+
+			   <table class="detail-inner-table" style="background:white; margin:0;">
+                    <thead style="background:#f3f4f6; position:sticky; top:0;">
+                        <tr><th>No</th><th>학년</th><th>반</th><th>번호</th><th>이름</th><th>관리</th></tr>
+                    </thead>
+                    <tbody id="specialListBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+			  
+			  
+			  
 
                <div class="slide-panel-overlay" id="neisOverlay" onclick="closeNeisModal()" style="z-index: 2500;"></div>
     <div class="detail-modal subject" id="neisModal" style="width: 1000px; max-height: 85vh; z-index: 2501; max-width: 95vw;">
@@ -962,9 +998,9 @@
             </div>
 		
             
-            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px; line-height: 1.5;">
-                ※ NEIS-수혜수급자관리-교육비 지원 대상자 엑셀/CSV 파일을 올리면 자동으로 <b>방과후 '통보[O]'</b> 아동만 추출합니다.<br>
-                ※ '프로그램에 추가'를 누르면 기존 명단에 없는 신규 아동만 메인 데이터베이스에 자동으로 등록됩니다.
+           <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px; line-height: 1.5;">
+                ※ NEIS(나이스)-교육복지-수혜수급자 명단(엑셀/CSV)을 올리면 <b>방과후 '통보[O]', '통보[X]' 아동이 모두 목록에 표시</b>됩니다.<br>
+                ※ 단, '프로그램에 추가' 버튼을 누를 때는 <b>방과후 '통보[O]' 인 아동만</b> 메인 데이터베이스에 안전하게 등록됩니다.
             </div>
 
             <div style="overflow-x: auto; border:1px solid var(--border-color); border-radius:8px;">
@@ -1005,6 +1041,7 @@
         let db = [];
         let currentTab = 'all';
 		let neisList = []; // ✨ V6.0 NEIS 수혜수급자 대기 명단 보관소
+		let specialList = []; // ✨ 특수학급 학생 대기 명단 보관소
 		let isSuikViewOn = false; // ✨ 수익자 금액 보기 토글 상태 기록
         
         window.toggleSuikView = function() {
@@ -1059,6 +1096,8 @@
 			 // ✨ V6.0 NEIS 명단 로드 (새로고침해도 명단 유지)
             const storedNeis = localStorage.getItem('edusync_neis_list');
             if(storedNeis) { try { neisList = JSON.parse(storedNeis); } catch(e) { neisList = []; } }
+			const storedSpecial = localStorage.getItem('edusync_special_list');
+            if(storedSpecial) { try { specialList = JSON.parse(storedSpecial); } catch(e) { specialList = []; } }
             const saved = localStorage.getItem('edusync_db_v3');
             if(saved) { 
                 try { db = JSON.parse(saved); } catch(e) { db = []; } 
@@ -2189,8 +2228,9 @@
                             <td class="text-center" style="${br} font-weight: 700; color: #9ca3af;">${index + 1}</td>
                             ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
                             <td style="${br}">
-                                <span class="student-id">${row.r.grade}-${row.r.classNum}-${row.r.studentNum}</span><br>
+                               <span class="student-id">${row.r.grade}-${row.r.classNum}-${row.r.studentNum}</span><br>
                                 <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${maskName(row.r.name)}</a>
+                                ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                             </td>
                             <td style="${br}">${badge}</td>
                             <td style="${br} font-weight:700;">${row.sName}${newBadge}</td>
@@ -2363,8 +2403,9 @@
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
-                                    <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
+                                   <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
                                     <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${maskName(r.name)}</a>
+                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
                                 <td><span class="status-badge ${stClass}">${c.status}</span></td>
@@ -2558,8 +2599,9 @@
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
-                                    <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
+                                  <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
                                     <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${maskName(r.name)}</a>
+                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
                                 <td><span class="status-badge ${qStClass}">${c[q].status}</span></td>
@@ -2957,7 +2999,8 @@ function openPanel(mode, id = null) {
             }
 
             let saveTime = Date.now();
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, memo };
+            let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, memo, createdAt };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -4225,17 +4268,28 @@ function openPanel(mode, id = null) {
                                 let targetQs = [];
                                 for(let num=1; num<=maxQuarter; num++) targetQs.push(num);
                                 
-                                let backupData = {
+                               let backupData = {
                                     memo: r.memo || '',
                                     b: targetQs.map(qNum => {
                                         let qObj = r[`q${qNum}`] || {subs:[]};
                                         return qObj.subs.map(x => ({
                                             su:x.burdenSu, gy:x.burdenGy, j:x.burdenJ,
                                             rG:x.rG||0, rS:x.rS||0, rSu:x.rSu||0, rGy:x.rGy||0, rJ:x.rJ||0,
-                                            isNew:x.isNew||null
+                                            isNew:x.isNew||null,
+                                            // ✨ V6.6 수기 입력값 백업 추가
+                                            mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
+                                            mFreeSu:x.mFreeSu, mFreeGy:x.mFreeGy, mFreeJ:x.mFreeJ,
+                                            mSuikSu:x.mSuikSu, mSuikGy:x.mSuikGy, mSuikJ:x.mSuikJ
                                         }));
                                     })
                                 };
+                                
+                                // ✨ 첫 번째 학생 정보 저장 시, 특수학급 및 자유수강 대기 명단도 함께 은밀히 백업
+                                if (s === 0 && i === 0) {
+                                    backupData.specialList = specialList;
+                                    backupData.neisList = neisList;
+                                }
+                                
                                 newRow.getCell(hiddenColIndex).value = JSON.stringify(backupData);
                             }
                         }
@@ -4383,7 +4437,22 @@ function openPanel(mode, id = null) {
                         let backupJsonStr = String(row.getCell(hiddenColIndex).value || row.getCell(34).value || '').trim();
                         let backupData = null;
                         if(backupJsonStr.startsWith('{')) {
-                            try { backupData = JSON.parse(backupJsonStr); } catch(e) {}
+                            try { 
+                                backupData = JSON.parse(backupJsonStr); 
+                                // ✨ 백업본에 숨겨진 특수학급 및 자유수강 대기 명단 안전하게 복원(병합)
+                                if(backupData.specialList) {
+                                    backupData.specialList.forEach(st => {
+                                        if(!specialList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum)) specialList.push(st);
+                                    });
+                                    persistSpecialList();
+                                }
+                                if(backupData.neisList) {
+                                    backupData.neisList.forEach(st => {
+                                        if(!neisList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum && s.name === st.name)) neisList.push(st);
+                                    });
+                                    persistNeisList();
+                                }
+                            } catch(e) {}
                         }
 
                         currentExStudent = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
@@ -4394,8 +4463,9 @@ function openPanel(mode, id = null) {
                             currentIsMerge = false;
                         }
 
-                        currentStudent = {
+                          currentStudent = {
                             id: Date.now() + Math.random().toString(36).substr(2, 5) + rowNumber,
+                            createdAt: currentExStudent && currentExStudent.createdAt ? currentExStudent.createdAt : Date.now(), // ✨ 신규 생성 시간
                             grade, classNum, studentNum, name: sName,
                             hasG3: (v(5)==='O' || v(5)==='o'), hasFree: (v(6)==='O' || v(6)==='o'), freeTier: String(v(7)).trim(),
                             q1: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
@@ -4424,18 +4494,29 @@ function openPanel(mode, id = null) {
                             
                             if(name && currentStudent[`q${q}`].subs.length < 6) {
                                 let sIdx = currentStudent[`q${q}`].subs.length;
-                                let bSu, bGy, bJ;
+                                
+								
+								let bSu, bGy, bJ;
                                 let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
                                 let isNewTime = uploadTime;
+                                let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
 
                                 if(!currentIsMerge && currentStudent._backupBurdens && currentStudent._backupBurdens[q-1] && currentStudent._backupBurdens[q-1][sIdx]) {
                                     let bk = currentStudent._backupBurdens[q-1][sIdx];
                                     bSu = bk.su; bGy = bk.gy; bJ = bk.j;
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
                                     isNewTime = bk.isNew || uploadTime;
+                                    
+                                    // ✨ 수기입력 복원
+                                    mG3Su = bk.mG3Su; mG3Gy = bk.mG3Gy; mG3J = bk.mG3J;
+                                    mFreeSu = bk.mFreeSu; mFreeGy = bk.mFreeGy; mFreeJ = bk.mFreeJ;
+                                    mSuikSu = bk.mSuikSu; mSuikGy = bk.mSuikGy; mSuikJ = bk.mSuikJ;
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime });
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ });
+								
+
+                              
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
 
                                 if(!currentIsMerge && name && !savedSubjects.some(subObj => subObj.name === name)) {
@@ -4582,6 +4663,71 @@ function openPanel(mode, id = null) {
 		/* -------------------------------------------------------------
            ✨ V6.2 핵심 기능: NEIS 연동 + 수기 추가 + 계층 자동 번역기
            ------------------------------------------------------------- */
+           /* -------------------------------------------------------------
+           ✨ 특수학급 명단 관리 로직
+           ------------------------------------------------------------- */
+        function openSpecialModal() {
+            renderSpecialList();
+            document.getElementById('specialOverlay').classList.add('active');
+            document.getElementById('specialModal').style.display = 'flex';
+        }
+        function closeSpecialModal() {
+            document.getElementById('specialOverlay').classList.remove('active');
+            document.getElementById('specialModal').style.display = 'none';
+        }
+        function persistSpecialList() {
+            localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
+        }
+		
+		
+		
+        function renderSpecialList() {
+            const tbody = document.getElementById('specialListBody');
+            // ✨ colspan을 5에서 6으로 변경 (No. 열 추가)
+            if(specialList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#9ca3af;">등록된 특수학급 학생이 없습니다.</td></tr>';
+                return;
+            }
+            let html = '';
+            // ✨ No. 번호(idx+1) 출력 및 정렬 적용
+            specialList.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum).forEach((st, idx) => {
+                html += `<tr>
+                    <td style="text-align:center; font-weight:bold; color:#6b7280;">${idx + 1}</td>
+                    <td style="text-align:center; font-weight:bold;">${st.grade}</td>
+                    <td style="text-align:center;">${st.classNum}</td>
+                    <td style="text-align:center;">${st.studentNum}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--text-dark);">${st.name}</td>
+                    <td style="text-align:center;"><button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteSpecialStudent(${idx})">삭제</button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+		
+		
+		
+		
+		
+        function addSpecialStudent() {
+            let grade = parseInt(document.getElementById('sp_g').value);
+            let classNum = parseInt(document.getElementById('sp_c').value);
+            let studentNum = parseInt(document.getElementById('sp_n').value);
+            let name = document.getElementById('sp_name').value.trim();
+            if(!grade || !classNum || !studentNum || !name) { alert("학년, 반, 번호, 이름을 모두 입력해주세요."); return; }
+            if(specialList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum)) {
+                alert("이미 등록된 학번입니다."); return;
+            }
+            specialList.push({grade, classNum, studentNum, name});
+            document.getElementById('sp_g').value=''; document.getElementById('sp_c').value=''; document.getElementById('sp_n').value=''; document.getElementById('sp_name').value='';
+            persistSpecialList(); renderSpecialList();
+        }
+        function deleteSpecialStudent(idx) {
+            specialList.splice(idx, 1);
+            persistSpecialList(); renderSpecialList();
+        }
+
+        /* -------------------------------------------------------------
+           ✨ V6 핵심 기능: NEIS 연동 + 수기 추가 + 자동 대조 + 특수학급 차단
+           ------------------------------------------------------------- */
         function openNeisModal() {
             renderNeisList();
             document.getElementById('neisOverlay').classList.add('active');
@@ -4600,80 +4746,94 @@ function openPanel(mode, id = null) {
         function renderNeisList() {
             const tbody = document.getElementById('neisListBody');
             if (neisList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="padding:30px; color:#9ca3af;">업로드된 명단이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#9ca3af;">업로드된 명단이 없습니다.</td></tr>';
                 return;
             }
 
             let html = '';
             neisList.forEach((st, idx) => {
-                let stBadge = '';
-                let trStyle = '';
+                let stBadge = ''; let trStyle = '';
                 if(st.status === '신규') { 
                     stBadge = `<span style="background:#10b981; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">신규추가</span>`; 
                     trStyle="background:#ecfdf5;"; 
                 } else if(st.status === '제외') { 
                     stBadge = `<span style="background:#ef4444; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">명단누락</span>`; 
                     trStyle="background:#fef2f2; opacity:0.7;"; 
+                } else if(st.status === '통보X') { 
+                    stBadge = `<span style="background:#dc2626; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">지원제외</span>`; 
+                    trStyle="background:#f3f4f6; opacity:0.4;"; 
+                } else if(st.status === '특수반') { 
+                    stBadge = `<span style="background:#f59e0b; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">특수반</span>`; 
+                    trStyle="background:#fffbeb; opacity:0.4;"; // ✨ 특수반은 노란빛으로 흐리게 표시
                 } else { 
                     stBadge = `<span style="background:#6b7280; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">기존유지</span>`; 
                 }
 
+                // 통보X 및 특수학급 글씨 색상 처리
+                let afterSchoolHtml = st.afterSchool;
+                if (st.afterSchool.includes('통보[X]') || st.afterSchool.toLowerCase().includes('통보[x]')) {
+                    afterSchoolHtml = `<span style="color:#ef4444; font-weight:900;">${st.afterSchool}</span>`;
+                } else if (st.status === '특수반') {
+                    afterSchoolHtml = `<span style="color:#d97706; font-weight:900;">${st.afterSchool}</span>`;
+                } else {
+                    afterSchoolHtml = `<span style="color:#10b981; font-weight:bold;">${st.afterSchool}</span>`;
+                }
+
                 html += `<tr style="${trStyle}">
-                    <td style="color:#6b7280; font-weight:bold;">${idx + 1}</td>
-                    <td>${st.grade}</td>
-                    <td>${st.classNum}</td>
-                    <td>${st.studentNum}</td>
-                    <td style="font-weight:bold; color:var(--text-dark);">${st.name} <div style="margin-top:4px;">${stBadge}</div></td>
-                    <td style="color:#10b981; font-weight:bold;">${st.afterSchool}</td>
-                    <td>${st.familyTier}</td>
-                    <td>${st.reqDate}</td>
-                    <td>${st.confirmDate}</td>
-                    <td><button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteNeisStudent(${idx})">삭제</button></td>
+                    <td style="color:#6b7280; font-weight:bold; text-align:center;">${idx + 1}</td>
+                    <td style="text-align:center;">${st.grade}</td>
+                    <td style="text-align:center;">${st.classNum}</td>
+                    <td style="text-align:center;">${st.studentNum}</td>
+                    <td style="font-weight:bold; color:var(--text-dark); text-align:center;">${st.name} <div style="margin-top:4px;">${stBadge}</div></td>
+                    <td style="text-align:center;">${afterSchoolHtml}</td>
+                    <td style="text-align:center;">${st.familyTier}</td>
+                    <td style="text-align:center;">${st.reqDate}</td>
+                    <td style="text-align:center;">${st.confirmDate}</td>
+                    <td style="text-align:center;"><button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteNeisStudent(${idx})">삭제</button></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
 
-       // ✨ 수기 개별 추가 폼 토글
         function toggleNeisManualAdd() {
             let f = document.getElementById('neisManualAddForm');
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
 
-        // ✨ 수기 개별 추가 실행 (날짜 포함)
         function addManualNeisStudent() {
             let grade = parseInt(document.getElementById('nm_g').value);
             let classNum = parseInt(document.getElementById('nm_c').value);
             let studentNum = parseInt(document.getElementById('nm_n').value);
             let name = document.getElementById('nm_name').value.trim();
             let familyTier = document.getElementById('nm_tier').value;
-            let reqDate = document.getElementById('nm_req').value; // 달력에서 가져옴
-            let confirmDate = document.getElementById('nm_conf').value; // 달력에서 가져옴
+            let reqDate = document.getElementById('nm_req').value; 
+            let confirmDate = document.getElementById('nm_conf').value; 
 
             if(!grade || !classNum || !studentNum || !name) {
                 alert("학년, 반, 번호, 이름을 모두 입력해주세요."); return;
             }
 
-            let exists = neisList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum && s.name === name);
-            if(exists) {
+            // ✨ 수기 추가 시에도 특수학급 사전 대조
+            if(specialList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum)) {
+                alert("특수학급 명단에 등록된 학번입니다. 지원이 불가하므로 추가할 수 없습니다."); return;
+            }
+
+            if(neisList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum && s.name === name)) {
                 alert("이미 수혜수급자 명단에 등록되어 있는 학생입니다."); return;
             }
 
             neisList.unshift({
                 grade, classNum, studentNum, name,
                 afterSchool: '수기추가[O]',
-                familyTier: familyTier,
-                reqDate: reqDate,
-                confirmDate: confirmDate,
+                familyTier: familyTier, reqDate: reqDate, confirmDate: confirmDate,
                 status: '신규'
             });
 
-            document.getElementById('nm_g').value = ''; document.getElementById('nm_c').value = '';
-            document.getElementById('nm_n').value = ''; document.getElementById('nm_name').value = '';
-            document.getElementById('nm_req').value = ''; document.getElementById('nm_conf').value = '';
+            document.getElementById('nm_g').value=''; document.getElementById('nm_c').value='';
+            document.getElementById('nm_n').value=''; document.getElementById('nm_name').value='';
+            document.getElementById('nm_req').value=''; document.getElementById('nm_conf').value='';
 
-            persistNeisList();
-            renderNeisList();
+            persistNeisList(); renderNeisList();
         }
 
         async function importNeisExcel(e) {
@@ -4703,8 +4863,7 @@ function openPanel(mode, id = null) {
                     let lines = cleanText.split(/\r?\n/);
                     
                     rows = lines.map(line => {
-                        let arr = [];
-                        let inQuote = false, current = '';
+                        let arr = []; let inQuote = false, current = '';
                         for(let i=0; i<line.length; i++){
                             let char = line[i];
                             if(char === '"' && line[i+1] === '"') { current += '"'; i++; }
@@ -4712,8 +4871,7 @@ function openPanel(mode, id = null) {
                             else if(char === ',' && !inQuote) { arr.push(current); current = ''; }
                             else current += char;
                         }
-                        arr.push(current);
-                        return arr;
+                        arr.push(current); return arr;
                     });
                 } else {
                     const wb = new ExcelJS.Workbook();
@@ -4723,14 +4881,11 @@ function openPanel(mode, id = null) {
                         let rowVals = [];
                         row.eachCell({ includeEmpty: true }, (cell) => {
                             let val = cell.value;
-                            // 엑셀의 날짜 데이터 형식을 무조건 문자로 강제 변환
                             if(val && typeof val === 'object') {
                                 if(val instanceof Date) {
                                     let d = new Date(val.getTime() - (val.getTimezoneOffset() * 60000));
                                     val = d.toISOString().split('T')[0];
-                                } else if(val.result !== undefined) {
-                                    val = val.result;
-                                }
+                                } else if(val.result !== undefined) { val = val.result; }
                             }
                             rowVals.push(String(val || ''));
                         });
@@ -4746,12 +4901,11 @@ function openPanel(mode, id = null) {
             }
         }
 
-        // 날짜 데이터 깔끔하게 다듬기 함수
         function cleanDateStr(d) {
             if(!d) return '';
             let str = String(d).replace(/"/g, '').trim();
-            if(str.includes('T')) str = str.split('T')[0]; // 시간 찌꺼기 제거
-            if(str.includes(' ')) str = str.split(' ')[0]; // 시간 찌꺼기 제거
+            if(str.includes('T')) str = str.split('T')[0]; 
+            if(str.includes(' ')) str = str.split(' ')[0]; 
             return str;
         }
 
@@ -4759,7 +4913,6 @@ function openPanel(mode, id = null) {
             let colGrade = -1, colClass = -1, colNum = -1, colName = -1;
             let colAfterSchool = -1, colFamily = -1, colReqDate = -1, colConfirmDate = -1;
 
-            // 헤더 찾기 (중복 헤더 방지 락 적용)
             for(let i=0; i<Math.min(20, rows.length); i++) {
                 let cols = rows[i];
                 for(let j=0; j<cols.length; j++) {
@@ -4770,19 +4923,17 @@ function openPanel(mode, id = null) {
                     else if ((cleanVal.includes('학생명') || cleanVal.includes('성명')) && colName === -1) colName = j;
                     else if (cleanVal.includes('방과후') && colAfterSchool === -1) colAfterSchool = j;
                     else if (cleanVal.includes('가구자격') && colFamily === -1) colFamily = j;
-                    else if (cleanVal.includes('신청일') && colReqDate === -1) colReqDate = j; // ✨ 첫 번째 신청일만 잡고 락(Lock)
+                    else if (cleanVal.includes('신청일') && colReqDate === -1) colReqDate = j; 
                     else if ((cleanVal.includes('심사완료') || cleanVal.includes('심사일')) && colConfirmDate === -1) colConfirmDate = j;
                 }
             }
 
-            if (colGrade === -1 || colName === -1) {
-                alert('업로드 파일에서 학년 또는 학생명을 찾을 수 없습니다.'); return;
-            }
+            if (colGrade === -1 || colName === -1) { alert('업로드 파일에서 학년 또는 학생명을 찾을 수 없습니다.'); return; }
 
             let existingMap = new Map();
             neisList.forEach(st => { st._matched = false; let key = `${st.grade}-${st.classNum}-${st.studentNum}-${st.name}`; existingMap.set(key, st); });
 
-            let addedCount = 0, updatedCount = 0, rejectedList = [];
+            let addedCount = 0, updatedCount = 0, rejectedCount = 0, specialCount = 0;
 
             for(let i=0; i<rows.length; i++) {
                 let cols = rows[i];
@@ -4790,17 +4941,57 @@ function openPanel(mode, id = null) {
                 
                 let grade = parseInt(String(cols[colGrade] || '').replace(/"/g, '').trim());
                 if (isNaN(grade)) continue; 
+                let classNum = parseInt(String(cols[colClass] || '').replace(/"/g, '').trim()) || 0;
+                let studentNum = parseInt(String(cols[colNum] || '').replace(/"/g, '').trim()) || 0;
                 let name = String(cols[colName] || '').replace(/"/g, '').trim();
                 let afterSchool = colAfterSchool !== -1 ? String(cols[colAfterSchool] || '').replace(/"/g, '').trim() : '통보[O]';
                 
                 let reqDate = colReqDate !== -1 ? cleanDateStr(cols[colReqDate]) : '';
                 let confirmDate = colConfirmDate !== -1 ? cleanDateStr(cols[colConfirmDate]) : '';
 
-                if (afterSchool.includes('통보[X]') || afterSchool.toLowerCase().includes('통보[x]')) {
-                    rejectedList.push(`${grade}학년 ${cols[colClass]}반 ${cols[colNum]}번 ${name}`);
-                } else if (afterSchool.includes('통보[O]') || afterSchool.toLowerCase().includes('통보[o]') || colAfterSchool === -1) {
-                    let key = `${grade}-${cols[colClass]}-${cols[colNum]}-${name}`;
-                    
+                let key = `${grade}-${classNum}-${studentNum}-${name}`;
+
+                // ✨ 1순위 필터링: 특수학급 대조 (우선 차단)
+                let isSpecial = specialList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+
+                if (isSpecial) {
+                    if (existingMap.has(key)) {
+                        let st = existingMap.get(key);
+                        st._matched = true; st.status = '특수반';
+                        st.afterSchool = '특수학급[중복불가]';
+                    } else {
+                        neisList.push({
+                            grade, classNum, studentNum, name,
+                            afterSchool: '특수학급[중복불가]', 
+                            familyTier: colFamily !== -1 ? String(cols[colFamily] || '').trim() : '',
+                            reqDate: reqDate, confirmDate: confirmDate,
+                            status: '특수반', _matched: true
+                        });
+                    }
+                    specialCount++;
+                }
+                // ✨ 2순위: 통보[X] 여부 체크
+                else if (afterSchool.includes('통보[X]') || afterSchool.toLowerCase().includes('통보[x]')) {
+                    if (existingMap.has(key)) {
+                        let st = existingMap.get(key);
+                        st._matched = true; st.status = '통보X';
+                        st.afterSchool = afterSchool;
+                        st.familyTier = colFamily !== -1 ? String(cols[colFamily] || '').trim() : st.familyTier;
+                        if(reqDate) st.reqDate = reqDate;
+                        if(confirmDate) st.confirmDate = confirmDate;
+                    } else {
+                        neisList.push({
+                            grade, classNum, studentNum, name,
+                            afterSchool, 
+                            familyTier: colFamily !== -1 ? String(cols[colFamily] || '').trim() : '',
+                            reqDate: reqDate, confirmDate: confirmDate,
+                            status: '통보X', _matched: true
+                        });
+                    }
+                    rejectedCount++;
+                } 
+                // ✨ 3순위: 정상(통보[O]) 처리
+                else if (afterSchool.includes('통보[O]') || afterSchool.toLowerCase().includes('통보[o]') || colAfterSchool === -1) {
                     if (existingMap.has(key)) {
                         let st = existingMap.get(key);
                         st._matched = true; st.status = '유지';
@@ -4811,11 +5002,10 @@ function openPanel(mode, id = null) {
                         updatedCount++;
                     } else {
                         neisList.push({
-                            grade, classNum: parseInt(cols[colClass])||0, studentNum: parseInt(cols[colNum])||0, name,
+                            grade, classNum, studentNum, name,
                             afterSchool, 
                             familyTier: colFamily !== -1 ? String(cols[colFamily] || '').trim() : '',
-                            reqDate: reqDate,
-                            confirmDate: confirmDate,
+                            reqDate: reqDate, confirmDate: confirmDate,
                             status: '신규', _matched: true
                         });
                         addedCount++;
@@ -4832,8 +5022,9 @@ function openPanel(mode, id = null) {
             });
             
             neisList.sort((a, b) => {
-                const order = { '신규': 1, '제외': 2, '유지': 3 };
-                let oa = order[a.status || '신규'] || 4; let ob = order[b.status || '신규'] || 4;
+                // ✨ 특수반은 5순위로 통보X보다도 아래에 유배시킴
+                const order = { '신규': 1, '제외': 2, '유지': 3, '통보X': 4, '특수반': 5 };
+                let oa = order[a.status || '신규'] || 6; let ob = order[b.status || '신규'] || 6;
                 if (oa !== ob) return oa - ob;
                 if (a.grade !== b.grade) return a.grade - b.grade;
                 if (a.classNum !== b.classNum) return a.classNum - b.classNum;
@@ -4842,10 +5033,8 @@ function openPanel(mode, id = null) {
 
             persistNeisList(); renderNeisList();
 
-            let msg = `✅ 완료!\n- 신규 추가: ${addedCount}명\n- 중복 유지: ${updatedCount}명\n- 명단 누락: ${droppedCount}명`;
-            if (rejectedList.length > 0) {
-                msg += `\n\n[안내] 방과후 통보[X] 학생 : ${rejectedList.length}명 제외됨\n` + rejectedList.slice(0, 10).join('\n') + (rejectedList.length > 10 ? '\n...등등' : '');
-            }
+            let msg = `✅ 명단 업로드 완료!\n- 신규 추가: ${addedCount}명\n- 중복 유지: ${updatedCount}명\n- 명단 누락: ${droppedCount}명\n- 통보[X]: ${rejectedCount}명`;
+            if (specialCount > 0) msg += `\n- 특수반(차단): ${specialCount}명`;
             alert(msg);
         }
 
@@ -4884,7 +5073,8 @@ function openPanel(mode, id = null) {
         }
 
         function addNeisToProgram() {
-            let validList = neisList.filter(st => st.status !== '제외'); 
+            // ✨ 핵심: '제외', '통보X', '특수반'은 절대 프로그램 메인에 들어오지 못하게 원천 차단
+            let validList = neisList.filter(st => st.status !== '제외' && st.status !== '통보X' && st.status !== '특수반'); 
             if(validList.length === 0) { alert("프로그램에 추가할 유효한 명단이 없습니다."); return; }
 
             let newCount = 0; let currentTime = Date.now();
@@ -4892,8 +5082,9 @@ function openPanel(mode, id = null) {
             validList.forEach(st => {
                 let exists = db.some(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
                 if (!exists) {
-                    let rec = {
+                        let rec = {
                         id: currentTime++ + Math.random().toString(36).substr(2, 5),
+                        createdAt: Date.now(), // ✨ 나이스에서 신규 추가 시 시간 기록
                         grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
                         hasG3: (st.grade === 3), hasFree: true,
                         freeTier: translateFreeTier(st.familyTier), 
@@ -4913,9 +5104,6 @@ function openPanel(mode, id = null) {
             alert(`🎉 총 ${newCount}명 신규로 메인 프로그램에 등록 되었습니다!`);
             closeNeisModal();
         }
-	   
-	   
-		
 		
 
 
