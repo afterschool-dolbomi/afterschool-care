@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V6.4</title>
+    <title>방과후 지원금 돌보미 V6.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -626,7 +626,7 @@
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 샘플 엑셀 다운로드</button>
                 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn-3d btn-side" style="flex: 1; background:#0ea5e9; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">🌐 업데이트 확인</button>
+                    <button class="btn-3d btn-side" style="flex: 1; background:#0ea5e9; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항</button>
                     <button class="btn-3d btn-side" style="flex: 1; background:#8b5cf6; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="startTutorial()">💡 튜토리얼 보기</button>
                 </div>
                 
@@ -4267,8 +4267,11 @@ function openPanel(mode, id = null) {
                             if (i === 0) {
                                 let targetQs = [];
                                 for(let num=1; num<=maxQuarter; num++) targetQs.push(num);
-                                
-                               let backupData = {
+                               
+
+
+							   
+                              let backupData = {
                                     memo: r.memo || '',
                                     b: targetQs.map(qNum => {
                                         let qObj = r[`q${qNum}`] || {subs:[]};
@@ -4276,20 +4279,18 @@ function openPanel(mode, id = null) {
                                             su:x.burdenSu, gy:x.burdenGy, j:x.burdenJ,
                                             rG:x.rG||0, rS:x.rS||0, rSu:x.rSu||0, rGy:x.rGy||0, rJ:x.rJ||0,
                                             isNew:x.isNew||null,
-                                            // ✨ V6.6 수기 입력값 백업 추가
+                                            // ✨ 수기 입력값 백업 보존
                                             mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
                                             mFreeSu:x.mFreeSu, mFreeGy:x.mFreeGy, mFreeJ:x.mFreeJ,
                                             mSuikSu:x.mSuikSu, mSuikGy:x.mSuikGy, mSuikJ:x.mSuikJ
                                         }));
                                     })
                                 };
-                                
-                                // ✨ 첫 번째 학생 정보 저장 시, 특수학급 및 자유수강 대기 명단도 함께 은밀히 백업
+                                // ✨ 특수학급 및 자유수강 명단 1회 백업
                                 if (s === 0 && i === 0) {
                                     backupData.specialList = specialList;
                                     backupData.neisList = neisList;
                                 }
-                                
                                 newRow.getCell(hiddenColIndex).value = JSON.stringify(backupData);
                             }
                         }
@@ -4435,6 +4436,7 @@ function openPanel(mode, id = null) {
 
                         // ✨ 구버전(4분기) 엑셀을 업로드해도 호환되도록 백업 열(34번 등)을 자동으로 찾아냄
                         let backupJsonStr = String(row.getCell(hiddenColIndex).value || row.getCell(34).value || '').trim();
+						
                         let backupData = null;
                         if(backupJsonStr.startsWith('{')) {
                             try { 
@@ -5077,19 +5079,30 @@ function openPanel(mode, id = null) {
             let validList = neisList.filter(st => st.status !== '제외' && st.status !== '통보X' && st.status !== '특수반'); 
             if(validList.length === 0) { alert("프로그램에 추가할 유효한 명단이 없습니다."); return; }
 
-            let newCount = 0; let currentTime = Date.now();
+
+
+
+                   let newCount = 0; let currentTime = Date.now();
+
+            // ✨ 신규 명단 추가 전, 기존 학생들의 '신규' 뱃지 기록 싹 지우기!
+            db.forEach(st => delete st.createdAt);
 
             validList.forEach(st => {
                 let exists = db.some(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
                 if (!exists) {
-                        let rec = {
+                    let rec = {
                         id: currentTime++ + Math.random().toString(36).substr(2, 5),
-                        createdAt: Date.now(), // ✨ 나이스에서 신규 추가 시 시간 기록
+                        createdAt: Date.now(), // ✨ 이번에 추가된 학생에게만 새롭게 시간 기록
                         grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
                         hasG3: (st.grade === 3), hasFree: true,
                         freeTier: translateFreeTier(st.familyTier), 
                         memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
                     };
+            
+
+
+
+
 
                     for(let q=1; q<=6; q++) {
                         let subs = [];
