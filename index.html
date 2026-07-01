@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V6.5</title>
+    <title>방과후 지원금 돌보미 V7.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -292,6 +292,16 @@
         @keyframes flash-text { 0% { opacity: 0.7; } 100% { opacity: 1; } }
 
 
+         /* ✨ 타임머신 경고 배너 애니메이션 */
+        @keyframes pulse-bg {
+            0% { background-color: #ef4444; }
+            100% { background-color: #b91c1c; }
+        }  
+
+
+
+
+
 /* --- 🖨️ 인쇄 시 빈칸 늘어짐 완벽 해결 및 다크모드 무시 --- */
         @media print {
             @page { size: landscape; margin: 10mm; }
@@ -565,7 +575,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V6.5</span>
+                <span class="brand-version">V7.0</span>
             </div>
             
             <div class="stat-section">
@@ -617,13 +627,15 @@
                     </select>
                 </div>
                 
+				<!-- ✨ 타임머신 스냅샷 버튼 -->
+                <button class="btn-3d btn-side" id="btn-snapshot-manage" style="background:#fdf4ff; color:#a21caf; border:1px solid #f5d0fe; margin-bottom:12px; box-shadow: 0 4px 6px rgba(162, 28, 175, 0.2);" onclick="openSnapshotModal()">⏳ 날짜별 과거 기록(백업) 관리</button>
                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')">✏️ 학생 개별 입력</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="background:transparent; border:1px solid var(--sidebar-accent);" onclick="openSubjectManager()">⚙️ 과목 목록 관리</button>
                  <button class="btn-3d btn-side" id="btn-neis-manage" style="background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe;" onclick="openNeisModal()">🎓 자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="background:#fff7ed; color:#b45309; border:1px solid #fed7aa;" onclick="openSpecialModal()">🏫 특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-upload" onclick="document.getElementById('excelUpload').click()">📥 단체 명단 엑셀 업로드</button>
                 <button class="btn-3d btn-side" id="btn-excel-export" onclick="exportExcel()">📤 전체 명단 백업(엑셀 저장)</button>
-                <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 샘플 엑셀 다운로드</button>
+                <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 입력 엑셀 다운로드</button>
                 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
                     <button class="btn-3d btn-side" style="flex: 1; background:#0ea5e9; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항</button>
@@ -642,6 +654,12 @@
     </aside>
 
     <main class="main-content">
+	      <!-- ✨ 타임머신 과거 모드 작동 시 나타나는 강력 경고 배너 -->
+        <div id="timeTravelBanner" style="display:none; width:100%; height:45px; color:white; z-index:99999; justify-content:center; align-items:center; gap:16px; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; animation: pulse-bg 1s infinite alternate;">
+            <span id="timeTravelText" style="font-size:14px; letter-spacing:-0.5px;"></span>
+            <button onclick="returnToLive()" style="background:white; color:#ef4444; border:none; padding:6px 16px; border-radius:4px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">🔙 최신(오늘) 상태로 돌아가기</button>
+        </div>
+	
         <header class="top-header">
             <div class="header-row">
                 <div class="tabs">
@@ -916,6 +934,45 @@
     </div>
               
 			  
+			  <!-- ✨ 날짜별 과거 기록(스냅샷) 관리 모달창 -->
+    <div class="slide-panel-overlay" id="snapshotOverlay" onclick="closeSnapshotModal()" style="z-index: 2600;"></div>
+    <div class="detail-modal subject" id="snapshotModal" style="width: 600px; max-height: 85vh; z-index: 2601;">
+        <div class="detail-header" style="background: #a21caf;">
+            <h3 style="font-size:16px;">⏳ 날짜별 과거 기록(스냅샷) 관리</h3>
+            <button class="close-btn" onclick="closeSnapshotModal()">&times;</button>
+        </div>
+        <div class="detail-body">
+            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 16px; line-height: 1.5;">
+                ※ 언제든 특정 날짜의 프로그램 상태 전체를 통째로 얼려서 저장해 둘 수 있습니다.<br>
+                ※ 교육청 제출용 엑셀을 만들거나, 변동 내역(환불 등)이 생겼을 때 메모와 함께 기록을 남겨보세요.
+            </div>
+            
+            <div style="display:flex; gap:8px; margin-bottom: 20px; background:#fdf4ff; padding:16px; border-radius:8px; border:1px solid #f5d0fe; align-items:flex-end;">
+                <div style="flex:1;">
+                    <label style="font-size:12px; font-weight:bold; color:#701a75; margin-bottom:6px; display:block;">기록할 날짜 (필수)</label>
+                    <input type="date" id="snap_date" style="width:100%; padding:8px; border:1px solid #d8b4fe; border-radius:4px; font-weight:bold;">
+                </div>
+                <div style="flex:2;">
+                    <label style="font-size:12px; font-weight:bold; color:#701a75; margin-bottom:6px; display:block;">변동 사유 및 메모 (선택)</label>
+                    <input type="text" id="snap_memo" placeholder="예: 홍길동 1분기 수강 취소 반영" style="width:100%; padding:8px; border:1px solid #d8b4fe; border-radius:4px;">
+                </div>
+                <button class="btn-save" style="background:#a21caf; border:none; padding:8px 16px; border-radius:4px; height:auto; color:white; font-weight:bold;" onclick="handleSaveSnapshot()">현재 상태 저장</button>
+            </div>
+            
+            <div style="font-weight:bold; color:var(--text-dark); margin-bottom:8px; font-size:14px;">저장된 과거 기록 목록</div>
+            <div style="overflow-y:auto; max-height:400px; border:1px solid var(--border-color); border-radius:8px;">
+                <table class="detail-inner-table" style="background:white; margin:0;">
+                    <thead style="background:#f3f4f6; position:sticky; top:0;">
+                        <tr><th style="width:110px;">날짜</th><th>메모</th><th style="width:140px;">관리</th></tr>
+                    </thead>
+                    <tbody id="snapshotListBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+			  
+			  
+			  
 			  <div class="slide-panel-overlay" id="specialOverlay" onclick="closeSpecialModal()" style="z-index: 2400;"></div>
     <div class="detail-modal subject" id="specialModal" style="width: 550px; max-height: 80vh; z-index: 2401;">
         <div class="detail-header" style="background: #f59e0b;">
@@ -927,12 +984,14 @@
                 ※ 여기에 특수학급 학생 명단을 한 번만 등록해 두면 1년 내내 유지됩니다.<br>
                 ※ 자유수강자 엑셀 명단을 올릴 때, <b>이 학번과 일치하는 학생은 자동으로 [특수반]으로 분류되어 프로그램에 중복 등록되는 것을 원천 차단</b>합니다.
             </div>
-            <div style="display:flex; gap:6px; margin-bottom: 16px; background:#fffbeb; padding:12px; border-radius:6px; border:1px solid #fde68a;">
+             <div style="display:flex; gap:6px; margin-bottom: 16px; background:#fffbeb; padding:12px; border-radius:6px; border:1px solid #fde68a; align-items:center;">
+                <input type="hidden" id="sp_edit_idx" value="-1">
                 <input type="number" id="sp_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="number" id="sp_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="number" id="sp_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="text" id="sp_name" placeholder="이름" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <button class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:0 14px; font-weight:bold;" onclick="addSpecialStudent()">추가</button>
+                <button id="btn_sp_save" class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:6px 14px; font-weight:bold;" onclick="saveSpecialStudent()">추가</button>
+                <button id="btn_sp_cancel" class="btn-tool" style="display:none; background:white; color:#f59e0b; border:1px solid #f59e0b; border-radius:4px; padding:6px 10px; font-weight:bold;" onclick="cancelEditSpecial()">취소</button>
             </div>
             <div style="overflow-y:auto; max-height:350px; border:1px solid var(--border-color); border-radius:6px;">
                
@@ -1038,28 +1097,29 @@
 
     
     <script>
-        let db = [];
+              let db = [];
         let currentTab = 'all';
-		let neisList = []; // ✨ V6.0 NEIS 수혜수급자 대기 명단 보관소
-		let specialList = []; // ✨ 특수학급 학생 대기 명단 보관소
-		let isSuikViewOn = false; // ✨ 수익자 금액 보기 토글 상태 기록
+        let neisList = []; 
+        let specialList = []; 
+        let snapshots = []; // ✨ 타임머신 과거 기록 보관소
+        let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
+        let isSuikViewOn = false; 
         
         window.toggleSuikView = function() {
             isSuikViewOn = !isSuikViewOn;
             renderGrid();
         };
 
-        let isRefundViewOn = false; // ✨ 환불 금액 보기 토글 상태 기록
+        let isRefundViewOn = false;
         
-        // ✨ 환불 금액 뷰 열기/닫기 함수
         window.toggleRefundView = function() {
             isRefundViewOn = !isRefundViewOn;
             renderGrid();
         };
         let isPrivacyOn = false;
         let isDarkMode = localStorage.getItem('edusync_darkmode') === 'true';
-       let viewMode = 'summary'; 
-        let maxQuarter = 4; // ✨ 4분기/6분기 전환용 글로벌 변수 추가
+        let viewMode = 'summary'; 
+        let maxQuarter = 4; 
         
         let currentViewData = [];
         let currentSubjectViewData = []; 
@@ -1069,7 +1129,7 @@
             "큐브", "독서신문논술", "바둑&체스", "미니어쳐&클레이", "토탈공예", "코딩", "주산암산", "미술회화"
         ];
         let savedSubjects = [];
-        let visibleRows = {1:3, 2:3, 3:3, 4:3, 5:3, 6:3}; // ✨ 5, 6분기 허용
+        let visibleRows = {1:3, 2:3, 3:3, 4:3, 5:3, 6:3}; 
 
         window.onload = () => {
             if(isDarkMode) {
@@ -1093,11 +1153,16 @@
             }
             renderSubjectList();
              
-			 // ✨ V6.0 NEIS 명단 로드 (새로고침해도 명단 유지)
             const storedNeis = localStorage.getItem('edusync_neis_list');
             if(storedNeis) { try { neisList = JSON.parse(storedNeis); } catch(e) { neisList = []; } }
-			const storedSpecial = localStorage.getItem('edusync_special_list');
+            
+            const storedSpecial = localStorage.getItem('edusync_special_list');
             if(storedSpecial) { try { specialList = JSON.parse(storedSpecial); } catch(e) { specialList = []; } }
+            
+            // ✨ 타임머신 스냅샷 불러오기
+            const storedSnapshots = localStorage.getItem('edusync_snapshots');
+            if(storedSnapshots) { try { snapshots = JSON.parse(storedSnapshots); } catch(e) { snapshots = []; } }
+
             const saved = localStorage.getItem('edusync_db_v3');
             if(saved) { 
                 try { db = JSON.parse(saved); } catch(e) { db = []; } 
@@ -1111,10 +1176,6 @@
                 }
             }
             
-			
-			
-			
-			// ✨ 6분기 데이터 껍데기 세팅 및 저장된 스위치 설정 불러오기
             let storedMq = localStorage.getItem('edusync_maxQuarter');
             if(storedMq) maxQuarter = parseInt(storedMq);
             if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
@@ -1129,17 +1190,7 @@
                 }
             });
 
-			
-			
-			
-			
-			
-			
-			
-			
-            // ✨ 5번 요구사항: 데이터 로딩 시 전역으로 강사료+수용비=수강료 강제 보정 및 검증
             validateAndFixCalculations();
-            
             renderFormQuarters();
             updateGlobalStats();
             renderGrid(); 
@@ -1152,11 +1203,6 @@
             }
         };
 
-
-
-
-
-// ✨ 6분기 전환 스위치 작동 함수
         function changeQuarterSystem() {
             let val = document.getElementById('quarterSetting').value;
             maxQuarter = parseInt(val);
@@ -1174,15 +1220,6 @@
             renderGrid();
         }
 
-
-
-
-
-
-
-
-
-        // ✨ [수정사항 5] 전반적인 강사료 + 수용비 공식 재적용 보호
         function validateAndFixCalculations() {
             db.forEach(student => {
                 for(let q=1; q<=4; q++) {
@@ -1190,7 +1227,6 @@
                     if(student[qKey] && student[qKey].subs) {
                         let sumG = 0, sumS = 0, sumSu = 0, sumGy = 0, sumJ = 0;
                         student[qKey].subs.forEach(sub => {
-                            // 강사료나 수용비가 있다면 최우선 적용
                             if(toNum(sub.g) > 0 || toNum(sub.s) > 0) {
                                 sub.su = toNum(sub.g) + toNum(sub.s);
                             }
@@ -1204,6 +1240,30 @@
             });
         }
 
+        // ✨ 과거 모드일 때 실데이터 덮어쓰기 방지 (매우 중요)
+        function persistData() {
+            if(isTimeTravelMode) return; 
+            localStorage.setItem('edusync_db_v3', JSON.stringify(db));
+            updateGlobalStats();
+        }
+        function persistSubjects() {
+            if(isTimeTravelMode) return;
+            localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
+        }
+        function persistNeisList() {
+            if(isTimeTravelMode) return;
+            localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
+        }
+        function persistSpecialList() {
+            if(isTimeTravelMode) return;
+            localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
+        }
+  
+  
+  
+  
+  
+  
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode', isDarkMode);
@@ -1628,10 +1688,9 @@
             return newR;
         }
 
-        function persistData() {
-            localStorage.setItem('edusync_db_v3', JSON.stringify(db));
-            updateGlobalStats();
-        }
+          
+		
+		  
 
         function resetAllData() {
             if(confirm("정말로 모든 학생 명단과 정산 데이터를 초기화 하시겠습니까?\n이 작업은 복구할 수 없습니다.")) {
@@ -4286,10 +4345,11 @@ function openPanel(mode, id = null) {
                                         }));
                                     })
                                 };
-                                // ✨ 특수학급 및 자유수강 명단 1회 백업
+                               // ✨ 특수학급, 자유수강 명단 + 과거 기록(스냅샷)까지 1회 백업
                                 if (s === 0 && i === 0) {
                                     backupData.specialList = specialList;
                                     backupData.neisList = neisList;
+                                    backupData.snapshots = snapshots; // ✨ 과거 기록 추가
                                 }
                                 newRow.getCell(hiddenColIndex).value = JSON.stringify(backupData);
                             }
@@ -4441,7 +4501,9 @@ function openPanel(mode, id = null) {
                         if(backupJsonStr.startsWith('{')) {
                             try { 
                                 backupData = JSON.parse(backupJsonStr); 
-                                // ✨ 백업본에 숨겨진 특수학급 및 자유수강 대기 명단 안전하게 복원(병합)
+                                
+								
+								// ✨ 백업본의 모든 데이터(특수반, 자유수강, 과거기록) 복원
                                 if(backupData.specialList) {
                                     backupData.specialList.forEach(st => {
                                         if(!specialList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum)) specialList.push(st);
@@ -4454,6 +4516,13 @@ function openPanel(mode, id = null) {
                                     });
                                     persistNeisList();
                                 }
+                                if(backupData.snapshots) {
+                                    backupData.snapshots.forEach(snap => {
+                                        if(!snapshots.some(s => s.id === snap.id)) snapshots.push(snap);
+                                    });
+                                    localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                                }
+								
                             } catch(e) {}
                         }
 
@@ -4683,15 +4752,14 @@ function openPanel(mode, id = null) {
 		
 		
 		
-        function renderSpecialList() {
+		
+		function renderSpecialList() {
             const tbody = document.getElementById('specialListBody');
-            // ✨ colspan을 5에서 6으로 변경 (No. 열 추가)
             if(specialList.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#9ca3af;">등록된 특수학급 학생이 없습니다.</td></tr>';
                 return;
             }
             let html = '';
-            // ✨ No. 번호(idx+1) 출력 및 정렬 적용
             specialList.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum).forEach((st, idx) => {
                 html += `<tr>
                     <td style="text-align:center; font-weight:bold; color:#6b7280;">${idx + 1}</td>
@@ -4699,33 +4767,83 @@ function openPanel(mode, id = null) {
                     <td style="text-align:center;">${st.classNum}</td>
                     <td style="text-align:center;">${st.studentNum}</td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-dark);">${st.name}</td>
-                    <td style="text-align:center;"><button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteSpecialStudent(${idx})">삭제</button></td>
+                    <td style="text-align:center;">
+                        <div style="display:flex; gap:4px; justify-content:center;">
+                            <button class="btn-tool" style="color:white; background:#10b981; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="editSpecialStudent(${idx})">수정</button>
+                            <button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteSpecialStudent(${idx})">삭제</button>
+                        </div>
+                    </td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
-		
-		
-		
-		
-		
-        function addSpecialStudent() {
+
+        // ✨ 수정 폼 활성화
+        function editSpecialStudent(idx) {
+            let st = specialList[idx];
+            document.getElementById('sp_edit_idx').value = idx;
+            document.getElementById('sp_g').value = st.grade;
+            document.getElementById('sp_c').value = st.classNum;
+            document.getElementById('sp_n').value = st.studentNum;
+            document.getElementById('sp_name').value = st.name;
+            
+            document.getElementById('btn_sp_save').innerText = '저장';
+            document.getElementById('btn_sp_save').style.background = '#10b981';
+            document.getElementById('btn_sp_cancel').style.display = 'inline-block';
+        }
+
+        // ✨ 수정 취소 (입력창 초기화)
+        function cancelEditSpecial() {
+            document.getElementById('sp_edit_idx').value = '-1';
+            document.getElementById('sp_g').value = '';
+            document.getElementById('sp_c').value = '';
+            document.getElementById('sp_n').value = '';
+            document.getElementById('sp_name').value = '';
+            
+            document.getElementById('btn_sp_save').innerText = '추가';
+            document.getElementById('btn_sp_save').style.background = '#f59e0b';
+            document.getElementById('btn_sp_cancel').style.display = 'none';
+        }
+
+        // ✨ 추가 및 수정 병합 저장 처리
+        function saveSpecialStudent() {
+            let editIdx = parseInt(document.getElementById('sp_edit_idx').value);
             let grade = parseInt(document.getElementById('sp_g').value);
             let classNum = parseInt(document.getElementById('sp_c').value);
             let studentNum = parseInt(document.getElementById('sp_n').value);
             let name = document.getElementById('sp_name').value.trim();
-            if(!grade || !classNum || !studentNum || !name) { alert("학년, 반, 번호, 이름을 모두 입력해주세요."); return; }
-            if(specialList.some(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum)) {
-                alert("이미 등록된 학번입니다."); return;
+            
+            if(!grade || !classNum || !studentNum || !name) { 
+                alert("학년, 반, 번호, 이름을 모두 입력해주세요."); 
+                return; 
             }
-            specialList.push({grade, classNum, studentNum, name});
-            document.getElementById('sp_g').value=''; document.getElementById('sp_c').value=''; document.getElementById('sp_n').value=''; document.getElementById('sp_name').value='';
-            persistSpecialList(); renderSpecialList();
+            
+            let exists = specialList.findIndex(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+            
+            if(editIdx === -1) { // 신규 추가 모드
+                if(exists !== -1) { alert("이미 등록된 학번입니다."); return; }
+                specialList.push({grade, classNum, studentNum, name});
+            } else { // 기존 데이터 수정 모드
+                if(exists !== -1 && exists !== editIdx) { alert("다른 학생과 중복되는 학번으로 수정할 수 없습니다."); return; }
+                specialList[editIdx] = {grade, classNum, studentNum, name};
+            }
+            
+            cancelEditSpecial(); 
+            persistSpecialList(); 
+            renderSpecialList();
         }
+
         function deleteSpecialStudent(idx) {
-            specialList.splice(idx, 1);
-            persistSpecialList(); renderSpecialList();
+            if(confirm('선택한 학생을 특수학급 명단에서 삭제하시겠습니까?')) {
+                specialList.splice(idx, 1);
+                persistSpecialList(); 
+                renderSpecialList();
+            }
         }
+		
+		
+		
+        
 
         /* -------------------------------------------------------------
            ✨ V6 핵심 기능: NEIS 연동 + 수기 추가 + 자동 대조 + 특수학급 차단
@@ -5121,7 +5239,185 @@ function openPanel(mode, id = null) {
 
 
 
+        
+		
+		
+		
+		
+		/* -------------------------------------------------------------
+           ✨ V6.7 핵심 기능: 타임머신(스냅샷) - 과거 기록 저장 및 열람
+           ------------------------------------------------------------- */
+        function openSnapshotModal() {
+            if(isTimeTravelMode) {
+                alert('현재 과거 기록을 보는 중입니다. 최신 상태로 돌아간 후 이용해주세요.');
+                return;
+            }
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('snap_date').value = today;
+            document.getElementById('snap_memo').value = '';
+            renderSnapshotList();
+            document.getElementById('snapshotOverlay').classList.add('active');
+            document.getElementById('snapshotModal').style.display = 'flex';
+        }
 
+        function closeSnapshotModal() {
+            document.getElementById('snapshotOverlay').classList.remove('active');
+            document.getElementById('snapshotModal').style.display = 'none';
+        }
+
+        function renderSnapshotList() {
+            const tbody = document.getElementById('snapshotListBody');
+            if(snapshots.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:30px; color:#9ca3af;">저장된 과거 기록이 없습니다.</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            snapshots.forEach((snap, idx) => {
+                let autoBadge = snap.isAuto ? '<span style="background:#fee2e2; color:#ef4444; padding:2px 4px; border-radius:4px; font-size:10px; margin-right:4px;">자동</span>' : '';
+                html += `
+                    <tr>
+                        <td style="text-align:center; font-weight:bold; color:var(--text-dark);">${snap.date}</td>
+                        <td style="text-align:left; color:#4b5563;">${autoBadge}${snap.memo}</td>
+                        <td style="text-align:center;">
+                            <button class="btn-tool" style="background:#10b981; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" onclick="loadSnapshot('${snap.id}')">이동</button>
+                            <button class="btn-tool" style="background:#ef4444; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold;" onclick="deleteSnapshot('${snap.id}')">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function handleSaveSnapshot() {
+            let dateStr = document.getElementById('snap_date').value;
+            let memoStr = document.getElementById('snap_memo').value.trim();
+            if(!dateStr) { alert('기록할 날짜를 선택해주세요.'); return; }
+            
+            saveCurrentStateAsSnapshot(dateStr, memoStr, false);
+        }
+
+        // 상태 얼려서 저장하기
+        function saveCurrentStateAsSnapshot(dateStr, memoStr, isAuto=false) {
+            let snap = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                date: dateStr,
+                memo: memoStr,
+                isAuto: isAuto,
+                data: {
+                    db: JSON.parse(JSON.stringify(db)),
+                    savedSubjects: JSON.parse(JSON.stringify(savedSubjects)),
+                    neisList: JSON.parse(JSON.stringify(neisList)),
+                    specialList: JSON.parse(JSON.stringify(specialList)),
+                    maxQuarter: maxQuarter
+                }
+            };
+            snapshots.push(snap);
+            snapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); 
+            localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+            
+            if(!isAuto) {
+                renderSnapshotList();
+                alert(`[${dateStr}] 시점의 기록이 안전하게 보관되었습니다!\n앞으로 언제든 이 시점으로 되돌아올 수 있습니다.`);
+                document.getElementById('snap_memo').value = '';
+            }
+        }
+
+        function deleteSnapshot(id) {
+            if(confirm("이 과거 기록을 완전히 삭제하시겠습니까? (복구 불가)")) {
+                snapshots = snapshots.filter(x => x.id !== id);
+                localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                renderSnapshotList();
+            }
+        }
+
+        // 과거로 돌아가기
+        function loadSnapshot(id) {
+            if(isTimeTravelMode) return;
+            
+            let snap = snapshots.find(x => x.id === id);
+            if(!snap) return;
+
+            // 1. 과거로 가기 전에 현재 최신 상태를 비상 백업으로 저장 (오늘 날짜)
+            let today = new Date().toISOString().split('T')[0];
+            let liveData = {
+                db: JSON.parse(JSON.stringify(db)),
+                savedSubjects: JSON.parse(JSON.stringify(savedSubjects)),
+                neisList: JSON.parse(JSON.stringify(neisList)),
+                specialList: JSON.parse(JSON.stringify(specialList)),
+                maxQuarter: maxQuarter
+            };
+            localStorage.setItem('edusync_live_backup', JSON.stringify(liveData));
+            
+            // 1-1. 스냅샷 목록에도 '자동 백업'으로 남겨주기
+            saveCurrentStateAsSnapshot(today, "[시스템 자동백업] 과거 기록 열람 전 최신 상태 보호", true);
+
+            // 2. 글로벌 변수를 과거 데이터로 몽땅 덮어쓰기 (persistData는 막혀있어서 실제 브라우저 캐시는 안전함)
+            db = JSON.parse(JSON.stringify(snap.data.db || []));
+            savedSubjects = JSON.parse(JSON.stringify(snap.data.savedSubjects || []));
+            neisList = JSON.parse(JSON.stringify(snap.data.neisList || []));
+            specialList = JSON.parse(JSON.stringify(snap.data.specialList || []));
+            maxQuarter = snap.data.maxQuarter || 4;
+
+            // 3. UI 변경 (경고 배너 띄우기)
+            isTimeTravelMode = true;
+            document.getElementById('timeTravelBanner').style.display = 'flex';
+            document.getElementById('timeTravelText').innerText = `⏳ [${snap.date}] 시점의 과거 기록을 보고 있습니다. (이 상태에서 수정된 내용은 저장되지 않습니다)`;
+
+            closeSnapshotModal();
+            
+            if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
+            if(maxQuarter === 6) {
+                document.getElementById('tabQ5').style.display = 'inline-block';
+                document.getElementById('tabQ6').style.display = 'inline-block';
+            } else {
+                document.getElementById('tabQ5').style.display = 'none';
+                document.getElementById('tabQ6').style.display = 'none';
+            }
+            
+            renderSubjectList();
+            updateGlobalStats();
+            renderGrid();
+
+            alert(`현재 상태가 오늘 날짜(${today})로 자동 저장되었습니다.\n\n선택하신 [${snap.date}] 시점의 프로그램으로 되돌아갑니다!\n원하시는 정보를 확인하시고 상단의 '최신 상태로 돌아가기'를 눌러 복귀하세요.`);
+        }
+
+        // 현재(최신)으로 복귀하기
+        function returnToLive() {
+            let backupStr = localStorage.getItem('edusync_live_backup');
+            if(backupStr) {
+                let liveData = JSON.parse(backupStr);
+                db = liveData.db || [];
+                savedSubjects = liveData.savedSubjects || [];
+                neisList = liveData.neisList || [];
+                specialList = liveData.specialList || [];
+                maxQuarter = liveData.maxQuarter || 4;
+            }
+
+            isTimeTravelMode = false; // 락(Lock) 해제
+            document.getElementById('timeTravelBanner').style.display = 'none';
+
+            if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
+            if(maxQuarter === 6) {
+                document.getElementById('tabQ5').style.display = 'inline-block';
+                document.getElementById('tabQ6').style.display = 'inline-block';
+            } else {
+                document.getElementById('tabQ5').style.display = 'none';
+                document.getElementById('tabQ6').style.display = 'none';
+            }
+            
+            renderSubjectList();
+            updateGlobalStats();
+            renderGrid();
+            
+            // 캐시 다시 동기화
+            localStorage.setItem('edusync_db_v3', JSON.stringify(db));
+            localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
+            localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
+            localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
+
+            alert("시간 여행을 마치고 최신(현재) 상태로 무사히 복귀했습니다!");
+        }
         
 		
 		
