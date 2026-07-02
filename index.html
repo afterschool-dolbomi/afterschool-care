@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.0</title>
+    <title>방과후 지원금 돌보미 V7.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -520,6 +520,17 @@
 		
 		
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
     </style>
 </head>
 <body>
@@ -575,7 +586,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.0</span>
+                <span class="brand-version">V7.1</span>
             </div>
             
             <div class="stat-section">
@@ -645,6 +656,9 @@
                 <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
                 
                 <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444; margin-top:16px;" onclick="resetAllData()">🚨 모든 데이터 초기화</button>
+				
+	
+				
             </div>
         </div>
         
@@ -654,9 +668,10 @@
     </aside>
 
     <main class="main-content">
-	      <!-- ✨ 타임머신 과거 모드 작동 시 나타나는 강력 경고 배너 -->
+	        <!-- ✨ 타임머신 과거 모드 작동 시 나타나는 강력 경고 배너 -->
         <div id="timeTravelBanner" style="display:none; width:100%; height:45px; color:white; z-index:99999; justify-content:center; align-items:center; gap:16px; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; animation: pulse-bg 1s infinite alternate;">
             <span id="timeTravelText" style="font-size:14px; letter-spacing:-0.5px;"></span>
+            <button onclick="overwriteWithSnapshot()" style="background:#fef08a; color:#854d0e; border:none; padding:6px 16px; border-radius:4px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">⚠️ 이 날짜로 프로그램 덮어쓰기</button>
             <button onclick="returnToLive()" style="background:white; color:#ef4444; border:none; padding:6px 16px; border-radius:4px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">🔙 최신(오늘) 상태로 돌아가기</button>
         </div>
 	
@@ -5281,6 +5296,7 @@ function openPanel(mode, id = null) {
                         <td style="text-align:left; color:#4b5563;">${autoBadge}${snap.memo}</td>
                         <td style="text-align:center;">
                             <button class="btn-tool" style="background:#10b981; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" onclick="loadSnapshot('${snap.id}')">이동</button>
+							<button class="btn-tool" style="background:#3b82f6; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" onclick="editSnapshotMemo('${snap.id}')">수정</button>
                             <button class="btn-tool" style="background:#ef4444; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold;" onclick="deleteSnapshot('${snap.id}')">삭제</button>
                         </td>
                     </tr>
@@ -5297,8 +5313,12 @@ function openPanel(mode, id = null) {
             saveCurrentStateAsSnapshot(dateStr, memoStr, false);
         }
 
-        // 상태 얼려서 저장하기
+                // 상태 얼려서 저장하기
         function saveCurrentStateAsSnapshot(dateStr, memoStr, isAuto=false) {
+            if (isAuto) {
+                // ✨ 같은 날짜의 자동 백업이 이미 있다면 삭제하여 최신 1개로 덮어쓰기
+                snapshots = snapshots.filter(s => !(s.isAuto && s.date === dateStr));
+            }
             let snap = {
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                 date: dateStr,
@@ -5322,6 +5342,40 @@ function openPanel(mode, id = null) {
                 document.getElementById('snap_memo').value = '';
             }
         }
+
+
+
+               // ✨ 타임머신 메모 수정
+        function editSnapshotMemo(id) {
+            let snap = snapshots.find(x => x.id === id);
+            if(!snap) return;
+            let newMemo = prompt("수정할 메모 내용을 입력하세요:", snap.memo);
+            if(newMemo !== null && newMemo.trim() !== "") {
+                snap.memo = newMemo.trim();
+                localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                renderSnapshotList();
+            }
+        }
+
+        // ✨ 과거 기록으로 현재 프로그램을 완전히 덮어쓰기
+        function overwriteWithSnapshot() {
+            if(!confirm("⚠️ 경고!\n정말 이 과거 기록으로 현재 프로그램을 완전히 덮어쓰시겠습니까?\n현재(최신) 상태의 기존 데이터는 영구적으로 삭제됩니다!")) return;
+            
+            isTimeTravelMode = false; // 보호 락 해제
+            
+            // 현재 화면의(과거) 데이터를 실제 브라우저 저장소에 영구 덮어쓰기
+            localStorage.setItem('edusync_db_v3', JSON.stringify(db));
+            localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
+            localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
+            localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
+            
+            // 돌아갈 라이브 백업 데이터 영구 삭제
+            localStorage.removeItem('edusync_live_backup');
+            
+            document.getElementById('timeTravelBanner').style.display = 'none';
+            alert("완료되었습니다!\n이제 이 과거 기록이 새로운 '최신(오늘) 상태'가 되었습니다.");
+        }     
+
 
         function deleteSnapshot(id) {
             if(confirm("이 과거 기록을 완전히 삭제하시겠습니까? (복구 불가)")) {
