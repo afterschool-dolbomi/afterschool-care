@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.1</title>
+    <title>방과후 지원금 돌보미 V7.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -586,7 +586,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.1</span>
+                <span class="brand-version">V7.2</span>
             </div>
             
             <div class="stat-section">
@@ -655,7 +655,7 @@
                 
                 <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
                 
-                <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444; margin-top:16px;" onclick="resetAllData()">🚨 모든 데이터 초기화</button>
+               <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444; margin-top:16px;" onclick="openResetModal()">🚨 데이터 초기화 관리</button>
 				
 	
 				
@@ -1094,6 +1094,30 @@
         </div>
     </div>
 
+
+
+         <!-- ✨ 세밀한 데이터 초기화 모달창 -->
+    <div class="slide-panel-overlay" id="resetOverlay" onclick="closeResetModal()" style="z-index: 3000;"></div>
+    <div class="detail-modal subject" id="resetModal" style="width: 400px; z-index: 3001;">
+        <div class="detail-header" style="background: #ef4444;">
+            <h3 style="font-size:16px;">🚨 데이터 초기화 관리</h3>
+            <button class="close-btn" onclick="closeResetModal()">&times;</button>
+        </div>
+        <div class="detail-body">
+            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 16px; line-height: 1.5;">
+                초기화할 대상을 선택하세요. (※ 지워진 데이터는 복구 불가)
+            </div>
+            <select id="resetQuarterSelect" style="width:100%; margin-bottom: 16px; font-weight:bold; color:#b91c1c; border:1px solid #fca5a5; background:#fef2f2; padding: 10px; border-radius: 6px;" onchange="updateResetButtons()">
+                <option value="all">전체 데이터 완전 초기화</option>
+                <!-- 자바스크립트가 분기 설정에 따라 메뉴를 채워줍니다 -->
+            </select>
+            
+            <div id="resetButtonsArea" style="display:flex; flex-direction:column; gap:10px;">
+                <!-- 선택한 분기에 따라 버튼들이 자동으로 바뀝니다 -->
+            </div>
+        </div>
+    </div>
+
     <div id="tutorialClickBlocker" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:transparent; z-index:4999; cursor:default;"></div>
     
     <div id="tutorialSpotlight" style="display:none; position:fixed; z-index:5000; pointer-events:none; border: 4px solid var(--sidebar-accent); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.65); background: transparent; transition: all 0.3s ease;"></div>
@@ -1526,7 +1550,7 @@
                 
                 // ✨ 튜토리얼 완료 후 예제 데이터 삭제 안내 말풍선 (1.5초 노출)
                 setTimeout(() => {
-                    let resetBtn = document.querySelector('button[onclick="resetAllData()"]');
+                    let resetBtn = document.querySelector('button[onclick="openResetModal()"]');
                     if(resetBtn) {
                         let rect = resetBtn.getBoundingClientRect();
                         let tip = document.createElement('div');
@@ -1770,15 +1794,106 @@
         }
 
           
-		
-		  
+		    // ✨ 분기별 상세 데이터 초기화 관리 로직
+        function openResetModal() {
+            let select = document.getElementById('resetQuarterSelect');
+            let html = `<option value="all">전체(모든 학생, 과목, 내역) 초기화</option>`;
+            for(let i=1; i<=maxQuarter; i++) {
+                html += `<option value="${i}">${i}분기 데이터 선택 초기화</option>`;
+            }
+            select.innerHTML = html;
+            updateResetButtons();
+            
+            document.getElementById('resetOverlay').classList.add('active');
+            document.getElementById('resetModal').style.display = 'flex';
+        }
 
-        function resetAllData() {
-            if(confirm("정말로 모든 학생 명단과 정산 데이터를 초기화 하시겠습니까?\n이 작업은 복구할 수 없습니다.")) {
-                db = []; persistData(); renderGrid();
+        function closeResetModal() {
+            document.getElementById('resetOverlay').classList.remove('active');
+            document.getElementById('resetModal').style.display = 'none';
+        }
+
+        function updateResetButtons() {
+            let val = document.getElementById('resetQuarterSelect').value;
+            let area = document.getElementById('resetButtonsArea');
+            if(val === 'all') {
+                area.innerHTML = `<button class="btn-save" style="background:#ef4444; width:100%; height:45px; border-radius:6px; box-shadow:0 4px 6px rgba(239,68,68,0.3);" onclick="executeReset('all')">🚨 모든 데이터 완전 초기화</button>`;
+            } else {
+                area.innerHTML = `
+                    <button class="btn-tool" style="border:1px solid #ef4444; color:#ef4444; width:100%; height:42px; border-radius:6px; font-weight:bold; background:#fff5f5;" onclick="executeReset('q_all', ${val})">🗑️ ${val}분기 전체 내역(과목포함) 초기화</button>
+                    <button class="btn-tool" style="border:1px solid #f59e0b; color:#d97706; width:100%; height:42px; border-radius:6px; font-weight:bold; background:#fffbeb;" onclick="executeReset('q_refund', ${val})">↩️ ${val}분기 환불 금액만 초기화</button>
+                    <button class="btn-tool" style="border:1px solid #3b82f6; color:#2563eb; width:100%; height:42px; border-radius:6px; font-weight:bold; background:#eff6ff;" onclick="executeReset('q_manual', ${val})">✏️ ${val}분기 수기입력(영수증)만 초기화</button>
+                `;
             }
         }
 
+        function executeReset(type, q) {
+            let msg = "";
+            if(type === 'all') msg = "정말로 [모든 학생 명단과 정산 데이터]를 초기화 하시겠습니까?\n이 작업은 복구할 수 없습니다.";
+            else if(type === 'q_all') msg = `정말로 [${q}분기 전체 내역(과목 포함)]을 초기화 하시겠습니까?\n모든 학생의 ${q}분기 수강 과목과 금액이 모두 삭제됩니다.`;
+            else if(type === 'q_refund') msg = `정말로 모든 학생의 [${q}분기 환불 금액]을 모두 0원으로 초기화 하시겠습니까?`;
+            else if(type === 'q_manual') msg = `정말로 모든 학생의 [${q}분기 수기입력(영수증) 내역]을 모두 지우고\n시스템 자동계산 모드로 되돌리시겠습니까?`;
+            
+            if(!confirm(msg)) return;
+            
+            if(type === 'all') {
+                db = []; neisList = []; specialList = [];
+                persistData(); persistNeisList(); persistSpecialList();
+            } else {
+                db.forEach(st => {
+                    if(st[`q${q}`] && st[`q${q}`].subs) {
+                        st[`q${q}`].subs.forEach(s => {
+                            if(type === 'q_all') {
+                                s.name = ''; s.g = 0; s.s = 0; s.su = 0; s.gy = 0; s.j = 0;
+                                s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
+                                delete s.mG3Su; delete s.mG3Gy; delete s.mG3J;
+                                delete s.mFreeSu; delete s.mFreeGy; delete s.mFreeJ;
+                                delete s.mSuikSu; delete s.mSuikGy; delete s.mSuikJ;
+                                delete s.burdenSu; delete s.burdenGy; delete s.burdenJ;
+                            } else if(type === 'q_refund') {
+                                s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
+                            } else if(type === 'q_manual') {
+                                delete s.mG3Su; delete s.mG3Gy; delete s.mG3J;
+                                delete s.mFreeSu; delete s.mFreeGy; delete s.mFreeJ;
+                                delete s.mSuikSu; delete s.mSuikGy; delete s.mSuikJ;
+                            }
+                        });
+                        if(type === 'q_all') {
+                            st[`q${q}`].g = 0; st[`q${q}`].s = 0; st[`q${q}`].su = 0; st[`q${q}`].gy = 0; st[`q${q}`].j = 0;
+                        }
+                    }
+                });
+                persistData();
+            }
+            renderGrid();
+            closeResetModal();
+            alert("초기화가 완료되었습니다.");
+        }
+
+        // ✨ 개별 학생 수강금액 청소 버튼
+        window.clearStudentQuarterFees = function(id, q) {
+            if(!confirm(`해당 학생의 ${q}분기 수강금액(강사료, 수용비, 수강료, 교재비, 재료비)을 모두 0원으로 지우시겠습니까?\n(과목명은 유지됩니다)`)) return;
+            let r = db.find(x => x.id == id);
+            if(!r) return;
+            if(r[`q${q}`] && r[`q${q}`].subs) {
+                r[`q${q}`].subs.forEach(s => { s.g = 0; s.s = 0; s.su = 0; s.gy = 0; s.j = 0; });
+            }
+            persistData(); showDetailModal(id); renderGrid();
+        };
+
+        // ✨ 개별 학생 환불금액 청소 버튼
+        window.clearStudentQuarterRefunds = function(id, q) {
+            if(!confirm(`해당 학생의 ${q}분기 환불금액을 모두 0원으로 지우시겠습니까?`)) return;
+            let r = db.find(x => x.id == id);
+            if(!r) return;
+            if(r[`q${q}`] && r[`q${q}`].subs) {
+                r[`q${q}`].subs.forEach(s => { s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0; });
+            }
+            persistData(); showDetailModal(id); renderGrid();
+        };
+		  
+
+       
         const toNum = v => Number(v) || 0;
         const formatMoney = v => v.toLocaleString() + '원';
         const maskName = name => name; // ✨ 보안 모드 완전 삭제: 항상 원본 이름 그대로 표시
@@ -3458,10 +3573,12 @@ function openPanel(mode, id = null) {
                     let refFree = origFree - usedFree;
 
                     html += `
-                    <div class="detail-box">
+                        <div class="detail-box">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <h4 style="margin:0;">${q}분기 상세 현황</h4>
-                            <button class="btn-tool no-print" style="padding:4px 10px; font-size:12px;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
+                             <div style="display:flex; gap:6px;">
+                                <button class="btn-tool no-print" style="padding:4px 10px; font-size:12px;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
+                            </div>
                         </div>
                         
                         <div style="overflow-x: auto;">
@@ -3477,6 +3594,11 @@ function openPanel(mode, id = null) {
                                                 (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span>)
                                             </div>
                                             <div>${q}분기 지원금 수강 신청금액</div>
+											
+											
+											
+											
+											
                                         </th>
                                         
                                         <th colspan="6" rowspan="2" style="background:#fef2f2; color:#b91c1c; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px;">
