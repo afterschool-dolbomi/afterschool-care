@@ -2219,10 +2219,7 @@
             const fName = document.getElementById('filterName').value.trim().toLowerCase();
             const fGrade = document.getElementById('filterGrade').value;
 			
-			
-			
-			
-			
+	
 			
             const fStatus = document.getElementById('filterStatus').value;
             const fFund = document.getElementById('filterFund').value;
@@ -2711,10 +2708,13 @@
                             <td style="border-right: none;"></td>
                             ${totExpTds}
                             <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumTotalExp)}</td>							
-							<td class="text-right" style="color:var(--color-g3); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalG3Used)}<br>잔액: ${formatMoney(sumTotalRemG3)}</td>
+                            <td class="text-right" style="color:var(--color-g3); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalG3Used)}<br>잔액: ${formatMoney(sumTotalRemG3)}</td>
                             <td class="text-right" style="color:var(--color-free); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalFreeUsed)}<br>잔액: ${formatMoney(sumTotalRemFree)}</td>
                             <td class="text-right" style="color:#10b981; font-weight:bold; font-size:12px;">총지원: ${formatMoney(sumTotalAllow)}<br>잔액: ${formatMoney(sumTotalRemG3 + sumTotalRemFree)}</td>
-                            <td class="no-print"></td>
+                            <td class="no-print" style="vertical-align: middle; text-align: center;">
+                                <div style="font-size:11px; color:#10b981; font-weight:bold; margin-bottom:2px;">총 지원금 사용액</div>
+                                <div style="font-size:13px; color:#10b981; font-weight:900;">${formatMoney(sumTotalG3Used + sumTotalFreeUsed)}</div>
+                            </td>
                         </tr>`;
                     }
 
@@ -3588,26 +3588,26 @@ function openPanel(mode, id = null) {
 									
                                         <tr>
                                         <th rowspan="3" style="background:#f3f4f6; position:sticky; left:0; z-index:2; border-right:2px solid var(--border-color);">과목명</th>
-                                        
-                                        <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px;">
-                                            <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
-                                                (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span>)
-                                            </div>
-                                            <div>${q}분기 지원금 수강 신청금액</div>
-											
-											
-											
-											
+                                          <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
+                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fffbeb; color:#d97706; border:1px solid #fde68a; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterFees('${r.id}', ${q})">🗑️ 신청금액 지우기</button>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
+                                        (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span>)
+                                    </div>
+                                    <div>${q}분기 지원금 수강 신청금액</div>
+                                </th>
 											
                                         </th>
-                                        
-                                        <th colspan="6" rowspan="2" style="background:#fef2f2; color:#b91c1c; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px;">
-                                            <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
-                                                (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span>)
-                                            </div>
-                                            <div>${q}분기 지원금 환불금액 (입력)</div>
-                                        </th>
-                                        
+                                       
+                                        <th colspan="6" rowspan="2" style="background:#fef2f2; color:#b91c1c; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
+                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterRefunds('${r.id}', ${q})">↩️ 환불금액 지우기</button>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
+                                        (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span>)
+                                    </div>
+                                    <div>${q}분기 지원금 환불금액 (입력)</div>
+                                </th>
+										
+										
+										
                                         <th colspan="6" rowspan="2" style="background:#dcfce7; color:#15803d; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px;">
                                             <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#166534;">
                                                 (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(usedG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(usedFree)}</span>)
