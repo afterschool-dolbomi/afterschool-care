@@ -1178,7 +1178,11 @@
             const storedSnapshots = localStorage.getItem('edusync_snapshots');
             if(storedSnapshots) { try { snapshots = JSON.parse(storedSnapshots); } catch(e) { snapshots = []; } }
 
-            const saved = localStorage.getItem('edusync_db_v3');
+
+             
+			 
+			 
+			 const saved = localStorage.getItem('edusync_db_v3');
             if(saved) { 
                 try { db = JSON.parse(saved); } catch(e) { db = []; } 
             } else {
@@ -1188,8 +1192,39 @@
                         let oldDb = JSON.parse(oldSaved);
                         db = oldDb.map(r => migrateRecord(r));
                     } catch(e) {}
+                } else {
+                    // ✨ 데이터가 아예 없을 때 (처음 실행 시) 예제 데이터 삽입
+                    let defaultTime = Date.now();
+                    db = [
+                        {
+                            id: defaultTime + 'a', grade: 3, classNum: 1, studentNum: 10, name: '이준혁', hasG3: true, hasFree: true, freeTier: '기초생활수급자', memo: '', createdAt: defaultTime,
+                            q1: { g:100000, s:10000, su:110000, gy:15000, j:5000, subs: [ {name:'컴퓨터', g:100000, s:10000, su:110000, gy:15000, j:5000} ] },
+                            q2: { g:98200, s:4300, su:102500, gy:0, j:0, subs: [ {name:'컴퓨터', g:98200, s:4300, su:102500, gy:0, j:0} ] }
+                        },
+                        {
+                            id: defaultTime + 'b', grade: 3, classNum: 1, studentNum: 2, name: '이리오', hasG3: true, hasFree: true, freeTier: '기초생활수급자', memo: '', createdAt: defaultTime,
+                            q1: { g:120000, s:6000, su:126000, gy:0, j:100000, subs: [ {name:'영어', g:120000, s:6000, su:126000, gy:0, j:100000} ] },
+                            q2: { g:5000, s:15000, su:20000, gy:0, j:0, subs: [ {name:'영어', g:5000, s:15000, su:20000, gy:0, j:0} ] }
+                        },
+                        {
+                            id: defaultTime + 'c', grade: 1, classNum: 2, studentNum: 15, name: '나재민', hasG3: false, hasFree: true, freeTier: '한부모가족', memo: '', createdAt: defaultTime,
+                            q1: { g:172300, s:8830, su:181130, gy:15000, j:90000, subs: [ {name:'바둑&체스', g:90000, s:4500, su:94500, gy:0, j:90000}, {name:'코딩', g:82300, s:4330, su:86630, gy:15000, j:0} ] },
+                            q2: { g:24870, s:100000, su:124870, gy:90000, j:4500, subs: [ {name:'컴퓨터', g:24870, s:100000, su:124870, gy:90000, j:4500} ] },
+                            q3: { g:0, s:0, su:0, gy:4500, j:0, subs: [ {name:'컴퓨터', g:0, s:0, su:0, gy:4500, j:0} ] }
+                        },
+                        {
+                            id: defaultTime + 'd', grade: 1, classNum: 3, studentNum: 5, name: '전정국', hasG3: false, hasFree: true, freeTier: '기초생활수급자', memo: '', createdAt: defaultTime,
+                            q1: { g:87600, s:1460, su:89060, gy:0, j:0, subs: [ {name:'주산암산', g:87600, s:1460, su:89060, gy:0, j:0} ] }
+                        },
+                        {
+                            id: defaultTime + 'e', grade: 2, classNum: 3, studentNum: 15, name: '공명', hasG3: false, hasFree: true, freeTier: '중위소득90%이하', memo: '', createdAt: defaultTime,
+                            q1: { g:0, s:0, su:0, gy:0, j:0, subs: [] }
+                        }
+                    ];
                 }
             }
+
+            
             
             let storedMq = localStorage.getItem('edusync_maxQuarter');
             if(storedMq) maxQuarter = parseInt(storedMq);
@@ -1477,7 +1512,10 @@
             if(currentTutorialStep > 0) currentTutorialStep--;
             showTutorialStep();
         }
-        function endTutorial(isCanceled) {
+		
+		
+		
+          function endTutorial(isCanceled) {
             document.getElementById('tutorialClickBlocker').style.display = 'none';
             document.getElementById('tutorialSpotlight').style.display = 'none';
             document.getElementById('tutorialTooltip').style.display = 'none';
@@ -1485,6 +1523,34 @@
             
             if (!isCanceled) {
                 alert('💡 튜토리얼 가이드가 모두 완료되었습니다! 언제든 좌측 메뉴에서 튜토리얼 다시 보기를 누르실 수 있습니다.');
+                
+                // ✨ 튜토리얼 완료 후 예제 데이터 삭제 안내 말풍선 (1.5초 노출)
+                setTimeout(() => {
+                    let resetBtn = document.querySelector('button[onclick="resetAllData()"]');
+                    if(resetBtn) {
+                        let rect = resetBtn.getBoundingClientRect();
+                        let tip = document.createElement('div');
+                        tip.innerHTML = '📌 예제 아동 목록을 삭제하려면<br><b>[모든 데이터 초기화]</b> 버튼을 누르세요!';
+                        tip.style.cssText = `
+                            position: fixed; z-index: 5500; background: #ef4444; color: white;
+                            padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold;
+                            box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; line-height: 1.4;
+                            top: ${rect.top - 60}px; left: ${rect.left + (rect.width/2) - 100}px; width: 200px;
+                            animation: flash-text 0.5s infinite alternate; pointer-events: none;
+                        `;
+                        // 말풍선 꼬리표
+                        let arrow = document.createElement('div');
+                        arrow.style.cssText = `
+                            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+                            border-width: 8px 8px 0; border-style: solid; border-color: #ef4444 transparent transparent transparent;
+                        `;
+                        tip.appendChild(arrow);
+                        document.body.appendChild(tip);
+                        
+                        // 1.5초 후 말풍선 제거
+                        setTimeout(() => tip.remove(), 2500); 
+                    }
+                }, 300);
             }
             checkUpdatePopup();
         }
