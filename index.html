@@ -1059,10 +1059,14 @@
                     <button class="btn-tool" style="background:#e0e7ff; color:#7e22ce; border:1px solid #c084fc; font-weight:bold; height:36px; margin-left:4px;" onclick="toggleNeisManualAdd()">✏️ 개별 수기 추가</button>
                     <button class="btn-save" style="background:#10b981; border:none; height:36px; margin-left:8px;" onclick="addNeisToProgram()">➕ 프로그램에 자유수강 아동 추가</button>
                 </div>
-                <div>
+                <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
                     <button class="btn-tool" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; height:36px;" onclick="resetNeisList()">🗑️ 수혜수급자 명단 초기화</button>
+                    <!-- ✨ 이름 검색창 추가 -->
+                    <input type="text" id="neisSearchInput" placeholder="🔍 학생 이름 검색..." style="width:160px; padding:6px; border:1px solid #c084fc; border-radius:4px; font-size:12px; outline:none;" onkeyup="renderNeisList()">
                 </div>
             </div>
+            
+            <!-- ✨ V6.2 수기 추가 폼 (평소엔 숨겨짐) -->
             
             <!-- ✨ V6.2 수기 추가 폼 (평소엔 숨겨짐) -->
             <div id="neisManualAddForm" style="display:none; background:#f9fafb; padding:12px; margin-bottom:12px; border-radius:6px; border:1px solid #cbd5e1; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -5151,15 +5155,34 @@ function openPanel(mode, id = null) {
             localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
         }
 
-        function renderNeisList() {
+
+             function renderNeisList() {
             const tbody = document.getElementById('neisListBody');
+            const searchInput = document.getElementById('neisSearchInput');
+            const searchKw = searchInput ? searchInput.value.trim() : '';
+
             if (neisList.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#9ca3af;">업로드된 명단이 없습니다.</td></tr>';
                 return;
             }
 
             let html = '';
-            neisList.forEach((st, idx) => {
+            
+            // ✨ 검색 필터링 로직 추가 (원본 인덱스 보존)
+            let displayList = neisList.map((st, i) => ({ st, origIdx: i }));
+            if(searchKw) {
+                displayList = displayList.filter(item => item.st.name.includes(searchKw));
+            }
+
+            if (displayList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#9ca3af;">검색 결과가 없습니다.</td></tr>';
+                return;
+            }
+
+            displayList.forEach((item, displayIdx) => {
+                let st = item.st;
+                let idx = item.origIdx; // 삭제할 때 꼬이지 않도록 진짜 원본 번호 기억
+                
                 let stBadge = ''; let trStyle = '';
                 if(st.status === '신규') { 
                     stBadge = `<span style="background:#10b981; color:white; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold;">신규추가</span>`; 
@@ -5179,7 +5202,7 @@ function openPanel(mode, id = null) {
 
                 // 통보X 및 특수학급 글씨 색상 처리
                 let afterSchoolHtml = st.afterSchool;
-                if (st.afterSchool.includes('통보[X]') || st.afterSchool.toLowerCase().includes('통보[x]')) {
+                if (st.afterSchool.includes('[X]') || st.afterSchool.toLowerCase().includes('[x]')) {
                     afterSchoolHtml = `<span style="color:#ef4444; font-weight:900;">${st.afterSchool}</span>`;
                 } else if (st.status === '특수반') {
                     afterSchoolHtml = `<span style="color:#d97706; font-weight:900;">${st.afterSchool}</span>`;
@@ -5188,7 +5211,7 @@ function openPanel(mode, id = null) {
                 }
 
                 html += `<tr style="${trStyle}">
-                    <td style="color:#6b7280; font-weight:bold; text-align:center;">${idx + 1}</td>
+                    <td style="color:#6b7280; font-weight:bold; text-align:center;">${displayIdx + 1}</td>
                     <td style="text-align:center;">${st.grade}</td>
                     <td style="text-align:center;">${st.classNum}</td>
                     <td style="text-align:center;">${st.studentNum}</td>
@@ -5202,6 +5225,8 @@ function openPanel(mode, id = null) {
             });
             tbody.innerHTML = html;
         }
+
+
 
         function toggleNeisManualAdd() {
             let f = document.getElementById('neisManualAddForm');
