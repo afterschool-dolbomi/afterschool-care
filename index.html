@@ -587,6 +587,11 @@
                 }
             }
         });
+		
+		
+		
+		
+		
     </script>
 
     <datalist id="subjectList"></datalist>
@@ -940,7 +945,9 @@
         </div>
     </div>
 
-    <div class="slide-panel-overlay" id="printExportOverlay" style="z-index: 3500;" onclick="closePrintExportModal()"></div>
+             
+			 
+			 <div class="slide-panel-overlay" id="printExportOverlay" style="z-index: 3500;" onclick="closePrintExportModal()"></div>
     <div class="detail-modal subject" id="printExportModal" style="width: 380px; z-index: 3501;">
         <div class="detail-header" style="background: var(--sidebar-accent);">
             <h3 style="font-size:16px;">🖨️ 정산 저장 및 인쇄</h3>
@@ -951,6 +958,8 @@
                 원하시는 출력 방식을 선택해주세요.
             </p>
             <div style="display:flex; flex-direction:column; gap:10px;">
+                <!-- ✨ 교육청 제출 서식 엑셀 버튼 추가 -->
+                <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
                 <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
             </div>
@@ -1082,8 +1091,8 @@
 		
             
            <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px; line-height: 1.5;">
-                ※ NEIS(나이스)-교육복지-수혜수급자 명단(엑셀/CSV)을 올리면 <b>방과후 '통보[O]', '통보[X]' 아동이 모두 목록에 표시</b>됩니다.<br>
-                ※ 단, '프로그램에 추가' 버튼을 누를 때는 <b>방과후 '통보[O]' 인 아동만</b> 메인 데이터베이스에 안전하게 등록됩니다.
+                ※ NEIS(나이스)-교육복지-수혜수급자 명단(엑셀/CSV)을 올리면 <b>방과후 상태가 모두 목록에 표시</b>됩니다.<br>
+                ※ 단, '프로그램에 추가' 버튼을 누를 때는 <b>방과후 '통보[O]' 또는 '완료[O]' 인 아동만</b> 메인 데이터베이스에 안전하게 등록됩니다.
             </div>
 
             <div style="overflow-x: auto; border:1px solid var(--border-color); border-radius:8px;">
@@ -1126,6 +1135,73 @@
             </div>
         </div>
     </div>
+
+
+              <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
+    <div class="slide-panel-overlay" id="eduWizardOverlay" onclick="closeEduWizard()" style="z-index: 4000;"></div>
+    <div class="detail-modal subject" id="eduWizardModal" style="width: 550px; max-height: 85vh; z-index: 4001;">
+        <div class="detail-header" style="background: #8b5cf6;">
+            <h3 style="font-size:16px;">🏫 교육청 서식 작성 마법사</h3>
+            <button class="close-btn" onclick="closeEduWizard()">&times;</button>
+        </div>
+        <div class="detail-body" style="padding:24px;">
+            
+                      <div id="eduStep1">
+                <h4 style="color:#6b21a8; margin-bottom:12px;">1단계: 엑셀 서식 파일 선택</h4>
+                <div style="background:#f3e8ff; padding:16px; border-radius:8px; border:1px solid #d8b4fe;">
+                    <label style="display:flex; align-items:center; margin-bottom:8px; font-weight:bold; cursor:pointer;">
+                        <input type="radio" name="eduFileType" value="empty" checked onchange="updateEduStep3UI()" style="margin-right:8px;"> 빈 서식 선택으로 시작
+                    </label>
+                    <label style="display:flex; align-items:center; font-weight:bold; cursor:pointer;">
+                        <input type="radio" name="eduFileType" value="existing" onchange="updateEduStep3UI()" style="margin-right:8px;"> 기존 입력했던 파일 이어서 시작
+                    </label>
+                    <div style="margin-top:16px;">
+                        <input type="file" id="eduUploadFile" accept=".xlsx" style="display:block; width:100%; padding:8px; border:1px solid #c084fc; border-radius:4px; background:white;">
+                    </div>
+                </div>
+            </div>
+
+              <div id="eduStep2" style="display:none;">
+                <h4 style="color:#6b21a8; margin-bottom:12px;">2단계: 입력할 데이터 시점(날짜) 선택</h4>
+                <div style="background:#f3e8ff; padding:16px; border-radius:8px; border:1px solid #d8b4fe;">
+                    <label style="display:flex; align-items:center; margin-bottom:12px; font-weight:bold; color:#ef4444; cursor:pointer;">
+                        <input type="radio" name="eduMode" value="auto" checked onchange="toggleEduMode()" style="margin-right:8px;"> 프로그램 스스로 관리 지점 선택 (분기별 수강/환불 자동 분리)
+                    </label>
+                    <label style="display:flex; align-items:center; margin-bottom:8px; font-weight:bold; color:#4c1d95; cursor:pointer;">
+                        <input type="radio" name="eduMode" value="manual" onchange="toggleEduMode()" style="margin-right:8px;"> 수동 저장된 과거 기록 선택 (여러 날짜 중복 체크 가능)
+                    </label>
+                    <div id="eduSnapshotCheckboxes" style="max-height:150px; overflow-y:auto; border:1px solid #c084fc; background:white; padding:10px; border-radius:4px; font-size:13px; line-height:1.6;">
+                        <!-- JS가 스냅샷 목록을 채워줍니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="eduStep3" style="display:none;">
+                <h4 style="color:#6b21a8; margin-bottom:12px;">3단계: 정렬 방식 선택</h4>
+                <div id="eduSortOptions" style="background:#f3e8ff; padding:16px; border-radius:8px; border:1px solid #d8b4fe; font-weight:bold;">
+                    <!-- JS가 1단계 선택에 따라 옵션을 바꿉니다 -->
+                </div>
+            </div>
+
+            <div id="eduStep4" style="display:none;">
+                <h4 style="color:#6b21a8; margin-bottom:12px;">4단계: 엑셀 파일 저장</h4>
+                <div style="background:#ecfdf5; padding:16px; border-radius:8px; border:1px solid #a7f3d0; text-align:center;">
+                    <p style="font-size:14px; font-weight:bold; color:#065f46; margin-bottom:8px;">설정이 완료되었습니다! 🎉</p>
+                    <p style="font-size:12px; color:#047857;">아래 [저장 및 생성] 버튼을 누르시면 입력이 시작됩니다.<br>데이터 양에 따라 수 초가 소요될 수 있습니다.</p>
+                </div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color);">
+                <button class="btn-tool" id="btnEduPrev" style="display:none; padding:8px 24px;" onclick="prevEduStep()">이전</button>
+                <div style="flex:1;"></div>
+                <button class="btn-save" id="btnEduNext" style="background:#8b5cf6; padding:8px 32px;" onclick="nextEduStep()">다음 단계</button>
+                <button class="btn-save" id="btnEduExec" style="display:none; background:#10b981; padding:8px 32px;" onclick="executeEduExport()">엑셀 저장 및 생성 🚀</button>
+            </div>
+        </div>
+    </div>
+
+
+
 
     <div id="tutorialClickBlocker" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:transparent; z-index:4999; cursor:default;"></div>
     
@@ -5302,8 +5378,8 @@ function openPanel(mode, id = null) {
                     }
                     specialCount++;
                 }
-                // ✨ 2순위: 통보[X] 여부 체크
-                else if (afterSchool.includes('통보[X]') || afterSchool.toLowerCase().includes('통보[x]')) {
+                // ✨ 2순위: 지원 제외 대상 (통보[X] 또는 완료[X])
+                else if (afterSchool.includes('[X]') || afterSchool.toLowerCase().includes('[x]')) {
                     if (existingMap.has(key)) {
                         let st = existingMap.get(key);
                         st._matched = true; st.status = '통보X';
@@ -5322,12 +5398,12 @@ function openPanel(mode, id = null) {
                     }
                     rejectedCount++;
                 } 
-                // ✨ 3순위: 정상(통보[O]) 처리
-                else if (afterSchool.includes('통보[O]') || afterSchool.toLowerCase().includes('통보[o]') || colAfterSchool === -1) {
+                // ✨ 3순위: 정상 지원 대상 (통보[O], 완료[O] 등)
+                else {
                     if (existingMap.has(key)) {
                         let st = existingMap.get(key);
                         st._matched = true; st.status = '유지';
-                        st.afterSchool = afterSchool;
+                        st.afterSchool = afterSchool || '상태미상';
                         st.familyTier = colFamily !== -1 ? String(cols[colFamily] || '').trim() : st.familyTier;
                         if(reqDate) st.reqDate = reqDate;
                         if(confirmDate) st.confirmDate = confirmDate;
@@ -5335,7 +5411,7 @@ function openPanel(mode, id = null) {
                     } else {
                         neisList.push({
                             grade, classNum, studentNum, name,
-                            afterSchool, 
+                            afterSchool: afterSchool || '상태미상', 
                             familyTier: colFamily !== -1 ? String(cols[colFamily] || '').trim() : '',
                             reqDate: reqDate, confirmDate: confirmDate,
                             status: '신규', _matched: true
@@ -5671,9 +5747,283 @@ function openPanel(mode, id = null) {
         }
         
 		
+		  // ✨ 교육청 서식 작성 마법사 엔진 (고도화 버전)
+        let eduCurrentStep = 1;
+
+        function generateEduOfficeExcel() {
+            openEduWizard();
+        }
+
+        function toggleEduMode() {
+            let mode = document.querySelector('input[name="eduMode"]:checked').value;
+            let checks = document.querySelectorAll('.edu-snap-chk');
+            if (mode === 'auto') {
+                checks.forEach(c => { c.disabled = true; c.checked = false; });
+            } else {
+                checks.forEach(c => { c.disabled = false; });
+            }
+        }
+
+        function openEduWizard() {
+            eduCurrentStep = 1;
+            document.getElementById('eduUploadFile').value = '';
+            
+            // 스냅샷 목록 세팅
+            let snapHtml = '';
+            let validSnaps = snapshots.filter(s => !s.isAuto);
+            validSnaps.sort((a,b) => new Date(a.date) - new Date(b.date)); // 날짜순 정렬
+            validSnaps.forEach(s => {
+                snapHtml += `<label style="display:flex; align-items:center; margin-bottom:4px; cursor:pointer;">
+                    <input type="checkbox" class="edu-snap-chk" value="${s.id}" style="margin-right:6px;" disabled> 
+                    ${s.date} (${s.memo})
+                </label>`;
+            });
+            if(snapHtml === '') snapHtml = '<span style="color:#9ca3af; font-size:12px;">수동으로 저장된 과거 기록이 없습니다.</span>';
+            document.getElementById('eduSnapshotCheckboxes').innerHTML = snapHtml;
+            
+            // 모드 초기화
+            let radioAuto = document.querySelector('input[name="eduMode"][value="auto"]');
+            if(radioAuto) { radioAuto.checked = true; toggleEduMode(); }
+
+            updateEduWizardUI();
+            document.getElementById('eduWizardOverlay').classList.add('active');
+            document.getElementById('eduWizardModal').style.display = 'flex';
+        }
+
+        function closeEduWizard() {
+            document.getElementById('eduWizardOverlay').classList.remove('active');
+            document.getElementById('eduWizardModal').style.display = 'none';
+        }
+
+        function updateEduStep3UI() {
+            let type = document.querySelector('input[name="eduFileType"]:checked').value;
+            let area = document.getElementById('eduSortOptions');
+            if(type === 'empty') {
+                area.innerHTML = `
+                    <label style="display:flex; align-items:center; margin-bottom:8px;">
+                        <input type="radio" name="eduSortType" value="sort" checked disabled style="margin-right:6px;"> 기존/신규 명단 전체 학번순 정렬 (오름차순) - 빈 서식 필수
+                    </label>
+                    <span style="font-size:11px; color:#ef4444; margin-left:24px;">※ 빈 서식은 자동으로 학번 기준 오름차순 정렬됩니다.</span>`;
+            } else {
+                area.innerHTML = `
+                    <label style="display:flex; align-items:center; margin-bottom:8px; cursor:pointer;">
+                        <input type="radio" name="eduSortType" value="sort" checked style="margin-right:6px;"> 기존 명단과 신규 명단을 합쳐서 전체 학번순 정렬
+                    </label>
+                    <label style="display:flex; align-items:center; cursor:pointer;">
+                        <input type="radio" name="eduSortType" value="append" style="margin-right:6px;"> 기존 명단은 놔두고 신규 아동만 맨 아래에 추가
+                    </label>`;
+            }
+        }
+
+        function nextEduStep() {
+            if(eduCurrentStep === 1) {
+                if(!document.getElementById('eduUploadFile').files[0]) {
+                    alert("적용할 교육청 엑셀 서식 파일을 먼저 선택해주세요!"); return;
+                }
+            }
+            if(eduCurrentStep < 4) eduCurrentStep++;
+            updateEduWizardUI();
+        }
+
+        function prevEduStep() {
+            if(eduCurrentStep > 1) eduCurrentStep--;
+            updateEduWizardUI();
+        }
+
+        function updateEduWizardUI() {
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`eduStep${i}`).style.display = (i === eduCurrentStep) ? 'block' : 'none';
+            }
+            document.getElementById('btnEduPrev').style.display = (eduCurrentStep === 1) ? 'none' : 'inline-block';
+            if(eduCurrentStep === 4) {
+                document.getElementById('btnEduNext').style.display = 'none';
+                document.getElementById('btnEduExec').style.display = 'inline-block';
+            } else {
+                document.getElementById('btnEduNext').style.display = 'inline-block';
+                document.getElementById('btnEduExec').style.display = 'none';
+            }
+            if(eduCurrentStep === 1) updateEduStep3UI();
+        }
+
+        function mapTierToColumn(tierStr) {
+            if(!tierStr) return null;
+            if (tierStr.includes('기초생계') || tierStr.includes('기초주거') || tierStr.includes('기초의료') || tierStr.includes('기초교육') || tierStr.includes('기초생활')) return 6; 
+            if (tierStr.includes('한부모')) return 7; 
+            if (tierStr.includes('차상위')) return 8; 
+            if (tierStr.includes('중위소득')) return 9; 
+            if (tierStr.includes('학교장추천')) return 10; 
+            if (tierStr.includes('난민')) return 11; 
+            if (tierStr.includes('육아기')) return 12; 
+            return 6; 
+        }
+
+        
 		
-		
-		
+		// 🚀 최종 실행 엔진 (1단계: 헤더 빈칸 추적 및 작성 테스트)
+        async function executeEduExport() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+                const fileInput = document.getElementById('eduUploadFile');
+                const wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(await fileInput.files[0].arrayBuffer());
+                const ws = wb.worksheets[0];
+
+                let isNewFile = document.querySelector('input[name="eduFileType"]:checked').value === 'empty';
+                let isSort = true;
+                if(!isNewFile) {
+                    let sortEl = document.querySelector('input[name="eduSortType"]:checked');
+                    if(sortEl && sortEl.value === 'append') isSort = false;
+                }
+
+                // ✨ [오류 방지 로직] 빈 서식 선택 시 데이터 유무 체크
+                if(isNewFile) {
+                    let hasData = false;
+                    for(let r = 10; r <= Math.min(ws.rowCount, 100); r++) {
+                        let row = ws.getRow(r);
+                        if(row.getCell(2).value || row.getCell(5).value) { hasData = true; break; }
+                    }
+                    if(hasData) {
+                        alert("⚠️ 빈 서식이 아닙니다!\n기존에 학생 목록이 이미 입력되어 있습니다.\n\n1단계로 돌아가서 '기존 입력했던 파일 이어서 시작'을 선택해주세요.");
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        return;
+                    }
+                }
+
+                // ✨ 모드 파악 및 스냅샷 준비
+                let eduMode = document.querySelector('input[name="eduMode"]:checked').value;
+                let selectedSnaps = [];
+                if(eduMode === 'manual') {
+                    let checkedBoxes = document.querySelectorAll('.edu-snap-chk:checked');
+                    if(checkedBoxes.length === 0) {
+                        alert("⚠️ '수동 기록' 방식을 선택하셨습니다. 기록된 날짜를 1개 이상 체크해주세요.");
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        return;
+                    }
+                    checkedBoxes.forEach(cb => {
+                        let s = snapshots.find(x => x.id === cb.value);
+                        if(s) selectedSnaps.push(s);
+                    });
+                    // 날짜 오름차순 정렬 (가장 오래된 순)
+                    selectedSnaps.sort((a,b) => new Date(a.date) - new Date(b.date)); 
+                }
+
+                // =========================================================================
+                // 1. 학생 목록 A~L열 채우기 (기존 작동하던 안전한 로직 유지)
+                // =========================================================================
+                let startRow = 10;
+                let maxRow = ws.rowCount;
+                
+                // M열 이후 수식은 아예 건드리지 않고, A~L열(1~12번) 값만 초기화
+                for (let r = startRow; r <= maxRow; r++) {
+                    let row = ws.getRow(r);
+                    for (let c = 1; c <= 12; c++) { row.getCell(c).value = null; }
+                }
+
+                let existingRows = [];
+                for(let r = startRow; r <= maxRow; r++) {
+                    let row = ws.getRow(r);
+                    if(row.getCell(2).value) { 
+                        let cellValues = [];
+                        row.eachCell({ includeEmpty: true }, (cell, colNum) => cellValues[colNum] = cell.value);
+                        existingRows.push({
+                            isExisting: true,
+                            grade: Number(row.getCell(2).value) || 0,
+                            classNum: Number(row.getCell(3).value) || 0,
+                            studentNum: Number(row.getCell(4).value) || 0,
+                            name: String(row.getCell(5).value || '').trim(),
+                            cells: cellValues
+                        });
+                    }
+                }
+
+                let validNeis = neisList.filter(st => st.status !== '제외' && st.status !== '통보X' && st.status !== '특수반');
+                let combined = [...existingRows];
+                validNeis.forEach(st => {
+                    let exists = existingRows.some(ex => String(ex.grade) === String(st.grade) && String(ex.classNum) === String(st.classNum) && String(ex.studentNum) === String(st.studentNum) && ex.name === st.name);
+                    if(!exists) combined.push({ isExisting: false, grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name, tier: st.familyTier });
+                });
+                if(isSort) combined.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum);
+
+                for(let i=0; i<combined.length; i++) {
+                    let rIdx = startRow + i;
+                    let targetRow = ws.getRow(rIdx);
+                    let data = combined[i];
+                    targetRow.getCell(1).value = i + 1; // A열
+                    if (data.isExisting) {
+                        for(let c=2; c<=12; c++) { if(data.cells && data.cells[c] !== undefined) targetRow.getCell(c).value = data.cells[c]; }
+                    } else {
+                        targetRow.getCell(2).value = data.grade; targetRow.getCell(3).value = data.classNum;
+                        targetRow.getCell(4).value = data.studentNum; targetRow.getCell(5).value = data.name;
+                        let tCol = mapTierToColumn(data.tier);
+                        if(tCol && tCol <= 12) targetRow.getCell(tCol).value = 1;
+                    }
+                }
+
+                // =========================================================================
+                // ✨ 2. P열부터 시작하는 스마트 헤더(6번 줄) 작성 로직 (NEW!)
+                // =========================================================================
+                if (eduMode === 'manual') {
+                    // 날짜 변환 함수 (2026-06-25 -> 06월25일)
+                    function formatSnapDate(dStr) {
+                        if(!dStr) return '';
+                        let p = dStr.split('-');
+                        return p.length >= 3 ? `${p[1]}월${p[2]}일` : dStr;
+                    }
+
+                    let currentSearchCol = 16; // P열부터 검색 시작
+
+                    for (let i = 0; i < selectedSnaps.length; i++) {
+                        let snap = selectedSnaps[i];
+                        let snapDate = formatSnapDate(snap.date);
+                        let snapMemo = snap.memo || '';
+
+                        let foundEmptySlot = false;
+                        
+                        // 빈 칸(날짜가 안 적힌 칸)을 찾을 때까지 4칸씩 점프하며 검색
+                        while (!foundEmptySlot && currentSearchCol <= 200) {
+                            let headerCell = ws.getRow(6).getCell(currentSearchCol);
+                            let cellText = String(headerCell.value || '').trim();
+                            
+                            // 템플릿의 기본 문자열이거나 완전히 비어있는지 확인
+                            let isEmptyTemplate = cellText === '' || cellText.includes('( 월 일)') || cellText.includes('(0월0일)');
+                            
+                            if (isNewFile) {
+                                foundEmptySlot = true; // 빈 서식이면 따질 것 없이 바로 통과
+                            } else {
+                                if (isEmptyTemplate) {
+                                    foundEmptySlot = true; // 기존 파일이라도 날짜가 비어있으면 통과
+                                } else {
+                                    currentSearchCol += 4; // 이미 진짜 날짜가 적혀있다면 4칸(1세트) 뒤로 이동
+                                }
+                            }
+                        }
+
+                        // 빈칸을 찾았다면 해당 자리에 차수, 날짜, 메모 입력
+                        if (foundEmptySlot) {
+                            let roundNum = Math.floor((currentSearchCol - 16) / 4) + 1; // P열(16)이면 1차, T열(20)이면 2차
+                            let newHeaderText = `${roundNum}차(${snapDate})-${snapMemo}`;
+                            
+                            ws.getRow(6).getCell(currentSearchCol).value = newHeaderText;
+                            
+                            // 다음 날짜 입력을 위해 기준점을 4칸 뒤로 이동
+                            currentSearchCol += 4; 
+                        }
+                    }
+                }
+
+                const buffer = await wb.xlsx.writeBuffer();
+                saveAs(new Blob([buffer]), `교육청제출용_헤더작성테스트_${new Date().toISOString().slice(0,10)}.xlsx`);
+                
+                closeEduWizard();
+                alert("✅ 헤더 작성 테스트 완료!\n다운로드된 엑셀 파일의 6번째 줄이 제대로 비켜가며 써졌는지 확인해주세요!");
+                
+            } catch(e) {
+                console.error(e);
+                alert("엑셀 생성 오류: " + e.message);
+            } finally {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
 		
 		
 		
