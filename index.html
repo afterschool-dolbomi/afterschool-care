@@ -5849,12 +5849,12 @@ function openPanel(mode, id = null) {
                     (헤더의 날짜 칸은 기존 템플릿의 빈칸 상태로 유지됩니다.)`;
                 } else if (isNewFile && eduMode === 'manual') {
                     descBox.innerHTML = `<b>[빈 서식 + 수동 저장된 과거 기록 선택]</b><br>
-                    선택하신 과거 기록 날짜들이 각 세트의 헤더에 오름차순으로 자동 기입됩니다.<br>
-                    해당 날짜 시점까지의 수강/환불 금액 누적 차액이 1, 2, 3차 세트에 차례대로 정밀하게 나뉘어 입력됩니다.`;
+                    선택하신 과거 기록 날짜들이 각 세트의 헤더에 오름차순으로 자동 기입되며,<br>
+                    <b>마지막 차수에는 '현재 최신 데이터'가 자동으로 추가</b>되어 과거 기록 이후의 변동분까지 남김없이 엑셀에 기입됩니다.`;
                 } else {
                     descBox.innerHTML = `<b>[기존 파일 + 수동 저장된 과거 기록 선택]</b><br>
-                    기존 엑셀에 이미 기록된 차수(날짜)들은 그대로 보존하고 건너뜁니다.<br>
-                    비어있는 다음 차수부터 선택하신 과거 기록 날짜가 헤더에 등록되며, 기존 금액을 뺀 <b>순수 추가 차액</b>만 안전하게 이어 적힙니다.`;
+                    기존 엑셀에 이미 기록된 차수(날짜)들은 보존하고 건너뜁니다.<br>
+                    비어있는 다음 차수부터 선택하신 과거 기록과 <b>'현재 최신 데이터'</b>가 추가되어 순수 추가 차액만 안전하게 이어 적힙니다.`;
                 }
 
             } else {
@@ -5877,8 +5877,7 @@ function openPanel(mode, id = null) {
             return 6; 
         }
 
-        
-		    // 🚀 최종 실행 엔진 (자동 분기 분리 & 수동 델타 계산 완벽 통합 엔진)
+         // 🚀 최종 실행 엔진 (자동 분기 분리 & 수동 델타 계산 완벽 통합 엔진)
         async function executeEduExport() {
             document.getElementById('loading-overlay').style.display = 'flex';
             try {
@@ -5910,6 +5909,9 @@ function openPanel(mode, id = null) {
                 let eduMode = document.querySelector('input[name="eduMode"]:checked').value;
                 let selectedSnaps = [];
 
+
+
+
                 if(eduMode === 'manual') {
                     let checkedBoxes = document.querySelectorAll('.edu-snap-chk:checked');
                     if(checkedBoxes.length === 0) {
@@ -5922,6 +5924,15 @@ function openPanel(mode, id = null) {
                         if(s) selectedSnaps.push(s);
                     });
                     selectedSnaps.sort((a,b) => new Date(a.date) - new Date(b.date)); 
+                    
+                    // ✨ [핵심 해결 로직] 과거 스냅샷에는 없지만 현재 프로그램(라이브)에는 존재하는 
+                    // 신규 학생이나 최신 금액 변동분을 잡기 위해, '현재 최신 데이터'를 마지막 차수로 강제 편입!
+                    let todayStr = new Date().toISOString().split('T')[0];
+                    selectedSnaps.push({
+                        date: todayStr,
+                        memo: '현재 최신 데이터',
+                        data: { db: db } // 현재 라이브 DB를 그대로 전달
+                    });
                 }
 
                 let startRow = 10;
@@ -5957,7 +5968,6 @@ function openPanel(mode, id = null) {
                     if(!exists) combined.push({ isExisting: false, grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name, tier: st.familyTier });
                 });
                 if(isSort) combined.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum);
-
 
                 function ensureColStyle(cBase) {
                     if (cBase > 52) { 
@@ -6039,36 +6049,52 @@ function openPanel(mode, id = null) {
                     }
                 }
 
+                 // ✨ 완벽한 자유수강 영수증 스캔 함수 (환불 전 순수 수강액과 환불액 분리)
                 function getFreeTotals(snapDb, grade, classNum, studentNum, name, specificQ = null) {
                     let st = snapDb.find(x => String(x.grade) === String(grade) && String(x.classNum) === String(classNum) && String(x.studentNum) === String(studentNum) && x.name === name);
-                    let grossFree = 0, refundFree = 0;
                     
-                    if(st) {
-                        let c = calcStudent(st); 
-                        let qList = specificQ ? [specificQ] : [1,2,3,4,5,6].slice(0, maxQuarter);
-                        
-                        qList.forEach(q => {
-                            let qKey = `q${q}`;
-                            if(c.allocs && c.allocs[qKey]) {
-                                c.allocs[qKey].forEach(alloc => {
-                                    if(alloc) grossFree += (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0);
-                                });
-                            }
-                            if(st[qKey] && st[qKey].subs) {
-                                st[qKey].subs.forEach((s, sIdx) => {
-                                    let refSum = toNum(s.rSu) + toNum(s.rGy) + toNum(s.rJ);
-                                    if (refSum > 0) {
-                                        let alloc = c.allocs[qKey] && c.allocs[qKey][sIdx] ? c.allocs[qKey][sIdx] : null;
-                                        if (alloc) {
-                                            let totalGross = (alloc.g3Su||0) + (alloc.frSu||0) + (alloc.skSu||0) + (alloc.g3Gy||0) + (alloc.frGy||0) + (alloc.skGy||0) + (alloc.g3J||0) + (alloc.frJ||0) + (alloc.skJ||0);
-                                            let freeGross = (alloc.frSu||0) + (alloc.frGy||0) + (alloc.frJ||0);
-                                            if (totalGross > 0) refundFree += Math.round(refSum * (freeGross / totalGross));
-                                        }
-                                    }
-                                });
-                            }
-                        });
+                    if(!st) return { gross: 0, refund: 0 };
+
+                    // 1. 환불이 차감된 후의 실제 결제액(Net) 계산
+                    let c_net = calcStudent(st); 
+
+                    // 2. 환불액을 0으로 강제 세팅한 가상의 학생 데이터로 '환불 전 순수 수강금액(Gross)' 계산
+                    let st_gross = JSON.parse(JSON.stringify(st));
+                    for(let q=1; q<=6; q++) {
+                        if(st_gross[`q${q}`] && st_gross[`q${q}`].subs) {
+                            st_gross[`q${q}`].subs.forEach(s => {
+                                s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
+                            });
+                        }
                     }
+                    let c_gross = calcStudent(st_gross);
+
+                    let grossFree = 0;
+                    let netFree = 0;
+                    
+                    let qList = specificQ ? [specificQ] : [1,2,3,4,5,6].slice(0, maxQuarter);
+                    
+                    qList.forEach(q => {
+                        let qKey = `q${q}`;
+                        
+                        // 환불 전 순수 수강금액 합산 (엑셀 1세트 1번째 칸용)
+                        if(c_gross.allocs && c_gross.allocs[qKey]) {
+                            c_gross.allocs[qKey].forEach(alloc => {
+                                if(alloc) grossFree += (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0);
+                            });
+                        }
+                        
+                        // 환불 후 실제 최종액 합산
+                        if(c_net.allocs && c_net.allocs[qKey]) {
+                            c_net.allocs[qKey].forEach(alloc => {
+                                if(alloc) netFree += (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0);
+                            });
+                        }
+                    });
+                    
+                    // 환불액 = 환불 전 총액 - 환불 후 최종액 (엑셀 1세트 2번째 칸용)
+                    let refundFree = grossFree - netFree;
+                    
                     return { gross: grossFree, refund: refundFree };
                 }
 
@@ -6109,7 +6135,6 @@ function openPanel(mode, id = null) {
                         targetRow.getCell(cBase+2).value = null; targetRow.getCell(cBase+3).value = null;
                     }
 
-                    // ✨ 모드에 따른 차액/분할 기입 시스템
                     for (let j = 0; j < snapColMapping.length; j++) {
                         let mapping = snapColMapping[j];
                         let cBase = mapping.cBase;
@@ -6176,7 +6201,7 @@ function openPanel(mode, id = null) {
                 saveAs(new Blob([buffer]), `교육청제출용_자유수강완성본_${new Date().toISOString().slice(0,10)}.xlsx`);
                 
                 closeEduWizard();
-                alert("✅ 교육청 제출 엑셀(자유수강 전용) 완벽 생성 완료!");
+                alert("✅ 교육청 제출 엑셀 완벽 생성 완료!\n(선택하신 과거 기록 외에 '현재 최신 데이터'까지 마지막에 자동 합산되었습니다.)");
                 
             } catch(e) {
                 console.error(e);
@@ -6185,7 +6210,7 @@ function openPanel(mode, id = null) {
                 document.getElementById('loading-overlay').style.display = 'none';
             }
         }
-		
+		 
 		
     </script>
 </body>
