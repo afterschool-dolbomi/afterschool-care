@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.4</title>
+    <title>방과후 지원금 돌보미 V7.5</title>
+	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -537,6 +538,48 @@
 <body>
 
 
+    <div id="noticePopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        
+        <div style="background:#ffffff; border-radius:12px; overflow:hidden; width:95%; max-width:975px; height:90vh; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); display:flex; flex-direction:column; animation: popIn 0.3s ease-out forwards;">
+            
+          <div style="width:100%; flex-grow:1; overflow:auto; background:#f3f4f6; text-align:center; padding: 0;">
+                
+                <img src="https://i.ibb.co/gbDxfL5W/image.png" alt="공지사항" style="width:100%; height:auto; display:block; margin:0 auto;" decoding="async" fetchpriority="high">
+                
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; flex-shrink: 0;">
+                <div style="display:flex; gap:12px;">
+                    <button onclick="closeNoticePopup(7)" style="background:#e2e8f0; color:#475569; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🕖 7일간 보지 않기</button>
+                    <button onclick="closeNoticePopup('forever')" style="background:#fee2e2; color:#ef4444; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🚫 평생 보지 않기</button>
+                </div>
+                <button onclick="closeNoticePopup(0)" style="background:#3b82f6; color:white; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:800;">닫기 ✖</button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    </style>
+    
+
+  
+   <! 크기 조절 방법 요약, 위 코드 안에 주석(``)으로 달아둔 부분을 보시면 됩니다.
+1. **팝업의 가로 길이를 바꾸고 싶을 때:** `max-width: 1100px;`의 숫자를 바꿉니다. (예: `800px`)
+2. **팝업의 세로 길이를 바꾸고 싶을 때:** `max-height: 85vh;`의 숫자를 바꿉니다. (예: `70vh`)
+3. **그림 크기를 내 마음대로 강제 지정하고 싶을 때:** `<img ... style="width: auto;` 부분의 `auto`를 지우고 `600px` 처럼 직접 입력합니다. (단, 원본보다 크게 적으면 또 깨질 수 있습니다!)
+
+선생님을 위한 마지막 팁 (직접 더 조절하고 싶을 때)
+창을 더 넓게 키우고 싶을 때: max-width: 1400px; 숫자를 더 키워보세요 (예: 1800px).
+창을 위아래로 더 키우고 싶을 때: height: 90vh; 숫자를 더 키워보세요 (예: 95vh).
+이미지가 너무 커서 창 안에서 한눈에 보고 싶을 때: 이미지 스타일의 max-width: none;을 max-width: 100%;로 바꾸시면, 이미지가 창 크기에 맞춰 쏙 들어오게 됩니다. !>
+
+
+
+
+
+
+
 
     <div id="loading-overlay">
         <div class="spinner"></div>
@@ -606,7 +649,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.4</span>
+                <span class="brand-version">V7.5</span>
             </div>
             
             <div class="stat-section">
@@ -2297,13 +2340,7 @@
 
 		
 		
-		
-		
-		
-		
-		
-		
-
+		     let subjectGridSortType = 'subject'; // ✨ 과목별 보기 정렬 필터 기본값 (과목순)
         function renderGrid() {
             const tHead = document.getElementById('tHead');
             const tBody = document.getElementById('tBody');
@@ -2444,13 +2481,27 @@
                     });
                 });
 
-                subjectRows.sort((a, b) => {
+               
+			   
+			      subjectRows.sort((a, b) => {
                     if (currentTab === 'all') {
                         if (a.qNum !== b.qNum) return a.qNum - b.qNum;
                     }
-                    if (a.sName !== b.sName) return a.sName.localeCompare(b.sName);
-                    return (a.r.grade - b.r.grade) || (a.r.classNum - b.r.classNum) || (a.r.studentNum - b.r.studentNum);
+                    
+                    if (subjectGridSortType === 'subject') {
+                        // 1순위: 과목명 -> 2순위: 학번
+                        if (a.sName !== b.sName) return a.sName.localeCompare(b.sName);
+                        return (a.r.grade - b.r.grade) || (a.r.classNum - b.r.classNum) || (a.r.studentNum - b.r.studentNum);
+                    } else {
+                        // 1순위: 학번 -> 2순위: 과목명
+                        if (a.r.grade !== b.r.grade) return a.r.grade - b.r.grade;
+                        if (a.r.classNum !== b.r.classNum) return a.r.classNum - b.r.classNum;
+                        if (a.r.studentNum !== b.r.studentNum) return a.r.studentNum - b.r.studentNum;
+                        return a.sName.localeCompare(b.sName);
+                    }
                 });
+			     
+			   
 
                 currentSubjectViewData = subjectRows;
 
@@ -2461,7 +2512,12 @@
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                        <div style="display:flex; gap:8px;">
+                       <div style="display:flex; gap:8px; align-items:center;">
+                            <select onchange="subjectGridSortType = this.value; renderGrid();" style="padding:6px 10px; border-radius:4px; font-size:13px; font-weight:bold; outline:none; border:1px solid #c084fc; color:#6b21a8; cursor:pointer;">
+                                <option value="subject" ${subjectGridSortType === 'subject' ? 'selected' : ''}>📚 과목명 순서로 묶어보기</option>
+                                <option value="student" ${subjectGridSortType === 'student' ? 'selected' : ''}>🧑‍🎓 학번/이름 순서로 묶어보기</option>
+                            </select>
+
                             <button class="btn-tool no-print" style="background: ${isSuikViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px;" onclick="toggleSuikView()">
                                 ${isSuikViewOn ? '◀ 수익자 금액 닫기' : '수익자 금액 보기 ▶'}
                             </button>
@@ -6210,6 +6266,45 @@ function openPanel(mode, id = null) {
                 document.getElementById('loading-overlay').style.display = 'none';
             }
         }
+		 
+		 
+		 
+		 
+		  
+		  // ==========================================
+        // ✨ 공지 팝업창 제어 로직 (7일 / 평생 보지 않기)
+        // ==========================================
+        function checkNoticePopup() {
+            let hideUntil = localStorage.getItem('hide_notice_popup_v75');
+            
+            if (hideUntil === 'forever') return; // 평생 보지 않기 체크됨
+            if (hideUntil && Date.now() < parseInt(hideUntil)) return; // 7일이 아직 안 지남
+
+            // 위 조건에 안 걸리면 팝업창을 보여줍니다.
+            let popup = document.getElementById('noticePopupOverlay');
+            if(popup) popup.style.display = 'flex';
+        }
+
+        function closeNoticePopup(days) {
+            if (days === 'forever') {
+                localStorage.setItem('hide_notice_popup_v75', 'forever');
+            } else if (days > 0) {
+                // 현재 시간 + (7일 * 24시간 * 60분 * 60초 * 1000밀리초)
+                let expireTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+                localStorage.setItem('hide_notice_popup_v75', expireTime.toString());
+            }
+            // 창 닫기 (days가 0이면 그냥 닫기만 함)
+            document.getElementById('noticePopupOverlay').style.display = 'none';
+        }
+
+        // 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
+        checkNoticePopup();
+		 
+		 
+		 
+		 
+		 
+		 
 		 
 		
     </script>
