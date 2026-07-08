@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.5</title>
+    <title>방과후 지원금 돌보미 V7.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -84,7 +84,6 @@
         .btn-tool { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-color); background: white; cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,0.05); transition: 0.3s; color: var(--text-dark); }
         .btn-tool:active { transform: translateY(2px); box-shadow: none; }
         
-        .privacy-on { background: #fee2e2 !important; color: #dc2626 !important; border-color: #f87171 !important; }
 
         .filters { display: flex; gap: 8px; align-items: center; }
         .filters select, .filters input { height: 36px; padding: 0 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; transition: 0.3s; }
@@ -232,7 +231,7 @@
         
         body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #d1d5db !important; opacity: 1; }
         body.dark-mode .student-id { color: #ffffff !important; }
-        body.dark-mode .privacy-on { background: #7f1d1d !important; color: #fca5a5 !important; border-color: #ef4444 !important; }
+        
         body.dark-mode .detail-box, body.dark-mode .benefit-box { background: #1f2937; border-color: #374151; }
         
         body.dark-mode .detail-modal, body.dark-mode .slide-panel { 
@@ -550,6 +549,7 @@
             
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; flex-shrink: 0;">
                 <div style="display:flex; gap:12px;">
+                    <button onclick="closeNoticePopup(1)" style="background:#f1f5f9; color:#64748b; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">📅 오늘 하루 보지 않기</button>
                     <button onclick="closeNoticePopup(7)" style="background:#e2e8f0; color:#475569; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🕖 7일간 보지 않기</button>
                     <button onclick="closeNoticePopup('forever')" style="background:#fee2e2; color:#ef4444; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🚫 평생 보지 않기</button>
                 </div>
@@ -649,7 +649,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.5</span>
+                <span class="brand-version">V7.6</span>
             </div>
             
             <div class="stat-section">
@@ -865,7 +865,7 @@
                     <span class="desc-text">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
                     
                     <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
-                        <select id="fTier">
+                        <select id="fTier" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
                             <option value="">계층 선택 (필수)</option>
                             <option value="기초생활수급자">기초생활수급자</option><option value="한부모가족">한부모가족</option>
                             <option value="법적차상위">법적차상위</option><option value="중위소득90%이하">중위소득90%이하</option>
@@ -1290,7 +1290,7 @@
             isRefundViewOn = !isRefundViewOn;
             renderGrid();
         };
-        let isPrivacyOn = false;
+        
         let isDarkMode = localStorage.getItem('edusync_darkmode') === 'true';
         let viewMode = 'summary'; 
         let maxQuarter = 4; 
@@ -2031,15 +2031,7 @@
        
         const toNum = v => Number(v) || 0;
         const formatMoney = v => v.toLocaleString() + '원';
-        const maskName = name => name; // ✨ 보안 모드 완전 삭제: 항상 원본 이름 그대로 표시
-
-
-
-
-
-
-
-
+        
 
 
 
@@ -2629,7 +2621,7 @@
                             ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
                             <td style="${br}">
                                <span class="student-id">${row.r.grade}-${row.r.classNum}-${row.r.studentNum}</span><br>
-                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${maskName(row.r.name)}</a>
+                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                                 ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                             </td>
                             <td style="${br}">${badge}</td>
@@ -2804,7 +2796,7 @@
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
                                    <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${maskName(r.name)}</a>
+                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                     ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
@@ -3003,7 +2995,7 @@
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
                                   <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${maskName(r.name)}</a>
+                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                     ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
@@ -3231,17 +3223,20 @@
             document.getElementById('tierGroup').style.display = document.getElementById('fFree').checked ? 'block' : 'none';
         }
 
-        function checkFundLogic(event) {
-            let grade = toNum(document.getElementById('fGrade').value);
-            let g3Box = document.getElementById('fG3');
-            let desc = document.getElementById('g3Desc');
-            
-            if(grade > 0 && grade !== 3) {
-                g3Box.checked = false;
-                g3Box.disabled = true;
-                desc.style.color = "#ef4444";
-                desc.innerText = "※ 3학년이 아니므로 초3지원금을 선택할 수 없습니다.";
-            } else {
+       function checkFundLogic(event) {
+    let grade = toNum(document.getElementById('fGrade').value);
+    let g3Box = document.getElementById('fG3');
+    let fFreeBox = document.getElementById('fFree');
+    let desc = document.getElementById('g3Desc');
+    
+    if(grade > 0 && grade !== 3) {
+        g3Box.checked = false;
+        g3Box.disabled = true;
+        desc.style.color = "#ef4444";
+        desc.innerText = "※ 3학년이 아니므로 초3지원금을 선택할 수 없습니다.";
+        
+        if(fFreeBox) { fFreeBox.checked = true; toggleTier(); }
+    } else {
                 g3Box.disabled = false;
                 desc.style.color = "var(--sidebar-accent)";
                 desc.innerText = "연 50만원 (3학년 전용). 상반기/하반기 각 25만원 한도 분할";
@@ -3361,9 +3356,9 @@ function openPanel(mode, id = null) {
             let classNum = toNum(document.getElementById('fClass').value);
             let studentNum = toNum(document.getElementById('fNum').value);
             
-            if(db.some(x => x.id !== id && x.grade === grade && x.classNum === classNum && x.studentNum === studentNum)) {
-                alert(`이미 존재하는 학번입니다. (${grade}학년 ${classNum}반 ${studentNum}번) 학번 중복으로 저장 차단되었습니다.`);
-                return;
+            let dupSpecial = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+            if (dupSpecial) {
+                alert(`⚠️ 특수학급 명단과 학번이 겹칩니다!\n(${grade}학년 ${classNum}반 ${studentNum}번 - 특수학급 등록명: ${dupSpecial.name})\n\n확인 후 저장은 계속 진행됩니다.`);
             }
 
             let hasG3 = document.getElementById('fG3').checked;
@@ -3496,7 +3491,7 @@ function openPanel(mode, id = null) {
             
             let c = calcStudent(r);
             
-            document.getElementById('detailTitle').innerText = `[${r.grade}학년 ${r.classNum}반 ${maskName(r.name)}] 학생 상세 수강 내역`;
+            document.getElementById('detailTitle').innerText = `[${r.grade}학년 ${r.classNum}반 ${r.name}] 학생 상세 수강 내역`;
             document.getElementById('detailHeaderAction').innerHTML = `<button class="btn-tool no-print" style="background: #f8fafc; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 8px 18px; font-size: 14px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'" onclick="closeModal('detail'); openPanel('edit','${r.id}')">✏️ 전체 데이터 개별 수정창</button>`;
             
             let html = ``;
@@ -4501,9 +4496,10 @@ function openPanel(mode, id = null) {
                     
                     if(r === 0) {
                         let g3Formula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"O","X"))` };
+                        let freeFormula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"","O"))` };
                         if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, 'O', '기초생활수급자'];
                         else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, 'X', ''];
-                        else rowData = ['', '', '', '', g3Formula, '', ''];
+                        else rowData = ['', '', '', '', g3Formula, freeFormula, ''];
                     } else {
                         rowData = ['', '', '', '', '', '', ''];
                     }
@@ -4739,8 +4735,9 @@ function openPanel(mode, id = null) {
 
             let newCount = 0;
             let mergeCount = 0; 
-            let blockMsgs = []; 
+             let blockMsgs = []; 
             let intraDups = []; 
+            let specialDups = [];
             let isSubUpdated = false;
             
             let headerVal8_1 = ws.getCell('H1').value ? String(ws.getCell('H1').value) : '';
@@ -4768,6 +4765,12 @@ function openPanel(mode, id = null) {
 
             function processCurrentStudent() {
                 if(!currentStudent) return;
+                
+                let spHit = specialList.find(s => s.grade === currentStudent.grade && s.classNum === currentStudent.classNum && s.studentNum === currentStudent.studentNum);
+                if (spHit) {
+                    let dupMsg = `${currentStudent.grade}학년 ${currentStudent.classNum}반 ${currentStudent.studentNum}번 ${currentStudent.name} (특수학급 등록명: ${spHit.name})`;
+                    if (!specialDups.includes(dupMsg)) specialDups.push(dupMsg);
+                }
                 
                 if (currentIsMerge && currentExStudent) {
                     let mergedAny = false;
@@ -4949,9 +4952,15 @@ function openPanel(mode, id = null) {
                         }
                     }
                 } else {
-                    let grade = toNum(v(1)), classNum = toNum(v(2)), studentNum = toNum(v(3));
+                   let grade = toNum(v(1)), classNum = toNum(v(2)), studentNum = toNum(v(3));
                     let studentName = String(v(4)).trim();
                     if(!grade || !studentName) return; 
+
+                    let spHitH = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+                    if (spHitH) {
+                        let dupMsgH = `${grade}학년 ${classNum}반 ${studentNum}번 ${studentName} (특수학급 등록명: ${spHitH.name})`;
+                        if (!specialDups.includes(dupMsgH)) specialDups.push(dupMsgH);
+                    }
 
                     let key = `${grade}-${classNum}-${studentNum}`;
                     if(processedKeys.has(key)) {
@@ -5072,6 +5081,10 @@ function openPanel(mode, id = null) {
             if(blockMsgs.length > 0) {
                 msg += `\n\n[기타 알림]\n`;
                 msg += blockMsgs.map(s => `- ${s}`).join('\n');
+            }
+            if(specialDups.length > 0) {
+                msg += `\n\n[⚠️ 특수학급 명단 중복 알림]\n`;
+                msg += specialDups.map(s => `- ${s}`).join('\n');
             }
             
             alert(msg);
@@ -5981,14 +5994,17 @@ function openPanel(mode, id = null) {
                     });
                     selectedSnaps.sort((a,b) => new Date(a.date) - new Date(b.date)); 
                     
-                    // ✨ [핵심 해결 로직] 과거 스냅샷에는 없지만 현재 프로그램(라이브)에는 존재하는 
-                    // 신규 학생이나 최신 금액 변동분을 잡기 위해, '현재 최신 데이터'를 마지막 차수로 강제 편입!
-                    let todayStr = new Date().toISOString().split('T')[0];
-                    selectedSnaps.push({
-                        date: todayStr,
-                        memo: '현재 최신 데이터',
-                        data: { db: db } // 현재 라이브 DB를 그대로 전달
-                    });
+                    // ✨ 마지막으로 선택한 과거 기록과 현재 라이브 데이터가 실제로 다를 때만 '현재 최신 데이터' 차수를 추가!
+                    let lastSnap = selectedSnaps[selectedSnaps.length - 1];
+                    let isDifferentFromLast = !lastSnap || JSON.stringify(lastSnap.data.db) !== JSON.stringify(db);
+                    if (isDifferentFromLast) {
+                        let todayStr = new Date().toISOString().split('T')[0];
+                        selectedSnaps.push({
+                            date: todayStr,
+                            memo: '현재 최신 데이터',
+                            data: { db: db } // 현재 라이브 DB를 그대로 전달
+                        });
+                    }
                 }
 
                 let startRow = 10;
