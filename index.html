@@ -728,6 +728,9 @@
         <div style="color: #ffffff; font-size: 14px; font-weight: bold; text-align: center; margin-top: 20px; text-shadow: 0px 1px 2px rgba(0,0,0,0.5); letter-spacing: 0.5px; opacity: 0.9;">
             제작자: 갈월초 늘봄행정실무사
         </div>
+       <div style="text-align:center; margin-top:12px;">
+            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" style="background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 18px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
+        </div>
     </aside>
 
     <main class="main-content">
@@ -3355,14 +3358,22 @@ function openPanel(mode, id = null) {
             let grade = toNum(document.getElementById('fGrade').value);
             let classNum = toNum(document.getElementById('fClass').value);
             let studentNum = toNum(document.getElementById('fNum').value);
-            
-            let dupSpecial = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
-            if (dupSpecial) {
-                alert(`⚠️ 특수학급 명단과 학번이 겹칩니다!\n(${grade}학년 ${classNum}반 ${studentNum}번 - 특수학급 등록명: ${dupSpecial.name})\n\n확인 후 저장은 계속 진행됩니다.`);
+            if(db.some(x => x.id !== id && x.grade === grade && x.classNum === classNum && x.studentNum === studentNum)) {
+                alert(`이미 존재하는 학번입니다. (${grade}학년 ${classNum}반 ${studentNum}번) 학번 중복으로 저장 차단되었습니다.`);
+                return;
             }
-
-            let hasG3 = document.getElementById('fG3').checked;
+            
+			
+			let hasG3 = document.getElementById('fG3').checked;
             let hasFree = document.getElementById('fFree').checked;
+
+            // ✨ 자유수강권에 체크된 경우에만 특수학급 중복 검사
+            if (hasFree) {
+                let dupSpecial = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+                if (dupSpecial) {
+                    alert(`⚠️ 자유수강권 중복 지원 불가!\n방금 입력하신 학번은 '특수학급 명단'에 있는 학생입니다.\n(특수학급 등록명: ${dupSpecial.name})\n\n※ 확인 후 저장은 계속 진행됩니다.`);
+                }
+            }
             let freeTier = document.getElementById('fTier').value;
 
             if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
@@ -4766,8 +4777,9 @@ function openPanel(mode, id = null) {
             function processCurrentStudent() {
                 if(!currentStudent) return;
                 
+                // ✨ 자유수강권(currentStudent.hasFree)이 O인 경우에만 특수학급 중복 카운트
                 let spHit = specialList.find(s => s.grade === currentStudent.grade && s.classNum === currentStudent.classNum && s.studentNum === currentStudent.studentNum);
-                if (spHit) {
+                if (spHit && currentStudent.hasFree) {
                     let dupMsg = `${currentStudent.grade}학년 ${currentStudent.classNum}반 ${currentStudent.studentNum}번 ${currentStudent.name} (특수학급 등록명: ${spHit.name})`;
                     if (!specialDups.includes(dupMsg)) specialDups.push(dupMsg);
                 }
@@ -4951,119 +4963,20 @@ function openPanel(mode, id = null) {
                             }
                         }
                     }
-                } else {
-                   let grade = toNum(v(1)), classNum = toNum(v(2)), studentNum = toNum(v(3));
-                    let studentName = String(v(4)).trim();
-                    if(!grade || !studentName) return; 
-
-                    let spHitH = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
-                    if (spHitH) {
-                        let dupMsgH = `${grade}학년 ${classNum}반 ${studentNum}번 ${studentName} (특수학급 등록명: ${spHitH.name})`;
-                        if (!specialDups.includes(dupMsgH)) specialDups.push(dupMsgH);
+					
+					
+					} else {
+                    // ✨ 구버전(가로형) 엑셀 양식 지원 종료 차단 및 알림
+                    if (rowNumber === 2) {
+                        alert("⚠️ [알림] 구버전(가로형) 엑셀 양식이 감지되었습니다.\n\n현재 버전부터는 가로형 양식 업로드를 지원하지 않습니다. 우측 메뉴의 [입력 엑셀 다운로드] 버튼을 눌러 최신 세로형 빈 양식을 사용해 주세요.");
                     }
-
-                    let key = `${grade}-${classNum}-${studentNum}`;
-                    if(processedKeys.has(key)) {
-                        intraDups.push(`${grade}학년 ${classNum}반 ${studentNum}번 ${studentName} '학번 중복으로 업로드 되지 않았습니다.'`);
-                        return; 
-                    }
-                    processedKeys.add(key);
-
-                    let ex = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
-
-                    if(ex) { 
-                        let col = 8;
-                        let mergedAny = false;
-                        for(let q=1; q<=maxQuarter; q++) { // ✨ maxQuarter 연동
-                            for(let subIdx=1; subIdx<=6; subIdx++) {
-                                let name=String(v(col)).trim();
-                                let g=toNum(v(col+1)), s=toNum(v(col+2));
-                                let su=toNum(v(col+3));
-                                if(g > 0 || s > 0) su = g + s; 
-                                let gy=toNum(v(col+4)), j=toNum(v(col+5));
-                                if(name) {
-                                    let exists = ex[`q${q}`].subs.some(sub => sub.name === name);
-                                    if(!exists) {
-                                        let emptyIdx = ex[`q${q}`].subs.findIndex(slot => !slot.name || slot.name.trim() === '');
-                                        if(emptyIdx !== -1) {
-                                            ex[`q${q}`].subs[emptyIdx] = { name, g, s, su, gy, j, isNew: uploadTime, rG:0, rS:0, rSu:0, rGy:0, rJ:0 };
-                                            ex[`q${q}`].g += g; ex[`q${q}`].s += s; ex[`q${q}`].su += su; ex[`q${q}`].gy += gy; ex[`q${q}`].j += j;
-                                            mergedAny = true;
-                                            if(!savedSubjects.some(subObj => subObj.name === name)) {
-                                                savedSubjects.push({ name: name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
-                                                isSubUpdated = true;
-                                            }
-                                        } else {
-                                            let msg = `${grade}학년 ${classNum}반 ${studentNum}번 과목 6개 초과로 일부 누락`;
-                                            if(!blockMsgs.includes(msg)) blockMsgs.push(msg);
-                                        }
-                                    }
-                                }
-                                col += 6;
-                            }
-                        }
-                        if(mergedAny) mergeCount++;
-                        return;
-                    }
-
-                    let rec = {
-                        id: Date.now() + Math.random().toString(36).substr(2, 5) + rowNumber,
-                        grade, classNum, studentNum, name: studentName,
-                        hasG3: (v(5)==='O' || v(5)==='o'), hasFree: (v(6)==='O' || v(6)==='o'), freeTier: String(v(7)).trim(),
-                        memo: ''
-                    };
-
-                    let col = 8;
-                    for(let q=1; q<=6; q++) { // ✨ 무조건 6분기 뼈대 생성
-                        let subs = [];
-                        let sumG=0, sumS=0, sumSu=0, sumGy=0, sumJ=0;
-                        if(q <= maxQuarter) {
-                            for(let subIdx=1; subIdx<=6; subIdx++) {
-                                let name=String(v(col)).trim();
-                                let g=toNum(v(col+1)), s=toNum(v(col+2));
-                                let su=toNum(v(col+3));
-                                if(g > 0 || s > 0) su = g + s; 
-                                let gy=toNum(v(col+4)), j=toNum(v(col+5));
-                                
-                                if (name) {
-                                    subs.push({ name, g, s, su, gy, j, isNew: uploadTime, rG:0, rS:0, rSu:0, rGy:0, rJ:0 });
-                                    sumG+=g; sumS+=s; sumSu+=su; sumGy+=gy; sumJ+=j;
-                                } else {
-                                    subs.push({ name:'', g:0, s:0, su:0, gy:0, j:0, rG:0, rS:0, rSu:0, rGy:0, rJ:0 });
-                                }
-                                col += 6;
-
-                                if(name && !savedSubjects.some(subObj => subObj.name === name)) {
-                                    savedSubjects.push({ name: name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
-                                    isSubUpdated = true;
-                                }
-                            }
-                        } else {
-                            for(let subIdx=1; subIdx<=6; subIdx++) subs.push({ name:'', g:0, s:0, su:0, gy:0, j:0, rG:0, rS:0, rSu:0, rGy:0, rJ:0 });
-                        }
-                        rec[`q${q}`] = { subs, g:sumG, s:sumS, su:sumSu, gy:sumGy, j:sumJ };
-                    }
-                    db.push(rec); newCount++;
+                    return; // 더 이상 읽지 않고 중단
                 }
-            });
+			});
 
             if(isVerticalFormat) processCurrentStudent();
 			
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-
             if(isSubUpdated) {
                 persistSubjects();
                 renderSubjectList();
@@ -6314,15 +6227,28 @@ function openPanel(mode, id = null) {
         }
 
         // 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
-        checkNoticePopup();
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-		
+       checkNoticePopup();
     </script>
+
+
+          <div id="donatePopup" style="display:none; position:fixed; bottom:80px; left:30px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; width:210px; box-shadow:0 8px 20px rgba(0,0,0,0.18); z-index:9999;">
+        <div style="font-size:13px; color:#334155; font-weight:600; line-height:1.6; margin-bottom:10px;">
+            프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️
+        </div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
+        <a href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="text-decoration:none;">
+            <button style="background:#fee500; color:#3c1e1e; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; width:100%; font-size:13px;">카카오페이로 후원하기</button>
+        </a>
+        <div style="position:absolute; bottom:-8px; left:24px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:8px solid #fffbeb;"></div>
+    </div>
+
+    <script>
+        function toggleDonatePopup() {
+            let p = document.getElementById('donatePopup');
+            p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+        }
+    </script>
+
+   
 </body>
 </html>
