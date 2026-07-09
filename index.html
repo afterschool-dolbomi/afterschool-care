@@ -273,10 +273,11 @@
         body.dark-mode .st-over { background: #7f1d1d; color: #fca5a5; }
         body.dark-mode .st-done { background: #713f12; color: #fde047; }
         
-        body.dark-mode .refund-input { background: #374151 !important; border-color: #4b5563 !important; color: #fca5a5 !important;}
-        body.dark-mode .refund-input:focus { border-color: #f87171 !important; box-shadow: 0 0 0 2px rgba(248,113,113,0.2) !important;}
-        body.dark-mode .apply-input { background: #374151 !important; border-color: #4b5563 !important; color: #e5e7eb !important; }
-        body.dark-mode .apply-input:focus { border-color: #60a5fa !important; box-shadow: 0 0 0 2px rgba(96,165,250,0.2) !important; }
+        /* ✨ 다크모드: 수강료(파란 테두리), 환불(빨간 테두리) 눈에 띄게 강조 */
+        body.dark-mode .refund-input { background: #111827 !important; border: 1px solid #f87171 !important; color: #fca5a5 !important; }
+        body.dark-mode .refund-input:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,0.4) !important; }
+        body.dark-mode .apply-input { background: #111827 !important; border: 1px solid #60a5fa !important; color: #ffffff !important; font-weight: bold; }
+        body.dark-mode .apply-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 2px rgba(59,130,246,0.4) !important; }
 
         body.dark-mode .subject-item { background: #1f2937; border-color: #374151; }
         body.dark-mode .subject-item:hover { background: #374151; }
@@ -446,7 +447,20 @@
         .alloc-input { width:65px; text-align:right; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:11px; font-weight:bold; background:white; }
         .alloc-input::placeholder { color: inherit; opacity: 0.65; font-weight: normal; }
         .alloc-input:focus { border-color:var(--sidebar-accent); box-shadow:0 0 0 2px rgba(59,130,246,0.2); outline:none; }
-        body.dark-mode .alloc-input { background: #1f2937; border-color: #4b5563; }
+       /* ✨ 다크모드: 하단 영수증 수기입력칸 항목별 맞춤 색상 테두리 적용 */
+        body.dark-mode .alloc-input { background: #111827 !important; color: #ffffff !important; }
+        
+        /* 1. 초3지원금 영역 (하늘색 테두리) */
+        body.dark-mode .alloc-input[onchange*="mG3"] { border: 1px solid #38bdf8 !important; }
+        body.dark-mode .alloc-input[onchange*="mG3"]:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 2px rgba(14,165,233,0.4) !important; }
+        
+        /* 2. 자유수강권 영역 (보라색 테두리) */
+        body.dark-mode .alloc-input[onchange*="mFree"] { border: 1px solid #a78bfa !important; }
+        body.dark-mode .alloc-input[onchange*="mFree"]:focus { border-color: #8b5cf6 !important; box-shadow: 0 0 0 2px rgba(139,92,246,0.4) !important; }
+        
+        /* 3. 수익자 부담금 영역 (빨간색 테두리) */
+        body.dark-mode .alloc-input[onchange*="mSuik"] { border: 1px solid #f87171 !important; }
+        body.dark-mode .alloc-input[onchange*="mSuik"]:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,0.4) !important; }
 		
 		
 		
