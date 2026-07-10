@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.7</title>
+    <title>방과후 지원금 돌보미 V7.8</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -663,7 +663,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.7</span>
+                <span class="brand-version">V7.8</span>
             </div>
             
             <div class="stat-section">
@@ -1337,11 +1337,12 @@
                 savedSubjects = baseList.map(name => {
                     return (typeof name === 'string') ? {
                         name: name,
-                        fees: { 1:{su:0, gy:0, j:0}, 2:{su:0, gy:0, j:0}, 3:{su:0, gy:0, j:0}, 4:{su:0, gy:0, j:0} }
+                        fees: { 1:{su:0, gy:0, j:0}, 2:{su:0, gy:0, j:0}, 3:{su:0, gy:0, j:0}, 4:{su:0, gy:0, j:0}, 5:{su:0, gy:0, j:0}, 6:{su:0, gy:0, j:0} }
                     } : name;
                 });
                 persistSubjects();
             }
+            savedSubjects.forEach(ensureSubjectFees); // ✨ 구버전 데이터(1~4분기 단가만 있던 과목)에 5,6분기 단가 자동 보정
             renderSubjectList();
              
             const storedNeis = localStorage.getItem('edusync_neis_list');
@@ -1448,7 +1449,7 @@
 
         function validateAndFixCalculations() {
             db.forEach(student => {
-                for(let q=1; q<=4; q++) {
+                for(let q=1; q<=6; q++) { // ✨ 4에서 6으로 수정: 4분기제에서도 보존된 5,6분기 데이터의 합계를 정상적으로 검증/보정
                     let qKey = `q${q}`;
                     if(student[qKey] && student[qKey].subs) {
                         let sumG = 0, sumS = 0, sumSu = 0, sumGy = 0, sumJ = 0;
@@ -1793,8 +1794,18 @@
             document.getElementById('subjectBody').innerHTML = html;
         }
 
+        // ✨ 과목 단가(fees) 객체에 1~6분기 키가 항상 존재하도록 보정 (구버전 데이터/4분기 전용 데이터 호환)
+        function ensureSubjectFees(sub) {
+            if(!sub.fees) sub.fees = {};
+            for(let q=1; q<=6; q++) {
+                if(!sub.fees[q]) sub.fees[q] = {su:0, gy:0, j:0};
+            }
+            return sub;
+        }
+
         function editSubjectForm(idx) {
-            let sub = idx === -1 ? {name:'', fees:{1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0}}} : savedSubjects[idx];
+            let sub = idx === -1 ? {name:'', fees:{}} : savedSubjects[idx];
+            ensureSubjectFees(sub);
             
             let html = `
                 <div style="background:white; padding:16px; border-radius:8px; margin-bottom:16px; border:2px solid var(--sidebar-accent);">
@@ -1808,7 +1819,7 @@
                             <label style="font-size:12px; font-weight:bold; margin-right:8px;">과목명:</label>
                             <input type="text" id="es_name" value="${sub.name}" style="padding:6px 12px; border:1px solid #ccc; border-radius:4px; width:200px;">
                         </div>
-                        <button type="button" class="btn-tool" style="font-size:11px; padding:6px 10px; background:#e0f2fe; color:var(--sidebar-accent); border:1px solid #bae6fd; font-weight:bold;" onclick="copyQ1Fees()">⬇️ 1분기 금액 동일 적용 (2~4분기)</button>
+                        <button type="button" class="btn-tool" style="font-size:11px; padding:6px 10px; background:#e0f2fe; color:var(--sidebar-accent); border:1px solid #bae6fd; font-weight:bold;" onclick="copyQ1Fees()">⬇️ 1분기 금액 동일 적용 (2~${maxQuarter}분기)</button>
                     </div>
 
                     <table class="detail-inner-table" style="background:#f9fafb;">
@@ -1817,7 +1828,7 @@
                         </thead>
                         <tbody>
             `;
-            for(let q=1; q<=4; q++) {
+            for(let q=1; q<=maxQuarter; q++) {
                 html += `
                     <tr>
                         <td style="text-align:center; font-weight:bold;">${q}분기</td>
@@ -1830,6 +1841,7 @@
             html += `
                         </tbody>
                     </table>
+                    ${maxQuarter === 4 ? `<div style="font-size:11px; color:#9ca3af; margin-top:8px;">※ 현재 4분기제로 설정되어 있어 1~4분기 단가만 표시됩니다. (5,6분기 단가는 6분기제로 전환 시 다시 나타나며, 값이 있다면 보존됩니다.)</div>` : ''}
                     <div style="margin-top:16px; text-align:right;">
                         <button class="btn-save" style="height:32px; padding:0 16px; border:none; border-radius:4px; cursor:pointer;" onclick="saveSubjectForm()">저장</button>
                         <button class="btn-tool" style="height:32px; padding:0 16px; margin-left:8px;" onclick="renderSubjectManagerList()">취소</button>
@@ -1844,7 +1856,7 @@
             let su1 = document.getElementById('es_q1_su').value;
             let gy1 = document.getElementById('es_q1_gy').value;
             let j1 = document.getElementById('es_q1_j').value;
-            for(let q=2; q<=4; q++) {
+            for(let q=2; q<=maxQuarter; q++) {
                 document.getElementById(`es_q${q}_su`).value = su1;
                 document.getElementById(`es_q${q}_gy`).value = gy1;
                 document.getElementById(`es_q${q}_j`).value = j1;
@@ -1861,14 +1873,17 @@
                 return alert("이미 존재하는 과목명입니다.");
             }
 
-            let fees = {};
-            for(let q=1; q<=4; q++) {
+            // ✨ 화면에 보이지 않는 분기(예: 4분기제일 때의 5,6분기) 단가는 기존 값을 그대로 보존한 뒤,
+            //    화면에 보이는 1~maxQuarter 분기만 새 입력값으로 덮어씁니다.
+            let fees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : {};
+            for(let q=1; q<=maxQuarter; q++) {
                 fees[q] = {
                     su: toNum(document.getElementById(`es_q${q}_su`).value),
                     gy: toNum(document.getElementById(`es_q${q}_gy`).value),
                     j: toNum(document.getElementById(`es_q${q}_j`).value)
                 };
             }
+            for(let q=1; q<=6; q++) { if(!fees[q]) fees[q] = {su:0, gy:0, j:0}; }
 
             if(idx === -1) {
                 savedSubjects.push({ name: newName, fees });
@@ -1880,7 +1895,7 @@
                     if (confirm(`'${oldName}'을(를) 수강 중인 기존 학생들의 수강 내역 이름도 모두 '${newName}'(으)로 변경하시겠습니까?\n\n[확인] : 학생들 기록 일괄 변경\n[취소] : 학생들 기록은 두고 목록 이름만 변경`)) {
                         let updatedCount = 0;
                         db.forEach(r => {
-                            for(let q=1; q<=4; q++) {
+                            for(let q=1; q<=6; q++) { // ✨ 4에서 6으로 수정: 현재 4분기제라도 보존된 5,6분기 기록의 이름까지 함께 변경
                                 if (r[`q${q}`] && r[`q${q}`].subs) {
                                     r[`q${q}`].subs.forEach(s => {
                                         if(s.name === oldName) {
@@ -3381,11 +3396,13 @@ function openPanel(mode, id = null) {
 			let hasG3 = document.getElementById('fG3').checked;
             let hasFree = document.getElementById('fFree').checked;
 
-            // ✨ 자유수강권에 체크된 경우에만 특수학급 중복 검사
+            // ✨ 자유수강권에 체크된 경우에만 특수학급 중복 검사 → 이번엔 저장 자체를 차단
             if (hasFree) {
                 let dupSpecial = specialList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
                 if (dupSpecial) {
-                    alert(`⚠️ 자유수강권 중복 지원 불가!\n방금 입력하신 학번은 '특수학급 명단'에 있는 학생입니다.\n(특수학급 등록명: ${dupSpecial.name})\n\n※ 확인 후 저장은 계속 진행됩니다.`);
+                    let studentNameChk = document.getElementById('fName').value.trim();
+                    alert(`${grade}-${classNum}-${studentNum} ${studentNameChk} 학생은 특수학급 아동과 학번이 겹쳐 명단에 추가 하지 않습니다`);
+                    return;
                 }
             }
             let freeTier = document.getElementById('fTier').value;
@@ -3629,7 +3646,7 @@ function openPanel(mode, id = null) {
                     let rows = validSubs.map((s, dummyIdx) => {
                         let sIdx = subs.indexOf(s); 
                         let stdSub = savedSubjects.find(subj => subj.name === s.name);
-                        let stdFees = stdSub ? stdSub.fees[q] : {su:0, gy:0, j:0};
+                        let stdFees = (stdSub && stdSub.fees && stdSub.fees[q]) ? stdSub.fees[q] : {su:0, gy:0, j:0}; // ✨ 방어 코드: 5,6분기 단가가 없어도 오류 대신 0원으로 처리
                         
                         if (toNum(s.g) > 0 || toNum(s.s) > 0) s.su = toNum(s.g) + toNum(s.s);
 
@@ -4791,11 +4808,12 @@ function openPanel(mode, id = null) {
             function processCurrentStudent() {
                 if(!currentStudent) return;
                 
-                // ✨ 자유수강권(currentStudent.hasFree)이 O인 경우에만 특수학급 중복 카운트
+                // ✨ 자유수강권(currentStudent.hasFree)이 O이면서 특수학급과 겹치면 → 추가 자체를 차단
                 let spHit = specialList.find(s => s.grade === currentStudent.grade && s.classNum === currentStudent.classNum && s.studentNum === currentStudent.studentNum);
                 if (spHit && currentStudent.hasFree) {
-                    let dupMsg = `${currentStudent.grade}학년 ${currentStudent.classNum}반 ${currentStudent.studentNum}번 ${currentStudent.name} (특수학급 등록명: ${spHit.name})`;
+                    let dupMsg = `${currentStudent.grade}-${currentStudent.classNum}-${currentStudent.studentNum} ${currentStudent.name} 학생은 특수학급 아동과 학번이 겹쳐 명단에 추가 하지 않습니다`;
                     if (!specialDups.includes(dupMsg)) specialDups.push(dupMsg);
+                    return; // ✨ 병합/신규추가 둘 다 여기서 막음
                 }
                 
                 if (currentIsMerge && currentExStudent) {
@@ -5010,7 +5028,7 @@ function openPanel(mode, id = null) {
                 msg += blockMsgs.map(s => `- ${s}`).join('\n');
             }
             if(specialDups.length > 0) {
-                msg += `\n\n[⚠️ 특수학급 명단 중복 알림]\n`;
+               msg += `\n\n[⚠️ 특수학급 중복으로 명단 추가가 차단된 학생]\n`;
                 msg += specialDups.map(s => `- ${s}`).join('\n');
             }
             
@@ -5673,6 +5691,7 @@ function openPanel(mode, id = null) {
 
             db = JSON.parse(JSON.stringify(snap.data.db || []));
             savedSubjects = JSON.parse(JSON.stringify(snap.data.savedSubjects || []));
+            savedSubjects.forEach(ensureSubjectFees); // ✨ 과거 스냅샷에 5,6분기 단가가 없을 경우 보정(오류 방지)
             neisList = JSON.parse(JSON.stringify(snap.data.neisList || []));
             specialList = JSON.parse(JSON.stringify(snap.data.specialList || []));
             maxQuarter = snap.data.maxQuarter || 4;
@@ -5705,6 +5724,7 @@ function openPanel(mode, id = null) {
                 let liveData = JSON.parse(backupStr);
                 db = liveData.db || [];
                 savedSubjects = liveData.savedSubjects || [];
+                savedSubjects.forEach(ensureSubjectFees); // ✨ 최신 상태 복귀 시에도 동일하게 보정
                 neisList = liveData.neisList || [];
                 specialList = liveData.specialList || [];
                 maxQuarter = liveData.maxQuarter || 4;
