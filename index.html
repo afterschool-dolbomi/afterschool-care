@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.8</title>
+    <title>방과후 지원금 돌보미 V7.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -663,7 +663,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.8</span>
+                <span class="brand-version">V7.9</span>
             </div>
             
             <div class="stat-section">
@@ -726,8 +726,7 @@
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 입력 엑셀 다운로드</button>
                 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn-3d btn-side" style="flex: 1; background:#0ea5e9; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항</button>
-                    <button class="btn-3d btn-side" style="flex: 1; background:#8b5cf6; color:white; border:none; font-size: 11px; padding: 10px 4px;" onclick="startTutorial()">💡 튜토리얼 보기</button>
+                   <button class="btn-3d btn-side" style="width: 100%; background:#0ea5e9; color:white; border:none; font-size: 13px; font-weight: bold; padding: 10px 4px; margin-top: 8px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항 & 🖥️실습 유튜브 영상️</button>
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
@@ -742,8 +741,10 @@
         <div style="color: #ffffff; font-size: 14px; font-weight: bold; text-align: center; margin-top: 20px; text-shadow: 0px 1px 2px rgba(0,0,0,0.5); letter-spacing: 0.5px; opacity: 0.9;">
             제작자: 갈월초 늘봄행정실무사
         </div>
-       <div style="text-align:center; margin-top:12px;">
-            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" style="background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 18px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
+       <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
+            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
+            
+            <button class="btn-3d btn-side" onclick="startTutorial()" style="flex: 1; background:#8b5cf6; color:white; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">💡 튜토리얼</button>
         </div>
     </aside>
 
@@ -1085,9 +1086,9 @@
             </div>
              <div style="display:flex; gap:6px; margin-bottom: 16px; background:#fffbeb; padding:12px; border-radius:6px; border:1px solid #fde68a; align-items:center;">
                 <input type="hidden" id="sp_edit_idx" value="-1">
-                <input type="number" id="sp_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <input type="number" id="sp_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <input type="number" id="sp_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="text" id="sp_name" placeholder="이름" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <button id="btn_sp_save" class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:6px 14px; font-weight:bold;" onclick="saveSpecialStudent()">추가</button>
                 <button id="btn_sp_cancel" class="btn-tool" style="display:none; background:white; color:#f59e0b; border:1px solid #f59e0b; border-radius:4px; padding:6px 10px; font-weight:bold;" onclick="cancelEditSpecial()">취소</button>
@@ -3766,7 +3767,7 @@ function openPanel(mode, id = null) {
                             </div>
                         </div>
                         
-                        <div style="overflow-x: auto;">
+                         <div style="overflow-x: auto;" id="receiptScrollWrap_${q}">
                             <table class="detail-inner-table" style="min-width:1400px; text-align:center;">
                                 <thead>
                                  
@@ -3938,8 +3939,17 @@ function openPanel(mode, id = null) {
             let s = r[`q${q}`].subs[sIdx];
             let numVal = val.toString().replace(/,/g, ''); // ✨ 콤마 제거 후 숫자로 변환
             s[field] = numVal === '' ? undefined : toNum(numVal); // 지우면 다시 자동 계산(undefined)으로 복귀c
+            
+            let scrollWrap3 = document.getElementById('receiptScrollWrap_' + q);
+            let scrollPos3 = scrollWrap3 ? scrollWrap3.scrollLeft : 0;
+            
             persistData();
             showDetailModal(id);
+            
+            setTimeout(() => {
+                let newWrap3 = document.getElementById('receiptScrollWrap_' + q);
+                if(newWrap3) newWrap3.scrollLeft = scrollPos3;
+            }, 10);
             renderGrid();
         };
 
@@ -3956,10 +3966,13 @@ function openPanel(mode, id = null) {
             let numVal = val.toString().replace(/,/g, ''); // ✨ 콤마 제거
             s[field] = numVal === '' ? 0 : toNum(numVal);
             
-            // 수강료 = 강사료 + 수용비 공식 상시 유지
+// 수강료 = 강사료 + 수용비 공식 상시 유지
             if (field === 'g' || field === 's') {
                 s.su = toNum(s.g) + toNum(s.s);
             }
+            
+            let scrollWrap1 = document.getElementById('receiptScrollWrap_' + q);
+            let scrollPos1 = scrollWrap1 ? scrollWrap1.scrollLeft : 0;
             
             persistData();
             showDetailModal(id);
@@ -3971,6 +3984,8 @@ function openPanel(mode, id = null) {
                     let len = el.value.length;
                     if(el.setSelectionRange) el.setSelectionRange(len, len);
                 }
+                let newWrap1 = document.getElementById('receiptScrollWrap_' + q);
+                if(newWrap1) newWrap1.scrollLeft = scrollPos1;
             }, 10);
             renderGrid();
         };
@@ -3986,6 +4001,9 @@ function openPanel(mode, id = null) {
                 s.rSu = toNum(s.rG) + toNum(s.rS);
             }
             
+            let scrollWrap2 = document.getElementById('receiptScrollWrap_' + q);
+            let scrollPos2 = scrollWrap2 ? scrollWrap2.scrollLeft : 0;
+            
             persistData();
             showDetailModal(id);
             setTimeout(() => {
@@ -3995,6 +4013,8 @@ function openPanel(mode, id = null) {
                     let len = el.value.length;
                     if(el.setSelectionRange) el.setSelectionRange(len, len);
                 }
+                let newWrap2 = document.getElementById('receiptScrollWrap_' + q);
+                if(newWrap2) newWrap2.scrollLeft = scrollPos2;
             }, 10);
             renderGrid();
         }
@@ -4479,18 +4499,23 @@ function openPanel(mode, id = null) {
             ws.views = [{ state: 'frozen', xSplit: 7, ySplit: 2 }];
             
             let cols = [
-                { header: '학년', key: 'gr', width: 8 }, { header: '반', key: 'cl', width: 8 }, { header: '번호', key: 'nu', width: 8 }, { header: '이름', key: 'na', width: 15 },
-                { header: '초3지원금(O/X)', key: 'g3', width: 16 }, { header: '자유수강권(O/X)', key: 'fr', width: 16 }, { header: '자유수강 계층', key: 'ti', width: 18 }
+                { header: '학년', key: 'gr', width: 8, style:{ protection:{locked:false} } }, 
+                { header: '반', key: 'cl', width: 8, style:{ protection:{locked:false} } }, 
+                { header: '번호', key: 'nu', width: 8, style:{ protection:{locked:false} } }, 
+                { header: '이름', key: 'na', width: 15, style:{ protection:{locked:false} } },
+                { header: '초3지원금(O/X)', key: 'g3', width: 16, style:{ protection:{locked:true} } }, 
+                { header: '자유수강권(O/X)', key: 'fr', width: 16, style:{ protection:{locked:false} } }, 
+                { header: '자유수강 계층', key: 'ti', width: 18, style:{ protection:{locked:false} } }
             ];
 
             for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 동적 변경
                 cols = cols.concat([
-                    { header: `${q}분기_과목`, width: 15 }, 
-                    { header: `${q}분기_강사료`, width: 12, style: { numFmt: '#,##0' } }, 
-                    { header: `${q}분기_수용비`, width: 12, style: { numFmt: '#,##0' } },
-                    { header: `${q}분기_수강료`, width: 12, style: { numFmt: '#,##0' } }, 
-                    { header: `${q}분기_교재비`, width: 12, style: { numFmt: '#,##0' } }, 
-                    { header: `${q}분기_재료비`, width: 12, style: { numFmt: '#,##0' } }
+                    { header: `${q}분기_과목`, width: 15, style:{ protection:{locked:false} } }, 
+                    { header: `${q}분기_강사료`, width: 12, style: { numFmt: '#,##0', protection:{locked:false} } }, 
+                    { header: `${q}분기_수용비`, width: 12, style: { numFmt: '#,##0', protection:{locked:false} } },
+                    { header: `${q}분기_수강료`, width: 12, style: { numFmt: '#,##0', protection:{locked:true} } }, 
+                    { header: `${q}분기_교재비`, width: 12, style: { numFmt: '#,##0', protection:{locked:false} } }, 
+                    { header: `${q}분기_재료비`, width: 12, style: { numFmt: '#,##0', protection:{locked:false} } }
                 ]);
             }
             ws.columns = cols;
@@ -4539,8 +4564,8 @@ function openPanel(mode, id = null) {
                     if(r === 0) {
                         let g3Formula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"O","X"))` };
                         let freeFormula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"","O"))` };
-                        if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, 'O', '기초생활수급자'];
-                        else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, 'X', ''];
+                       if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, freeFormula, '기초생활수급자'];
+                        else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, freeFormula, ''];
                         else rowData = ['', '', '', '', g3Formula, freeFormula, ''];
                     } else {
                         rowData = ['', '', '', '', '', '', ''];
@@ -4585,6 +4610,10 @@ function openPanel(mode, id = null) {
                 ws.getCell(`F${i}`).dataValidation = { type: 'list', allowBlank: true, formulae: ['"O,X"'] };
                 ws.getCell(`G${i}`).dataValidation = { type: 'list', allowBlank: true, formulae: ['"기초생활수급자,한부모가족,법적차상위,중위소득90%이하,학교장추천,난민인정자,육아기근로단축"'] };
             }
+
+            // ✨ 수식 열(초3지원금, 분기별 수강료)만 잠그고 시트 보호 — 나머지 칸은 계속 자유롭게 입력 가능
+            await ws.protect('', { selectLockedCells: true, selectUnlockedCells: true });
+
 
             const buffer = await wb.xlsx.writeBuffer();
             saveAs(new Blob([buffer]), '업로드용_세로형_빈양식.xlsx');
