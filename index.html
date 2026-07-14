@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V7.9</title>
+    <title>방과후 지원금 돌보미 V8.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
+   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -31,7 +32,11 @@
         details > summary::-webkit-details-marker { display: none; }
 
         /* --- 좌측 사이드바 --- */
-        .sidebar { width: 280px; flex-shrink: 0; background-color: var(--sidebar-bg); padding: 24px; display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 10; transition: background-color 0.3s; }
+        .sidebar { width: 280px; flex-shrink: 0; background-color: var(--sidebar-bg); padding: 24px; display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 10; transition: background-color 0.3s, width 0.3s ease, padding 0.3s ease; }
+        .sidebar.collapsed { width: 44px; padding: 16px 8px; overflow: hidden; }
+      .sidebar.collapsed > div { display: none !important; }
+        .sidebar.collapsed .sidebar-expand-tab { display: flex !important; }
+       #statusPanelWrap.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
         
         /* ✨ 브랜드 타이틀 3D 느낌 디자인 (이모티콘 제거, 밝은색상, 흰색 테두리, 스크롤 방지 사이즈 조절) */
         .brand { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap; overflow: hidden; }
@@ -81,7 +86,34 @@
         .tab-btn.active { background: var(--text-dark); color: white; }
         
         .header-tools { display: flex; gap: 8px; align-items: center; }
-        .btn-tool { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-color); background: white; cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,0.05); transition: 0.3s; color: var(--text-dark); }
+		
+		.toolbar-divider{
+    width:2px;
+    height:34px;
+    background:rgba(255,255,255,.25);
+    margin:0 12px;
+    align-self:center;
+    flex-shrink:0;
+}
+
+
+
+.toolbar-divider{
+    width:2px;
+    height:34px;
+    background:var(--border-color,#d1d5db);
+    opacity:.5;
+    margin:0 12px;
+    align-self:center;
+}
+		
+		
+		
+		
+        .btn-tool { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; box-shadow: none; transition: background 0.15s ease, color 0.15s ease; color: var(--text-dark); display: inline-flex; align-items: center; gap: 6px; }
+        .btn-tool svg { width: 15px; height: 15px; }
+        .btn-tool:hover { background: rgba(59, 130, 246, 0.1); color: var(--sidebar-accent); }
+        .btn-tool:active { background: rgba(59, 130, 246, 0.18); }
         .btn-tool:active { transform: translateY(2px); box-shadow: none; }
         
 
@@ -223,7 +255,8 @@
         body.dark-mode .total-row td[style*="var(--color-free)"] { color: #a78bfa !important; }
         body.dark-mode .total-row td[style*="#10b981"] { color: #34d399 !important; }
 		
-        body.dark-mode .btn-tool { background: #374151; color: #f9fafb; border-color: #4b5563; }
+        body.dark-mode .btn-tool { background: transparent; color: #f9fafb; border-color: transparent; }
+        body.dark-mode .btn-tool:hover { background: rgba(59, 130, 246, 0.25); color: #93c5fd; }
         body.dark-mode .btn-tool:hover { background: #4b5563; }
         body.dark-mode .tab-btn { background: #374151; color: #9ca3af; }
         body.dark-mode .tab-btn.active { background: #3b82f6; color: white; }
@@ -534,7 +567,11 @@
 		
 		
 		
-		
+	/* 필터창 열림 애니메이션 */
+#filterPanelWrap.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+
+/* 라디오 버튼 디자인 정렬 */
+#filterPanelWrap input[type="radio"] { margin-right: 8px; accent-color: var(--sidebar-accent); }
 		
 		
 		
@@ -659,80 +696,62 @@
 
     <datalist id="subjectList"></datalist>
 
-    <aside class="sidebar">
+       <aside class="sidebar">
+        <button class="sidebar-expand-tab" onclick="toggleSidebar()" title="메뉴 펼치기" style="display:none; position:absolute; top:16px; right:8px; width:26px; height:26px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; align-items:center; justify-content:center; padding:0; z-index:30;">
+            <span style="display:inline-flex; width:12px; height:10px; border:1.5px solid #d1d5db; border-radius:2px; overflow:hidden;">
+                <span style="width:4px; height:100%; background:#d1d5db; display:inline-block;"></span>
+                <span style="flex:1;"></span>
+            </span>
+        </button>
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V7.9</span>
+                <span class="brand-version">V8.0</span>
             </div>
-            
-            <div class="stat-section">
-                <div class="stat-title">실시간 종합 지표</div>
-                <div class="stat-box primary">
-                    <div class="stat-label">총 관리학생 인원</div>
-                    <div class="stat-value" id="s_totalStudents">0명</div>
-                </div>
-                <div class="stat-box primary">
-                    <div class="stat-label">순수 지원금 집행액 (초3+자유)</div>
-                    <div class="stat-value" id="s_totalSubsidy">0원</div>
-                </div>
-                <div class="stat-box" style="border-left-color: #ec4899;">
-                    <div class="stat-label">총 수강 금액 (지원+수익자)</div>
-                    <div class="stat-value" id="s_totalSpent">0원</div>
-                </div>
-            </div>
-
-            <div class="stat-section">
-                <div class="stat-title">지원금 대상자 현황</div>
-                <div class="stat-box g3"><div class="stat-label">초3지원금 대상자</div><div class="stat-value" id="s_g3Count">0명</div></div>
-                <div class="stat-box free"><div class="stat-label">자유수강권 대상자</div><div class="stat-value" id="s_freeCount">0명</div></div>
-            </div>
-
-            <div class="stat-section">
-                <div class="stat-title">지원금 상태 현황</div>
-                <div class="stat-box none"><div class="stat-label">지원금 미사용자</div><div class="stat-value" id="s_stNone" style="font-size:16px;">0명</div></div>
-                <div class="stat-box done"><div class="stat-label">지원금 소진자 (0원)</div><div class="stat-value" id="s_stDone" style="font-size:16px;">0명</div></div>
-                <div class="stat-box alert"><div class="stat-label">지원금 초과자</div><div class="stat-value" id="s_stOver" style="font-size:16px; color:#ef4444;">0명</div></div>
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-         
-			<div class="action-menu">
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+    </div>
+    
+    <div>
+        <div class="action-menu">
+          <!-- ⚙️ 분기 설정 & 메뉴 접기 버튼 통합 영역 -->
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+                <div style="flex-grow: 1; min-width:0; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
                     <label style="font-size: 11px; color: #9ca3af; font-weight: bold; margin-bottom: 6px; display: block;">⚙️ 학교 운영 방식 (분기 설정)</label>
                     <select id="quarterSetting" onchange="changeQuarterSystem()" style="width: 100%; background: #374151; color: white; border: 1px solid #4b5563; padding: 6px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;">
                         <option value="4">4분기제</option>
                         <option value="6">6분기제</option>
                     </select>
                 </div>
+                <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="메뉴 접기/펼치기" style="flex-shrink:0; width:34px; height:34px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition: 0.2s;">
+                    <span style="display:inline-flex; width:16px; height:12px; border:2px solid #d1d5db; border-radius:2px; overflow:hidden;">
+                        <span style="width:5px; height:100%; background:#d1d5db; display:inline-block;"></span>
+                        <span style="flex:1;"></span>
+                    </span>
+                </button>
+            </div>
+
+          
+						
+						
+            
+            <!-- 기존 8개의 메뉴 버튼들은 그대로 유지 (생략) -->
                 
-				<!-- ✨ 타임머신 스냅샷 버튼 -->
-                <button class="btn-3d btn-side" id="btn-snapshot-manage" style="background:#fdf4ff; color:#a21caf; border:1px solid #f5d0fe; margin-bottom:12px; box-shadow: 0 4px 6px rgba(162, 28, 175, 0.2);" onclick="openSnapshotModal()">⏳ 날짜별 과거 기록(백업) 관리</button>
-               <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')">✏️ 학생 개별 입력</button>
-                <button class="btn-3d btn-side" id="btn-subject-manage" style="background:transparent; border:1px solid var(--sidebar-accent);" onclick="openSubjectManager()">⚙️ 과목 목록 관리</button>
-                 <button class="btn-3d btn-side" id="btn-neis-manage" style="background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe;" onclick="openNeisModal()">🎓 자유수강자 명단 관리 (NEIS)</button>
-                <button class="btn-3d btn-side" id="btn-special-manage" style="background:#fff7ed; color:#b45309; border:1px solid #fed7aa;" onclick="openSpecialModal()">🏫 특수학급 명단 관리</button>
-                <button class="btn-3d btn-side" id="btn-excel-upload" onclick="document.getElementById('excelUpload').click()">📥 단체 명단 엑셀 업로드</button>
-                <button class="btn-3d btn-side" id="btn-excel-export" onclick="exportExcel()">📤 전체 명단 백업(엑셀 저장)</button>
-                <button class="btn-3d btn-side" id="btn-sample-excel" style="background:transparent; border:1px solid #4b5563;" onclick="downloadSampleExcel()">📄 입력 엑셀 다운로드</button>
-                
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                   <button class="btn-3d btn-side" style="width: 100%; background:#0ea5e9; color:white; border:none; font-size: 13px; font-weight: bold; padding: 10px 4px; margin-top: 8px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항 & 🖥️실습 유튜브 영상️</button>
+				<!-- ✨ 버튼 순서 재배치 + gap으로 간격 통일 -->
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')">✏️ 학생 개별 입력</button>
+                <button class="btn-3d btn-side" id="btn-snapshot-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSnapshotModal()">⏳ 8.날짜별 과거 기록(백업) 관리</button>
+                <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
+                <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
+                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
+                <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
+                <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
+                <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
+                <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444;" onclick="openResetModal()">🚨 1.데이터 초기화 관리</button>
+                <div style="display: flex; gap: 8px;">
+                   <button class="btn-3d btn-side" style="width: 100%; background:#0ea5e9; color:white; border:none; font-size: 13px; font-weight: bold; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항 & 🖥️실습 유튜브 영상️</button>
+                </div>
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
-                
-               <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444; margin-top:16px;" onclick="openResetModal()">🚨 데이터 초기화 관리</button>
-				
 	
 				
             </div>
@@ -745,8 +764,8 @@
             <button class="btn-3d btn-side" onclick="toggleDonatePopup()" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
             
             <button class="btn-3d btn-side" onclick="startTutorial()" style="flex: 1; background:#8b5cf6; color:white; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">💡 튜토리얼</button>
-        </div>
-    </aside>
+     </div>
+   </aside>
 
     <main class="main-content">
 	        <!-- ✨ 타임머신 과거 모드 작동 시 나타나는 강력 경고 배너 -->
@@ -756,63 +775,126 @@
             <button onclick="returnToLive()" style="background:white; color:#ef4444; border:none; padding:6px 16px; border-radius:4px; font-weight:900; font-size:13px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">🔙 최신(오늘) 상태로 돌아가기</button>
         </div>
 	
-        <header class="top-header">
-            <div class="header-row">
-                <div class="tabs">
-                   <button class="tab-btn active" onclick="switchTab('all')">전체관리</button>
-                    <button class="tab-btn" onclick="switchTab('q1')">1분기</button>
-                    <button class="tab-btn" onclick="switchTab('q2')">2분기</button>
-                    <button class="tab-btn" onclick="switchTab('q3')">3분기</button>
-                    <button class="tab-btn" onclick="switchTab('q4')">4분기</button>
-                    <button class="tab-btn" id="tabQ5" onclick="switchTab('q5')" style="display:none;">5분기</button>
-                    <button class="tab-btn" id="tabQ6" onclick="switchTab('q6')" style="display:none;">6분기</button>
-                    <div style="display: flex; flex-direction: column; justify-content: center; margin-left: 15px;">
-                        <span style="font-size: 13px; color: #ef4444; font-weight: 600; margin-bottom: 0.5px; display: block;">※ 컴퓨터를 바꾸면 명단이 저장되지 않습니다. 수시로 백업(엑셀 저장) 해주세요.</span>
-                        <span style="font-size: 13px; color: #ef4444; font-weight: 600;">※ 프로그램을 사용전! '과목 목록 관리' 버튼을 눌러 과목명과 기준 수강료를 작성해주세요.</span>
+     <header class="top-header">
+    <div class="header-row">
+        <!-- 탭과 이름 검색을 한 줄로 배치 -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('all')">전체관리</button>
+            <button class="tab-btn" onclick="switchTab('q1')">1분기</button>
+            <button class="tab-btn" onclick="switchTab('q2')">2분기</button>
+            <button class="tab-btn" onclick="switchTab('q3')">3분기</button>
+            <button class="tab-btn" onclick="switchTab('q4')">4분기</button>
+            <button class="tab-btn" id="tabQ5" onclick="switchTab('q5')" style="display:none;">5분기</button>
+            <button class="tab-btn" id="tabQ6" onclick="switchTab('q6')" style="display:none;">6분기</button>
+            
+            <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
+            <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; height: 32px; padding: 0 16px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark);">
+        </div>
+        
+        <!-- 우측 툴 버튼 영역 -->
+        <div class="header-tools">
+           <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
+            <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
+            <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 저장 및 인쇄</button>
+			<div class="toolbar-divider"></div>
+			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
+			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
+			<button class="btn-tool" onclick="toggleFundPopup()" id="btnFundInfo"><i data-lucide="info"></i> 지원금 안내</button>
+            <button class="btn-tool" onclick="toggleTierPopup()"><i data-lucide="layers"></i> 계층 현황</button>
+          
+        </div>
+    </div>
+</header>
+           
+       <!-- 🎯 상세 필터창 (오른쪽 스르륵 패널) -->
+<div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:70px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
+    <button onclick="toggleFilterPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
+    <div style="font-size: 16px; font-weight: bold; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">🎯 상세 필터 설정</div>
+    
+   <!-- 학년 필터 -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">📌 학년 필터 (복수 선택 가능)</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="1" onchange="renderGrid()"> 1학년</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="2" onchange="renderGrid()"> 2학년</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="3" onchange="renderGrid()"> 3학년</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="4" onchange="renderGrid()"> 4학년</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="5" onchange="renderGrid()"> 5학년</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltGrade" value="6" onchange="renderGrid()"> 6학년</label>
+        </div>
+    </div>
+
+    <!-- 지원금 상태 필터 -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">💡 지원금 상태 필터</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="" checked onchange="renderGrid()"> 모든 상태</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="미사용" onchange="renderGrid()"> 미사용</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="사용중" onchange="renderGrid()"> 사용중</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="소진" onchange="renderGrid()"> 소진</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="초과" onchange="renderGrid()"> 초과</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="환불발생" onchange="renderGrid()"> 환불발생</label>
+        </div>
+    </div>
+
+    <!-- 수강권 종류 필터 -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">🎟️ 수강권 필터</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="" checked onchange="renderGrid()"> 전체 보기</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="free" onchange="renderGrid()"> 자유수강권 (중복포함)</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="g3" onchange="renderGrid()"> 초3지원금 (중복포함)</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="dual" onchange="renderGrid()"> 자유 + 초3 중복</label>
+        </div>
+    </div>
+</div>
+		   
+		   
+		   
+		   <div id="statusPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:70px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto;">
+            <button onclick="toggleStatusPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div class="stat-section" style="margin-bottom:0;">
+                    <div class="stat-title">실시간 종합 지표</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="stat-box primary">
+                            <div class="stat-label">총 관리학생 인원</div>
+                            <div class="stat-value" id="s_totalStudents">0명</div>
+                        </div>
+                        <div class="stat-box primary">
+                            <div class="stat-label">순수 지원금 집행액 (초3+자유)</div>
+                            <div class="stat-value" id="s_totalSubsidy">0원</div>
+                        </div>
+                        <div class="stat-box" style="border-left-color: #ec4899;">
+                            <div class="stat-label">총 수강 금액 (지원+수익자)</div>
+                            <div class="stat-value" id="s_totalSpent">0원</div>
+                        </div>
                     </div>
                 </div>
-                <div class="header-tools">
-                    <button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode">🌙 다크 모드</button>
-                   
-                    <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()">🖨️ 정산 저장 및 인쇄</button>
+                <div class="stat-section" style="margin-bottom:0;">
+                    <div class="stat-title">지원금 대상자 현황</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="stat-box g3"><div class="stat-label">초3지원금 대상자</div><div class="stat-value" id="s_g3Count">0명</div></div>
+                        <div class="stat-box free"><div class="stat-label">자유수강권 대상자</div><div class="stat-value" id="s_freeCount">0명</div></div>
+                    </div>
+                </div>
+                <div class="stat-section" style="margin-bottom:0;">
+                    <div class="stat-title">지원금 상태 현황</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="stat-box none"><div class="stat-label">지원금 미사용자</div><div class="stat-value" id="s_stNone" style="font-size:16px;">0명</div></div>
+                        <div class="stat-box done"><div class="stat-label">지원금 소진자 (0원)</div><div class="stat-value" id="s_stDone" style="font-size:16px;">0명</div></div>
+                        <div class="stat-box alert"><div class="stat-label">지원금 초과자</div><div class="stat-value" id="s_stOver" style="font-size:16px; color:#ef4444;">0명</div></div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="header-row">
-                <div class="filters">
-                    <input type="text" id="filterName" placeholder="이름 검색" onkeyup="renderGrid()">
-                    <select id="filterGrade" onchange="renderGrid()">
-                        <option value="">모든 학년</option>
-                        <option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option>
-                        <option value="4">4학년</option><option value="5">5학년</option><option value="6">6학년</option>
-                    </select>
-                    <select id="filterStatus" onchange="renderGrid()">
-                        <option value="">모든 상태</option>
-                        <option value="미사용">미사용</option>
-                        <option value="사용중">사용중</option>
-                        <option value="소진">소진</option>
-                        <option value="초과">초과</option>
-                        <option value="환불발생">환불발생</option>
-                    </select>
-                    <select id="filterFund" onchange="renderGrid()">
-                        <option value="">수강권 필터 (전체)</option>
-                        <option value="free">자유수강권 (중복포함)</option>
-                        <option value="g3">초3지원금 (중복포함)</option>
-                        <option value="dual">자유 + 초3 중복</option>
-                    </select>
-                    
-                    <select id="filterSubject" onchange="renderGrid()" style="display:none; background:#f3e8ff; border-color:#d8b4fe; font-weight:bold; color:#6b21a8;">
-                        <option value="">모든 과목</option>
-                    </select>
-                </div>
-                <div class="header-tools">
-                    <button class="btn-tool" onclick="toggleFundPopup()">지원금 중복 안내</button>
-                    <button class="btn-tool" onclick="toggleTierPopup()">자유수강권 계층 현황</button>
-                    <button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:800; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.4);">📋 과목별 보기</button>
-                </div>
-            </div>
-        </header>
-
+        </div>
+		   
+		   
+		   
+		   
+		   
+		   
+		   
         <div class="tier-popup" id="fundPopup" style="right: 320px; width: 330px;">
             <div style="font-weight:700; margin-bottom:16px; color:var(--text-dark); text-align:center;">📌 지원금 중복 사용 안내</div>
             <div class="tier-item" style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed #e5e7eb; padding-bottom:8px;">
@@ -1028,7 +1110,7 @@
                 <!-- ✨ 교육청 제출 서식 엑셀 버튼 추가 -->
                 <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
-                <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
+                <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff; display: flex; justify-content: center; align-items: center;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
             </div>
         </div>
     </div>
@@ -1488,8 +1570,20 @@
         }
   
   
+         function toggleSidebar() {
+            let sb = document.querySelector('.sidebar');
+            sb.classList.toggle('collapsed');
+            let isCollapsed = sb.classList.contains('collapsed');
+            let txt = document.getElementById('sidebarToggleText');
+            if (txt) txt.style.display = isCollapsed ? 'none' : 'inline';
+        }
   
   
+  
+      function toggleStatusPanel() {
+            let panel = document.getElementById('statusPanelWrap');
+            if (panel) panel.classList.toggle('open');
+        }
   
   
         function toggleDarkMode() {
@@ -1499,13 +1593,16 @@
             updateDarkModeBtn();
         }
 
-        function updateDarkModeBtn() {
+    function updateDarkModeBtn() {
             let btn = document.getElementById('btnDarkMode');
             if (btn) {
-                btn.innerText = isDarkMode ? '☀️ 라이트 모드' : '🌙 다크 모드';
-                btn.style.background = isDarkMode ? '#374151' : 'white';
-                btn.style.color = isDarkMode ? 'white' : 'var(--text-dark)';
-                btn.style.borderColor = isDarkMode ? '#4b5563' : 'var(--border-color)';
+                let moonIcon = document.getElementById('iconMoon');
+                let sunIcon = document.getElementById('iconSun');
+                let label = document.getElementById('darkModeLabel');
+                if (moonIcon) moonIcon.style.display = isDarkMode ? 'none' : 'inline-block';
+                if (sunIcon) sunIcon.style.display = isDarkMode ? 'inline-block' : 'none';
+                if (label) label.innerText = isDarkMode ? '라이트모드' : '다크모드';
+                btn.title = isDarkMode ? '라이트 모드' : '다크 모드';
             }
         }
 		
@@ -1527,15 +1624,14 @@
                     btn.style.background = 'white';
                     btn.style.color = 'var(--color-free)';
                     btn.style.borderColor = 'var(--color-free)';
-                    filterSubj.style.display = 'inline-block';
+                    if (filterSubj) filterSubj.style.display = 'inline-block';
                 } else {
                     viewMode = 'summary';
                     btn.innerText = '📋 과목별 보기';
                     btn.style.background = '#8b5cf6';
                     btn.style.color = 'white';
                     btn.style.borderColor = 'transparent';
-                    filterSubj.style.display = 'none';
-                    filterSubj.value = ""; 
+                   if (filterSubj) { filterSubj.style.display = 'none'; filterSubj.value = ""; }
                 }
                 renderGrid();
                 
@@ -2336,30 +2432,32 @@
             }
             
             const statusSelect = document.getElementById('filterStatus');
-            let currentVal = statusSelect.value;
-            
-            if (tab === 'all') {
-                statusSelect.innerHTML = `
-                    <option value="">모든 상태</option>
-                    <option value="미사용">미사용</option>
-                    <option value="사용중">사용중</option>
-                    <option value="소진">소진</option>
-                    <option value="초과">초과</option>
-                    <option value="환불발생">환불발생</option>
-                `;
-            } else {
-                let qText = tab.replace('q','') + '분기'; 
-                statusSelect.innerHTML = `
-                    <option value="">${qText} 모든상태</option>
-                    <option value="사용중">${qText} 사용중</option>
-                    <option value="소진">${qText} 소진</option>
-                    <option value="초과">${qText} 초과</option>
-                    <option value="환불발생">${qText} 환불발생</option>
-                `;
-                if(currentVal === '미사용') currentVal = ''; 
+            if (statusSelect) {
+                let currentVal = statusSelect.value;
+                
+                if (tab === 'all') {
+                    statusSelect.innerHTML = `
+                        <option value="">모든 상태</option>
+                        <option value="미사용">미사용</option>
+                        <option value="사용중">사용중</option>
+                        <option value="소진">소진</option>
+                        <option value="초과">초과</option>
+                        <option value="환불발생">환불발생</option>
+                    `;
+                } else {
+                    let qText = tab.replace('q','') + '분기'; 
+                    statusSelect.innerHTML = `
+                        <option value="">${qText} 모든상태</option>
+                        <option value="사용중">${qText} 사용중</option>
+                        <option value="소진">${qText} 소진</option>
+                        <option value="초과">${qText} 초과</option>
+                        <option value="환불발생">${qText} 환불발생</option>
+                    `;
+                    if(currentVal === '미사용') currentVal = ''; 
+                }
+                
+                statusSelect.value = currentVal;
             }
-            
-            statusSelect.value = currentVal;
             renderGrid();
         }
 
@@ -2371,20 +2469,19 @@
             const tBody = document.getElementById('tBody');
             const colGroup = document.getElementById('datatableColgroup');
             const fName = document.getElementById('filterName').value.trim().toLowerCase();
-            const fGrade = document.getElementById('filterGrade').value;
+           const fGradeList = Array.from(document.querySelectorAll('input[name="fltGrade"]:checked')).map(el => el.value);
 			
-	
-			
-            const fStatus = document.getElementById('filterStatus').value;
-            const fFund = document.getElementById('filterFund').value;
-            const fSubject = document.getElementById('filterSubject').value;
+            const fStatus = document.querySelector('input[name="fltStatus"]:checked')?.value || "";
+            const fFund = document.querySelector('input[name="fltFund"]:checked')?.value || "";
+            const fSubjectEl = document.getElementById('filterSubject');
+            const fSubject = fSubjectEl ? fSubjectEl.value : '';
 
             colGroup.innerHTML = ''; 
 
             let viewData = db.map(r => ({ r, c: calcStudent(r) })).filter(item => {
                 let { r, c } = item;
                 if(fName && !r.name.toLowerCase().includes(fName)) return false;
-                if(fGrade && String(r.grade) !== fGrade) return false;
+                if(fGradeList.length > 0 && !fGradeList.includes(String(r.grade))) return false;
                 
                if (currentTab !== 'all') {
                     // ✨ 0원이어도 수강 과목 이름이 1개라도 존재하면 해당 분기에 표시되도록 허용
@@ -2859,8 +2956,8 @@
                                 </td>
                                 <td style="text-align:center;" class="no-print">
                                     <div style="display:flex; gap:4px; justify-content:center;">
-                                        <button class="btn-tool" style="padding:4px 8px;" onclick="openPanel('edit','${r.id}')">수정</button>
-                                        <button class="btn-tool" style="padding:4px 8px; color:red;" onclick="deleteRecord('${r.id}')">삭제</button>
+                                        <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: bold; color: #475569; cursor: pointer;" onclick="openPanel('edit','${r.id}')">수정</button>
+                                        <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; box-shadow: 0 1px 3px rgba(239,68,68,0.2); font-weight: bold; color: #ef4444; cursor: pointer;" onclick="deleteRecord('${r.id}')">삭제</button>
                                     </div>
                                 </td>
                             </tr>
@@ -3049,10 +3146,10 @@
                                 <td class="text-right" style="color:var(--color-g3); line-height: 1.5;">${g3Html}</td>
                                 <td class="text-right" style="color:var(--color-free); line-height: 1.5;">${freeHtml}</td>
                                 <td class="text-right" style="color:#10b981; line-height: 1.5;">${totalHtml}</td>
-                                <td style="text-align:center;" class="no-print">
+                               <td style="text-align:center;" class="no-print">
                                     <div style="display:flex; gap:4px; justify-content:center;">
-                                        <button class="btn-tool" style="padding:4px 8px;" onclick="openPanel('edit','${r.id}')">수정</button>
-                                        <button class="btn-tool" style="padding:4px 8px; color:red;" onclick="deleteRecord('${r.id}')">삭제</button>
+                                        <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: bold; color: #475569; cursor: pointer;" onclick="openPanel('edit','${r.id}')">수정</button>
+                                        <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; box-shadow: 0 1px 3px rgba(239,68,68,0.2); font-weight: bold; color: #ef4444; cursor: pointer;" onclick="deleteRecord('${r.id}')">삭제</button>
                                     </div>
                                 </td>
                             </tr>
@@ -4080,10 +4177,19 @@ function openPanel(mode, id = null) {
             }
         }
 
-        function toggleFundPopup() {
+      function toggleFundPopup() {
             const pop = document.getElementById('fundPopup');
             document.getElementById('tierPopup').style.display = 'none';
             if(pop.style.display === 'block') { pop.style.display = 'none'; return; }
+            
+            let btn = document.getElementById('btnFundInfo');
+            if (btn) {
+                let rect = btn.getBoundingClientRect();
+                pop.style.top = (rect.bottom + 8) + 'px';
+                pop.style.left = 'auto';
+                pop.style.right = (window.innerWidth - rect.right) + 'px';
+            }
+            pop.style.position = 'fixed';
             pop.style.display = 'block';
         }
 
@@ -4397,10 +4503,11 @@ function openPanel(mode, id = null) {
                     let freeStr = r.hasFree ? `O(${r.freeTier||''})` : "X";
                     let rowData = [ index + 1, r.grade, r.classNum, r.studentNum, r.name, g3Str, freeStr ];
 
-                    if(currentTab === 'all') {
+                   if(currentTab === 'all') {
                         rowData.push(c.status);
                         for(let i=1; i<=maxQuarter; i++) rowData.push(c[`q${i}`].exp); // ✨ 동적 삽입
-                        rowData.push(c.total.exp, c.total.usedG3, c.remG3, c.total.usedFree, c.remFree, c.totalAllowance, (c.remG3+c.remFree));
+                        // ✨ 총 지원금 사용 = 초3지원 사용액 + 자유수강 사용액
+                        rowData.push(c.total.exp, c.total.usedG3, c.remG3, c.total.usedFree, c.remFree, (c.total.usedG3 + c.total.usedFree), (c.remG3+c.remFree));
                     } else {
                         let q = currentTab;
                         let netG=0, netS=0, netSu=0, netGy=0, netJ=0;
@@ -4439,9 +4546,10 @@ function openPanel(mode, id = null) {
                             for(let i=1; i<=maxQuarter; i++) sumQs[i] += c[`q${i}`].exp;
                             sumTotalExp+=c.total.exp; sumG3Used+=c.total.usedG3; sumG3Rem+=c.remG3; sumFreeUsed+=c.total.usedFree; sumFreeRem+=c.remFree; sumTotAllow+=c.totalAllowance; sumTotRem+=(c.remG3+c.remFree);
                         });
-                        let totData = ['전체 총합', '', '', '', '', '', '', ''];
+                       let totData = ['전체 총합', '', '', '', '', '', '', ''];
                         for(let i=1; i<=maxQuarter; i++) totData.push(sumQs[i]);
-                        totData.push(sumTotalExp, sumG3Used, sumG3Rem, sumFreeUsed, sumFreeRem, sumTotAllow, sumTotRem);
+                        // ✨ 총 지원금 사용 칸에 지원액(sumTotAllow)이 아닌 사용액 합산(sumG3Used + sumFreeUsed) 적용
+                        totData.push(sumTotalExp, sumG3Used, sumG3Rem, sumFreeUsed, sumFreeRem, (sumG3Used + sumFreeUsed), sumTotRem);
                         tRow = ws.addRow(totData);
                         ws.mergeCells(tRow.number, 1, tRow.number, 8);
                     } else {
@@ -4677,10 +4785,19 @@ function openPanel(mode, id = null) {
                         cell.border = borderStyle;
                     });
 
-                    // ✨ 분기 수에 맞춰서 백업 데이터 숨김 위치 자동 조절
+                   // ✨ 분기 수에 맞춰서 백업 데이터 숨김 위치 자동 조절
                     let hiddenColIndex = 7 + (maxQuarter * 6) + 1; 
                     ws.getColumn(hiddenColIndex).hidden = true;
                     ws.getCell(2, hiddenColIndex).value = "시스템 백업용 데이터 (수정금지)";
+
+                    // ✨ 특수학급/자유수강/과거기록은 용량이 커서 한 셀에 다 넣으면 엑셀이 손상되므로, 여러 줄로 쪼개서 저장
+                    let bigBackupColIndex = hiddenColIndex + 1;
+                    ws.getColumn(bigBackupColIndex).hidden = true;
+                    ws.getCell(2, bigBackupColIndex).value = "시스템 백업용 데이터2 (수정금지)";
+                    let bigBackupStr = JSON.stringify({ specialList: specialList, neisList: neisList, snapshots: snapshots });
+                    let bigBackupChunks = [];
+                    for(let ci=0; ci<bigBackupStr.length; ci+=30000) bigBackupChunks.push(bigBackupStr.slice(ci, ci+30000));
+                    let chunkCursor = 0;
 
                     const cellBorder = {
                         top: {style:'thin', color: {argb:'FFD1D5DB'}}, left: {style:'thin', color: {argb:'FFD1D5DB'}},
@@ -4725,8 +4842,15 @@ function openPanel(mode, id = null) {
                             }
                             
                             let newRow = ws.addRow(rowData);
+
+                            // ✨ 대용량 백업 조각을 한 줄씩 순서대로 기록
+                            if (chunkCursor < bigBackupChunks.length) {
+                                newRow.getCell(bigBackupColIndex).value = bigBackupChunks[chunkCursor];
+                                chunkCursor++;
+                            }
+
                             newRow.eachCell({ includeEmpty: true }, function(cell, colNumber) {
-                                if(colNumber >= hiddenColIndex) return; 
+                                if(colNumber >= hiddenColIndex) return;
                                 
                                 let fillRef = fills.base_s1;
                                 if (colNumber >= 8 && colNumber <= 13) fillRef = isTinted ? fills.q1_s2 : fills.q1_s1;
@@ -4763,16 +4887,39 @@ function openPanel(mode, id = null) {
                                         }));
                                     })
                                 };
-                               // ✨ 특수학급, 자유수강 명단 + 과거 기록(스냅샷)까지 1회 백업
-                                if (s === 0 && i === 0) {
-                                    backupData.specialList = specialList;
-                                    backupData.neisList = neisList;
-                                    backupData.snapshots = snapshots; // ✨ 과거 기록 추가
-                                }
-                                newRow.getCell(hiddenColIndex).value = JSON.stringify(backupData);
+                               newRow.getCell(hiddenColIndex).value = JSON.stringify(backupData);
                             }
                         }
                     });
+
+               
+
+                    // ✨ 추가 등록용 빈 서식 50명분(각 6과목)을 맨 아래에 이어서 추가 — 여기에 새 학생을 적으면 초3지원금/자유수강권/수강료가 자동 계산됩니다
+                    let colLettersBk = [ ['I','J'], ['O','P'], ['U','V'], ['AA','AB'], ['AG','AH'], ['AM','AN'] ];
+                    let extraRow = ws.rowCount + 1;
+                    let extraStartRow = extraRow;
+                    for(let s2=0; s2<50; s2++) {
+                        for(let i2=0; i2<6; i2++) {
+                            let rowData2 = [];
+                            if(i2 === 0) {
+                                let g3F = { formula: `IF(A${extraRow}="","",IF(A${extraRow}=3,"O","X"))` };
+                                let frF = { formula: `IF(A${extraRow}="","",IF(A${extraRow}=3,"","O"))` };
+                                rowData2 = ['', '', '', '', g3F, frF, ''];
+                            } else {
+                                rowData2 = ['', '', '', '', '', '', ''];
+                            }
+                            for(let q=1; q<=maxQuarter; q++) {
+                                rowData2.push('', '', '', {formula:`${colLettersBk[q-1][0]}${extraRow}+${colLettersBk[q-1][1]}${extraRow}`}, '', '');
+                            }
+                            ws.addRow(rowData2);
+                            extraRow++;
+                        }
+                    }
+                    for(let i=extraStartRow; i<extraRow; i+=6) {
+                        ws.getCell(`E${i}`).dataValidation = { type: 'list', allowBlank: true, formulae: ['"O,X"'] };
+                        ws.getCell(`F${i}`).dataValidation = { type: 'list', allowBlank: true, formulae: ['"O,X"'] };
+                        ws.getCell(`G${i}`).dataValidation = { type: 'list', allowBlank: true, formulae: ['"기초생활수급자,한부모가족,법적차상위,중위소득90%이하,학교장추천,난민인정자,육아기근로단축"'] };
+                    }
 
                     const buffer = await wb.xlsx.writeBuffer();
                     saveAs(new Blob([buffer]), `방과후세로형정산백업_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -4886,6 +5033,39 @@ function openPanel(mode, id = null) {
                     newCount++;
                 }
             }
+
+            // ✨ 여러 줄에 나눠 저장된 대용량 백업(특수학급/자유수강/과거기록) 조각을 순서대로 이어붙여서 복원
+            try {
+                let bigBackupColIndex = 7 + (maxQuarter * 6) + 2;
+                let bigBackupStr = '';
+                ws.eachRow({ includeEmpty: true }, (row) => {
+                    let cellVal = row.getCell(bigBackupColIndex).value;
+                    if (cellVal && typeof cellVal === 'string' && cellVal !== '시스템 백업용 데이터2 (수정금지)') {
+                        bigBackupStr += cellVal;
+                    }
+                });
+                if (bigBackupStr.startsWith('{')) {
+                    let bigBackupData = JSON.parse(bigBackupStr);
+                    if (bigBackupData.specialList) {
+                        bigBackupData.specialList.forEach(st => {
+                            if(!specialList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum)) specialList.push(st);
+                        });
+                        persistSpecialList();
+                    }
+                    if (bigBackupData.neisList) {
+                        bigBackupData.neisList.forEach(st => {
+                            if(!neisList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum && s.name === st.name)) neisList.push(st);
+                        });
+                        persistNeisList();
+                    }
+                    if (bigBackupData.snapshots) {
+                        bigBackupData.snapshots.forEach(snap => {
+                            if(!snapshots.some(s => s.id === snap.id)) snapshots.push(snap);
+                        });
+                        localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                    }
+                }
+            } catch(e) {}
 
             ws.eachRow((row, rowNumber) => {
                 let v1Str = String(row.getCell(1).value || '');
@@ -6305,12 +6485,58 @@ function openPanel(mode, id = null) {
         <div style="position:absolute; bottom:-8px; left:24px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:8px solid #fffbeb;"></div>
     </div>
 
+ 
+		
+
+
+
     <script>
+	
+	    
         function toggleDonatePopup() {
             let p = document.getElementById('donatePopup');
             p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
         }
+		
+		
+		
+		
+		// 필터창 스르륵 열기/닫기 함수
+function toggleFilterPanel() {
+    const panel = document.getElementById('filterPanelWrap');
+    panel.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    let statusPanel = document.getElementById('statusPanelWrap');
+    let filterPanel = document.getElementById('filterPanelWrap');
+    if (statusPanel && statusPanel.classList.contains('open')) {
+        if (!statusPanel.contains(e.target) && e.target.id !== 'btnStatusView') {
+            statusPanel.classList.remove('open');
+        }
+    }
+    if (filterPanel && filterPanel.classList.contains('open')) {
+        if (!filterPanel.contains(e.target) && e.target.id !== 'btnFilterView') {
+            filterPanel.classList.remove('open');
+        }
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        let statusPanel = document.getElementById('statusPanelWrap');
+        let filterPanel = document.getElementById('filterPanelWrap');
+        if (statusPanel) statusPanel.classList.remove('open');
+        if (filterPanel) filterPanel.classList.remove('open');
+    }
+});
+		
     </script>
+
+
+
+     <script>lucide.createIcons();</script>
+
 
    
 </body>
