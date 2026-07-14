@@ -1228,6 +1228,7 @@
             </div>
             
             <!-- ✨ 수기 추가 폼 -->
+            <!-- ✨ V6.2 수기 추가 폼 (평소엔 숨겨짐) -->
             <div id="neisManualAddForm" style="display:none; background:#f9fafb; padding:12px; margin-bottom:12px; border-radius:6px; border:1px solid #cbd5e1; gap:8px; align-items:center; flex-wrap:wrap;">
                 <span style="font-size:13px; font-weight:bold; color:#6b21a8; margin-right:4px;">수기 입력:</span>
                 <input type="number" id="nm_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
@@ -1243,7 +1244,14 @@
                     <option value="중위소득">중위소득</option>
                     <option value="난민인정자">난민인정자</option>
                 </select>
+                <div style="display:flex; align-items:center; gap:4px; border:1px solid #ccc; padding:4px; border-radius:4px; background:white;">
+                    <span style="font-size:11px; color:#6b7280; font-weight:bold;">신청일:</span>
+                    <input type="date" id="nm_req" style="border:none; font-size:12px; outline:none;">
+                    <span style="font-size:11px; color:#6b7280; font-weight:bold; margin-left:4px;">심사일:</span>
+                    <input type="date" id="nm_conf" style="border:none; font-size:12px; outline:none;">
+                </div>
                 <button class="btn-save" style="padding:6px 12px; height:auto; border-radius:4px; font-size:12px;" onclick="addManualNeisStudent()">명단에 추가하기</button>
+           
             </div>
 
             <!-- 표 -->
