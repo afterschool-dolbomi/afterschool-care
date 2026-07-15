@@ -800,7 +800,7 @@
 			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
 			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
 			<button class="btn-tool" onclick="toggleFundPopup()" id="btnFundInfo"><i data-lucide="info"></i> 지원금 안내</button>
-            <button class="btn-tool" onclick="toggleTierPopup()"><i data-lucide="layers"></i> 계층 현황</button>
+            <button class="btn-tool" onclick="toggleTierPopup()" id="btnTierInfo"><i data-lucide="layers"></i> 계층 현황</button>
           
         </div>
     </div>
@@ -4305,7 +4305,16 @@ function openPanel(mode, id = null) {
             for(let t in tiers) html += `<div class="tier-item"><span>${t}</span><span class="fw-bold">${tiers[t]}명</span></div>`; 
             if(!hasFreeStudents) html = "<div style='color:#ef4444; font-size:12px; margin-bottom:12px; text-align:center;'>현재 자유수강권 등록 학생이 없습니다.</div>" + html;
             
-            document.getElementById('tierList').innerHTML = html;
+document.getElementById('tierList').innerHTML = html;
+            
+            let btn = document.getElementById('btnTierInfo');
+            if (btn) {
+                let rect = btn.getBoundingClientRect();
+                pop.style.top = (rect.bottom + 8) + 'px';
+                pop.style.left = 'auto';
+                pop.style.right = (window.innerWidth - rect.right) + 'px';
+            }
+            pop.style.position = 'fixed';
             pop.style.display = 'block';
         }
 
