@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V8.0</title>
+    <title>방과후 지원금 돌보미 V8.1</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -706,7 +706,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V8.0</span>
+                <span class="brand-version">V8.1</span>
             </div>
     </div>
     
@@ -972,6 +972,11 @@
                             <option value="학교장추천">학교장추천</option><option value="난민인정자">난민인정자</option>
                             <option value="육아기근로단축">육아기근로단축</option>
                         </select>
+                        <div style="margin-top:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:8px;">
+                            <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
+                            <input type="text" id="fFreeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
+                            <div style="font-size:11px; color:#9ca3af; margin-top:2px;">타 학교에서 이미 사용한 금액이 있다면, 남은 금액만큼으로 줄여서 입력하세요.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -2172,9 +2177,9 @@
 
 
 
-       function calcStudent(r) {
+      function calcStudent(r) {
             let allowanceG3 = r.hasG3 ? 500000 : 0;
-            let allowanceFree = r.hasFree ? 600000 : 0;
+            let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
             let remG3_H1 = r.hasG3 ? 250000 : 0; 
             let remG3_Total = allowanceG3;
             let remFree = allowanceFree;
@@ -2543,8 +2548,8 @@
                 viewData.forEach(({r, c}) => {
                     let allowanceG3 = r.hasG3 ? 500000 : 0;
                     let remG3_H1 = r.hasG3 ? 250000 : 0;
-                    let remG3_Total = allowanceG3;
-                    let remFree = r.hasFree ? 600000 : 0;
+                   let remG3_Total = allowanceG3;
+                    let remFree = r.hasFree ? (r.freeLimit || 600000) : 0;
 
 
 
@@ -3105,8 +3110,8 @@
                             accUsedFree += c[`q${i}`].usedFree;
                         }
                         
-                        let allowanceG3 = r.hasG3 ? 500000 : 0;
-                        let allowanceFree = r.hasFree ? 600000 : 0;
+                         let allowanceG3 = r.hasG3 ? 500000 : 0;
+            let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
                         
                         let remG3_until_Q = allowanceG3 - accUsedG3;
                         let remFree_until_Q = allowanceFree - accUsedFree;
@@ -3403,9 +3408,10 @@ function openPanel(mode, id = null) {
                 updateQuarterTotal(q);
             }
             
-            if(mode === 'add') {
+           if(mode === 'add') {
                 document.getElementById('panelTitle').innerText = "신규 학생 상세 입력";
                 document.getElementById('editId').value = "";
+                document.getElementById('fFreeLimit').value = "600,000";
                 
                 for(let q=1; q<=maxQuarter; q++) {
                     visibleRows[q] = 3;
@@ -3426,6 +3432,7 @@ function openPanel(mode, id = null) {
                 document.getElementById('fG3').checked = r.hasG3;
                 document.getElementById('fFree').checked = r.hasFree;
                 document.getElementById('fTier').value = r.freeTier || "";
+                document.getElementById('fFreeLimit').value = (r.freeLimit || 600000).toLocaleString();
 
                 for(let q=1; q<=maxQuarter; q++) {
                     let subs = r[`q${q}`] ? r[`q${q}`].subs || [] : [];
@@ -3511,7 +3518,8 @@ function openPanel(mode, id = null) {
                     return;
                 }
             }
-            let freeTier = document.getElementById('fTier').value;
+           let freeTier = document.getElementById('fTier').value;
+          let freeLimit = toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || 600000;
 
             if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
             if(!hasG3 && !hasFree) { alert("지원 자격을 1개 이상 선택해야 합니다."); return; }
@@ -3546,7 +3554,7 @@ function openPanel(mode, id = null) {
 
             let saveTime = Date.now();
             let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, memo, createdAt };
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, memo, createdAt };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -3645,8 +3653,8 @@ function openPanel(mode, id = null) {
             let html = ``;
             
               // ✨ 학생별 지원금 종합 현황판 전광판 렌더링
-            let allowanceG3 = r.hasG3 ? 500000 : 0;
-            let allowanceFree = r.hasFree ? 600000 : 0;
+           let allowanceG3 = r.hasG3 ? 500000 : 0;
+                        let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
 
             // ✨ 초3지원금 상반기/하반기 분할 내역 계산
             let h1Cut = maxQuarter === 6 ? 3 : 2;
@@ -4536,7 +4544,7 @@ document.getElementById('tierList').innerHTML = html;
                         let qNum = parseInt(q.replace('q', ''));
                         let accUsedG3 = 0, accUsedFree = 0;
                         for (let i = 1; i <= qNum; i++) { accUsedG3 += c[`q${i}`].usedG3; accUsedFree += c[`q${i}`].usedFree; }
-                        let allowanceG3 = r.hasG3 ? 500000 : 0; let allowanceFree = r.hasFree ? 600000 : 0;
+                        let allowanceG3 = r.hasG3 ? 500000 : 0; let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
                         let remG3_until_Q = allowanceG3 - accUsedG3; let remFree_until_Q = allowanceFree - accUsedFree; let remTotal_until_Q = remG3_until_Q + remFree_until_Q;
 
                         rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
@@ -6435,7 +6443,8 @@ document.getElementById('tierList').innerHTML = html;
                     }
 
                     targetRow.getCell(15).value = null;
-                    targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(600000-N${rIdx}>0,600000-N${rIdx},IF(600000-N${rIdx}=0,"지원금 0원","지원금 초과사용")),"")` };
+                    let stFreeLimit = st.freeLimit || 600000;
+                    targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>0,${stFreeLimit}-N${rIdx},IF(${stFreeLimit}-N${rIdx}=0,"지원금 0원","지원금 초과사용")),"")` };
 
                     targetRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
                         if (styleTemplate[colNum]) cell.style = JSON.parse(JSON.stringify(styleTemplate[colNum]));
