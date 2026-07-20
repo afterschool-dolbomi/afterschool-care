@@ -761,7 +761,7 @@
             제작자: 갈월초 늘봄행정실무사
         </div>
        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
-            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
+            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" id="btnDonate" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
             
             <button class="btn-3d btn-side" onclick="startTutorial()" style="flex: 1; background:#8b5cf6; color:white; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">💡 튜토리얼</button>
      </div>
@@ -1668,11 +1668,10 @@
             document.getElementById('printExportModal').style.display = 'none';
         }
 
-        const tutorialSteps = [
+      const tutorialSteps = [
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
-            { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
-            // ✨ V6.0 튜토리얼 추가 항목
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
+            { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
@@ -1720,10 +1719,11 @@
             setTimeout(() => {
                 let rect = targetEl.getBoundingClientRect();
                 
-                let tTop = rect.top;
+              let tTop = rect.top;
                 let tLeft = rect.left;
                 let tWidth = rect.width;
                 let tHeight = rect.height;
+                let tooltipAnchorBottom = rect.top + rect.height; // ✨ 툴팁 위치는 항상 '헤더 셀' 기준으로 계산 (스포트라이트 높이랑 분리)
 
                 if (step.type === 'column') {
                     let wrapper = document.querySelector('.table-wrapper');
@@ -1776,11 +1776,12 @@
                     
                     tooltip.style.top = tooltipTop + 'px';
                     tooltip.style.left = (tLeft + tWidth + 25) + 'px';
-                } else if (step.align === 'bottom') {
-                    let tooltipTop = tTop + tHeight + 25;
+               } else if (step.align === 'bottom') {
+                    let tooltipTop = tooltipAnchorBottom + 25;
                     if(tooltipTop + tooltip.offsetHeight > window.innerHeight - 10) {
-                        tooltipTop = tTop - tooltip.offsetHeight - 25; 
+                        tooltipTop = window.innerHeight - tooltip.offsetHeight - 10; // ✨ 위로 뒤집지 않고 화면 안쪽 아래에 붙임
                     }
+                    if(tooltipTop < 10) tooltipTop = 10; // ✨ 혹시라도 화면 위로 넘어가면 최소 10px는 확보
                     tooltip.style.top = tooltipTop + 'px';
                     
                     let leftPos = tLeft + (tWidth/2) - 165;
@@ -1823,7 +1824,7 @@
                             padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold;
                             box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; line-height: 1.4;
                             top: ${rect.top - 60}px; left: ${rect.left + (rect.width/2) - 100}px; width: 200px;
-                            animation: flash-text 0.5s infinite alternate; pointer-events: none;
+                            animation: flash-text 1s infinite alternate; pointer-events: none;
                         `;
                         // 말풍선 꼬리표
                         let arrow = document.createElement('div');
@@ -5017,8 +5018,20 @@ document.getElementById('tierList').innerHTML = html;
                     return; // ✨ 병합/신규추가 둘 다 여기서 막음
                 }
                 
-                if (currentIsMerge && currentExStudent) {
+              if (currentIsMerge && currentExStudent) {
                     let mergedAny = false;
+                    // ✨ 기존엔 없던 지원금 유형이 새로 업로드되면 추가로 활성화 (원래 있던 유형은 그대로 유지, 새로 생긴 것만 추가)
+                    if (currentStudent.hasFree && !currentExStudent.hasFree) {
+                        currentExStudent.hasFree = true;
+                        currentExStudent.freeTier = currentStudent.freeTier || currentExStudent.freeTier || '';
+                        currentExStudent.freeLimit = currentExStudent.freeLimit || 600000;
+                        mergedAny = true; // ✨ 지원금 유형 변동도 '업데이트'로 집계
+                    }
+                    if (currentStudent.hasG3 && !currentExStudent.hasG3) {
+                        currentExStudent.hasG3 = true;
+                        mergedAny = true; // ✨ 지원금 유형 변동도 '업데이트'로 집계
+                    }
+                    
                     for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 동적 연동
                         let newSubs = currentStudent[`q${q}`].subs;
                         newSubs.forEach(newSub => {
@@ -6519,10 +6532,30 @@ document.getElementById('tierList').innerHTML = html;
     <script>
 	
 	    
-        function toggleDonatePopup() {
+       function toggleDonatePopup() {
             let p = document.getElementById('donatePopup');
-            p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+            let isHidden = (p.style.display === 'none' || !p.style.display);
+            if (!isHidden) { p.style.display = 'none'; return; }
+            
+            let btn = document.getElementById('btnDonate');
+            if (btn) {
+                let rect = btn.getBoundingClientRect();
+                p.style.top = 'auto';
+                p.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+                p.style.left = rect.left + 'px';
+            }
+            p.style.display = 'block';
         }
+
+        document.addEventListener('click', function(e) {
+            let p = document.getElementById('donatePopup');
+            let btn = document.getElementById('btnDonate');
+            if (p && p.style.display === 'block') {
+                if (!p.contains(e.target) && e.target !== btn && !(btn && btn.contains(e.target))) {
+                    p.style.display = 'none';
+                }
+            }
+        });
 		
 		
 		
