@@ -964,14 +964,24 @@
                     </label>
                     <span class="desc-text">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
                     
-                    <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
-                        <select id="fTier" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
+                   <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
+                        <select id="fTier" onchange="toggleTier()" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
                             <option value="">계층 선택 (필수)</option>
                             <option value="기초생활수급자">기초생활수급자</option><option value="한부모가족">한부모가족</option>
                             <option value="법적차상위">법적차상위</option><option value="중위소득90%이하">중위소득90%이하</option>
                             <option value="학교장추천">학교장추천</option><option value="난민인정자">난민인정자</option>
                             <option value="육아기근로단축">육아기근로단축</option>
                         </select>
+                        <div id="yukaDateGroup" style="display:none; margin-top:10px; background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
+                            <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <span style="font-size:12px; color:#6b7280;">시작일</span>
+                                <input type="date" id="fFreeStartDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+                                <span style="font-size:12px; color:#6b7280;">~ 마감일</span>
+                                <input type="date" id="fFreeEndDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+                            </div>
+                            <div style="font-size:11px; color:#9ca3af; margin-top:4px;">이 기간에만 자유수강권 지원금을 사용할 수 있습니다.</div>
+                        </div>
                         <div style="margin-top:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:8px;">
                             <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
                             <input type="text" id="fFreeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
@@ -1240,7 +1250,7 @@
                 <input type="number" id="nm_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="number" id="nm_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="text" id="nm_name" placeholder="이름" style="width:90px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <select id="nm_tier" style="padding:6px; border:1px solid #ccc; border-radius:4px;">
+               <select id="nm_tier" onchange="toggleNmDateLabel()" style="padding:6px; border:1px solid #ccc; border-radius:4px;">
                     <option value="육아기근로시간단축활용가정">육아기근로단축</option>
                     <option value="학교장추천대상자">학교장추천</option>
                     <option value="기초생계급여수급자">기초생활수급자</option>
@@ -1250,9 +1260,9 @@
                     <option value="난민인정자">난민인정자</option>
                 </select>
                 <div style="display:flex; align-items:center; gap:4px; border:1px solid #ccc; padding:4px; border-radius:4px; background:white;">
-                    <span style="font-size:11px; color:#6b7280; font-weight:bold;">신청일:</span>
+                    <span style="font-size:11px; color:#6b7280; font-weight:bold;" id="nmReqLabel">신청일:</span>
                     <input type="date" id="nm_req" style="border:none; font-size:12px; outline:none;">
-                    <span style="font-size:11px; color:#6b7280; font-weight:bold; margin-left:4px;">심사일:</span>
+                    <span style="font-size:11px; color:#6b7280; font-weight:bold; margin-left:4px;" id="nmConfLabel">심사일:</span>
                     <input type="date" id="nm_conf" style="border:none; font-size:12px; outline:none;">
                 </div>
                 <button class="btn-save" style="padding:6px 12px; height:auto; border-radius:4px; font-size:12px;" onclick="addManualNeisStudent()">명단에 추가하기</button>
@@ -1265,7 +1275,7 @@
                     <thead style="background:#f3f4f6; position: sticky; top: 0; z-index: 10;">
                         <tr>
                             <th>No.</th><th>학년</th><th>반</th><th>번호</th><th>학생명</th>
-                            <th>방과후</th><th>가구자격</th><th>신청일자</th><th>심사완료일자</th>
+                           <th>방과후</th><th>가구자격</th><th>신청일자<br><span style="font-size:10px; color:#9ca3af; font-weight:400;">(육아기시작일)</span></th><th>심사완료일자<br><span style="font-size:10px; color:#9ca3af; font-weight:400;">(육아기마감일)</span></th>
                             <th>관리</th>
                         </tr>
                     </thead>
@@ -3363,8 +3373,10 @@
             document.getElementById(`fq${q}_tot_label`).innerText = `분기 합계: ${(sumSu + sumGy + sumJ).toLocaleString()}원`;
         }
 
-        function toggleTier() {
+       function toggleTier() {
             document.getElementById('tierGroup').style.display = document.getElementById('fFree').checked ? 'block' : 'none';
+            let tier = document.getElementById('fTier').value;
+            document.getElementById('yukaDateGroup').style.display = (tier === '육아기근로단축') ? 'block' : 'none';
         }
 
        function checkFundLogic(event) {
@@ -3413,6 +3425,8 @@ function openPanel(mode, id = null) {
                 document.getElementById('panelTitle').innerText = "신규 학생 상세 입력";
                 document.getElementById('editId').value = "";
                 document.getElementById('fFreeLimit').value = "600,000";
+                document.getElementById('fFreeStartDate').value = "";
+                document.getElementById('fFreeEndDate').value = "";
                 
                 for(let q=1; q<=maxQuarter; q++) {
                     visibleRows[q] = 3;
@@ -3432,8 +3446,11 @@ function openPanel(mode, id = null) {
                 document.getElementById('fNum').value = r.studentNum; document.getElementById('fName').value = r.name;
                 document.getElementById('fG3').checked = r.hasG3;
                 document.getElementById('fFree').checked = r.hasFree;
-                document.getElementById('fTier').value = r.freeTier || "";
+document.getElementById('fTier').value = r.freeTier || "";
                 document.getElementById('fFreeLimit').value = (r.freeLimit || 600000).toLocaleString();
+                document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
+                document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
+                toggleTier();
 
                 for(let q=1; q<=maxQuarter; q++) {
                     let subs = r[`q${q}`] ? r[`q${q}`].subs || [] : [];
@@ -3519,8 +3536,15 @@ function openPanel(mode, id = null) {
                     return;
                 }
             }
-           let freeTier = document.getElementById('fTier').value;
+         let freeTier = document.getElementById('fTier').value;
           let freeLimit = toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || 600000;
+          let freeStartDate = document.getElementById('fFreeStartDate').value;
+          let freeEndDate = document.getElementById('fFreeEndDate').value;
+
+          if(hasFree && freeTier === '육아기근로단축' && (!freeStartDate || !freeEndDate)) {
+              alert("육아기근로단축은 지원 시작일과 마감일을 모두 입력해야 합니다.");
+              return;
+          }
 
             if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
             if(!hasG3 && !hasFree) { alert("지원 자격을 1개 이상 선택해야 합니다."); return; }
@@ -3555,7 +3579,7 @@ function openPanel(mode, id = null) {
 
             let saveTime = Date.now();
             let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, memo, createdAt };
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, memo, createdAt };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -3616,8 +3640,26 @@ function openPanel(mode, id = null) {
                 rec[`q${q}`] = { subs, g:sumG, s:sumS, su:sumSu, gy:sumGy, j:sumJ };
             }
 
-            let idx = db.findIndex(x => x.id == id);
+           let idx = db.findIndex(x => x.id == id);
             if(idx > -1) db[idx] = rec; else db.push(rec);
+
+            // ✨ 육아기근로단축 학생은 자유수강자 명단 관리(NEIS)에도 자동 등록/갱신
+            if (hasFree && freeTier === '육아기근로단축') {
+                let existingNeis = neisList.find(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum && s.name === rec.name);
+                if (existingNeis) {
+                    existingNeis.familyTier = '육아기근로시간단축활용가정';
+                    existingNeis.reqDate = freeStartDate;
+                    existingNeis.confirmDate = freeEndDate;
+                } else {
+                    neisList.unshift({
+                        grade, classNum, studentNum, name: rec.name,
+                        afterSchool: '개별입력연동[O]',
+                        familyTier: '육아기근로시간단축활용가정', reqDate: freeStartDate, confirmDate: freeEndDate,
+                        status: '신규'
+                    });
+                }
+                persistNeisList();
+            }
 
             if(subjectsUpdated) {
                 persistSubjects();
@@ -5171,7 +5213,15 @@ document.getElementById('tierList').innerHTML = html;
                             } catch(e) {}
                         }
 
-                        currentExStudent = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
+                       currentExStudent = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
+                        
+                        // ✨ 학번은 같은데 이름이 다르면 절대 병합하지 않고 경고 후 건너뜀 (수기 입력 실수 방지)
+                        if(currentExStudent && currentExStudent.name !== sName) {
+                            intraDups.push(`${grade}학년 ${classNum}반 ${studentNum}번 '${sName}' → 이 학번은 이미 '${currentExStudent.name}' 학생으로 등록되어 있습니다. 이름 불일치로 업로드 되지 않았습니다. 학번을 다시 확인해주세요.`);
+                            skipCurrentStudent = true;
+                            currentStudent = null;
+                            return;
+                        }
                         
                         if(currentExStudent) {
                             currentIsMerge = true;
@@ -5267,7 +5317,7 @@ document.getElementById('tierList').innerHTML = html;
             let msg = `총: ${newCount + mergeCount}명(신규 ${newCount}명, 업데이트 ${mergeCount}명)\n`;
             
             if(intraDups.length > 0) {
-                msg += `\n[엑셀 내 학번 중복 알림]\n`;
+                msg += `\n[⚠️ 업로드하신 엑셀 파일 "안에서" 같은 학번이 2번 이상 발견되어 아래 학생은 처리되지 않았습니다. (프로그램에 이미 있는 학생과는 무관한 알림입니다 - 그런 학생은 위쪽 '업데이트' 인원수에 정상적으로 포함되어 있습니다)]\n`;
                 msg += intraDups.map(s => `- ${s}`).join('\n');
             }
             if(blockMsgs.length > 0) {
@@ -5493,6 +5543,16 @@ document.getElementById('tierList').innerHTML = html;
             });
             tbody.innerHTML = html;
         }
+
+        function toggleNmDateLabel() {
+            let tier = document.getElementById('nm_tier').value;
+            let isYuka = (tier === '육아기근로시간단축활용가정');
+            document.getElementById('nmReqLabel').innerText = isYuka ? '시작일:' : '신청일:';
+            document.getElementById('nmConfLabel').innerText = isYuka ? '마감일:' : '심사일:';
+        }
+
+
+
 
         function toggleNeisManualAdd() {
             let f = document.getElementById('neisManualAddForm');
