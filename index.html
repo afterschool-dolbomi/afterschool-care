@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V8.2</title>
+    <title>방과후 지원금 돌보미 V8.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -588,8 +588,34 @@
 <body>
 
 
-  
-<div id="sessionRatioModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
+<div id="neisDateEditModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:320px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+            <div style="font-weight:800; font-size:16px; margin-bottom:6px; color:var(--text-dark);">📅 날짜 수정</div>
+            <div id="neisDateEditName" style="font-size:13px; color:#6b7280; margin-bottom:14px;"></div>
+            <div style="margin-bottom:10px;">
+                <label id="neisDateEditLabel1" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">신청일자</label>
+                <input type="date" id="neisDateEdit1" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label id="neisDateEditLabel2" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">심사완료일자</label>
+                <input type="date" id="neisDateEdit2" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="closeNeisDateEditModal()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db; background:white; color:#374151; font-weight:700; cursor:pointer;">취소</button>
+                <button onclick="confirmNeisDateEdit()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="yukaExpiryPopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:420px; max-height:70vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+            <div style="font-weight:800; font-size:16px; margin-bottom:12px; color:#b91c1c;">🍼 육아기근로단축 지원기간 확인 필요</div>
+            <div id="yukaExpiryList" style="font-size:13px; line-height:1.6;"></div>
+            <button onclick="closeYukaExpiryPopup()" style="margin-top:16px; width:100%; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">확인</button>
+        </div>
+    </div>
+
+    <div id="sessionRatioModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:340px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
             <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 육아기근로단축 차시 비율 적용</div>
             <div style="font-size:12.5px; color:#4b5563; line-height:1.6; margin-bottom:16px; background:#eff6ff; border-radius:8px; padding:10px;">
@@ -732,7 +758,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V8.2</span>
+                <span class="brand-version">V8.4</span>
             </div>
     </div>
     
@@ -1618,6 +1644,25 @@
             localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
         }
   
+
+
+         function getYukaDdayBadge(r) {
+            if (!(r.hasFree && r.freeTier === '육아기근로단축' && r.freeEndDate)) return '';
+            let today = new Date(); today.setHours(0,0,0,0);
+            let endDate = new Date(r.freeEndDate); endDate.setHours(0,0,0,0);
+            let diffDays = Math.round((endDate - today) / (1000*60*60*24));
+            
+            if (diffDays <= 0) {
+                return ` <span style="background:#fee2e2; color:#b91c1c; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:4px; white-space:nowrap;">🔴 기간만료</span>`;
+            } else if (diffDays <= 7) {
+                return ` <span style="background:#ffedd5; color:#c2410c; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:4px; white-space:nowrap;">🟠 D-${diffDays}</span>`;
+            }
+            return '';
+        }
+
+
+
+
   
          function toggleSidebar() {
             let sb = document.querySelector('.sidebar');
@@ -2528,6 +2573,7 @@
 		
 		
 		     let subjectGridSortType = 'subject'; // ✨ 과목별 보기 정렬 필터 기본값 (과목순)
+		     let subjectGridSortDir = 1; // ✨ 1=오름차순, -1=내림차순
         function renderGrid() {
             const tHead = document.getElementById('tHead');
             const tBody = document.getElementById('tBody');
@@ -2669,22 +2715,24 @@
 
                
 			   
-			      subjectRows.sort((a, b) => {
+			     subjectRows.sort((a, b) => {
                     if (currentTab === 'all') {
                         if (a.qNum !== b.qNum) return a.qNum - b.qNum;
                     }
                     
+                    let result = 0;
                     if (subjectGridSortType === 'subject') {
                         // 1순위: 과목명 -> 2순위: 학번
-                        if (a.sName !== b.sName) return a.sName.localeCompare(b.sName);
-                        return (a.r.grade - b.r.grade) || (a.r.classNum - b.r.classNum) || (a.r.studentNum - b.r.studentNum);
+                        if (a.sName !== b.sName) result = a.sName.localeCompare(b.sName);
+                        else result = (a.r.grade - b.r.grade) || (a.r.classNum - b.r.classNum) || (a.r.studentNum - b.r.studentNum);
                     } else {
                         // 1순위: 학번 -> 2순위: 과목명
-                        if (a.r.grade !== b.r.grade) return a.r.grade - b.r.grade;
-                        if (a.r.classNum !== b.r.classNum) return a.r.classNum - b.r.classNum;
-                        if (a.r.studentNum !== b.r.studentNum) return a.r.studentNum - b.r.studentNum;
-                        return a.sName.localeCompare(b.sName);
+                        if (a.r.grade !== b.r.grade) result = a.r.grade - b.r.grade;
+                        else if (a.r.classNum !== b.r.classNum) result = a.r.classNum - b.r.classNum;
+                        else if (a.r.studentNum !== b.r.studentNum) result = a.r.studentNum - b.r.studentNum;
+                        else result = a.sName.localeCompare(b.sName);
                     }
+                    return result * subjectGridSortDir;
                 });
 			     
 			   
@@ -2698,12 +2746,7 @@
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                       <div style="display:flex; gap:8px; align-items:center;">
-                            <select onchange="subjectGridSortType = this.value; renderGrid();" style="padding:6px 10px; border-radius:4px; font-size:13px; font-weight:bold; outline:none; border:1px solid #c084fc; color:#6b21a8; cursor:pointer;">
-                                <option value="subject" ${subjectGridSortType === 'subject' ? 'selected' : ''}>📚 과목명 순서로 묶어보기</option>
-                                <option value="student" ${subjectGridSortType === 'student' ? 'selected' : ''}>🧑‍🎓 학번/이름 순서로 묶어보기</option>
-                            </select>
-
+                      <div style="display:flex; gap:8px; align-items:center;">
                             <button class="btn-tool no-print" style="background: ${isSuikViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px;" onclick="toggleSuikView()">
                                 ${isSuikViewOn ? '◀ 수익자 금액 닫기' : '수익자 금액 보기 ▶'}
                             </button>
@@ -2756,9 +2799,9 @@
                     <tr>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">No.</th>
                         ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px;">분기</th>` : ''}
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle;" id="th-name">학번/이름</th>
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번/이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">과목명</th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">초3지원금</th>
                         <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강</th>
                         <th colspan="4" class="text-center" style="${br} color:#10b981; font-size:14px;">총 지원금</th>
@@ -2815,7 +2858,7 @@
                             ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
                             <td style="${br}">
                                <span class="student-id">${row.r.grade}-${row.r.classNum}-${row.r.studentNum}</span><br>
-                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
+                               <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>${getYukaDdayBadge(row.r)}
                                 ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                             </td>
                             <td style="${br}">${badge}</td>
@@ -2990,7 +3033,7 @@
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
                                    <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
+                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>${getYukaDdayBadge(r)}
                                     ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
@@ -3189,7 +3232,7 @@
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td>
                                   <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
+                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>${getYukaDdayBadge(r)}
                                     ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
                                 </td>
                                 <td>${badge}</td>
@@ -3964,7 +4007,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <h4 style="margin:0;">${q}분기 상세 현황</h4>
                              <div style="display:flex; gap:6px;">
-                                <button class="btn-tool no-print" style="padding:4px 10px; font-size:12px;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
+                                <button class="btn-tool no-print" style="padding:7px 14px; font-size:14px; font-weight:700; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
                             </div>
                         </div>
                         
@@ -4086,7 +4129,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                     html += `<div class="detail-box">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                     <h4 style="margin:0;">${q}분기 상세 현황</h4>
-                                    <button class="btn-tool no-print" style="padding:4px 10px; font-size:12px;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
+                                    <button class="btn-tool no-print" style="padding:7px 14px; font-size:14px; font-weight:700; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;" onclick="openSubSelectionSubPopup('${r.id}', ${q})">수강과목 및 금액 수정</button>
                                 </div>
                                 <div style="font-size:13px; color:#9ca3af;">수강 내역이 없습니다.</div>
                              </div>`;
@@ -4168,6 +4211,43 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('sr_total').value = s.totalSessions || '';
             document.getElementById('sr_covered').value = s.coveredSessions || '';
             document.getElementById('sessionRatioModal').style.display = 'flex';
+        }
+
+    function checkYukaExpiry() {
+            let today = new Date(); today.setHours(0,0,0,0);
+            let todayStr = today.toISOString().slice(0,10);
+            
+            if (localStorage.getItem('yuka_expiry_popup_shown_date') === todayStr) return;
+            
+            let expiredList = [], soonList = [];
+            db.forEach(r => {
+                if (r.hasFree && r.freeTier === '육아기근로단축' && r.freeEndDate) {
+                    let endDate = new Date(r.freeEndDate); endDate.setHours(0,0,0,0);
+                    let diffDays = Math.round((endDate - today) / (1000*60*60*24));
+                    if (diffDays <= 0) expiredList.push(r);
+                    else if (diffDays <= 7) soonList.push({ r, diffDays });
+                }
+            });
+            
+            if (expiredList.length === 0 && soonList.length === 0) return;
+            
+            let html = '';
+            if (expiredList.length > 0) {
+                html += `<div style="font-weight:800; color:#b91c1c; margin-bottom:6px;">🔴 지원기간 만료 (${expiredList.length}명)</div>`;
+                html += expiredList.map(r => `<div style="margin-bottom:4px;">- ${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name} (마감일: ${r.freeEndDate})</div>`).join('');
+            }
+            if (soonList.length > 0) {
+                html += `<div style="font-weight:800; color:#c2410c; margin-top:10px; margin-bottom:6px;">🟠 만료 임박 (${soonList.length}명)</div>`;
+                html += soonList.map(o => `<div style="margin-bottom:4px;">- ${o.r.grade}학년 ${o.r.classNum}반 ${o.r.studentNum}번 ${o.r.name} (D-${o.diffDays}, 마감일: ${o.r.freeEndDate})</div>`).join('');
+            }
+            
+            document.getElementById('yukaExpiryList').innerHTML = html;
+            document.getElementById('yukaExpiryPopupOverlay').style.display = 'flex';
+            localStorage.setItem('yuka_expiry_popup_shown_date', todayStr);
+        }
+
+        function closeYukaExpiryPopup() {
+            document.getElementById('yukaExpiryPopupOverlay').style.display = 'none';
         }
 
         function closeSessionRatioModal() {
@@ -5630,7 +5710,10 @@ document.getElementById('tierList').innerHTML = html;
                     <td style="text-align:center;">${st.familyTier}</td>
                     <td style="text-align:center;">${st.reqDate}</td>
                     <td style="text-align:center;">${st.confirmDate}</td>
-                    <td style="text-align:center;"><button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteNeisStudent(${idx})">삭제</button></td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button class="btn-tool" style="color:white; background:#3b82f6; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; margin-right:4px;" onclick="editNeisDate(${idx})">수정</button>
+                        <button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteNeisStudent(${idx})">삭제</button>
+                    </td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -5645,6 +5728,40 @@ document.getElementById('tierList').innerHTML = html;
 
 
 
+
+        let neisDateEditIdx = null;
+
+        function editNeisDate(idx) {
+            let st = neisList[idx];
+            if (!st) return;
+            neisDateEditIdx = idx;
+            
+            let isYuka = (st.familyTier === '육아기근로시간단축활용가정');
+            document.getElementById('neisDateEditLabel1').innerText = isYuka ? '시작일' : '신청일자';
+            document.getElementById('neisDateEditLabel2').innerText = isYuka ? '마감일' : '심사완료일자';
+            document.getElementById('neisDateEditName').innerText = `${st.grade}학년 ${st.classNum}반 ${st.studentNum}번 ${st.name}`;
+            document.getElementById('neisDateEdit1').value = st.reqDate || '';
+            document.getElementById('neisDateEdit2').value = st.confirmDate || '';
+            document.getElementById('neisDateEditModal').style.display = 'flex';
+        }
+
+        function closeNeisDateEditModal() {
+            document.getElementById('neisDateEditModal').style.display = 'none';
+            neisDateEditIdx = null;
+        }
+
+        function confirmNeisDateEdit() {
+            if (neisDateEditIdx === null) return;
+            let st = neisList[neisDateEditIdx];
+            if (!st) return;
+            
+            st.reqDate = document.getElementById('neisDateEdit1').value;
+            st.confirmDate = document.getElementById('neisDateEdit2').value;
+            
+            persistNeisList();
+            renderNeisList();
+            closeNeisDateEditModal();
+        }
 
         function toggleNeisManualAdd() {
             let f = document.getElementById('neisManualAddForm');
@@ -6661,7 +6778,8 @@ document.getElementById('tierList').innerHTML = html;
         }
 
         // 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
-       checkNoticePopup();
+     checkNoticePopup();
+       checkYukaExpiry();
     </script>
 
 
