@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V8.4</title>
+    <title>방과후 지원금 돌보미 V9.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -151,7 +151,9 @@
         .q-badge-4 { background-color: #f3e8ff; color: #6b21a8; } 
 
         .tier-text { display: block; font-size: 11px; color: #9ca3af; margin-top: 4px; }
-        .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+       .status-badge { padding: 4px 6px; border-radius: 8px; font-size: 11px; font-weight: bold; display:inline-block; width:52px; text-align:center; line-height:1.3; white-space:normal; word-break: keep-all; }
+        .st-beneficiary { background: #e0f2fe; color: #0369a1; }
+        body.dark-mode .st-beneficiary { background: #075985; color: #bae6fd; }
         .st-none { background: #f3f4f6; color: #6b7280; }
         .st-use { background: #dcfce7; color: #16a34a; }
         .st-done { background: #fef08a; color: #ca8a04; }
@@ -607,6 +609,17 @@
         </div>
     </div>
 
+    <div id="yukaMissingPopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:420px; max-height:70vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+            <div style="font-weight:800; font-size:16px; margin-bottom:8px; color:#c2410c;">📅 지원기간 미입력 육아기근로단축 학생</div>
+            <div style="font-size:12.5px; color:#6b7280; margin-bottom:12px; background:#fff7ed; border-radius:8px; padding:10px;">
+                아래 학생들은 육아기근로단축 자유수강권을 사용 중인데, 지원 시작일/마감일이 아직 입력되지 않았어요. '학생 개별 입력' 화면에서 해당 학생을 찾아 기간을 입력해주세요.
+            </div>
+            <div id="yukaMissingList" style="font-size:13px; line-height:1.6;"></div>
+            <button onclick="closeYukaMissingPopup()" style="margin-top:16px; width:100%; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">확인</button>
+        </div>
+    </div>
+
     <div id="yukaExpiryPopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:420px; max-height:70vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
             <div style="font-weight:800; font-size:16px; margin-bottom:12px; color:#b91c1c;">🍼 육아기근로단축 지원기간 확인 필요</div>
@@ -758,7 +771,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V8.4</span>
+                <span class="brand-version">V9.0</span>
             </div>
     </div>
     
@@ -880,11 +893,12 @@
     <div class="stat-section">
         <div class="stat-title" style="color: #60a5fa;">💡 지원금 상태 필터</div>
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="" checked onchange="renderGrid()"> 모든 상태</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="미사용" onchange="renderGrid()"> 미사용</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="사용중" onchange="renderGrid()"> 사용중</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="소진" onchange="renderGrid()"> 소진</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="초과" onchange="renderGrid()"> 초과</label>
+          <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="" checked onchange="renderGrid()"> 모든 상태</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 미사용" onchange="renderGrid()"> 지원금 미사용</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 사용중" onchange="renderGrid()"> 지원금 사용중</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 소진" onchange="renderGrid()"> 지원금 소진</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 초과" onchange="renderGrid()"> 지원금 초과</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="수익자" onchange="renderGrid()"> 수익자</label>
             <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="환불발생" onchange="renderGrid()"> 환불발생</label>
         </div>
     </div>
@@ -893,10 +907,11 @@
     <div class="stat-section">
         <div class="stat-title" style="color: #60a5fa;">🎟️ 수강권 필터</div>
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="" checked onchange="renderGrid()"> 전체 보기</label>
+          <label style="cursor: pointer;"><input type="radio" name="fltFund" value="" checked onchange="renderGrid()"> 전체 보기</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="free" onchange="renderGrid()"> 자유수강권 (중복포함)</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="g3" onchange="renderGrid()"> 초3지원금 (중복포함)</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="dual" onchange="renderGrid()"> 자유 + 초3 중복</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="beneficiary" onchange="renderGrid()"> 수익자만 보기</label>
         </div>
     </div>
 </div>
@@ -930,6 +945,14 @@
                         <div class="stat-box free"><div class="stat-label">자유수강권 대상자</div><div class="stat-value" id="s_freeCount">0명</div></div>
                     </div>
                 </div>
+                <div class="stat-section" style="margin-bottom:0;">
+                    <div class="stat-title">수익자 아동 현황 (지원금 미사용)</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="stat-box" style="border-left-color:#0ea5e9;"><div class="stat-label">수익자 아동 인원</div><div class="stat-value" id="s_beneficiaryCount">0명</div></div>
+                        <div class="stat-box" style="border-left-color:#0ea5e9;"><div class="stat-label">수익자 총 수납액</div><div class="stat-value" id="s_beneficiaryTotal">0원</div></div>
+                    </div>
+                </div>
+               
                 <div class="stat-section" style="margin-bottom:0;">
                     <div class="stat-title">지원금 상태 현황</div>
                     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -987,6 +1010,57 @@
             </div>
         </div>
     </main>
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- ✨ 수익자 관리 기능 안내 팝업 -->
+    <div id="beneficiaryNoticePopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(3px);">
+        <div style="background:#ffffff; border-radius:16px; overflow:hidden; width:90%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out forwards; display:flex; flex-direction:column;">
+            
+            <!-- 상단 타이틀 영역 (그라데이션 배경) -->
+            <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px 20px; text-align: center; color: white;">
+                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 완료! V9.0</h2>
+                <p style="margin: 8px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9;">프로그램이 더욱 강력해졌습니다.</p>
+            </div>
+            
+            <!-- 본문 안내 영역 -->
+            <div style="padding: 24px 24px 20px;">
+                <div style="font-size: 15px; color: #374151; line-height: 1.6; font-weight: 600; text-align: center; margin-bottom: 20px;">
+                    기존 방과후 지원금 관리뿐만 아니라,<br>
+                    이제 <span style="color: #ef4444; font-weight: 800; font-size: 16px;">수익자(일반 수강생)</span>도 편하게 관리할 수 있습니다.<br><br>
+                    <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
+                        💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 하단 닫기 및 체크박스 영역 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#64748b; cursor:pointer; font-weight:700;">
+                    <input type="checkbox" id="hideBeneficiaryCheckbox" style="width:16px; height:16px; accent-color:#3b82f6; cursor:pointer;">
+                    다음부터 이 창 보지 않기
+                </label>
+                <button onclick="closeBeneficiaryPopup()" style="background:#3b82f6; color:white; border:none; padding:10px 24px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:800; box-shadow:0 4px 6px rgba(59,130,246,0.3); transition: transform 0.1s;">
+                    확인
+                </button>
+            </div>
+        </div>
+    </div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
     <div class="slide-panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
     <aside class="slide-panel" id="slidePanel">
@@ -1444,6 +1518,12 @@
         </div>
     </div>
 
+
+     
+     
+
+
+
     
     <script>
               let db = [];
@@ -1645,6 +1725,8 @@
         }
   
 
+
+    
 
          function getYukaDdayBadge(r) {
             if (!(r.hasFree && r.freeTier === '육아기근로단축' && r.freeEndDate)) return '';
@@ -2461,18 +2543,20 @@
                 });
 
                 let currentRem = (idx <= h1CutoffIndex) ? (remG3_H1 + remFree) : (remG3_Total + remFree);
-                let qStatus = "미사용";
-                if (accOver > 0) qStatus = "초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "소진"; else if (accExp > 0) qStatus = "사용중";
+                let qStatus = "지원금 미사용";
+                if (!r.hasG3 && !r.hasFree) qStatus = "수익자";
+                else if (accOver > 0) qStatus = "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
 
                 res[q] = { exp, usedG3: q_usedG3, usedFree: q_usedFree, over: q_over, status: qStatus, hasManual, hasManualSu, hasManualGy, hasManualJ };
                 res.allocs[q] = q_allocs;
                 res.total.usedG3 += q_usedG3; res.total.usedFree += q_usedFree; res.total.over += q_over; res.total.exp += exp;
             });
 
-            let totalAllowance = allowanceG3 + allowanceFree;
+           let totalAllowance = allowanceG3 + allowanceFree;
             let totalSpent = res.total.usedG3 + res.total.usedFree;
-            let status = "미사용";
-            if (res.total.over > 0) status = "초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "소진"; else if (res.total.exp > 0) status = "사용중";
+            let status = "지원금 미사용";
+            if (!r.hasG3 && !r.hasFree) status = "수익자";
+            else if (res.total.over > 0) status = "지원금 초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "지원금 소진"; else if (res.total.exp > 0) status = "지원금 사용중";
 
             return { ...res, remG3: remG3_Total, remFree, totalAllowance, totalSpent, status };
         }
@@ -2493,8 +2577,8 @@
 
 
 
-                function updateGlobalStats() {
-            let st = { tot:0, spent:0, subsidy:0, g3:0, free:0, none:0, done:0, over:0 };
+               function updateGlobalStats() {
+            let st = { tot:0, spent:0, subsidy:0, g3:0, free:0, none:0, done:0, over:0, beneficiaryCount:0, beneficiaryTotal:0 };
             
             db.forEach(r => {
                 let c = calcStudent(r);
@@ -2503,9 +2587,11 @@
                 st.subsidy += (c.total.usedG3 + c.total.usedFree); // 순수 지원금만 합산
                 if(r.hasG3) st.g3++;
                 if(r.hasFree) st.free++;
-                if(c.status === "미사용") st.none++;
-                if(c.status === "소진") st.done++;
-                if(c.status === "초과") st.over++;
+               if(c.status === "지원금 미사용") st.none++;
+                if(c.status === "지원금 소진") st.done++;
+                if(c.status === "지원금 초과") st.over++;
+                // ✨ 지원금을 하나도 안 쓰는 '수익자 아동' 집계
+                if(!r.hasG3 && !r.hasFree) { st.beneficiaryCount++; st.beneficiaryTotal += c.total.exp; }
             });
 
             document.getElementById('s_totalStudents').innerText = st.tot + '명';
@@ -2516,6 +2602,8 @@
             document.getElementById('s_stNone').innerText = st.none + '명';
             document.getElementById('s_stDone').innerText = st.done + '명';
             document.getElementById('s_stOver').innerText = st.over + '명';
+            document.getElementById('s_beneficiaryCount').innerText = st.beneficiaryCount + '명';
+            document.getElementById('s_beneficiaryTotal').innerText = formatMoney(st.beneficiaryTotal);
         }
 
 
@@ -2621,9 +2709,10 @@
                     }
                 }
 
-                if(fFund === 'free' && !r.hasFree) return false;
+if(fFund === 'free' && !r.hasFree) return false;
                 if(fFund === 'g3' && !r.hasG3) return false;
                 if(fFund === 'dual' && !(r.hasG3 && r.hasFree)) return false;
+                if(fFund === 'beneficiary' && (r.hasG3 || r.hasFree)) return false;
                 
                 return true;
             });
@@ -3024,7 +3113,7 @@
                         if(r.hasG3) badge += `<span class="badge bg-g3">초3지원</span>`;
                         if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
                         
-                        let stClass = c.status==='미사용'?'st-none' : c.status==='사용중'?'st-use' : c.status==='소진'?'st-done':'st-over';
+                        let stClass = c.status==='수익자'?'st-beneficiary' : c.status==='지원금 미사용'?'st-none' : c.status==='지원금 사용중'?'st-use' : c.status==='지원금 소진'?'st-done':'st-over';
                         
                         let overHtml = c.total.over > 0 ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
 
@@ -3195,7 +3284,7 @@
                         if(r.hasG3) badge += `<span class="badge bg-g3">초3지원</span>`;
                         if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
 
-                        let qStClass = c[q].status==='미사용'?'st-none' : c[q].status==='사용중'?'st-use' : c[q].status==='소진'?'st-done':'st-over';
+                        let qStClass = c[q].status==='수익자'?'st-beneficiary' : c[q].status==='지원금 미사용'?'st-none' : c[q].status==='지원금 사용중'?'st-use' : c[q].status==='지원금 소진'?'st-done':'st-over';
 
                         let qNum = parseInt(q.replace('q', ''));
                         let accUsedG3 = 0, accUsedFree = 0;
@@ -3468,13 +3557,11 @@
     let fFreeBox = document.getElementById('fFree');
     let desc = document.getElementById('g3Desc');
     
-    if(grade > 0 && grade !== 3) {
+  if(grade > 0 && grade !== 3) {
         g3Box.checked = false;
         g3Box.disabled = true;
         desc.style.color = "#ef4444";
         desc.innerText = "※ 3학년이 아니므로 초3지원금을 선택할 수 없습니다.";
-        
-        if(fFreeBox) { fFreeBox.checked = true; toggleTier(); }
     } else {
                 g3Box.disabled = false;
                 desc.style.color = "var(--sidebar-accent)";
@@ -3630,7 +3717,7 @@ document.getElementById('fTier').value = r.freeTier || "";
           }
 
             if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
-            if(!hasG3 && !hasFree) { alert("지원 자격을 1개 이상 선택해야 합니다."); return; }
+           
 
             let oldR = db.find(x => x.id == id);
             let memo = oldR ? oldR.memo : '';
@@ -4212,6 +4299,30 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('sr_covered').value = s.coveredSessions || '';
             document.getElementById('sessionRatioModal').style.display = 'flex';
         }
+
+    function checkYukaMissingNeis() {
+        let today = new Date(); today.setHours(0,0,0,0);
+        let todayStr = today.toISOString().slice(0,10);
+        
+        if (localStorage.getItem('yuka_missing_neis_popup_shown_date') === todayStr) return;
+        
+        let missingList = db.filter(r => r.hasFree && r.freeTier === '육아기근로단축' &&
+            !neisList.some(st => st.grade === r.grade && st.classNum === r.classNum && st.studentNum === r.studentNum && st.name === r.name)
+        );
+        
+        if (missingList.length === 0) return;
+        
+        document.getElementById('yukaMissingList').innerHTML = missingList.map(r =>
+            `<div style="margin-bottom:4px;">- ${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name}</div>`
+        ).join('');
+        document.getElementById('yukaMissingPopupOverlay').style.display = 'flex';
+        
+        localStorage.setItem('yuka_missing_neis_popup_shown_date', todayStr);
+    }
+
+    function closeYukaMissingPopup() {
+        document.getElementById('yukaMissingPopupOverlay').style.display = 'none';
+    }
 
     function checkYukaExpiry() {
             let today = new Date(); today.setHours(0,0,0,0);
@@ -4911,10 +5022,9 @@ document.getElementById('tierList').innerHTML = html;
                     
                     if(r === 0) {
                         let g3Formula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"O","X"))` };
-                        let freeFormula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"","O"))` };
-                       if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, freeFormula, '기초생활수급자'];
-                        else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, freeFormula, ''];
-                        else rowData = ['', '', '', '', g3Formula, freeFormula, ''];
+                       if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, 'O', '기초생활수급자'];
+                        else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, 'X', ''];
+                        else rowData = ['', '', '', '', g3Formula, '', ''];
                     } else {
                         rowData = ['', '', '', '', '', '', ''];
                     }
@@ -6780,6 +6890,7 @@ document.getElementById('tierList').innerHTML = html;
         // 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
      checkNoticePopup();
        checkYukaExpiry();
+       checkYukaMissingNeis();
     </script>
 
 
@@ -6795,6 +6906,12 @@ document.getElementById('tierList').innerHTML = html;
     </div>
 
  
+		
+		
+		
+	
+		
+		
 		
 
 
@@ -6859,6 +6976,49 @@ document.addEventListener('keydown', function(e) {
         if (filterPanel) filterPanel.classList.remove('open');
     }
 });
+
+
+
+
+
+
+
+
+      // ✨ 수익자 관리 업데이트 팝업 로직
+    document.addEventListener("DOMContentLoaded", function() {
+        // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
+        const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v9');
+        
+        // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
+        if (!hidePopup) {
+            document.getElementById('beneficiaryNoticePopup').style.display = 'flex';
+        }
+    });
+
+    // 팝업 닫기 버튼을 눌렀을 때 실행되는 함수
+    function closeBeneficiaryPopup() {
+        // 체크박스에 체크가 되어 있는지 확인
+        const isChecked = document.getElementById('hideBeneficiaryCheckbox').checked;
+        
+        if (isChecked) {
+            // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
+            // 식별자를 'hideBeneficiaryPopup_v9'로 주어 나중에 V10 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
+            localStorage.setItem('hideBeneficiaryPopup_v9', 'true');
+        }
+        
+        // 팝업창 숨기기
+        document.getElementById('beneficiaryNoticePopup').style.display = 'none';
+    }
+		
+
+
+
+
+
+
+
+
+
 		
     </script>
 
