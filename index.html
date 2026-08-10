@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V9.3</title>
+    <title>방과후 지원금 돌보미 V9.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -36,7 +36,7 @@
         .sidebar.collapsed { width: 44px; padding: 16px 8px; overflow: hidden; }
       .sidebar.collapsed > div { display: none !important; }
         .sidebar.collapsed .sidebar-expand-tab { display: flex !important; }
-       #statusPanelWrap.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+       #statusPanelWrap.open { opacity: 1 !important; pointer-events: auto !important; }
         
         /* ✨ 브랜드 타이틀 3D 느낌 디자인 (이모티콘 제거, 밝은색상, 흰색 테두리, 스크롤 방지 사이즈 조절) */
         .brand { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap; overflow: hidden; }
@@ -772,7 +772,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V9.3</span>
+                <span class="brand-version">V9.4</span>
             </div>
     </div>
     
@@ -958,52 +958,65 @@
 		   
 		   
 		   
-		   <div id="statusPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:70px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto;">
-            <button onclick="toggleStatusPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
-            <div style="display:flex; flex-direction:column; gap:20px;">
-                <div class="stat-section" style="margin-bottom:0;">
-                    <div class="stat-title">실시간 종합 지표</div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div class="stat-box primary">
-                            <div class="stat-label">총 관리학생 인원</div>
-                            <div class="stat-value" id="s_totalStudents">0명</div>
-                        </div>
-                        <div class="stat-box primary">
-                            <div class="stat-label">순수 지원금 집행액 (초3+자유)</div>
-                            <div class="stat-value" id="s_totalSubsidy">0원</div>
-                        </div>
-                        <div class="stat-box" style="border-left-color: #ec4899;">
-                            <div class="stat-label">총 수강 금액 (지원+수익자)</div>
-                            <div class="stat-value" id="s_totalSpent">0원</div>
-                        </div>
-                    </div>
+		  <div id="statusPanelWrap" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--sidebar-bg); padding:24px 40px 60px 40px; z-index:500; opacity:0; pointer-events:none; transition:opacity 0.25s ease; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; position:sticky; top:0; background:var(--sidebar-bg); padding:8px 0; z-index:2;">
+                <span style="font-size:20px; font-weight:800; color:white;">📊 전체 현황</span>
+                <button onclick="toggleStatusPanel()" style="background:#374151; border:none; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">✕ 메인 화면으로</button>
+            </div>
+           <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                <div class="stat-box primary" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">총 관리학생 인원</div>
+                    <div class="stat-value" id="s_totalStudents" style="font-size:17px;">0명</div>
                 </div>
-                <div class="stat-section" style="margin-bottom:0;">
-                    <div class="stat-title">지원금 대상자 현황</div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div class="stat-box g3"><div class="stat-label">초3지원금 대상자</div><div class="stat-value" id="s_g3Count">0명</div></div>
-                        <div class="stat-box free"><div class="stat-label">자유수강권 대상자</div><div class="stat-value" id="s_freeCount">0명</div></div>
-                    </div>
+                <div class="stat-box primary" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                   <div class="stat-label" style="font-size:13px; white-space:nowrap;">순수 지원금 집행액 (초3지원금+자유수강)</div>
+                    <div class="stat-value" id="s_totalSubsidy" style="font-size:17px;">0원</div>
                 </div>
-                <div class="stat-section" style="margin-bottom:0;">
-                    <div class="stat-title">수익자 아동 현황 (지원금 미사용)</div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div class="stat-box" style="border-left-color:#0ea5e9;"><div class="stat-label">수익자 아동 인원</div><div class="stat-value" id="s_beneficiaryCount">0명</div></div>
-                        <div class="stat-box" style="border-left-color:#0ea5e9;"><div class="stat-label">수익자 총 수납액</div><div class="stat-value" id="s_beneficiaryTotal">0원</div></div>
-                    </div>
+                <div class="stat-box g3" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">초3지원금 총 사용액</div>
+                    <div class="stat-value" id="s_g3Used" style="font-size:17px;">0원</div>
                 </div>
-               
-                <div class="stat-section" style="margin-bottom:0;">
-                    <div class="stat-title">지원금 상태 현황</div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div class="stat-box none"><div class="stat-label">지원금 미사용자</div><div class="stat-value" id="s_stNone" style="font-size:16px;">0명</div></div>
-                        <div class="stat-box done"><div class="stat-label">지원금 소진자 (0원)</div><div class="stat-value" id="s_stDone" style="font-size:16px;">0명</div></div>
-                        <div class="stat-box alert"><div class="stat-label">지원금 초과자</div><div class="stat-value" id="s_stOver" style="font-size:16px; color:#ef4444;">0명</div></div>
-                    </div>
+                <div class="stat-box free" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">자유수강권 총 사용액</div>
+                    <div class="stat-value" id="s_freeUsed" style="font-size:17px;">0원</div>
+                </div>
+                <div class="stat-box g3" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">초3지원금 대상자</div>
+                    <div class="stat-value" id="s_g3Count" style="font-size:17px;">0명</div>
+                </div>
+                <div class="stat-box free" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">자유수강권 대상자</div>
+                    <div class="stat-value" id="s_freeCount" style="font-size:17px;">0명</div>
                 </div>
             </div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                <div class="stat-box" style="border-left-color: #ec4899; flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">총 수강 금액 (수익자+지원금)</div>
+                    <div class="stat-value" id="s_totalSpent" style="font-size:17px;">0원</div>
+                </div>
+                <div class="stat-box" style="border-left-color:#0ea5e9; flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">수익자 아동 인원</div>
+                    <div class="stat-value" id="s_beneficiaryCount" style="font-size:17px;">0명</div>
+                </div>
+                <div class="stat-box" style="border-left-color:#0ea5e9; flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">수익자 총 수납액</div>
+                    <div class="stat-value" id="s_beneficiaryTotal" style="font-size:17px;">0원</div>
+                </div>
+                <div class="stat-box none" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">지원금 미사용자</div>
+                    <div class="stat-value" id="s_stNone" style="font-size:15px;">0명</div>
+                </div>
+                <div class="stat-box done" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">지원금 소진자</div>
+                    <div class="stat-value" id="s_stDone" style="font-size:15px;">0명</div>
+                </div>
+                <div class="stat-box alert" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
+                    <div class="stat-label" style="font-size:13px;">지원금 초과자</div>
+                    <div class="stat-value" id="s_stOver" style="font-size:15px; color:#ef4444;">0명</div>
+                </div>
+            </div>
+            <div id="quarterSubjectTables" style="margin-top:24px;"></div>
         </div>
-		   
 		   
 		   
 		   
@@ -1795,10 +1808,82 @@
         }
   
   
-  
-      function toggleStatusPanel() {
+function toggleStatusPanel() {
             let panel = document.getElementById('statusPanelWrap');
             if (panel) panel.classList.toggle('open');
+            if (panel && panel.classList.contains('open')) renderQuarterSubjectTables();
+        }
+
+      function renderQuarterSubjectTables() {
+            let container = document.getElementById('quarterSubjectTables');
+            if (!container) return;
+            
+            let html = '<div style="display:flex; flex-wrap:wrap; gap:20px;">';
+            for (let q = 1; q <= maxQuarter; q++) {
+                let qKey = `q${q}`;
+                let counts = {};
+                
+                savedSubjects.forEach(s => { counts[s.name] = { beneficiary: 0, free: 0, g3: 0 }; });
+                
+                db.forEach(r => {
+                    if (!r[qKey] || !r[qKey].subs) return;
+                    r[qKey].subs.forEach(s => {
+                        let subName = s.name ? s.name.trim() : '';
+                        if (!subName) return;
+                        let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
+                        if (!hasAmount) return;
+                        
+                        if (!counts[subName]) counts[subName] = { beneficiary: 0, free: 0, g3: 0 };
+                        
+                        if (r.hasG3) counts[subName].g3++;
+                        else if (r.hasFree) counts[subName].free++;
+                        else counts[subName].beneficiary++;
+                    });
+                });
+                
+                let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
+               let rowIdx = 0;
+               let rowsHtml = Object.keys(counts).map(name => {
+                    let c = counts[name];
+                    let sum = c.beneficiary + c.free + c.g3;
+                    totalBen += c.beneficiary; totalFree += c.free; totalG3 += c.g3; totalAll += sum;
+                    let zebra = (rowIdx++ % 2 === 0) ? '#ffffff' : '#f5f3ff';
+                    return `<tr style="background:${zebra};">
+                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${name}</td>
+                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${c.beneficiary}</td>
+                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#7c3aed; font-weight:700;">${c.free}</td>
+                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#2563eb; font-weight:700;">${c.g3}</td>
+                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; font-weight:800; border-left:2px solid #c7d2fe;">${sum}</td>
+                    </tr>`;
+                }).join('');
+                
+               html += `
+                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 300px; min-width:270px; border-top:3px solid #6366f1;">
+                    <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${q}분기 강좌별 인원</div>
+                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #6366f1;">
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">초3</th>
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827; border-left:2px solid #6366f1;">합계</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}
+                          <tr style="border-top:2px solid #111827;">
+                                <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
+                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
+                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalFree}</td>
+                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalG3}</td>
+                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800; border-left:2px solid #111827;">${totalAll}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+            html += '</div>';
+            container.innerHTML = html;
         }
   
   
@@ -2635,14 +2720,16 @@
 
 
 
-               function updateGlobalStats() {
-            let st = { tot:0, spent:0, subsidy:0, g3:0, free:0, none:0, done:0, over:0, beneficiaryCount:0, beneficiaryTotal:0 };
+              function updateGlobalStats() {
+            let st = { tot:0, spent:0, subsidy:0, g3Used:0, freeUsed:0, g3:0, free:0, none:0, done:0, over:0, beneficiaryCount:0, beneficiaryTotal:0 };
             
             db.forEach(r => {
                 let c = calcStudent(r);
                 st.tot++;
                 st.spent += c.total.exp; // 전체 수강금액 (지원+수익)
                 st.subsidy += (c.total.usedG3 + c.total.usedFree); // 순수 지원금만 합산
+                st.g3Used += c.total.usedG3;
+                st.freeUsed += c.total.usedFree;
                 if(r.hasG3) st.g3++;
                 if(r.hasFree) st.free++;
                if(c.status === "지원금 미사용") st.none++;
@@ -2655,6 +2742,8 @@
             document.getElementById('s_totalStudents').innerText = st.tot + '명';
             document.getElementById('s_totalSubsidy').innerText = formatMoney(st.subsidy);
             document.getElementById('s_totalSpent').innerText = formatMoney(st.spent);
+            document.getElementById('s_g3Used').innerText = formatMoney(st.g3Used);
+            document.getElementById('s_freeUsed').innerText = formatMoney(st.freeUsed);
             document.getElementById('s_g3Count').innerText = st.g3 + '명';
             document.getElementById('s_freeCount').innerText = st.free + '명';
             document.getElementById('s_stNone').innerText = st.none + '명';
@@ -2663,7 +2752,6 @@
             document.getElementById('s_beneficiaryCount').innerText = st.beneficiaryCount + '명';
             document.getElementById('s_beneficiaryTotal').innerText = formatMoney(st.beneficiaryTotal);
         }
-
 
 
 
