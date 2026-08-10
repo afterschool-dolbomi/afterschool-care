@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V9.1</title>
+    <title>방과후 지원금 돌보미 V9.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -571,6 +571,7 @@
 		
 	/* 필터창 열림 애니메이션 */
 #filterPanelWrap.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+#yearSettingsPanelWrap.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
 
 /* 라디오 버튼 디자인 정렬 */
 #filterPanelWrap input[type="radio"] { margin-right: 8px; accent-color: var(--sidebar-accent); }
@@ -771,7 +772,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V9.1</span>
+                <span class="brand-version">V9.3</span>
             </div>
     </div>
     
@@ -806,6 +807,7 @@
                 <button class="btn-3d btn-side" id="btn-snapshot-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSnapshotModal()">⏳ 8.날짜별 과거 기록(백업) 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
+                <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
                 <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
@@ -870,11 +872,39 @@
         </div>
     </div>
 </header>
-           
+        
+    <div id="yearSettingsPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:white; padding:0; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto;">
+        <div style="background:#111827; padding:24px; position:relative;">
+            <button onclick="toggleYearSettingsPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
+            <div style="font-weight:800; font-size:16px; color:white;">⚙️ 학년도 지원금 설정</div>
+        </div>
+        <div style="padding:24px;">
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:6px;">학년도 선택</label>
+                <select id="ys_year" onchange="loadYearSetting()" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;"></select>
+            </div>
+            <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:14px; margin-bottom:12px;">
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">초3지원금 (연간)</label>
+                    <input type="text" id="ys_g3" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">자유수강권 (연간)</label>
+                    <input type="text" id="ys_free" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                </div>
+            </div>
+            <div id="ys_currentNotice" style="font-size:11px; margin-bottom:16px;"></div>
+            <button onclick="saveYearSetting()" style="width:100%; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">저장</button>
+        </div>
+    </div>
+
+
+
+		
        <!-- 🎯 상세 필터창 (오른쪽 스르륵 패널) -->
-<div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:70px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
+<div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:40px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
     <button onclick="toggleFilterPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
-    <div style="font-size: 16px; font-weight: bold; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">🎯 상세 필터 설정</div>
+    <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">🎯 상세 필터 설정</div>
     
    <!-- 학년 필터 -->
     <div class="stat-section">
@@ -903,7 +933,7 @@
         </div>
     </div>
 
-    <!-- 수강권 종류 필터 -->
+   <!-- 수강권 종류 필터 -->
     <div class="stat-section">
         <div class="stat-title" style="color: #60a5fa;">🎟️ 수강권 필터</div>
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
@@ -912,6 +942,16 @@
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="g3" onchange="renderGrid()"> 초3지원금 (중복포함)</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="dual" onchange="renderGrid()"> 자유 + 초3 중복</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="beneficiary" onchange="renderGrid()"> 수익자만 보기</label>
+        </div>
+    </div>
+
+    <!-- 과목 필터 (과목별 보기에서만 실제로 적용됨) -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#1f2937; color:white; font-size:13px;">
+                <option value="">모든 과목</option>
+            </select>
         </div>
     </div>
 </div>
@@ -1532,7 +1572,7 @@
         let specialList = []; 
         let snapshots = []; // ✨ 타임머신 과거 기록 보관소
         let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
-        let isSuikViewOn = false; 
+        let isSuikViewOn = true; // ✨ 수익자 관리 프로그램이라 항상 켜진 상태로 고정
         
         window.toggleSuikView = function() {
             isSuikViewOn = !isSuikViewOn;
@@ -2341,9 +2381,27 @@
 
 
 
-      function calcStudent(r) {
-            let allowanceG3 = r.hasG3 ? 500000 : 0;
-            let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
+      let yearlySettings = JSON.parse(localStorage.getItem('edusync_yearly_settings') || '{}');
+
+        function persistYearlySettings() {
+            localStorage.setItem('edusync_yearly_settings', JSON.stringify(yearlySettings));
+        }
+
+        function getYearSetting(year) {
+            return yearlySettings[year] || { g3: 500000, free: 600000 }; // ✨ 기본값(인천 기준) - 설정 안 하면 지금까지처럼 작동
+        }
+
+        function getG3Allowance() {
+            return getYearSetting(new Date().getFullYear()).g3;
+        }
+
+        function getFreeAllowanceDefault() {
+            return getYearSetting(new Date().getFullYear()).free;
+        }
+
+    function calcStudent(r) {
+            let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+            let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
             let remG3_H1 = r.hasG3 ? 250000 : 0; 
             let remG3_Total = allowanceG3;
             let remFree = allowanceFree;
@@ -2617,7 +2675,7 @@
             
             currentTab = tab;
             isRefundViewOn = false; // ✨ 탭 이동 시 환불 아코디언 무조건 닫기
-			isSuikViewOn = false; // ✨ 탭 이동 시 수익자 아코디언 무조건 닫기
+			isSuikViewOn = true; // ✨ 항상 켜진 상태로 유지
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             
             if (evtTarget && evtTarget.classList && evtTarget.classList.contains('tab-btn')) {
@@ -2662,6 +2720,7 @@
 		
 		     let subjectGridSortType = 'subject'; // ✨ 과목별 보기 정렬 필터 기본값 (과목순)
 		     let subjectGridSortDir = 1; // ✨ 1=오름차순, -1=내림차순
+		     let mainGridSortDir = 1; // ✨ 메인 홈 학번/이름 정렬방향
         function renderGrid() {
             const tHead = document.getElementById('tHead');
             const tBody = document.getElementById('tBody');
@@ -2732,10 +2791,10 @@ if(fFund === 'free' && !r.hasFree) return false;
                 let subjectRows = [];
 
                 viewData.forEach(({r, c}) => {
-                    let allowanceG3 = r.hasG3 ? 500000 : 0;
+                    let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
                     let remG3_H1 = r.hasG3 ? 250000 : 0;
                    let remG3_Total = allowanceG3;
-                    let remFree = r.hasFree ? (r.freeLimit || 600000) : 0;
+                    let remFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
 
 
 
@@ -2804,7 +2863,13 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                
 			   
-			     subjectRows.sort((a, b) => {
+			    subjectRows.sort((a, b) => {
+                    if (subjectGridSortType === 'quarter') {
+                        let qResult = (a.qNum - b.qNum) * subjectGridSortDir;
+                        if (qResult !== 0) return qResult;
+                        return (a.r.grade - b.r.grade) || (a.r.classNum - b.r.classNum) || (a.r.studentNum - b.r.studentNum);
+                    }
+                    
                     if (currentTab === 'all') {
                         if (a.qNum !== b.qNum) return a.qNum - b.qNum;
                     }
@@ -2835,11 +2900,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                      <div style="display:flex; gap:8px; align-items:center;">
-                            <button class="btn-tool no-print" style="background: ${isSuikViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px;" onclick="toggleSuikView()">
-                                ${isSuikViewOn ? '◀ 수익자 금액 닫기' : '수익자 금액 보기 ▶'}
-                            </button>
-                        </div>
+                     
                     </div>
                 `;
 
@@ -2859,7 +2920,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                 colGroup.innerHTML = `
                     <col style="width: 40px;">
                     ${currentTab === 'all' ? '<col style="width: 55px;">' : ''}
-                    <col style="width: 95px;"> <col style="width: 115px;"> <col style="width: 110px;">
+                    <col style="width: 55px;" id="col-id"> <col style="width: 65px;"> <col style="width: 100px;"> <col style="width: 100px;">
                     <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 80px;">
                     <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 80px;">
                     <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 85px;">
@@ -2887,8 +2948,9 @@ if(fFund === 'free' && !r.hasFree) return false;
                 tHead.innerHTML = `
                     <tr>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">No.</th>
-                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px;">분기</th>` : ''}
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번/이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">초3지원금</th>
@@ -2945,12 +3007,15 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <tr>
                             <td class="text-center" style="${br} font-weight: 700; color: #9ca3af;">${index + 1}</td>
                             ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
-                            <td style="${br}">
-                               <span class="student-id">${row.r.grade}-${row.r.classNum}-${row.r.studentNum}</span><br>
-                               <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>${getYukaDdayBadge(row.r)}
-                                ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
+                            <td style="${br} text-align:center; font-weight:600;">
+                               ${row.r.grade}-${row.r.classNum}-${row.r.studentNum}<br>
+                               ${getYukaDdayBadge(row.r)}
+                               ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
                             </td>
-                            <td style="${br}">${badge}</td>
+                            <td style="${br}">
+                               <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
+                            </td>
+                           <td style="${br}">${badge}</td>
                             <td style="${br} font-weight:700;">${row.sName}${newBadge}</td>
                             
                             <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
@@ -2997,6 +3062,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                             <td style="border-right: none;"></td>
                             ${currentTab === 'all' ? `<td style="border-right: none;"></td>` : ''}
                             <td style="border-right: none;"></td>
+                            <td style="border-right: none;"></td>
                             <td style="text-align:center; font-weight:bold;">총합</td>
                             <td style="${br}"></td>
                             <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3Su)}</td>
@@ -3030,7 +3096,7 @@ if(fFund === 'free' && !r.hasFree) return false;
 
             } else {
                 // --- 📊 전체 현황 보기 모드 ---
-                viewData.sort((a,b) => (a.r.grade - b.r.grade || a.r.classNum - b.r.classNum || a.r.studentNum - b.r.studentNum));
+                viewData.sort((a,b) => ((a.r.grade - b.r.grade || a.r.classNum - b.r.classNum || a.r.studentNum - b.r.studentNum)) * mainGridSortDir);
                 currentViewData = viewData;
 
                 tHead.innerHTML = ''; tBody.innerHTML = '';
@@ -3039,7 +3105,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                 if(currentTab === 'all') {
                     document.getElementById('tabBanner').innerHTML = `
                         <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
-                        <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※본 프로그램은 지원금 관리 프로그램 이지만, 수강료를 모두 입력하면 지원금과 수익자를 분리해줍니다.</span>
+                        <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
                     `;
                     
 					
@@ -3049,20 +3115,21 @@ if(fFund === 'free' && !r.hasFree) return false;
 					
 					
                    let colHtml = `
-                        <col style="width: 50px;"> <col style="width: 95px;" id="col-name"> <col style="width: 130px;">
+                        <col style="width: 50px;"> <col style="width: 55px;" id="col-id"> <col style="width: 65px;" id="col-name"> <col style="width: 120px;">
                         <col style="width: 75px;">`;
                     for(let i=1; i<=maxQuarter; i++) colHtml += ` <col style="width: 95px;">`;
                     colHtml += ` <col style="width: 105px;">
-                        <col style="width: 125px;"> <col style="width: 125px;"> <col style="width: 135px;">
+                        <col style="width: 120px;"> <col style="width: 120px;"> <col style="width: 130px;">
                         <col style="width: 100px;" id="col-manage" class="no-print">
                     `;
                     colGroup.innerHTML = colHtml;
 
                     let thHtml = `<tr>
                         <th class="text-center">No.</th>
-                        <th id="th-name">학번/이름</th>
-                        <th>지원유형</th>
-                        <th>상태</th>`;
+                        <th class="text-center" id="th-id" style="cursor:pointer;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" id="th-name" style="cursor:pointer;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center">지원유형</th>
+                        <th class="text-center">상태</th>`;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
                     thHtml += `
                         <th class="text-right" style="font-weight: 800; color: #111827;">총 집행액</th>
@@ -3121,10 +3188,13 @@ if(fFund === 'free' && !r.hasFree) return false;
                         tBody.innerHTML += `
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
+<td class="text-center" style="font-weight:600;">
+                                   ${r.grade}-${r.classNum}-${r.studentNum}<br>
+                                   ${getYukaDdayBadge(r)}
+                                   ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
+                                </td>
                                 <td>
-                                   <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>${getYukaDdayBadge(r)}
-                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
+                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                 </td>
                                 <td>${badge}</td>
                                 <td><span class="status-badge ${stClass}">${c.status}</span></td>
@@ -3174,6 +3244,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         tBody.innerHTML += `<tr class="total-row">
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
+                            <td style="border-right: none;"></td>
                             <td style="text-align:center; font-weight:bold;">전체 총합</td>
                             <td style="border-right: none;"></td>
                             ${totExpTds}
@@ -3210,12 +3281,12 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                     ` : '';
 
                     colGroup.innerHTML = `
-                        <col style="width: 50px;"> <col style="width: 95px;" id="col-name"> <col style="width: 130px;">
+                        <col style="width: 50px;"> <col style="width: 55px;" id="col-id"> <col style="width: 65px;" id="col-name"> <col style="width: 120px;">
                         <col style="width: 75px;"> <col style="width: 80px;"> <col style="width: 80px;">
                         <col style="width: 85px;"> <col style="width: 80px;"> <col style="width: 80px;">
                         <col style="width: 105px;">
                         ${refundCols}
-                        <col style="width: 125px;"> <col style="width: 125px;"> <col style="width: 125px;">
+                        <col style="width: 120px;"> <col style="width: 120px;"> <col style="width: 120px;">
                         <col style="width: 100px;" id="col-manage" class="no-print">
                     `;
 
@@ -3229,11 +3300,12 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         <th class="text-right" style="background:#fef2f2; font-weight:800; color:#b91c1c; line-height:1.3;">${qText}<br>환불 합계</th>
                     ` : '';
 
-                    tHead.innerHTML = `<tr>
+                  tHead.innerHTML = `<tr>
                         <th class="text-center">No.</th>
-                        <th id="th-name">학번/이름</th>
-                        <th>지원유형</th>
-                        <th>상태</th> 
+                        <th class="text-center" id="th-id">학번</th>
+                        <th class="text-center" id="th-name">이름</th>
+                        <th class="text-center">지원유형</th>
+                        <th class="text-center">상태</th>
                         <th class="text-right">${qText} 강사료</th>
                         <th class="text-right">${qText} 수용비</th>
                         <th class="text-right">${qText} 수강료</th>
@@ -3295,8 +3367,8 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             accUsedFree += c[`q${i}`].usedFree;
                         }
                         
-                         let allowanceG3 = r.hasG3 ? 500000 : 0;
-            let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
+                         let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+                         let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
                         
                         let remG3_until_Q = allowanceG3 - accUsedG3;
                         let remFree_until_Q = allowanceFree - accUsedFree;
@@ -3321,10 +3393,13 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         tBody.innerHTML += `
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
+                                <td class="text-center" style="font-weight:600;">
+                                  ${r.grade}-${r.classNum}-${r.studentNum}<br>
+                                  ${getYukaDdayBadge(r)}
+                                  ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
+                                </td>
                                 <td>
-                                  <span class="student-id">${r.grade}-${r.classNum}-${r.studentNum}</span><br>
-                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>${getYukaDdayBadge(r)}
-                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; display:inline-block; line-height:1;">🆕신규</div>' : ''}
+                                   <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                 </td>
                                 <td>${badge}</td>
                                 <td><span class="status-badge ${qStClass}">${c[q].status}</span></td>
@@ -3396,6 +3471,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         ` : '';
 
                         tBody.innerHTML += `<tr class="total-row">
+                            <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
@@ -3619,7 +3695,7 @@ function openPanel(mode, id = null) {
                 document.getElementById('fG3').checked = r.hasG3;
                 document.getElementById('fFree').checked = r.hasFree;
 document.getElementById('fTier').value = r.freeTier || "";
-                document.getElementById('fFreeLimit').value = (r.freeLimit || 600000).toLocaleString();
+                document.getElementById('fFreeLimit').value = (r.freeLimit || getFreeAllowanceDefault()).toLocaleString();
                 document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
                 document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
                 toggleTier();
@@ -3709,7 +3785,8 @@ document.getElementById('fTier').value = r.freeTier || "";
                 }
             }
          let freeTier = document.getElementById('fTier').value;
-          let freeLimit = toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || 600000;
+          let freeLimit = toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault();
+		 
           let freeStartDate = document.getElementById('fFreeStartDate').value;
           let freeEndDate = document.getElementById('fFreeEndDate').value;
 
@@ -3868,8 +3945,8 @@ document.getElementById('fTier').value = r.freeTier || "";
             let html = ``;
             
               // ✨ 학생별 지원금 종합 현황판 전광판 렌더링
-           let allowanceG3 = r.hasG3 ? 500000 : 0;
-                        let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
+          let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+                         let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
 
             // ✨ 초3지원금 상반기/하반기 분할 내역 계산
             let h1Cut = maxQuarter === 6 ? 3 : 2;
@@ -4886,7 +4963,7 @@ document.getElementById('tierList').innerHTML = html;
                         let qNum = parseInt(q.replace('q', ''));
                         let accUsedG3 = 0, accUsedFree = 0;
                         for (let i = 1; i <= qNum; i++) { accUsedG3 += c[`q${i}`].usedG3; accUsedFree += c[`q${i}`].usedFree; }
-                        let allowanceG3 = r.hasG3 ? 500000 : 0; let allowanceFree = r.hasFree ? (r.freeLimit || 600000) : 0;
+                      let allowanceG3 = r.hasG3 ? getG3Allowance() : 0; let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
                         let remG3_until_Q = allowanceG3 - accUsedG3; let remFree_until_Q = allowanceFree - accUsedFree; let remTotal_until_Q = remG3_until_Q + remFree_until_Q;
 
                         rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
@@ -5364,7 +5441,7 @@ document.getElementById('tierList').innerHTML = html;
                     if (currentStudent.hasFree && !currentExStudent.hasFree) {
                         currentExStudent.hasFree = true;
                         currentExStudent.freeTier = currentStudent.freeTier || currentExStudent.freeTier || '';
-                        currentExStudent.freeLimit = currentExStudent.freeLimit || 600000;
+                        currentExStudent.freeLimit = currentExStudent.freeLimit || getFreeAllowanceDefault();
                         mergedAny = true; // ✨ 지원금 유형 변동도 '업데이트'로 집계
                     }
                     if (currentStudent.hasG3 && !currentExStudent.hasG3) {
@@ -6851,7 +6928,7 @@ document.getElementById('tierList').innerHTML = html;
                     }
 
                     targetRow.getCell(15).value = null;
-                    let stFreeLimit = st.freeLimit || 600000;
+                    let stFreeLimit = st.freeLimit || getFreeAllowanceDefault();
                     targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>0,${stFreeLimit}-N${rIdx},IF(${stFreeLimit}-N${rIdx}=0,"지원금 0원","지원금 초과사용")),"")` };
 
                     targetRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
@@ -6963,6 +7040,58 @@ document.getElementById('tierList').innerHTML = html;
 		
 		
 		
+		
+		
+		function toggleYearSettingsPanel() {
+            let panel = document.getElementById('yearSettingsPanelWrap');
+            if (!panel) return;
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) initYearSettingsPanel();
+        }
+
+        function initYearSettingsPanel() {
+            let sel = document.getElementById('ys_year');
+            let curYear = new Date().getFullYear();
+            let years = new Set(Object.keys(yearlySettings).map(Number));
+            for (let y = curYear - 2; y <= curYear + 3; y++) years.add(y);
+            let sortedYears = Array.from(years).sort((a,b) => a-b);
+            sel.innerHTML = sortedYears.map(y => `<option value="${y}" ${y === curYear ? 'selected' : ''}>${y}학년도${y === curYear ? ' (현재)' : ''}</option>`).join('');
+            loadYearSetting();
+        }
+
+        function loadYearSetting() {
+            let year = document.getElementById('ys_year').value;
+            let setting = getYearSetting(year);
+            document.getElementById('ys_g3').value = setting.g3.toLocaleString();
+            document.getElementById('ys_free').value = setting.free.toLocaleString();
+            
+            let curYear = new Date().getFullYear();
+            let notice = document.getElementById('ys_currentNotice');
+            if (Number(year) === curYear) {
+                notice.innerHTML = '✅ 현재 계산에 실제로 적용되는 연도입니다.';
+                notice.style.color = '#16a34a';
+            } else {
+                notice.innerHTML = '📋 조회/기록용입니다. 실제 계산에는 적용되지 않습니다.';
+                notice.style.color = '#9ca3af';
+            }
+        }
+
+        function saveYearSetting() {
+            let year = document.getElementById('ys_year').value;
+            let g3 = toNum(document.getElementById('ys_g3').value.replace(/,/g, ''));
+            let free = toNum(document.getElementById('ys_free').value.replace(/,/g, ''));
+            
+            if (g3 <= 0 || free <= 0) { alert('금액은 0보다 커야 합니다.'); return; }
+            
+            yearlySettings[year] = { g3, free };
+            persistYearlySettings();
+            renderGrid();
+            alert(`${year}학년도 지원금이 저장되었습니다.`);
+        }
+
+        
+		
+		
 		// 필터창 스르륵 열기/닫기 함수
 function toggleFilterPanel() {
     const panel = document.getElementById('filterPanelWrap');
@@ -6972,6 +7101,7 @@ function toggleFilterPanel() {
 document.addEventListener('click', function(e) {
     let statusPanel = document.getElementById('statusPanelWrap');
     let filterPanel = document.getElementById('filterPanelWrap');
+    let yearPanel = document.getElementById('yearSettingsPanelWrap');
     if (statusPanel && statusPanel.classList.contains('open')) {
         if (!statusPanel.contains(e.target) && e.target.id !== 'btnStatusView') {
             statusPanel.classList.remove('open');
@@ -6980,6 +7110,11 @@ document.addEventListener('click', function(e) {
     if (filterPanel && filterPanel.classList.contains('open')) {
         if (!filterPanel.contains(e.target) && e.target.id !== 'btnFilterView') {
             filterPanel.classList.remove('open');
+        }
+    }
+    if (yearPanel && yearPanel.classList.contains('open')) {
+        if (!yearPanel.contains(e.target) && e.target.id !== 'btnYearSettings') {
+            yearPanel.classList.remove('open');
         }
     }
 });
