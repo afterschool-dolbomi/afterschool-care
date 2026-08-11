@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V9.5</title>
+    <title>방과후 지원금 돌보미 V9.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -71,6 +71,15 @@
         .action-menu { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
         .btn-3d { border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; padding: 12px; transition: all 0.1s; transform: translateY(0); position: relative; }
         .btn-3d:active { transform: translateY(4px); }
+
+        /* ✨ 팝업/모달 안의 모든 버튼에 눌림 효과 적용 (전체 공통) */
+        button {
+            transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+        }
+        button:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+        }
         .btn-side { background: rgba(255, 255, 255, 0.1); color: white; text-align: left; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
         .btn-side.highlight { background: var(--sidebar-accent); box-shadow: 0 4px 0 #1d4ed8; }
 
@@ -629,6 +638,50 @@
         </div>
     </div>
 
+
+
+            <div id="subjectPropagateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px; text-align:center;">
+                <div style="color:white; font-size:16px; font-weight:800;">📋 기존 학생 기록도 변경할까요?</div>
+            </div>
+            <div style="padding:22px 24px;">
+                <div id="subjectPropagateMsg" style="font-size:13.5px; color:#374151; line-height:1.6; margin-bottom:18px; white-space:pre-line;"></div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <button onclick="subjectPropagateConfirm(true)" style="padding:12px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px;">✅ 네, 기존 학생 기록도 함께 변경</button>
+                    <button onclick="subjectPropagateConfirm(false)" style="padding:12px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">➡️ 아니오, 과목 목록만 변경</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ 
+
+         
+         <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
+                <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
+                <div style="color:white; font-size:17px; font-weight:800; letter-spacing:-0.3px;">코디마스터 수강료 자료 등록</div>
+                <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
+            </div>
+            <div style="padding:24px;">
+                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
+                    등록할 분기를 선택하세요
+				    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
+                    코디마스터-수강료(학생별)-엑셀가져오기를 하여 엑셀을 불러오세요.
+                </div>
+                <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="closeCodimasterQuarterModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
+                    <button onclick="confirmCodimasterQuarter()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">엑셀 불러오기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div id="sessionRatioModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:340px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
             <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 육아기근로단축 차시 비율 적용</div>
@@ -772,7 +825,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V9.5</span>
+                <span class="brand-version">V9.6</span>
             </div>
     </div>
     
@@ -808,7 +861,8 @@
                 <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
-                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
+               <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
+                <button class="btn-3d btn-side" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(학생별)업로드</button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
@@ -819,6 +873,7 @@
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
+                <input type="file" id="codimasterUpload" accept=".xlsx" style="display:none;" onchange="importCodimaster(event)">
 	
 				
             </div>
@@ -909,9 +964,13 @@
 
 		
        <!-- 🎯 상세 필터창 (오른쪽 스르륵 패널) -->
-<div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:40px 24px 24px 24px; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
-    <button onclick="toggleFilterPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
-    <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">🎯 상세 필터 설정</div>
+<div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:0; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
+    <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; position:sticky; top:0; z-index:2; border-bottom:2px solid #d4af37;">
+        <button onclick="toggleFilterPanel()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+        <div style="font-size:17px; font-weight:800; color:white;">🎯 상세 필터 설정</div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:4px;">원하는 조건으로 학생 명단을 좁혀보세요</div>
+    </div>
+    <div style="padding:20px 24px;">
     
    <!-- 학년 필터 -->
     <div class="stat-section">
@@ -961,15 +1020,20 @@
             </select>
         </div>
     </div>
+    </div>
 </div>
 		   
 		   
 		   
-		  <div id="statusPanelWrap" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--sidebar-bg); padding:24px 40px 60px 40px; z-index:500; opacity:0; pointer-events:none; transition:opacity 0.25s ease; overflow-y:auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; position:sticky; top:0; background:var(--sidebar-bg); padding:8px 0; z-index:2;">
-                <span style="font-size:20px; font-weight:800; color:white;">📊 전체 현황</span>
-                <button onclick="toggleStatusPanel()" style="background:#374151; border:none; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">✕ 메인 화면으로</button>
+		  <div id="statusPanelWrap" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--sidebar-bg); padding:0; z-index:500; opacity:0; pointer-events:none; transition:opacity 0.25s ease; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 40px; z-index:2; border-bottom:2px solid #d4af37;">
+                <div>
+                    <span style="font-size:20px; font-weight:800; color:white;">📊 전체 현황</span>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">방과후 지원금 통합관리 시스템</div>
+                </div>
+                <button onclick="toggleStatusPanel()" style="background:rgba(212,175,55,0.15); border:1px solid #d4af37; color:#d4af37; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">✕ 메인 화면으로</button>
             </div>
+            <div style="padding:24px 40px 60px 40px;">
            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                 <div class="stat-box primary" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
                     <div class="stat-label" style="font-size:13px;">총 관리학생 인원</div>
@@ -1022,7 +1086,8 @@
                     <div class="stat-value" id="s_stOver" style="font-size:15px; color:#ef4444;">0명</div>
                 </div>
             </div>
-            <div id="quarterSubjectTables" style="margin-top:24px;"></div>
+           <div id="quarterSubjectTables" style="margin-top:24px;"></div>
+            </div>
         </div>
 		   
 		   
@@ -1604,9 +1669,19 @@
 
         let isRefundViewOn = false;
         
-        window.toggleRefundView = function() {
+       window.toggleRefundView = function() {
             isRefundViewOn = !isRefundViewOn;
-            renderGrid();
+            
+            let isHeavyLoad = (db.length > 80);
+            if (isHeavyLoad) {
+                document.getElementById('loading-overlay').style.display = 'flex';
+                setTimeout(() => {
+                    renderGrid();
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }, 30);
+            } else {
+                renderGrid();
+            }
         };
         
         let isDarkMode = localStorage.getItem('edusync_darkmode') === 'true';
@@ -1806,7 +1881,146 @@
         }
 
 
+        let codimasterSelectedQ = null;
 
+        function openCodimasterQuarterModal() {
+            codimasterSelectedQ = null;
+            let btnsHtml = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                btnsHtml += `<button type="button" id="cmQBtn${q}" onclick="selectCodimasterQuarter(${q})" style="padding:14px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:800; font-size:14px; cursor:pointer; transition:0.15s;">${q}분기</button>`;
+            }
+            document.getElementById('codimasterQuarterBtns').innerHTML = btnsHtml;
+            document.getElementById('codimasterQuarterModal').style.display = 'flex';
+        }
+
+        function selectCodimasterQuarter(q) {
+            codimasterSelectedQ = q;
+            for (let i = 1; i <= maxQuarter; i++) {
+                let btn = document.getElementById(`cmQBtn${i}`);
+                if (!btn) continue;
+                if (i === q) {
+                    btn.style.border = '2px solid #d4af37';
+                    btn.style.background = '#1e3a5f';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.border = '2px solid #cbd5e1';
+                    btn.style.background = 'white';
+                    btn.style.color = '#334155';
+                }
+            }
+        }
+
+        function confirmCodimasterQuarter() {
+            if (!codimasterSelectedQ) { alert('먼저 분기를 선택해주세요.'); return; }
+            document.getElementById('codimasterQuarterModal').style.display = 'none';
+            document.getElementById('codimasterUpload').click(); // ✨ 분기 선택 확정 후 파일 선택창 오픈
+        }
+
+        function closeCodimasterQuarterModal() {
+            document.getElementById('codimasterQuarterModal').style.display = 'none';
+            codimasterSelectedQ = null;
+        }
+
+        async function importCodimaster(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!codimasterSelectedQ) { alert('분기 선택 정보가 없습니다. 버튼을 다시 눌러 처음부터 시도해주세요.'); return; }
+            try {
+                const wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(await file.arrayBuffer());
+                processCodimaster(codimasterSelectedQ, wb);
+            } catch (err) {
+                alert('파일을 여는 중 오류가 발생했습니다: ' + err.message);
+                console.error(err);
+            }
+            document.getElementById('codimasterUpload').value = '';
+            codimasterSelectedQ = null;
+        }
+
+        function processCodimaster(q, wb) {
+            const ws = wb.worksheets[0];
+            const qKey = `q${q}`;
+
+            let newCount = 0, mergeCount = 0, freeDetected = 0, skipped = [];
+
+            ws.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // 헤더줄 건너뜀
+
+                let grade = toNum(row.getCell(4).value);
+                let classNum = toNum(row.getCell(5).value);
+                let studentNum = toNum(row.getCell(6).value);
+                let name = String(row.getCell(7).value || '').trim();
+                let hClass = String(row.getCell(8).value || '');
+                let subjectListRaw = String(row.getCell(17).value || '').trim();
+
+                if (!grade || !name || !subjectListRaw) { return; }
+
+                let isFree = hClass.includes('자유수강');
+
+                // ✨ Q열 과목 문자열 파싱: "요리1부(수)(30760/0/78000/0) - 댄스2부(목)(30760/0/0/1460)"
+                let monthsPerQuarter = 12 / maxQuarter; // ✨ 4분기제→3개월, 6분기제→2개월
+                let entries = subjectListRaw.split(' - ').map(s => s.trim()).filter(s => s);
+                let parsedSubs = [];
+                entries.forEach(entry => {
+                    let m = entry.match(/^(.+?)\d+부\([^)]*\)\(([-\d.]+)\/([-\d.]+)\/([-\d.]+)\/([-\d.]+)\)$/);
+                    if (!m) { skipped.push(`(파싱실패) ${grade}학년 ${classNum}반 ${studentNum}번 ${name}: ${entry}`); return; }
+                    let subName = m[1].trim();
+                    let su = Math.floor(toNum(m[2]) * monthsPerQuarter); // ✨ 월 수강료 × 분기당 개월수
+                    let gy = Math.floor(toNum(m[3]));
+                    let j = Math.floor(toNum(m[4])); // ✨ 4번째 숫자(실비)는 무시
+                    parsedSubs.push({ name: subName, g: 0, s: 0, su, gy, j });
+                });
+
+                let ex = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
+
+                if (ex) {
+                    // ✨ 자유수강 새로 감지되면 추가 활성화 (기존 지원유형은 유지)
+                    if (isFree && !ex.hasFree) { ex.hasFree = true; freeDetected++; }
+
+                    parsedSubs.forEach(ps => {
+                        let existingSub = ex[qKey].subs.find(s => s.name === ps.name);
+                        if (existingSub) {
+                            existingSub.g = ps.g; existingSub.s = ps.s; existingSub.su = ps.su; existingSub.gy = ps.gy; existingSub.j = ps.j;
+                        } else {
+                            let emptyIdx = ex[qKey].subs.findIndex(s => !s.name && toNum(s.su) === 0 && toNum(s.gy) === 0 && toNum(s.j) === 0);
+                            if (emptyIdx > -1) ex[qKey].subs[emptyIdx] = ps;
+                            else ex[qKey].subs.push(ps);
+                        }
+                        if (!savedSubjects.some(sub => sub.name === ps.name)) {
+                            savedSubjects.push({ name: ps.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
+                        }
+                    });
+                    mergeCount++;
+                } else {
+                    let newRec = {
+                        id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+                        grade, classNum, studentNum, name,
+                        hasG3: (grade >= 3 && grade <= getG3MaxGrade()),
+                        hasFree: isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
+                        memo: '', createdAt: Date.now()
+                    };
+                    for (let qi = 1; qi <= 6; qi++) newRec[`q${qi}`] = { subs: [{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0}] };
+                    parsedSubs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
+                    db.push(newRec);
+                    if (isFree) freeDetected++;
+                    newCount++;
+                }
+            });
+
+            persistData();
+            persistSubjects();
+            renderSubjectList();
+            renderGrid();
+
+            let msg = `${q}분기 코디마스터 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
+            if (skipped.length > 0) {
+                msg += `\n\n[⚠️ 과목 형식을 못 읽은 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
+                if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
+            }
+           alert(msg);
+            codimasterPendingWb = null;
+            codimasterSelectedQ = null;
+        }
 
   
          function toggleSidebar() {
@@ -2180,8 +2394,9 @@ function toggleStatusPanel() {
             document.getElementById('subjectModal').style.display = 'flex';
         }
 
-        function renderSubjectManagerList() {
+       function renderSubjectManagerList() {
             let html = '<button onclick="editSubjectForm(-1)" class="btn-tool" style="margin-bottom:16px; background:var(--sidebar-accent); color:white; border:none; padding:8px 16px;">+ 새 과목 및 기준단가 추가</button>';
+            html += '<button onclick="openMergeSubjectForm()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:#7c3aed; color:white; border:none; padding:8px 16px;">🔗 과목 통합</button>';
             html += '<div id="subjectEditArea"></div>';
             html += '<div id="subjectListArea">';
             
@@ -2210,6 +2425,64 @@ function toggleStatusPanel() {
                 if(!sub.fees[q]) sub.fees[q] = {su:0, gy:0, j:0};
             }
             return sub;
+        }
+
+       function openMergeSubjectForm() {
+            if (savedSubjects.length < 2) { alert('통합하려면 과목이 2개 이상 있어야 합니다.'); return; }
+            let options = savedSubjects.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            let html = `
+                <div style="background:white; padding:16px; border-radius:8px; margin-bottom:16px; border:2px solid #7c3aed;">
+                    <h4 style="margin-bottom:12px; color:var(--text-dark);">🔗 과목 통합 (같은 과목인데 이름만 다르게 등록된 경우)</h4>
+                    <div style="font-size:12px; color:#6b7280; margin-bottom:14px;">남길 과목과 없앨(병합될) 과목을 고르세요. 없앨 과목은 목록에서 사라지고, 남길 과목의 이름·단가로 합쳐집니다.</div>
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">✅ 남길 과목 (이 이름·단가를 유지)</label>
+                        <select id="ms_keep" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">${options}</select>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">🗑️ 병합할 과목 (목록에서 사라짐)</label>
+                        <select id="ms_merge" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">${options}</select>
+                    </div>
+                    <div style="text-align:right;">
+                        <button class="btn-save" style="height:32px; padding:0 16px; border:none; border-radius:4px; cursor:pointer;" onclick="confirmMergeSubjects()">통합하기</button>
+                        <button class="btn-tool" style="height:32px; padding:0 16px; margin-left:8px;" onclick="renderSubjectManagerList()">취소</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('subjectEditArea').innerHTML = html;
+            document.getElementById('subjectListArea').style.display = 'none';
+            if (savedSubjects.length > 1) document.getElementById('ms_merge').selectedIndex = 1;
+        }
+
+        function confirmMergeSubjects() {
+            let keepName = document.getElementById('ms_keep').value;
+            let mergeName = document.getElementById('ms_merge').value;
+            if (keepName === mergeName) { alert('서로 다른 두 과목을 선택해주세요.'); return; }
+
+            let mergeIdx = savedSubjects.findIndex(s => s.name === mergeName);
+            if (mergeIdx > -1) savedSubjects.splice(mergeIdx, 1);
+            persistSubjects();
+            renderSubjectList();
+            renderSubjectManagerList();
+
+            let msg = `'${mergeName}'을(를) '${keepName}'(으)로 통합했습니다.\n\n이미 이 과목을 수강 중인 기존 학생들의 기록에서도\n과목명을 '${mergeName}' → '${keepName}'(으)로 함께 변경할까요?`;
+            askSubjectPropagate(msg, () => {
+                let updatedCount = 0;
+                db.forEach(r => {
+                    for (let q = 1; q <= 6; q++) {
+                        if (r[`q${q}`] && r[`q${q}`].subs) {
+                            r[`q${q}`].subs.forEach(s => {
+                                if (s.name === mergeName) {
+                                    s.name = keepName;
+                                    updatedCount++;
+                                }
+                            });
+                        }
+                    }
+                });
+                persistData();
+                renderGrid();
+                alert(`반영 완료. 학생 기록 ${updatedCount}건이 '${keepName}'(으)로 변경되었습니다.`);
+            }, () => { /* 과목 목록만 통합, 학생 기록은 그대로 둠 */ });
         }
 
         function editSubjectForm(idx) {
@@ -2272,6 +2545,22 @@ function toggleStatusPanel() {
             }
         }
 
+      let subjectPropagateCallback = null;
+
+        function askSubjectPropagate(message, onYes, onNo) {
+            document.getElementById('subjectPropagateMsg').innerText = message;
+            subjectPropagateCallback = { onYes, onNo };
+            document.getElementById('subjectPropagateModal').style.display = 'flex';
+        }
+
+        function subjectPropagateConfirm(yes) {
+            document.getElementById('subjectPropagateModal').style.display = 'none';
+            if (subjectPropagateCallback) {
+                if (yes) subjectPropagateCallback.onYes(); else subjectPropagateCallback.onNo();
+            }
+            subjectPropagateCallback = null;
+        }
+
         function saveSubjectForm() {
             let idx = parseInt(document.getElementById('es_idx').value);
             let newName = document.getElementById('es_name').value.trim();
@@ -2282,9 +2571,8 @@ function toggleStatusPanel() {
                 return alert("이미 존재하는 과목명입니다.");
             }
 
-            // ✨ 화면에 보이지 않는 분기(예: 4분기제일 때의 5,6분기) 단가는 기존 값을 그대로 보존한 뒤,
-            //    화면에 보이는 1~maxQuarter 분기만 새 입력값으로 덮어씁니다.
             let fees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : {};
+            let oldFees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : null;
             for(let q=1; q<=maxQuarter; q++) {
                 fees[q] = {
                     su: toNum(document.getElementById(`es_q${q}_su`).value),
@@ -2296,35 +2584,63 @@ function toggleStatusPanel() {
 
             if(idx === -1) {
                 savedSubjects.push({ name: newName, fees });
-            } else {
-                let oldName = savedSubjects[idx].name;
-                savedSubjects[idx] = { name: newName, fees };
-                
-                if(oldName !== newName) {
-                    if (confirm(`'${oldName}'을(를) 수강 중인 기존 학생들의 수강 내역 이름도 모두 '${newName}'(으)로 변경하시겠습니까?\n\n[확인] : 학생들 기록 일괄 변경\n[취소] : 학생들 기록은 두고 목록 이름만 변경`)) {
-                        let updatedCount = 0;
-                        db.forEach(r => {
-                            for(let q=1; q<=6; q++) { // ✨ 4에서 6으로 수정: 현재 4분기제라도 보존된 5,6분기 기록의 이름까지 함께 변경
-                                if (r[`q${q}`] && r[`q${q}`].subs) {
-                                    r[`q${q}`].subs.forEach(s => {
-                                        if(s.name === oldName) {
-                                            s.name = newName;
-                                            updatedCount++;
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                        if(updatedCount > 0) {
-                            persistData();
-                            renderGrid();
-                        }
-                    }
-                }
+                persistSubjects();
+                renderSubjectList();
+                renderSubjectManagerList();
+                return;
             }
+
+            let oldName = savedSubjects[idx].name;
+            let nameChanged = (oldName !== newName);
+            let feesChanged = oldFees && JSON.stringify(oldFees) !== JSON.stringify(fees);
+
+            savedSubjects[idx] = { name: newName, fees };
             persistSubjects();
             renderSubjectList();
             renderSubjectManagerList();
+
+            if (!nameChanged && !feesChanged) return;
+
+            let msgParts = [];
+            if (nameChanged) msgParts.push(`과목명: '${oldName}' → '${newName}'`);
+            if (feesChanged) msgParts.push(`기준 단가가 변경됨`);
+            let msg = `${msgParts.join('\n')}\n\n이미 등록된 학생들의 기존 수강 기록도 같이 바꿀까요?\n\n(단가 변경은, 기존에 이 과목 기준단가와 정확히 똑같이 입력돼 있던 학생 기록만 새 단가로 바뀌어요. 개별적으로 다르게 수동 입력된 금액은 안전하게 그대로 유지됩니다.)`;
+
+            askSubjectPropagate(msg, () => {
+                let updatedNameCount = 0, updatedFeeCount = 0, skippedFeeCount = 0;
+                db.forEach(r => {
+                    for(let q=1; q<=6; q++) {
+                        if (r[`q${q}`] && r[`q${q}`].subs) {
+                            r[`q${q}`].subs.forEach(s => {
+                                let checkName = nameChanged ? oldName : newName;
+                                let isMatch = (s.name === checkName);
+                                if (nameChanged && isMatch) {
+                                    s.name = newName;
+                                    updatedNameCount++;
+                                }
+                                if (feesChanged && oldFees[q]) {
+                                    let nowName = nameChanged ? newName : s.name;
+                                    if ((isMatch || s.name === newName) && s.name === newName) {
+                                        let matchesOld = (toNum(s.su) === toNum(oldFees[q].su) && toNum(s.gy) === toNum(oldFees[q].gy) && toNum(s.j) === toNum(oldFees[q].j));
+                                        if (matchesOld) {
+                                            s.su = fees[q].su; s.gy = fees[q].gy; s.j = fees[q].j;
+                                            updatedFeeCount++;
+                                        } else if (toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0) {
+                                            skippedFeeCount++;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                persistData();
+                renderGrid();
+                let resultMsg = '반영 완료.';
+                if (nameChanged) resultMsg += `\n과목명 변경: ${updatedNameCount}건`;
+                if (feesChanged) resultMsg += `\n단가 변경: ${updatedFeeCount}건 반영, ${skippedFeeCount}건은 개별 수정 금액이라 건너뜀`;
+                alert(resultMsg);
+            }, () => { /* 목록만 변경, 학생 기록은 그대로 둠 */ });
         }
 
         function deleteSubject(idx) {
@@ -2854,9 +3170,20 @@ function toggleStatusPanel() {
                     if(currentVal === '미사용') currentVal = ''; 
                 }
                 
-                statusSelect.value = currentVal;
+               statusSelect.value = currentVal;
             }
-            renderGrid();
+            
+           // ✨ 학생 수가 많으면(=시간 걸릴 것 같으면) 로딩화면 살짝 보여주고 렌더링
+            let isHeavyLoad = (db.length > 80);
+            if (isHeavyLoad) {
+                document.getElementById('loading-overlay').style.display = 'flex';
+                setTimeout(() => {
+                    renderGrid();
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }, 30);
+            } else {
+                renderGrid();
+            }
         }
 
 		
@@ -3146,7 +3473,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <td class="text-right" style="${br} color:#111827; font-weight:800; background:#e5e7eb; padding:8px 6px; vertical-align:middle;">${formatMoney(row.realTot)}</td>
                     ` : '';
 
-                    tBody.innerHTML += `
+                    tBody.insertAdjacentHTML('beforeend', `
                         <tr>
                             <td class="text-center" style="${br} font-weight: 700; color: #9ca3af;">${index + 1}</td>
                             ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
@@ -3182,10 +3509,10 @@ if(fFund === 'free' && !r.hasFree) return false;
                                 <div style="display:flex; gap:4px; justify-content:center;">
                                     <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: bold; color: #475569; cursor: pointer;" onclick="openPanel('edit','${row.r.id}')">수정</button>
                                     <button class="btn-tool" style="padding: 3px 8px; font-size: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; box-shadow: 0 1px 3px rgba(239,68,68,0.2); font-weight: bold; color: #ef4444; cursor: pointer;" onclick="deleteRecord('${row.r.id}')">삭제</button>
-                                </div>
+                          </div>
                             </td>
                         </tr>
-                    `;
+                    `);
                 });
 
                 if(subjectRows.length > 0) {
@@ -3200,7 +3527,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <td class="text-right" style="${br} color:#111827; padding:8px 6px; background:#e5e7eb;">${formatMoney(sum_realTot)}</td>
                     ` : '';
 
-                    tBody.innerHTML += `
+                   tBody.insertAdjacentHTML('beforeend', `
                         <tr class="total-row">
                             <td style="border-right: none;"></td>
                             ${currentTab === 'all' ? `<td style="border-right: none;"></td>` : ''}
@@ -3220,10 +3547,10 @@ if(fFund === 'free' && !r.hasFree) return false;
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nGy)}</td>
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nJ)}</td>
                             <td class="text-right" style="${br} color:#10b981; padding:8px 6px;">${formatMoney(sum_nTot)}</td>
-                            ${suikTotTds}
+                          ${suikTotTds}
                             <td class="no-print"></td>
                         </tr>
-                    `;
+                    `);
                 }
 
                 if(subjectRows.length === 0) {
@@ -3328,7 +3655,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         
                         let overHtml = (!isBeneficiary && c.total.over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
 
-                        tBody.innerHTML += `
+                       tBody.insertAdjacentHTML('beforeend', `
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
 <td class="text-center" style="font-weight:600;">
@@ -3374,7 +3701,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                                     </div>
                                 </td>
                             </tr>
-                        `;
+                    `);
                     });
 
                    
@@ -3384,7 +3711,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         for(let i=1; i<=maxQuarter; i++) {
                             totExpTds += `<td class="text-right">${formatMoney(sumQs[i])}</td>`;
                         }
-                        tBody.innerHTML += `<tr class="total-row">
+                        tBody.insertAdjacentHTML('beforeend', `<tr class="total-row">
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
@@ -3395,9 +3722,9 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td class="text-right" style="color:var(--color-g3); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalG3Used)}<br>잔액: ${formatMoney(sumTotalRemG3)}</td>
                             <td class="text-right" style="color:var(--color-free); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalFreeUsed)}<br>잔액: ${formatMoney(sumTotalRemFree)}</td>
                            <td class="text-right" style="color:#10b981; font-weight:bold; font-size:12px;">총 사용액: ${formatMoney(sumTotalG3Used + sumTotalFreeUsed)}<br>잔액: ${formatMoney(sumTotalRemG3 + sumTotalRemFree)}</td>
-                            <td class="no-print" style="vertical-align: middle; text-align: center;">
+                          <td class="no-print" style="vertical-align: middle; text-align: center;">
                             </td>
-                        </tr>`;
+                        </tr>`);
                     }
 
                 } else {
@@ -3533,7 +3860,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td class="text-right" style="background:#fef2f2; color:#b91c1c; font-weight:800;">${formatMoney(refTot)}</td>
                         ` : '';
 
-                        tBody.innerHTML += `
+                        tBody.insertAdjacentHTML('beforeend', `
                             <tr>
                                 <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
                                 <td class="text-center" style="font-weight:600;">
@@ -3569,7 +3896,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                                     </div>
                                 </td>
                             </tr>
-                        `;
+                        `);
                     });
 
                     // ✨ 상단 배너에 환불 금액 보기 토글 버튼 추가
@@ -3613,7 +3940,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td class="text-right" style="background:#fef2f2; color:#b91c1c; font-weight:800;">${formatMoney(sumQ_rTot)}</td>
                         ` : '';
 
-                        tBody.innerHTML += `<tr class="total-row">
+                    tBody.insertAdjacentHTML('beforeend', `<tr class="total-row">
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
                             <td style="border-right: none;"></td>
@@ -3626,8 +3953,8 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td class="text-right" style="color:var(--color-g3); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemG3)}</div></td>
                             <td class="text-right" style="color:var(--color-free); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemFree)}</div></td>
                             <td class="text-right" style="color:#10b981; line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumG3 + sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemTotal)}</div></td>
-                            <td class="no-print"></td>
-                        </tr>`;
+                           <td class="no-print"></td>
+                        </tr>`);
                     }
                 }
 
