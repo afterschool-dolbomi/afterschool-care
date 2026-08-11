@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V9.4</title>
+    <title>방과후 지원금 돌보미 V9.5</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -772,7 +772,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V9.4</span>
+                <span class="brand-version">V9.5</span>
             </div>
     </div>
     
@@ -885,8 +885,15 @@
             </div>
             <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:14px; margin-bottom:12px;">
                 <div style="margin-bottom:12px;">
-                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">초3지원금 (연간)</label>
-                    <input type="text" id="ys_g3" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                   <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">초3지원금 (연간)</label>
+                    <input type="text" id="ys_g3" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box; margin-bottom:12px;">
+                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">지원 대상 최고 학년</label>
+                    <select id="ys_g3max" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                        <option value="3">3학년까지 (초3지원금)</option>
+                        <option value="4">4학년까지 (초3~4지원금)</option>
+                        <option value="5">5학년까지 (초3~5지원금)</option>
+                        <option value="6">6학년까지 (초3~6지원금)</option>
+                    </select>
                 </div>
                 <div>
                     <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">자유수강권 (연간)</label>
@@ -939,8 +946,8 @@
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
           <label style="cursor: pointer;"><input type="radio" name="fltFund" value="" checked onchange="renderGrid()"> 전체 보기</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="free" onchange="renderGrid()"> 자유수강권 (중복포함)</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="g3" onchange="renderGrid()"> 초3지원금 (중복포함)</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="dual" onchange="renderGrid()"> 자유 + 초3 중복</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="g3" onchange="renderGrid()"> <span id="fltG3Label">초3지원금</span> (중복포함)</label>
+            <label style="cursor: pointer;"><input type="radio" name="fltFund" value="dual" onchange="renderGrid()"> 자유 + <span id="fltG3Label2">초3</span> 중복</label>
             <label style="cursor: pointer;"><input type="radio" name="fltFund" value="beneficiary" onchange="renderGrid()"> 수익자만 보기</label>
         </div>
     </div>
@@ -969,11 +976,11 @@
                     <div class="stat-value" id="s_totalStudents" style="font-size:17px;">0명</div>
                 </div>
                 <div class="stat-box primary" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
-                   <div class="stat-label" style="font-size:13px; white-space:nowrap;">순수 지원금 집행액 (초3지원금+자유수강)</div>
+                  <div class="stat-label" style="font-size:13px; white-space:nowrap;" id="statSubsidyLabel">순수 지원금 집행액 (초3지원금+자유수강)</div>
                     <div class="stat-value" id="s_totalSubsidy" style="font-size:17px;">0원</div>
                 </div>
                 <div class="stat-box g3" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
-                    <div class="stat-label" style="font-size:13px;">초3지원금 총 사용액</div>
+                    <div class="stat-label" style="font-size:13px;" id="statG3UsedLabel">초3지원금 총 사용액</div>
                     <div class="stat-value" id="s_g3Used" style="font-size:17px;">0원</div>
                 </div>
                 <div class="stat-box free" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
@@ -981,7 +988,7 @@
                     <div class="stat-value" id="s_freeUsed" style="font-size:17px;">0원</div>
                 </div>
                 <div class="stat-box g3" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
-                    <div class="stat-label" style="font-size:13px;">초3지원금 대상자</div>
+                    <div class="stat-label" style="font-size:13px;" id="statG3Label">초3지원금 대상자</div>
                     <div class="stat-value" id="s_g3Count" style="font-size:17px;">0명</div>
                 </div>
                 <div class="stat-box free" style="flex:1 1 160px; min-width:140px; padding:10px 12px; margin-bottom:0;">
@@ -1026,15 +1033,15 @@
         <div class="tier-popup" id="fundPopup" style="right: 320px; width: 330px;">
             <div style="font-weight:700; margin-bottom:16px; color:var(--text-dark); text-align:center;">📌 지원금 중복 사용 안내</div>
             <div class="tier-item" style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed #e5e7eb; padding-bottom:8px;">
-                <span>자유수강 + 초3지원금</span>
+               <span>자유수강 + <span id="fundPopupG3">초3지원금</span></span>
                 <span style="color:#3b82f6; font-weight:bold;">중복가능</span>
             </div>
             <div class="tier-item" style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed #e5e7eb; padding-bottom:8px;">
-                <span>육아기근로단축 + 초3지원금</span>
+              <span>육아기근로단축 + <span id="fundPopupG3b">초3지원금</span></span>
                 <span style="color:#3b82f6; font-weight:bold;">중복가능</span>
             </div>
             <div class="tier-item" style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #d1d5db; padding-bottom:12px;">
-                <span>특수지원금 + 초3지원금</span>
+                <span>특수지원금 + <span id="fundPopupG3c">초3지원금</span></span>
                 <span style="color:#3b82f6; font-weight:bold;">중복가능</span>
             </div>
             <div class="tier-item" style="display:flex; justify-content:space-between; margin-bottom:8px; padding-top:4px; border-bottom:1px dashed #e5e7eb; padding-bottom:8px;">
@@ -1077,19 +1084,21 @@
             
             <!-- 상단 타이틀 영역 (그라데이션 배경) -->
             <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px 20px; text-align: center; color: white;">
-                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 완료! V9.0</h2>
+                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V9.5</h2>
                 <p style="margin: 8px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9;">프로그램이 더욱 강력해졌습니다.</p>
             </div>
             
             <!-- 본문 안내 영역 -->
             <div style="padding: 24px 24px 20px;">
-                <div style="font-size: 15px; color: #374151; line-height: 1.6; font-weight: 600; text-align: center; margin-bottom: 20px;">
-                    기존 방과후 지원금 관리뿐만 아니라,<br>
-                    이제 <span style="color: #ef4444; font-weight: 800; font-size: 16px;">수익자(일반 수강생)</span>도 편하게 관리할 수 있습니다.<br><br>
-                    <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
+                <div style="font-size: 14.5px; color: #374151; line-height: 1.7; font-weight: 600; text-align: left; margin-bottom: 4px; display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자(일반수강생)</span>도 편하게 관리할 수 있습니다.</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
+                    <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
                     </div>
-                </div>
+                     <div style="display:flex; gap:8px; align-items:center; justify-content:center; text-align:center;"><span style="color:#3b82f6; font-weight:900;">지금 바로 '학년도 지원금 설정' 을 눌러보세요</span>
+			   </div>
             </div>
             
             <!-- 하단 닫기 및 체크박스 영역 -->
@@ -1132,16 +1141,16 @@
                     <div class="form-group"><label>성명</label><input type="text" id="fName" required></div>
                 </div>
 
-                <div class="benefit-box">
+<div class="benefit-box">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="fG3"> <span style="color:var(--color-g3);">초3지원금</span>
+                        <input type="checkbox" id="fG3"> <span style="color:var(--color-g3);" id="g3Label">초3지원금</span>
                     </label>
                     <span class="desc-text" id="g3Desc">연 50만원 (3학년 전용). 상반기/하반기 각 25만원 한도 분할</span>
                     
                     <label class="checkbox-label" style="margin-top:16px;">
                         <input type="checkbox" id="fFree" onchange="toggleTier()"> <span style="color:var(--color-free);">자유수강권</span>
                     </label>
-                    <span class="desc-text">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
+                    <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
                     
                    <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
                         <select id="fTier" onchange="toggleTier()" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
@@ -2471,17 +2480,47 @@ function toggleStatusPanel() {
         function persistYearlySettings() {
             localStorage.setItem('edusync_yearly_settings', JSON.stringify(yearlySettings));
         }
+		
+		
+		
 
-        function getYearSetting(year) {
-            return yearlySettings[year] || { g3: 500000, free: 600000 }; // ✨ 기본값(인천 기준) - 설정 안 하면 지금까지처럼 작동
+       function getYearSetting(year) {
+            return yearlySettings[year] || { g3: 500000, free: 600000, g3MaxGrade: 3 }; // ✨ 기본값(인천 기준) - 설정 안 하면 지금까지처럼 작동
         }
 
-        function getG3Allowance() {
-            return getYearSetting(new Date().getFullYear()).g3;
+        function getCurrentAcademicYear() { // ✨ 학년도 계산: 3월~다음해 2월을 같은 학년도로 취급
+            let now = new Date();
+            let y = now.getFullYear();
+            let m = now.getMonth() + 1; // 1~12
+            return (m <= 2) ? y - 1 : y;
+        }
+
+        function getG3MaxGrade() {
+            let s = getYearSetting(getCurrentAcademicYear());
+            return s.g3MaxGrade || 3;
+        }
+
+        function getG3Label() { // ✨ "초3지원금" 또는 "초3~4지원금" 등 동적 명칭
+            let max = getG3MaxGrade();
+            return max <= 3 ? '초3지원금' : `초3~${max}지원금`;
+        }
+
+        function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3지원" / "초3~4지원")
+            let max = getG3MaxGrade();
+            return max <= 3 ? '초3지원' : `초3~${max}지원`;
+        }
+		
+		
+
+
+
+
+       function getG3Allowance() {
+            return getYearSetting(getCurrentAcademicYear()).g3;
         }
 
         function getFreeAllowanceDefault() {
-            return getYearSetting(new Date().getFullYear()).free;
+            return getYearSetting(getCurrentAcademicYear()).free;
         }
 
     function calcStudent(r) {
@@ -2750,7 +2789,22 @@ function toggleStatusPanel() {
             document.getElementById('s_stDone').innerText = st.done + '명';
             document.getElementById('s_stOver').innerText = st.over + '명';
             document.getElementById('s_beneficiaryCount').innerText = st.beneficiaryCount + '명';
-            document.getElementById('s_beneficiaryTotal').innerText = formatMoney(st.beneficiaryTotal);
+           document.getElementById('s_beneficiaryTotal').innerText = formatMoney(st.beneficiaryTotal);
+            
+            // ✨ 동적 초3(~N)지원금 명칭 일괄 갱신
+            document.querySelectorAll('#statG3Label').forEach(el => el.innerText = getG3Label() + ' 대상자');
+            
+            let statSubsidyEl = document.getElementById('statSubsidyLabel');
+            if (statSubsidyEl) statSubsidyEl.innerText = `순수 지원금 집행액 (${getG3Label()}+자유수강)`;
+            
+            let statG3UsedEl = document.getElementById('statG3UsedLabel');
+            if (statG3UsedEl) statG3UsedEl.innerText = `${getG3Label()} 총 사용액`;
+			
+            let fl1 = document.getElementById('fltG3Label'); if(fl1) fl1.innerText = getG3Label();
+            let fl2 = document.getElementById('fltG3Label2'); if(fl2) fl2.innerText = getG3Label().replace('지원금','');
+            let fp1 = document.getElementById('fundPopupG3'); if(fp1) fp1.innerText = getG3Label();
+            let fp2 = document.getElementById('fundPopupG3b'); if(fp2) fp2.innerText = getG3Label();
+            let fp3 = document.getElementById('fundPopupG3c'); if(fp3) fp3.innerText = getG3Label();
         }
 
 
@@ -3041,7 +3095,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                        <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">초3지원금</th>
+                        <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()}</th>
                         <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강</th>
                         <th colspan="4" class="text-center" style="${br} color:#10b981; font-size:14px;">총 지원금</th>
                         ${suikH1}
@@ -3071,7 +3125,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                     sum_realSu+=row.realSu; sum_realGy+=row.realGy; sum_realJ+=row.realJ; sum_realTot+=row.realTot;
 
                     let badge = '';
-                    if(row.r.hasG3) badge += `<span class="badge bg-g3">초3지원</span>`;
+                    if(row.r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
                     if(row.r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${row.r.freeTier}</span>`;
 
                     let isNewValid = (row.isNew && (Date.now() - row.isNew < 7 * 24 * 60 * 60 * 1000));
@@ -3221,7 +3275,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
                     thHtml += `
                         <th class="text-right" style="font-weight: 800; color: #111827;">총 집행액</th>
-                        <th class="text-right" style="color:var(--color-g3);">초3지원금</th>
+                        <th class="text-right" style="color:var(--color-g3);">${getG3Label()}</th>
                         <th class="text-right" style="color:var(--color-free);">자유수강</th>
                         <th class="text-right" style="color:#10b981;">총 지원금</th>
                         <th id="th-manage" style="text-align:center;" class="no-print">관리</th>
@@ -3266,7 +3320,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         sumTotalAllow += c.totalAllowance;
 
                         let badge = '';
-                        if(r.hasG3) badge += `<span class="badge bg-g3">초3지원</span>`;
+                        if(r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
                         if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
                         
                         let stClass = c.status==='수익자'?'st-beneficiary' : c.status==='지원금 미사용'?'st-none' : c.status==='지원금 사용중'?'st-use' : c.status==='지원금 소진'?'st-done':'st-over';
@@ -3401,7 +3455,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         <th class="text-right">${qText} 재료비</th>
                         <th class="text-right" style="font-weight: 800; color: #111827;">${qText} 합계</th>
                         ${refundHeaders}
-                        <th class="text-right" style="color:var(--color-g3); line-height:1.4;">초3지원금<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
+                        <th class="text-right" style="color:var(--color-g3); line-height:1.4;">${getG3Label()}<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
                         <th class="text-right" style="color:var(--color-free); line-height:1.4;">자유수강<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
                         <th class="text-right" style="color:#10b981; line-height:1.4;">총 지원금<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
 						<th id="th-manage" style="text-align:center;" class="no-print">관리</th>
@@ -3443,7 +3497,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         sumQ_rG += refG; sumQ_rS += refS; sumQ_rSu += refSu; sumQ_rGy += refGy; sumQ_rJ += refJ; sumQ_rTot += refTot;
 
                         let badge = '';
-                        if(r.hasG3) badge += `<span class="badge bg-g3">초3지원</span>`;
+                        if(r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
                         if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
 
                         let qStClass = c[q].status==='수익자'?'st-beneficiary' : c[q].status==='지원금 미사용'?'st-none' : c[q].status==='지원금 사용중'?'st-use' : c[q].status==='지원금 소진'?'st-done':'st-over';
@@ -3723,17 +3777,20 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
     let fFreeBox = document.getElementById('fFree');
     let desc = document.getElementById('g3Desc');
     
-  if(grade > 0 && grade !== 3) {
+ document.getElementById('g3Label').innerText = getG3Label();
+    let g3MaxG = getG3MaxGrade();
+    document.getElementById('freeDesc').innerText = `연 ${Math.round(getFreeAllowanceDefault()/10000)}만원. ${g3MaxG <= 3 ? '3학년' : '3~' + g3MaxG + '학년'}의 경우 ${getG3Label()} 소진 후 적용됨.`;
+    if(grade > 0 && (grade < 3 || grade > getG3MaxGrade())) {
         g3Box.checked = false;
         g3Box.disabled = true;
         desc.style.color = "#ef4444";
-        desc.innerText = "※ 3학년이 아니므로 초3지원금을 선택할 수 없습니다.";
+        desc.innerText = `※ 지원 대상 학년(3~${getG3MaxGrade()}학년)이 아니므로 ${getG3Label()}을 선택할 수 없습니다.`;
     } else {
-                g3Box.disabled = false;
-                desc.style.color = "var(--sidebar-accent)";
-                desc.innerText = "연 50만원 (3학년 전용). 상반기/하반기 각 25만원 한도 분할";
+        g3Box.disabled = false;
+        desc.style.color = "var(--sidebar-accent)";
+        desc.innerText = `연 ${Math.round(getG3Allowance()/10000)}만원 (${getG3MaxGrade() <= 3 ? '3학년' : '3~' + getG3MaxGrade() + '학년'} 전용). 상반기/하반기 각 ${Math.round(getG3Allowance()/2/10000)}만원 한도 분할`;
                 
-                if(grade === 3 && event && event.type === 'input') {
+               if(grade >= 3 && grade <= getG3MaxGrade() && event && event.type === 'input') {
                     g3Box.checked = true;
                 }
             }
@@ -4067,7 +4124,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                 <!-- 1. 초3지원금 메인 카드 -->
                 <div class="dashboard-card dash-g3" style="padding: 14px; display: flex; flex-direction: column; justify-content: center;">
                     <div class="dash-title-row" style="margin-bottom: 8px;">
-                        <span class="dash-title-text" style="font-size: 14px;">초3지원금 총액</span>
+                        <span class="dash-title-text" style="font-size: 14px;">${getG3Label()} 총액</span>
                         <span class="dash-title-val" style="font-size: 16px;">${formatMoney(allowanceG3)}</span>
                     </div>
                     <div class="dash-divider" style="margin: 6px 0;"></div>
@@ -4081,7 +4138,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                 <!-- 2. 초3지원금 분기별 상세 카드 -->
                 <div class="dashboard-card dash-g3" style="padding: 14px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); display: flex; flex-direction: column; justify-content: center;">
                     <div class="dash-title-row" style="margin-bottom: 8px;">
-                        <span class="dash-title-text" style="font-size: 14px; color: #0284c7;">초3지원 분기내역</span>
+                        <span class="dash-title-text" style="font-size: 14px; color: #0284c7;">${getG3LabelShort()} 분기내역</span>
                     </div>
                     <div class="dash-divider" style="margin: 6px 0; border-color: rgba(3, 105, 161, 0.2);"></div>
                     <div style="text-align: right; margin-top: 4px; font-size: 11px; white-space: nowrap; letter-spacing: -0.3px;">
@@ -4320,7 +4377,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                         </th>
                                     </tr>
                                     <tr>
-                                        ${r.hasG3 ? `<th colspan="3" style="background:#e0f2fe; color:var(--color-g3); border-right:1px solid #bae6fd; font-size:12.5px;">초3지원금</th>` : ''}
+                                        ${r.hasG3 ? `<th colspan="3" style="background:#e0f2fe; color:var(--color-g3); border-right:1px solid #bae6fd; font-size:12.5px;">${getG3Label()}</th>` : ''}
                                         ${r.hasFree ? `<th colspan="3" style="background:#f3e8ff; color:var(--color-free); border-right:1px solid #d8b4fe; font-size:12.5px;">자유수강</th>` : ''}
                                         <th colspan="3" style="background:#fef2f2; color:#b91c1c; font-size:12.5px;">수익자</th>
                                     </tr>
@@ -4957,23 +5014,23 @@ document.getElementById('tierList').innerHTML = html;
             if (viewMode === 'subject') {
                 if(currentTab === 'all') {
                     titleStr = '메인 홈 (과목별 상세 현황)';
-                    headers = ['No.', '분기', '학년', '반', '번호', '이름', '초3지원', '자유수강', '과목명', '초3지원(수강료)', '초3지원(교재)', '초3지원(재료)', '초3지원(합계)', '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
+                    headers = ['No.', '분기', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
                 } else {
                     let qText = currentTab.replace('q','') + '분기';
                     titleStr = qText + ' 과목별 상세 현황';
-                    headers = ['No.', '학년', '반', '번호', '이름', '초3지원', '자유수강', '과목명', '초3지원(수강료)', '초3지원(교재)', '초3지원(재료)', '초3지원(합계)', '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
+                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
                 }
             } else {
                 if(currentTab === 'all') {
                     titleStr = '메인 홈 (전체현황)';
                     // ✨ 6분기 설정에 맞춰 엑셀 헤더 동적 생성
-                    headers = ['No.', '학년', '반', '번호', '이름', '초3지원', '자유수강', '상태'];
+                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '상태'];
                     for(let i=1; i<=maxQuarter; i++) headers.push(i+'분기');
-                    headers.push('총 집행액', '초3지원 사용', '초3지원 잔액', '자유수강 사용', '자유수강 잔액', '총 지원금 사용', '총 지원금 잔액');
+                    headers.push('총 집행액', `${getG3LabelShort()} 사용`, `${getG3LabelShort()} 잔액`, '자유수강 사용', '자유수강 잔액', '총 지원금 사용', '총 지원금 잔액');
                 } else {
                     let qText = currentTab.replace('q','') + '분기';
                     titleStr = qText + ' 현황';
-                    headers = ['No.', '학년', '반', '번호', '이름', '초3지원', '자유수강', '상태', qText+' 강사료', qText+' 수용비', qText+' 수강료', qText+' 교재비', qText+' 재료비', qText+' 합계', '초3 분기사용액', '초3 분기잔액', '자유 분기사용액', '자유 분기잔액', '총분기사용액', '총분기잔액'];
+                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '상태', qText+' 강사료', qText+' 수용비', qText+' 수강료', qText+' 교재비', qText+' 재료비', qText+' 합계', `${getG3LabelShort()} 분기사용액`, `${getG3LabelShort()} 분기잔액`, '자유 분기사용액', '자유 분기잔액', '총분기사용액', '총분기잔액'];
                 }
             }
             
@@ -5143,7 +5200,7 @@ document.getElementById('tierList').innerHTML = html;
                 { header: '반', key: 'cl', width: 8, style:{ protection:{locked:false} } }, 
                 { header: '번호', key: 'nu', width: 8, style:{ protection:{locked:false} } }, 
                 { header: '이름', key: 'na', width: 15, style:{ protection:{locked:false} } },
-                { header: '초3지원금(O/X)', key: 'g3', width: 16, style:{ protection:{locked:true} } }, 
+                { header: `${getG3Label()}(O/X)`, key: 'g3', width: 16, style:{ protection:{locked:true} } }, 
                 { header: '자유수강권(O/X)', key: 'fr', width: 16, style:{ protection:{locked:false} } }, 
                 { header: '자유수강 계층', key: 'ti', width: 18, style:{ protection:{locked:false} } }
             ];
@@ -5202,7 +5259,7 @@ document.getElementById('tierList').innerHTML = html;
                     let rowData = [];
                     
                     if(r === 0) {
-                        let g3Formula = { formula: `IF(A${startRow}="","",IF(A${startRow}=3,"O","X"))` };
+                        let g3Formula = { formula: `IF(A${startRow}="","",IF(AND(A${startRow}>=3,A${startRow}<=${getG3MaxGrade()}),"O","X"))` };
                        if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, 'O', '기초생활수급자'];
                         else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, 'X', ''];
                         else rowData = ['', '', '', '', g3Formula, '', ''];
@@ -5273,7 +5330,7 @@ document.getElementById('tierList').innerHTML = html;
 
                     let cols = [
                         { header: '학년', key: 'gr', width: 8 }, { header: '반', key: 'cl', width: 8 }, { header: '번호', key: 'nu', width: 8 }, { header: '이름', key: 'na', width: 15 },
-                        { header: '초3지원금(O/X)', key: 'g3', width: 16 }, { header: '자유수강권(O/X)', key: 'fr', width: 16 }, { header: '자유수강 계층', key: 'ti', width: 18 }
+                        { header: `${getG3Label()}(O/X)`, key: 'g3', width: 16 }, { header: '자유수강권(O/X)', key: 'fr', width: 16 }, { header: '자유수강 계층', key: 'ti', width: 18 }
                     ];
                     for(let q=1; q<=maxQuarter; q++) {
                         cols = cols.concat([
@@ -6344,7 +6401,7 @@ document.getElementById('tierList').innerHTML = html;
                         id: currentTime++ + Math.random().toString(36).substr(2, 5),
                         createdAt: Date.now(), 
                         grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
-                        hasG3: (st.grade === 3), hasFree: true,
+                        hasG3: (st.grade >= 3 && st.grade <= getG3MaxGrade()), hasFree: true,
                         freeTier: translateFreeTier(st.familyTier), 
                         memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
                     };
@@ -7137,9 +7194,9 @@ document.getElementById('tierList').innerHTML = html;
             if (panel.classList.contains('open')) initYearSettingsPanel();
         }
 
-        function initYearSettingsPanel() {
+       function initYearSettingsPanel() {
             let sel = document.getElementById('ys_year');
-            let curYear = new Date().getFullYear();
+            let curYear = getCurrentAcademicYear();
             let years = new Set(Object.keys(yearlySettings).map(Number));
             for (let y = curYear - 2; y <= curYear + 3; y++) years.add(y);
             let sortedYears = Array.from(years).sort((a,b) => a-b);
@@ -7147,19 +7204,20 @@ document.getElementById('tierList').innerHTML = html;
             loadYearSetting();
         }
 
-        function loadYearSetting() {
+       function loadYearSetting() {
             let year = document.getElementById('ys_year').value;
             let setting = getYearSetting(year);
             document.getElementById('ys_g3').value = setting.g3.toLocaleString();
             document.getElementById('ys_free').value = setting.free.toLocaleString();
+            document.getElementById('ys_g3max').value = setting.g3MaxGrade || 3;
             
-            let curYear = new Date().getFullYear();
+           let curYear = getCurrentAcademicYear();
             let notice = document.getElementById('ys_currentNotice');
             if (Number(year) === curYear) {
-                notice.innerHTML = '✅ 현재 계산에 실제로 적용되는 연도입니다.';
+                notice.innerHTML = `✅ 현재 계산에 실제로 적용되는 연도입니다. (${curYear}년 3월 ~ ${curYear+1}년 2월)`;
                 notice.style.color = '#16a34a';
             } else {
-                notice.innerHTML = '📋 조회/기록용입니다. 실제 계산에는 적용되지 않습니다.';
+                notice.innerHTML = `📋 조회/기록용입니다. 실제 계산에는 적용되지 않습니다. (${year}년 3월 ~ ${Number(year)+1}년 2월)`;
                 notice.style.color = '#9ca3af';
             }
         }
@@ -7168,12 +7226,14 @@ document.getElementById('tierList').innerHTML = html;
             let year = document.getElementById('ys_year').value;
             let g3 = toNum(document.getElementById('ys_g3').value.replace(/,/g, ''));
             let free = toNum(document.getElementById('ys_free').value.replace(/,/g, ''));
+            let g3MaxGrade = toNum(document.getElementById('ys_g3max').value);
             
             if (g3 <= 0 || free <= 0) { alert('금액은 0보다 커야 합니다.'); return; }
             
-            yearlySettings[year] = { g3, free };
+            yearlySettings[year] = { g3, free, g3MaxGrade };
             persistYearlySettings();
             renderGrid();
+            updateGlobalStats();
             alert(`${year}학년도 지원금이 저장되었습니다.`);
         }
 
@@ -7226,7 +7286,7 @@ document.addEventListener('keydown', function(e) {
       // ✨ 수익자 관리 업데이트 팝업 로직
     document.addEventListener("DOMContentLoaded", function() {
         // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-        const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v9');
+       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v9_5');
         
         // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
         if (!hidePopup) {
@@ -7242,7 +7302,7 @@ document.addEventListener('keydown', function(e) {
         if (isChecked) {
             // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
             // 식별자를 'hideBeneficiaryPopup_v9'로 주어 나중에 V10 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v9', 'true');
+            localStorage.setItem('hideBeneficiaryPopup_v9_5', 'true');
         }
         
         // 팝업창 숨기기
