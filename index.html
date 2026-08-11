@@ -1149,7 +1149,7 @@
             
             <!-- 상단 타이틀 영역 (그라데이션 배경) -->
             <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px 20px; text-align: center; color: white;">
-                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V9.5</h2>
+                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V10</h2>
                 <p style="margin: 8px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9;">프로그램이 더욱 강력해졌습니다.</p>
             </div>
             
@@ -3615,6 +3615,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <col style="width: 75px;">`;
                     for(let i=1; i<=maxQuarter; i++) colHtml += ` <col style="width: 95px;">`;
                     colHtml += ` <col style="width: 105px;">
+                        <col style="width: 100px;">
                         <col style="width: 120px;"> <col style="width: 120px;"> <col style="width: 130px;">
                         <col style="width: 100px;" id="col-manage" class="no-print">
                     `;
@@ -3628,7 +3629,8 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <th class="text-center">상태</th>`;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
                     thHtml += `
-                        <th class="text-right" style="font-weight: 800; color: #111827;">총 집행액</th>
+                       <th class="text-right" style="font-weight: 800; color: #111827;">총 집행액</th>
+                        <th class="text-right" style="color:#b91c1c;">수익자부담</th>
                         <th class="text-right" style="color:var(--color-g3);">${getG3Label()}</th>
                         <th class="text-right" style="color:var(--color-free);">자유수강</th>
                         <th class="text-right" style="color:#10b981;">총 지원금</th>
@@ -3643,7 +3645,7 @@ if(fFund === 'free' && !r.hasFree) return false;
 					
 					
 					
-                    let sumTotalExp=0, sumTotalG3Used=0, sumTotalFreeUsed=0, sumTotalAllow=0;
+                    let sumTotalExp=0, sumTotalOver=0, sumTotalG3Used=0, sumTotalFreeUsed=0, sumTotalAllow=0;
                     let sumTotalRemG3=0, sumTotalRemFree=0;
 
 
@@ -3669,6 +3671,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         }
 
                         sumTotalExp += c.total.exp;
+                        sumTotalOver += c.total.over;
                         sumTotalG3Used += c.total.usedG3; sumTotalRemG3 += c.remG3;
                         sumTotalFreeUsed += c.total.usedFree; sumTotalRemFree += c.remFree;
                         sumTotalAllow += c.totalAllowance;
@@ -3705,7 +3708,8 @@ if(fFund === 'free' && !r.hasFree) return false;
                                     <div style="line-height: 1.0;">${formatMoney(c.total.exp)}</div>
                                     ${overHtml}
                                 </td>
-${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:middle;">-</td>` : `
+                                <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c.total.over)}</td>
+                                ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:middle;">-</td>` : `
                                 <td class="text-right" style="color:var(--color-g3); line-height: 1.5;">
                                     <div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c.total.usedG3)}</div>
                                     <div style="font-size:13px; font-weight:700;">잔액: ${formatMoney(c.remG3)}</div>
@@ -3744,7 +3748,8 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td style="text-align:center; font-weight:bold;">전체 총합</td>
                             <td style="border-right: none;"></td>
                             ${totExpTds}
-                            <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumTotalExp)}</td>							
+                           <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumTotalExp)}</td>							
+                            <td class="text-right" style="color:#b91c1c; font-weight:800;">${formatMoney(sumTotalOver)}</td>
                             <td class="text-right" style="color:var(--color-g3); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalG3Used)}<br>잔액: ${formatMoney(sumTotalRemG3)}</td>
                             <td class="text-right" style="color:var(--color-free); font-weight:bold; font-size:12px;">사용: ${formatMoney(sumTotalFreeUsed)}<br>잔액: ${formatMoney(sumTotalRemFree)}</td>
                            <td class="text-right" style="color:#10b981; font-weight:bold; font-size:12px;">총 사용액: ${formatMoney(sumTotalG3Used + sumTotalFreeUsed)}<br>잔액: ${formatMoney(sumTotalRemG3 + sumTotalRemFree)}</td>
@@ -3777,13 +3782,14 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                     ` : '';
 
                     colGroup.innerHTML = `
-                        <col style="width: 50px;"> <col style="width: 55px;" id="col-id"> <col style="width: 65px;" id="col-name"> <col style="width: 120px;">
-                        <col style="width: 75px;"> <col style="width: 80px;"> <col style="width: 80px;">
-                        <col style="width: 85px;"> <col style="width: 80px;"> <col style="width: 80px;">
-                        <col style="width: 105px;">
+                        <col style="width: 45px;"> <col style="width: 50px;" id="col-id"> <col style="width: 58px;" id="col-name"> <col style="width: 95px;">
+                        <col style="width: 62px;"> <col style="width: 68px;"> <col style="width: 68px;">
+                        <col style="width: 72px;"> <col style="width: 68px;"> <col style="width: 68px;">
+                        <col style="width: 88px;">
+                        <col style="width: 82px;">
                         ${refundCols}
-                        <col style="width: 120px;"> <col style="width: 120px;"> <col style="width: 120px;">
-                        <col style="width: 100px;" id="col-manage" class="no-print">
+                        <col style="width: 105px;"> <col style="width: 105px;"> <col style="width: 105px;">
+                        <col style="width: 88px;" id="col-manage" class="no-print">
                     `;
 
                     // ✨ 아코디언 토글 상태에 따른 헤더(Header) 2줄 처리
@@ -3807,7 +3813,8 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                         <th class="text-right">${qText} 수강료</th>
                         <th class="text-right">${qText} 교재비</th>
                         <th class="text-right">${qText} 재료비</th>
-                        <th class="text-right" style="font-weight: 800; color: #111827;">${qText} 합계</th>
+                       <th class="text-right" style="font-weight: 800; color: #111827;">${qText} 합계</th>
+                        <th class="text-right" style="color:#b91c1c;">수익자부담</th>
                         ${refundHeaders}
                         <th class="text-right" style="color:var(--color-g3); line-height:1.4;">${getG3Label()}<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
                         <th class="text-right" style="color:var(--color-free); line-height:1.4;">자유수강<br><span style="font-size:11px; font-weight:600; opacity:0.85; letter-spacing:-0.5px;">(${qText}사용액 /<br>${qText}까지잔액)</span></th>
@@ -3818,10 +3825,11 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                     let sumQ_g = 0, sumQ_s = 0, sumQ_su = 0, sumQ_gy = 0, sumQ_j = 0;
                     let sumQ_rG = 0, sumQ_rS = 0, sumQ_rSu = 0, sumQ_rGy = 0, sumQ_rJ = 0, sumQ_rTot = 0; // ✨ 환불 합계 변수
                     let qUsers = 0, g3Users = 0, freeUsers = 0;
-                    let sumRemG3 = 0, sumRemFree = 0, sumRemTotal = 0;
+                    let sumRemG3 = 0, sumRemFree = 0, sumRemTotal = 0, sumOver = 0;
 
                     viewData.forEach(({r, c}, index) => {
                         sumExp += c[q].exp; sumG3 += c[q].usedG3; sumFree += c[q].usedFree;
+                        sumOver += c[q].over;
                         
                         if(c[q].exp > 0) qUsers++;
                         if(c[q].usedG3 > 0) g3Users++;
@@ -3910,6 +3918,7 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                                     ${((r.hasG3 || r.hasFree) && c[q].over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c[q].over)}</div>` : ''}
                                 </td>
                                 
+                                <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
                                 ${refundTds}
 								
                                 <td class="text-right" style="color:var(--color-g3); line-height: 1.5;">${g3Html}</td>
@@ -3974,7 +3983,8 @@ ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:m
                             <td style="text-align:center; font-weight:bold;">${qText} 총합</td>
                             <td class="text-right">${formatMoney(sumQ_g)}</td><td class="text-right">${formatMoney(sumQ_s)}</td><td class="text-right" style="font-weight:bold;">${formatMoney(sumQ_su)}</td>
                             <td class="text-right">${formatMoney(sumQ_gy)}</td><td class="text-right">${formatMoney(sumQ_j)}</td>
-                            <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumExp)}</td>
+                           <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumExp)}</td>
+                            <td class="text-right" style="color:#b91c1c; font-weight:800;">${formatMoney(sumOver)}</td>
                             ${refundTotTds}
                             <td class="text-right" style="color:var(--color-g3); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemG3)}</div></td>
                             <td class="text-right" style="color:var(--color-free); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemFree)}</div></td>
