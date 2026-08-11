@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V9.6</title>
+    <title>방과후 지원금 돌보미 V10</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -825,7 +825,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V9.6</span>
+                <span class="brand-version">V10</span>
             </div>
     </div>
     
@@ -1159,6 +1159,7 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자(일반수강생)</span>도 편하게 관리할 수 있습니다.</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
                     <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
                     </div>
@@ -7614,7 +7615,7 @@ document.addEventListener('keydown', function(e) {
       // ✨ 수익자 관리 업데이트 팝업 로직
     document.addEventListener("DOMContentLoaded", function() {
         // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v9_5');
+       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10');
         
         // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
         if (!hidePopup) {
@@ -7629,8 +7630,8 @@ document.addEventListener('keydown', function(e) {
         
         if (isChecked) {
             // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
-            // 식별자를 'hideBeneficiaryPopup_v9'로 주어 나중에 V10 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v9_5', 'true');
+            // 식별자를 'hideBeneficiaryPopup_v10'으로 주어 나중에 또 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
+            localStorage.setItem('hideBeneficiaryPopup_v10', 'true');
         }
         
         // 팝업창 숨기기
