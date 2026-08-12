@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.1</title>
+    <title>방과후 지원금 돌보미 V10.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -825,7 +825,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.1</span>
+                <span class="brand-version">V10.2</span>
             </div>
     </div>
     
@@ -910,7 +910,7 @@
             <button class="tab-btn" id="tabQ6" onclick="switchTab('q6')" style="display:none;">6분기</button>
             
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
-            <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; height: 32px; padding: 0 16px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark);">
+            <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
@@ -2053,16 +2053,26 @@ function toggleStatusPanel() {
             let container = document.getElementById('quarterSubjectTables');
             if (!container) return;
             
-            let html = '<div style="display:flex; flex-wrap:wrap; gap:20px;">';
+            let html = `
+                <div style="background:#FCFCF0FF; border:1px solid #fde68a; border-left:4px solid #d4af37; border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:14px; color:#374151; line-height:1.8; max-width:900px;">
+                    <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📌 강좌별 인원 집계 기준 (한 학생이 여러 칸에 동시에 포함될 수 있어요)</div>
+                    · 지원금으로 순수하게 다 결제되면 → <b style="color:#d4af37;">해당 지원금 칸</b>에 1명<br>
+                    · 지원금이 <b style="color:#d4af37;">부족해서 일부만 수익자로 넘어가면</b> → 지원금 칸 1명 + <b style="color:#d4af37;">수익자 칸에도 1명</b> 같이 표시<br>
+                    · 초3·자유수강권을 둘 다 가진 학생이 초3이 부족해 자유수강으로 넘어가면 → 초3 칸 1명 + <b style="color:#d4af37;">자유수강 칸에도 1명</b><br>
+                    · 지원금 잔액이 아예 없어 전액 수익자로 결제되면 → <b style="color:#d4af37;">수익자 칸에만</b> 1명
+                </div>
+               <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">
+				`;
             for (let q = 1; q <= maxQuarter; q++) {
                 let qKey = `q${q}`;
                 let counts = {};
                 
                 savedSubjects.forEach(s => { counts[s.name] = { beneficiary: 0, free: 0, g3: 0 }; });
                 
-                db.forEach(r => {
+               db.forEach(r => {
                     if (!r[qKey] || !r[qKey].subs) return;
-                    r[qKey].subs.forEach(s => {
+                    let c = calcStudent(r); // ✨ 이미 계산된 과목별 지원금/수익자 배분 결과를 그대로 활용
+                    r[qKey].subs.forEach((s, sIdx) => {
                         let subName = s.name ? s.name.trim() : '';
                         if (!subName) return;
                         let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
@@ -2070,9 +2080,15 @@ function toggleStatusPanel() {
                         
                         if (!counts[subName]) counts[subName] = { beneficiary: 0, free: 0, g3: 0 };
                         
-                        if (r.hasG3) counts[subName].g3++;
-                        else if (r.hasFree) counts[subName].free++;
-                        else counts[subName].beneficiary++;
+                        let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
+                        let hasG3Amt = toNum(alloc.g3Su) > 0 || toNum(alloc.g3Gy) > 0 || toNum(alloc.g3J) > 0;
+                        let hasFreeAmt = toNum(alloc.frSu) > 0 || toNum(alloc.frGy) > 0 || toNum(alloc.frJ) > 0;
+                        let hasSkAmt = toNum(alloc.skSu) > 0 || toNum(alloc.skGy) > 0 || toNum(alloc.skJ) > 0;
+                        
+                        // ✨ 한 과목이 여러 지원금에 걸쳐 있으면 해당하는 칸에 전부 카운트 (중복 표시 허용)
+                        if (hasG3Amt) counts[subName].g3++;
+                        if (hasFreeAmt) counts[subName].free++;
+                        if (hasSkAmt) counts[subName].beneficiary++;
                     });
                 });
                 
@@ -2546,11 +2562,11 @@ function toggleStatusPanel() {
                 html += `
                     <tr>
                         <td style="text-align:center; font-weight:bold;">${q}분기</td>
-                        <td><input type="number" id="es_q${q}_g" value="${sub.fees[q].g||0}" oninput="updateEsSu(${q})" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
-                        <td><input type="number" id="es_q${q}_s" value="${sub.fees[q].s||0}" oninput="updateEsSu(${q})" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
-                        <td><input type="number" id="es_q${q}_su" value="${sub.fees[q].su}" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:2px solid #d4af37;"></td>
-                        <td><input type="number" id="es_q${q}_gy" value="${sub.fees[q].gy}" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
-                        <td><input type="number" id="es_q${q}_j" value="${sub.fees[q].j}" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
+                        <td><input type="number" id="es_q${q}_g" value="${sub.fees[q].g||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
+                        <td><input type="number" id="es_q${q}_s" value="${sub.fees[q].s||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
+                        <td><input type="number" id="es_q${q}_su" value="${sub.fees[q].su}" onfocus="if(this.value=='0') this.value='';" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:2px solid #d4af37;"></td>
+                        <td><input type="number" id="es_q${q}_gy" value="${sub.fees[q].gy}" onfocus="if(this.value=='0') this.value='';" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
+                        <td><input type="number" id="es_q${q}_j" value="${sub.fees[q].j}" onfocus="if(this.value=='0') this.value='';" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
 					</tr>
                 `;
             }
@@ -6011,30 +6027,50 @@ document.getElementById('tierList').innerHTML = html;
                         mergedAny = true; // ✨ 지원금 유형 변동도 '업데이트'로 집계
                     }
                     
+                    let isBackupRestore = !!currentStudent._backupBurdens; // ✨ 백업 파일 복원인지 여부 (숨김 백업열 유무로 판단)
+
                     for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 동적 연동
                         let newSubs = currentStudent[`q${q}`].subs;
-                        newSubs.forEach(newSub => {
-                            if(newSub.name) {
-                                let subExists = currentExStudent[`q${q}`].subs.some(s => s.name === newSub.name);
-                                if(!subExists) {
-                                    let emptyIdx = currentExStudent[`q${q}`].subs.findIndex(s => !s.name || s.name.trim() === '');
-                                    if(emptyIdx !== -1) {
-                                        currentExStudent[`q${q}`].subs[emptyIdx] = {...newSub, isNew: uploadTime};
-                                        currentExStudent[`q${q}`].g += newSub.g;
-                                        currentExStudent[`q${q}`].s += newSub.s;
-                                        currentExStudent[`q${q}`].su += newSub.su;
-                                        currentExStudent[`q${q}`].gy += newSub.gy;
-                                        currentExStudent[`q${q}`].j += newSub.j;
-                                        mergedAny = true;
-                                        if(!savedSubjects.some(subObj => subObj.name === newSub.name)) {
-                                            savedSubjects.push({ name: newSub.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
-                                            isSubUpdated = true;
-                                        }
-                                    } else {
-                                        let warningMsg = `${currentExStudent.grade}학년 ${currentExStudent.classNum}반 ${currentExStudent.studentNum}번 과목 6개 초과로 일부 누락`;
-                                        if(!blockMsgs.includes(warningMsg)) {
-                                            blockMsgs.push(warningMsg);
-                                        }
+                        newSubs.forEach((newSub, idx) => {
+                            if(!newSub.name) return;
+
+                            if (isBackupRestore) {
+                                // ✨ 백업 파일 복원: 과목명 중복 체크 없이, 파일에 적힌 자리(줄) 그대로 덮어씀 (같은 과목이 2번 있어도 정상 반영)
+                                let oldSub = currentExStudent[`q${q}`].subs[idx] || {g:0, s:0, su:0, gy:0, j:0};
+                                currentExStudent[`q${q}`].g += (toNum(newSub.g) - toNum(oldSub.g));
+                                currentExStudent[`q${q}`].s += (toNum(newSub.s) - toNum(oldSub.s));
+                                currentExStudent[`q${q}`].su += (toNum(newSub.su) - toNum(oldSub.su));
+                                currentExStudent[`q${q}`].gy += (toNum(newSub.gy) - toNum(oldSub.gy));
+                                currentExStudent[`q${q}`].j += (toNum(newSub.j) - toNum(oldSub.j));
+                                currentExStudent[`q${q}`].subs[idx] = {...newSub, isNew: newSub.isNew || uploadTime};
+                                mergedAny = true;
+                                if(!savedSubjects.some(subObj => subObj.name === newSub.name)) {
+                                    savedSubjects.push({ name: newSub.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
+                                    isSubUpdated = true;
+                                }
+                                return;
+                            }
+
+                            // 기존 로직 그대로 (수기 명단 업로드용: 과목명이 이미 있으면 건너뜀)
+                            let subExists = currentExStudent[`q${q}`].subs.some(s => s.name === newSub.name);
+                            if(!subExists) {
+                                let emptyIdx = currentExStudent[`q${q}`].subs.findIndex(s => !s.name || s.name.trim() === '');
+                                if(emptyIdx !== -1) {
+                                    currentExStudent[`q${q}`].subs[emptyIdx] = {...newSub, isNew: uploadTime};
+                                    currentExStudent[`q${q}`].g += newSub.g;
+                                    currentExStudent[`q${q}`].s += newSub.s;
+                                    currentExStudent[`q${q}`].su += newSub.su;
+                                    currentExStudent[`q${q}`].gy += newSub.gy;
+                                    currentExStudent[`q${q}`].j += newSub.j;
+                                    mergedAny = true;
+                                    if(!savedSubjects.some(subObj => subObj.name === newSub.name)) {
+                                        savedSubjects.push({ name: newSub.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
+                                        isSubUpdated = true;
+                                    }
+                                } else {
+                                    let warningMsg = `${currentExStudent.grade}학년 ${currentExStudent.classNum}반 ${currentExStudent.studentNum}번 과목 6개 초과로 일부 누락`;
+                                    if(!blockMsgs.includes(warningMsg)) {
+                                        blockMsgs.push(warningMsg);
                                     }
                                 }
                             }
@@ -6204,7 +6240,7 @@ document.getElementById('tierList').innerHTML = html;
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
 
-                                if(!currentIsMerge && currentStudent._backupBurdens && currentStudent._backupBurdens[q-1] && currentStudent._backupBurdens[q-1][sIdx]) {
+                                if(currentStudent._backupBurdens && currentStudent._backupBurdens[q-1] && currentStudent._backupBurdens[q-1][sIdx]) {
                                     let bk = currentStudent._backupBurdens[q-1][sIdx];
                                     bSu = bk.su; bGy = bk.gy; bJ = bk.j;
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
@@ -7668,12 +7704,12 @@ document.addEventListener('click', function(e) {
     let filterPanel = document.getElementById('filterPanelWrap');
     let yearPanel = document.getElementById('yearSettingsPanelWrap');
     if (statusPanel && statusPanel.classList.contains('open')) {
-        if (!statusPanel.contains(e.target) && e.target.id !== 'btnStatusView') {
+        if (!statusPanel.contains(e.target) && !e.target.closest('#btnStatusView')) {
             statusPanel.classList.remove('open');
         }
     }
     if (filterPanel && filterPanel.classList.contains('open')) {
-        if (!filterPanel.contains(e.target) && e.target.id !== 'btnFilterView') {
+        if (!filterPanel.contains(e.target) && !e.target.closest('#btnFilterView')) {
             filterPanel.classList.remove('open');
         }
     }
