@@ -3469,7 +3469,7 @@ let rowNum = rowIdx + 1;
                 let currentRem = (idx <= h1CutoffIndex) ? (remG3_H1 + remFree) : (remG3_Total + remFree);
                 let qStatus = "지원금 미사용";
                 if (!r.hasG3 && !r.hasFree) qStatus = "수익자";
-                else if (accOver > 0) qStatus = ((accExp - accOver) === 0) ? "지원금 소진" : "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
+                else if (accOver > 0) qStatus = ((q_usedG3 + q_usedFree) === 0) ? "지원금 소진" : "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
 
                 res[q] = { exp, usedG3: q_usedG3, usedFree: q_usedFree, over: q_over, status: qStatus, hasManual, hasManualSu, hasManualGy, hasManualJ };
                 res.allocs[q] = q_allocs;
