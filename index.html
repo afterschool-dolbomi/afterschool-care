@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.4</title>
+    <title>방과후 지원금 돌보미 V10.5</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -690,7 +690,7 @@
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
-                <div style="color:white; font-size:17px; font-weight:800; letter-spacing:-0.3px;">코디마스터 수강료 자료 등록</div>
+                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 수강료(강좌별) 자료 등록</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
             <div style="padding:24px;">
@@ -698,7 +698,7 @@
                     <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
                     등록할 분기를 선택하세요
 				    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
-                    코디마스터-수강료(학생별)-엑셀가져오기를 하여 엑셀을 불러오세요.
+                    코디마스터-수강료(강좌별)-엑셀가져오기를 하여 엑셀을 불러오세요.
                 </div>
                 <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
                 <div style="display:flex; gap:8px;">
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.4</span>
+                <span class="brand-version">V10.5</span>
             </div>
     </div>
     
@@ -890,7 +890,7 @@
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
-                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(학생별)업로드</button>
+                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(강좌별)업로드</button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
@@ -1973,51 +1973,57 @@
 
             let newCount = 0, mergeCount = 0, freeDetected = 0, skipped = [];
 
+            // ✨ 1단계: 엑셀은 학생-과목 한 줄씩이라, 먼저 학생별로 묶어줌
+            let studentGroups = {};
+
             ws.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) return; // 헤더줄 건너뜀
 
-                let grade = toNum(row.getCell(4).value);
-                let classNum = toNum(row.getCell(5).value);
-                let studentNum = toNum(row.getCell(6).value);
-                let name = String(row.getCell(7).value || '').trim();
-                let hClass = String(row.getCell(8).value || '');
-                let subjectListRaw = String(row.getCell(17).value || '').trim();
+                let subjectName = String(row.getCell(5).value || '').trim();  // E: 과목명
+                subjectName = subjectName.replace(/\d+부\([^)]*\)$/, '').trim(); // ✨ "요리1부(수)" → "요리"로 정리
+                let fClass = String(row.getCell(6).value || '');              // F: 구분(3학년지원비/자유수강지원금)
+                let grade = toNum(row.getCell(7).value);                       // G: 학년
+                let classNum = toNum(row.getCell(8).value);                    // H: 반
+                let studentNum = toNum(row.getCell(9).value);                  // I: 번호
+                let studentName = String(row.getCell(10).value || '').trim();  // J: 이름
 
-                if (!grade || !name || !subjectListRaw) { return; }
+                if (!grade || !studentName || !subjectName) return;
 
-                let isFree = hClass.includes('자유수강');
+                let quarterSu = Math.floor(toNum(row.getCell(16).value)); // P: 기수수강료 (이미 분기 최종 반영된 금액)
+                let quarterGy = Math.floor(toNum(row.getCell(18).value)); // R: 기수교재비
+                let quarterJ = Math.floor(toNum(row.getCell(19).value)); // S: 기수재료비
 
-                // ✨ Q열 과목 문자열 파싱: "요리1부(수)(30760/0/78000/0) - 댄스2부(목)(30760/0/0/1460)"
-                let monthsPerQuarter = 12 / maxQuarter; // ✨ 4분기제→3개월, 6분기제→2개월
-                let entries = subjectListRaw.split(' - ').map(s => s.trim()).filter(s => s);
-                let parsedSubs = [];
-                entries.forEach(entry => {
-                    let m = entry.match(/^(.+?)\d+부\([^)]*\)\(([-\d.]+)\/([-\d.]+)\/([-\d.]+)\/([-\d.]+)\)$/);
-                    if (!m) { skipped.push(`(파싱실패) ${grade}학년 ${classNum}반 ${studentNum}번 ${name}: ${entry}`); return; }
-                    let subName = m[1].trim();
-                    let su = Math.floor(toNum(m[2]) * monthsPerQuarter); // ✨ 월 수강료 × 분기당 개월수
-                    let gy = Math.floor(toNum(m[3]));
-                    let j = Math.floor(toNum(m[4])); // ✨ 4번째 숫자(실비)는 무시
+                let isFree = fClass.includes('자유수강');
 
-                    // ✨ 과목 목록 관리 기준단가와 금액이 같으면, 거기 등록된 강사료/수용비를 그대로 가져옴
-                    let g = 0, s = 0;
-                    let master = savedSubjects.find(sub => sub.name === subName);
-                    if (master && master.fees && master.fees[q]) {
-                        let mf = master.fees[q];
-                        if (toNum(mf.su) === su && (toNum(mf.g) > 0 || toNum(mf.s) > 0)) {
-                            g = toNum(mf.g); s = toNum(mf.s);
-                        }
-                    }
+                let key = `${grade}-${classNum}-${studentNum}`;
+                if (!studentGroups[key]) {
+                    studentGroups[key] = { grade, classNum, studentNum, name: studentName, isFree: false, subs: [] };
+                }
+                if (isFree) studentGroups[key].isFree = true;
 
-                    parsedSubs.push({ name: subName, g, s, su, gy, j });
-                });
-                let ex = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
+                // ✨ 과목 목록 관리에 이 분기 기준단가(수강료)가 설정돼 있으면 최우선 사용, 없으면 코디마스터 기수수강료 사용
+                let su = quarterSu;
+                let g = 0, s = 0;
+                let master = savedSubjects.find(sub => sub.name === subjectName);
+                if (master && master.fees && master.fees[q] && toNum(master.fees[q].su) > 0) {
+                    let mf = master.fees[q];
+                    su = toNum(mf.su);
+                    g = toNum(mf.g) || 0;
+                    s = toNum(mf.s) || 0;
+                }
+
+                // 교재비/재료비는 항상 코디마스터 파일의 학생별 개별 금액 그대로 사용
+                studentGroups[key].subs.push({ name: subjectName, g, s, su, gy: quarterGy, j: quarterJ });
+            });
+
+            // ✨ 2단계: 묶인 학생 데이터를 실제 명단(db)에 반영
+            Object.values(studentGroups).forEach(sg => {
+                let ex = db.find(x => x.grade === sg.grade && x.classNum === sg.classNum && x.studentNum === sg.studentNum);
 
                 if (ex) {
-                    // ✨ 자유수강 새로 감지되면 추가 활성화 (기존 지원유형은 유지)
-                    if (isFree && !ex.hasFree) { ex.hasFree = true; freeDetected++; }
+                    if (sg.isFree && !ex.hasFree) { ex.hasFree = true; freeDetected++; }
 
-                    parsedSubs.forEach(ps => {
+                    sg.subs.forEach(ps => {
                         let existingSub = ex[qKey].subs.find(s => s.name === ps.name);
                         if (existingSub) {
                             existingSub.g = ps.g; existingSub.s = ps.s; existingSub.su = ps.su; existingSub.gy = ps.gy; existingSub.j = ps.j;
@@ -2034,15 +2040,15 @@
                 } else {
                     let newRec = {
                         id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-                        grade, classNum, studentNum, name,
-                        hasG3: (grade >= 3 && grade <= getG3MaxGrade()),
-                        hasFree: isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
+                        grade: sg.grade, classNum: sg.classNum, studentNum: sg.studentNum, name: sg.name,
+                        hasG3: (sg.grade >= 3 && sg.grade <= getG3MaxGrade()), // ✨ 구분란과 무관하게 학년 기준으로 무조건 체크
+                        hasFree: sg.isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
                         memo: '', createdAt: Date.now()
                     };
                     for (let qi = 1; qi <= 6; qi++) newRec[`q${qi}`] = { subs: [{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0}] };
-                    parsedSubs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
+                    sg.subs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
                     db.push(newRec);
-                    if (isFree) freeDetected++;
+                    if (sg.isFree) freeDetected++;
                     newCount++;
                 }
             });
@@ -2052,14 +2058,13 @@
             renderSubjectList();
             renderGrid();
 
-            let msg = `${q}분기 코디마스터 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
+            let msg = `${q}분기 코디마스터(강좌별) 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
             if (skipped.length > 0) {
-                msg += `\n\n[⚠️ 과목 형식을 못 읽은 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
+                msg += `\n\n[⚠️ 처리 못한 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
                 if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
             }
-           alert(msg);
+            alert(msg);
             codimasterPendingWb = null;
-            codimasterSelectedQ = null;
         }
 
   
@@ -2528,7 +2533,7 @@ function toggleStatusPanel() {
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
             { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
-            { target: 'btn-codimaster-upload', text: '코디마스터에서 내려받은 수강료(학생별) 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액 등록까지 한번에 처리됩니다!', align: 'right' },
+            { target: 'btn-codimaster-upload', text: '코디마스터에서 내려받은 수강료(강좌별) 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
