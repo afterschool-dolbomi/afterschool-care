@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.2</title>
+    <title>방과후 지원금 돌보미 V10.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -825,7 +825,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.2</span>
+                <span class="brand-version">V10.3</span>
             </div>
     </div>
     
@@ -5815,7 +5815,7 @@ document.getElementById('tierList').innerHTML = html;
                     let bigBackupColIndex = hiddenColIndex + 1;
                     ws.getColumn(bigBackupColIndex).hidden = true;
                     ws.getCell(2, bigBackupColIndex).value = "시스템 백업용 데이터2 (수정금지)";
-                    let bigBackupStr = JSON.stringify({ specialList: specialList, neisList: neisList, snapshots: snapshots });
+                    let bigBackupStr = JSON.stringify({ specialList: specialList, neisList: neisList, snapshots: snapshots, savedSubjects: savedSubjects });
                     let bigBackupChunks = [];
                     for(let ci=0; ci<bigBackupStr.length; ci+=30000) bigBackupChunks.push(bigBackupStr.slice(ci, ci+30000));
                     let chunkCursor = 0;
@@ -6111,11 +6111,23 @@ document.getElementById('tierList').innerHTML = html;
                         });
                         persistNeisList();
                     }
-                    if (bigBackupData.snapshots) {
+                   if (bigBackupData.snapshots) {
                         bigBackupData.snapshots.forEach(snap => {
                             if(!snapshots.some(s => s.id === snap.id)) snapshots.push(snap);
                         });
                         localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                    }
+                    if (bigBackupData.savedSubjects) {
+                        bigBackupData.savedSubjects.forEach(sub => {
+                            let existing = savedSubjects.find(s => s.name === sub.name);
+                            if (existing) {
+                                existing.fees = sub.fees; // ✨ 이미 있는 과목이면 단가(강사료/수용비/수강료 등)를 백업 내용으로 갱신
+                            } else {
+                                savedSubjects.push(sub); // ✨ 백업엔 있는데 지금 목록엔 없는 과목은 새로 추가
+                            }
+                        });
+                        persistSubjects();
+                        renderSubjectList();
                     }
                 }
             } catch(e) {}
