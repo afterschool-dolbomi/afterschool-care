@@ -690,7 +690,7 @@
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
-                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 수강료(강좌별) 자료 등록</div>
+                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 '수강료(강좌별)-오른쪽 마우스-엑셀내보내기' 자료 등록</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
             <div style="padding:24px;">
@@ -698,7 +698,7 @@
                     <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
                     등록할 분기를 선택하세요
 				    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
-                    코디마스터-수강료(강좌별)-엑셀가져오기를 하여 엑셀을 불러오세요.
+                    코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하여 엑셀을 불러오세요.
                 </div>
                 <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
                 <div style="display:flex; gap:8px;">
@@ -890,7 +890,7 @@
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
-                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(강좌별)업로드</button>
+                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
@@ -2140,14 +2140,14 @@
 
                     let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
 
-                    if (hasG3Amt) {
-                        let note = hasSkAmt ? (r.hasFree ? '자유로 넘어감' : '지원금 부족') : '';
+                   if (hasG3Amt) {
+                        let note = hasSkAmt ? (hasFreeAmt ? '자유수강으로 넘어감' : '수익자로 넘어감') : '';
                         g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, gy: g3Gy, j: g3J, note });
                     }
                     if (hasFreeAmt) {
                         let notes = [];
                         if (hasG3Amt) notes.push('초3에서 넘어옴');
-                        if (hasSkAmt) notes.push('지원금 부족');
+                        if (hasSkAmt) notes.push('수익자로 넘어감');
                         freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, gy: frGy, j: frJ, note: notes.join(', ') });
                     }
                     if (hasSkAmt) {
@@ -2183,7 +2183,11 @@
             ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:12},{width:10},{width:10},{width:20},{width:16}];
         }
 
-        function addRosterDataRows(ws, rows, themeColor) {
+       function addRosterDataRows(ws, rows, themeColor) {
+            rows = [...rows].sort((a, b) => {
+                if (a.subject !== b.subject) return a.subject.localeCompare(b.subject); // ✨ 1순위: 과목명
+                return (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum); // ✨ 2순위: 학번
+            });
             rows.forEach(r => {
                 let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
                 row.eachCell(cell => { cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} }; });
@@ -2545,7 +2549,7 @@ let rowNum = rowIdx + 1;
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
             { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
-            { target: 'btn-codimaster-upload', text: '코디마스터에서 내려받은 수강료(강좌별) 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
+            { target: 'btn-codimaster-upload', text: '코디마스터-수강료(강좌별)-엑셀내보내기 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
