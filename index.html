@@ -2419,9 +2419,11 @@ function toggleStatusPanel() {
                     let c = counts[name];
                     let sum = c.beneficiary + c.free + c.g3;
                     totalBen += c.beneficiary; totalFree += c.free; totalG3 += c.g3; totalAll += sum;
+let rowNum = rowIdx + 1;
                     let zebra = (rowIdx++ % 2 === 0) ? '#ffffff' : '#f5f3ff';
                     return `<tr style="background:${zebra};">
-                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${name}</td>
+                        <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${rowNum}</td>
+                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb; white-space:normal; word-break:keep-all; overflow-wrap:break-word; line-height:1.3;">${name}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${c.beneficiary}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#7c3aed; font-weight:700;">${c.free}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#2563eb; font-weight:700;">${c.g3}</td>
@@ -2430,11 +2432,20 @@ function toggleStatusPanel() {
                 }).join('');
                 
                html += `
-                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 300px; min-width:270px; border-top:3px solid #6366f1;">
+                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 330px; min-width:300px; border-top:3px solid #6366f1;">
                     <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${q}분기 강좌별 인원</div>
-                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                   <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
+                        <colgroup>
+                            <col style="width:22px;">
+                            <col>
+                            <col style="width:44px;">
+                            <col style="width:52px;">
+                            <col style="width:32px;">
+                            <col style="width:40px;">
+                        </colgroup>
                         <thead>
                             <tr style="border-bottom:2px solid #6366f1;">
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">No.</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
@@ -2443,7 +2454,8 @@ function toggleStatusPanel() {
                             </tr>
                         </thead>
                         <tbody>${rowsHtml}
-                          <tr style="border-top:2px solid #111827;">
+                         <tr style="border-top:2px solid #111827;">
+                                <td style="padding:6px 5px; text-align:center; background:#fef08a !important;"></td>
                                 <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
                                 <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
                                 <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalFree}</td>
