@@ -658,7 +658,35 @@
  
 
          
-         <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+       <div id="adminRosterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
+                <div style="width:46px; height:46px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">🏛️</div>
+                <div style="color:white; font-size:17px; font-weight:800;">행정실 CMS 엑셀 수납 명단 저장</div>
+                <div style="color:#94a3b8; font-size:12px; margin-top:4px;">수익자·초3지원·자유수강 명단을 한번에 생성합니다</div>
+            </div>
+            <div style="padding:24px;">
+                <div style="font-size:12.5px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #d4af37; border-radius:8px; padding:14px; margin-bottom:20px; line-height:1.7;">
+                    <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📋 이렇게 만들어져요</div>
+                    · <b>강좌별 전체 수익자/초3지원금/자유수강자 명단</b> 시트 3개<br>
+                    · 지원금이 부족해 수익자로 넘어간 학생은 <b>해당 지원금 시트 + 수익자 시트 양쪽에 모두</b> 표시<br>
+                    · 초3→자유수강, 자유수강→수익자로 넘어간 내역은 각 행 끝에 <b>비고</b>로 표시<br>
+                    · 과목마다 <b>수익자 몫만 따로 뽑은 상세 시트</b>(교육비 + 교재비 또는 재료비)가 자동 생성돼요
+                </div>
+                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
+                    몇 분기 명단을 만들까요?
+                </div>
+                <div id="adminRosterQBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="closeAdminRosterModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
+                    <button onclick="confirmAdminRosterQuarter()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">명단 생성</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
@@ -917,7 +945,7 @@
         <div class="header-tools">
            <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
             <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
-            <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 저장 및 인쇄</button>
+            <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 업무,저장,인쇄</button>
 			<div class="toolbar-divider"></div>
 			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
 			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
@@ -1160,6 +1188,7 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
                     <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
                     </div>
@@ -1379,6 +1408,7 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <!-- ✨ 교육청 제출 서식 엑셀 버튼 추가 -->
                 <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
+                <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
                 <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff; display: flex; justify-content: center; align-items: center;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
             </div>
@@ -2034,7 +2064,294 @@
         }
 
   
-         function toggleSidebar() {
+     let adminRosterSelectedQ = null;
+
+        function openAdminRosterModal() {
+            adminRosterSelectedQ = null;
+            let btnsHtml = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                btnsHtml += `<button type="button" id="arQBtn${q}" onclick="selectAdminRosterQuarter(${q})" style="padding:14px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:800; font-size:14px; cursor:pointer;">${q}분기</button>`;
+            }
+            document.getElementById('adminRosterQBtns').innerHTML = btnsHtml;
+            document.getElementById('adminRosterModal').style.display = 'flex';
+        }
+
+        function selectAdminRosterQuarter(q) {
+            adminRosterSelectedQ = q;
+            for (let i = 1; i <= maxQuarter; i++) {
+                let btn = document.getElementById(`arQBtn${i}`);
+                if (!btn) continue;
+                if (i === q) { btn.style.border = '2px solid #d4af37'; btn.style.background = '#1e3a5f'; btn.style.color = 'white'; }
+                else { btn.style.border = '2px solid #cbd5e1'; btn.style.background = 'white'; btn.style.color = '#334155'; }
+            }
+        }
+
+        function closeAdminRosterModal() {
+            document.getElementById('adminRosterModal').style.display = 'none';
+            adminRosterSelectedQ = null;
+        }
+
+        function confirmAdminRosterQuarter() {
+            if (!adminRosterSelectedQ) { alert('먼저 분기를 선택해주세요.'); return; }
+            document.getElementById('adminRosterModal').style.display = 'none';
+            try {
+                generateAdminRoster(adminRosterSelectedQ);
+            } catch (err) {
+                alert('명단 생성 중 오류가 발생했습니다: ' + err.message);
+                console.error(err);
+            }
+            adminRosterSelectedQ = null;
+        }
+
+        // ✨ 분기별 학생-과목 데이터를 초3/자유/수익자로 나눠 집계 (기존 계산 엔진의 allocs 결과를 그대로 활용)
+        function computeAdminRosterData(q) {
+            let qKey = `q${q}`;
+            let g3Rows = [], freeRows = [], skRows = [];
+            let courseCounts = {};
+            let subjectSkDetail = {};
+
+            db.forEach(r => {
+                if (!r[qKey] || !r[qKey].subs) return;
+                let c = calcStudent(r);
+
+                r[qKey].subs.forEach((s, sIdx) => {
+                    let subName = (s.name || '').trim();
+                    if (!subName) return;
+                    let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
+                    if (!hasAmount) return;
+
+                    let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
+                    let g3Su = toNum(alloc.g3Su), g3Gy = toNum(alloc.g3Gy), g3J = toNum(alloc.g3J);
+                    let frSu = toNum(alloc.frSu), frGy = toNum(alloc.frGy), frJ = toNum(alloc.frJ);
+                    let skSu = toNum(alloc.skSu), skGy = toNum(alloc.skGy), skJ = toNum(alloc.skJ);
+
+                    let hasG3Amt = g3Su > 0 || g3Gy > 0 || g3J > 0;
+                    let hasFreeAmt = frSu > 0 || frGy > 0 || frJ > 0;
+                    let hasSkAmt = skSu > 0 || skGy > 0 || skJ > 0;
+
+                    if (!courseCounts[subName]) courseCounts[subName] = { sk: 0, free: 0, g3: 0 };
+                    if (hasG3Amt) courseCounts[subName].g3++;
+                    if (hasFreeAmt) courseCounts[subName].free++;
+                    if (hasSkAmt) courseCounts[subName].sk++;
+
+                    let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
+
+                    if (hasG3Amt) {
+                        let note = hasSkAmt ? (r.hasFree ? '자유로 넘어감' : '지원금 부족') : '';
+                        g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, gy: g3Gy, j: g3J, note });
+                    }
+                    if (hasFreeAmt) {
+                        let notes = [];
+                        if (hasG3Amt) notes.push('초3에서 넘어옴');
+                        if (hasSkAmt) notes.push('지원금 부족');
+                        freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, gy: frGy, j: frJ, note: notes.join(', ') });
+                    }
+                    if (hasSkAmt) {
+                        let note = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
+                        skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, gy: skGy, j: skJ, note });
+
+                        let detailNote = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
+                        if (!subjectSkDetail[subName]) subjectSkDetail[subName] = { eduRows: [], gyRows: [], jRows: [] };
+                        if (skSu > 0) subjectSkDetail[subName].eduRows.push({ ...base, amount: skSu, note: detailNote });
+                        if (skGy > 0) subjectSkDetail[subName].gyRows.push({ ...base, amount: skGy, note: detailNote });
+                        if (skJ > 0) subjectSkDetail[subName].jRows.push({ ...base, amount: skJ, note: detailNote });
+                    }
+                });
+            });
+
+            return { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail };
+        }
+
+       function addRosterHeaderRow(ws, title, themeColor) {
+            ws.mergeCells('A1:K1');
+            ws.getCell('A1').value = title;
+            ws.getCell('A1').font = { bold: true, size: 14 };
+            ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+            ws.getRow(1).height = 24;
+            ws.addRow([]);
+            let headerRow = ws.addRow(['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '수강료', '교재비', '재료비', '강좌', '비고']);
+            headerRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: themeColor } };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            });
+            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:12},{width:10},{width:10},{width:20},{width:16}];
+        }
+
+        function addRosterDataRows(ws, rows, themeColor) {
+            rows.forEach(r => {
+                let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
+                row.eachCell(cell => { cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} }; });
+            });
+
+            let totalAmount = rows.reduce((a,b)=>a+b.amount,0);
+            let totalSu = rows.reduce((a,b)=>a+b.su,0);
+            let totalGy = rows.reduce((a,b)=>a+b.gy,0);
+            let totalJ = rows.reduce((a,b)=>a+b.j,0);
+            let totalRow = ws.addRow(['', '', '', '', '총 합계', totalAmount, totalSu, totalGy, totalJ, '', '']);
+            totalRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor: { argb: themeColor } };
+                cell.border = { top:{style:'double'}, bottom:{style:'double'}, left:{style:'thin'}, right:{style:'thin'} };
+            });
+        }
+
+        function addCourseCountTable(ws, courseCounts) {
+            let startCol = 14; // N열부터
+            ws.mergeCells(2, startCol, 2, startCol+4);
+            ws.getCell(2, startCol).value = '강좌별 인원';
+            ws.getCell(2, startCol).font = { bold: true, size: 12 };
+            ws.getCell(2, startCol).alignment = { horizontal: 'center' };
+
+            let hRow = ws.getRow(4);
+            let headers = ['강좌명','수익자','자유수강','초3지원금','인원 합계'];
+            headers.forEach((h, i) => {
+                let cell = hRow.getCell(startCol+i);
+                cell.value = h;
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1E3A5F'} };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: 'center' };
+            });
+
+            let rIdx = 5;
+            let totSk=0, totFree=0, totG3=0;
+            savedSubjects.forEach((sub, idx) => {
+                let c = courseCounts[sub.name] || { sk: 0, free: 0, g3: 0 };
+                totSk += c.sk; totFree += c.free; totG3 += c.g3;
+                let row = ws.getRow(rIdx++);
+                let zebra = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
+                let vals = [sub.name, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
+                vals.forEach((v, i) => {
+                    let cell = row.getCell(startCol+i);
+                    cell.value = v;
+                    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:zebra} };
+                    cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} };
+                    cell.alignment = { horizontal: i===0 ? 'left' : 'center' };
+                });
+            });
+
+            let totRow = ws.getRow(rIdx);
+            let totVals = ['총합계', totSk, totFree, totG3, totSk+totFree+totG3];
+            totVals.forEach((v, i) => {
+                let cell = totRow.getCell(startCol+i);
+                cell.value = v;
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1E3A5F'} };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: i===0 ? 'left' : 'center' };
+            });
+        }
+
+        async function generateAdminRoster(q) {
+            const wb = new ExcelJS.Workbook();
+            let { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail } = computeAdminRosterData(q);
+
+            // 1. 수익자 명단 (붉은 계열)
+            let wsSk = wb.addWorksheet('강좌별 전체 수익자 명단');
+            addRosterHeaderRow(wsSk, `${q}분기 (수익자) 목록`, 'FFFECACA');
+            addRosterDataRows(wsSk, skRows, 'FFFECACA');
+            addCourseCountTable(wsSk, courseCounts);
+
+            // 2. 3학년지원대상자 명단 (하늘색 계열)
+            let wsG3 = wb.addWorksheet('강좌별 전체 3학년지원대상자 명단');
+            addRosterHeaderRow(wsG3, `${q}분기 (3학년지원금대상자) 목록`, 'FFBAE6FD');
+            addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
+
+            // 3. 자유수강자 명단 (보라색 계열)
+            let wsFree = wb.addWorksheet('강좌별 전체 자유수강자 명단');
+            addRosterHeaderRow(wsFree, `${q}분기 (자유수강대상자) 목록`, 'FFE9D5FF');
+            addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
+
+           // ✨ 과목별 수익자 상세 시트 공통 생성 함수 (캡처해주신 디자인 그대로)
+            function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q) {
+                let ws = wb.addWorksheet(`${subName}-${feeLabel}`.slice(0, 31));
+
+                // 제목: 병합 + 가운데 정렬
+                ws.mergeCells('A2:H2');
+                ws.getCell('A2').value = `${new Date().getFullYear()}년 ${q}분기 ${subName}부 ${feeLabel}(수익자)`;
+                ws.getCell('A2').font = { bold: true, size: 13 };
+                ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+                ws.getCell('A2').border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                ws.getRow(2).height = 22;
+
+                // 4행: 과목명 / 값 / 인원수 / 총 합계 요약 줄
+                let totalAmt = rows.reduce((a,b)=>a+b.amount,0);
+                let r4 = ws.getRow(4);
+                r4.getCell(1).value = '과목명';
+                r4.getCell(2).value = subName;
+                r4.getCell(3).value = `${rows.length}명`;
+                r4.getCell(4).value = '총 합계';
+                r4.getCell(5).value = totalAmt;
+                ws.mergeCells(4, 5, 4, 8); // E4:H4 합계 금액 칸 병합
+
+                r4.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(2).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFFFFFF'} };
+                r4.getCell(2).border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                r4.getCell(3).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(3).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(3).alignment = { horizontal: 'center' };
+                r4.getCell(4).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(4).alignment = { horizontal: 'center' };
+                r4.getCell(5).font = { bold: true, size: 13 };
+                r4.getCell(5).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFEF3C7'} };
+                r4.getCell(5).alignment = { horizontal: 'center' };
+                r4.getCell(5).border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                r4.height = 22;
+
+                // 5행: 헤더 (초록 배경 + 비고 칸 추가)
+                let hRow = ws.getRow(5);
+                let headers = ['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '*강좌명', '비고'];
+                headers.forEach((h, i) => {
+                    let cell = hRow.getCell(i+1);
+                    cell.value = h;
+                    cell.font = { bold: true };
+                    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFA7D8A0'} };
+                    cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                    cell.alignment = { horizontal: 'center' };
+                });
+
+                // 학생 목록: 테두리 + 지원금 부족 학생 빨간 글씨
+                rows.forEach(r => {
+                    let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
+                    let isShort = r.note === '지원금부족';
+                    row.eachCell(cell => {
+                        cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                        if (isShort) cell.font = { color: { argb: 'FFDC2626' } };
+                    });
+                });
+
+                ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:16},{width:14}];
+            }
+
+            // 4. 과목별 수익자 상세 시트
+            Object.keys(subjectSkDetail).forEach(subName => {
+                let detail = subjectSkDetail[subName];
+
+                if (detail.eduRows.length > 0) {
+                    buildSubjectDetailSheet(wb, subName, '교육비', detail.eduRows, q);
+                }
+
+                let feeType = detail.jRows.length > 0 ? 'j' : (detail.gyRows.length > 0 ? 'gy' : null);
+                if (feeType) {
+                    let feeRows = feeType === 'j' ? detail.jRows : detail.gyRows;
+                    let feeLabel = feeType === 'j' ? '재료비' : '교재비';
+                    buildSubjectDetailSheet(wb, subName, feeLabel, feeRows, q);
+                }
+            });
+
+            const buffer = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${q}분기_행정실_수납명단_${new Date().toISOString().slice(0,10)}.xlsx`;
+            link.click();
+        }
+
+        function toggleSidebar() {
             let sb = document.querySelector('.sidebar');
             sb.classList.toggle('collapsed');
             let isCollapsed = sb.classList.contains('collapsed');
@@ -7751,7 +8068,7 @@ document.addEventListener('keydown', function(e) {
       // ✨ 수익자 관리 업데이트 팝업 로직
     document.addEventListener("DOMContentLoaded", function() {
         // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10');
+       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10_3');
         
         // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
         if (!hidePopup) {
@@ -7767,7 +8084,7 @@ document.addEventListener('keydown', function(e) {
         if (isChecked) {
             // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
             // 식별자를 'hideBeneficiaryPopup_v10'으로 주어 나중에 또 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v10', 'true');
+            localStorage.setItem('hideBeneficiaryPopup_v10_3', 'true');
         }
         
         // 팝업창 숨기기
