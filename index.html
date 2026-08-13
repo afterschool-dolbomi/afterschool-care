@@ -999,6 +999,16 @@
         <div style="font-size:11px; color:#94a3b8; margin-top:4px;">원하는 조건으로 학생 명단을 좁혀보세요</div>
     </div>
     <div style="padding:20px 24px;">
+
+    <!-- 과목 필터 (과목별 보기에서만 실제로 적용됨) - 가장 많이 쓰는 필터라 맨 위로 배치 -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:2px solid #d4af37; background:#1f2937; color:white; font-size:13px;">
+                <option value="">모든 과목</option>
+            </select>
+        </div>
+    </div>
     
    <!-- 학년 필터 -->
     <div class="stat-section">
@@ -1039,16 +1049,7 @@
         </div>
     </div>
 
-    <!-- 과목 필터 (과목별 보기에서만 실제로 적용됨) -->
-    <div class="stat-section">
-        <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#1f2937; color:white; font-size:13px;">
-                <option value="">모든 과목</option>
-            </select>
-        </div>
-    </div>
-    </div>
+</div>
 </div>
 		   
 		   
@@ -1187,7 +1188,7 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자(일반수강생)</span>도 편하게 관리할 수 있습니다.</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하세요)</span></span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
                     <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
