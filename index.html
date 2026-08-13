@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.3</title>
+    <title>방과후 지원금 돌보미 V10.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.3</span>
+                <span class="brand-version">V10.4</span>
             </div>
     </div>
     
@@ -890,7 +890,7 @@
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
-                <button class="btn-3d btn-side" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(학생별)업로드</button>
+                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(학생별)업로드</button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
@@ -1188,14 +1188,13 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
                     <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center; justify-content:center; text-align:center;"><span style="color:#3b82f6; font-weight:900;">지금 바로 '학년도 지원금 설정' 을 눌러보세요</span>
 			   </div>
             </div>
-            </div>
+          
             
             <!-- 하단 닫기 및 체크박스 영역 -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0;">
@@ -2529,11 +2528,12 @@ function toggleStatusPanel() {
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
             { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
+            { target: 'btn-codimaster-upload', text: '코디마스터에서 내려받은 수강료(학생별) 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액 등록까지 한번에 처리됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
             { target: 'th-name', text: '학생의 1~4분기 수강 목록과 환불 금액을 적으려면 이름을 클릭하세요', align: 'bottom', type: 'column' },
-            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span>', align: 'bottom' },
+            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span><br><br>여기서 <b>교육청 자유수강 관리 엑셀</b>도 자동으로 만들 수 있고, <b style="color:#d4af37;">행정실 수납명단(수익자/초3/자유수강 분류)</b>도 자동으로 생성·저장할 수 있어요!', align: 'bottom' },
             { target: 'btn-excel-export', text: '컴퓨터를 바꾸거나 프로그램이 손상됨 방지를 위해 자주 백업(저장) 버튼을 눌러주세요. 환불, 메모 기록도 자동 저장 됩니다.', align: 'right', critical: true }
         ];
         let currentTutorialStep = 0;
@@ -2545,9 +2545,11 @@ function toggleStatusPanel() {
             checkUpdatePopup();
         }
 
-        function startTutorial() {
+       function startTutorial() {
             localStorage.setItem('edusync_tutorial_done', 'true');
             document.getElementById('tutorialWelcomeOverlay').classList.remove('active');
+            let noticePopup = document.getElementById('beneficiaryNoticePopup'); // ✨ 튜토리얼 시작 전 업데이트 공지 팝업이 남아있으면 강제로 닫아서 안 가리게 함
+            if (noticePopup) noticePopup.style.display = 'none';
             document.getElementById('tutorialWelcomeModal').style.display = 'none';
             
             document.getElementById('tutorialClickBlocker').style.display = 'block';
