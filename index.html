@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.5</title>
+    <title>방과후 지원금 돌보미 V10.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.5</span>
+                <span class="brand-version">V10.6</span>
             </div>
     </div>
     
@@ -3469,7 +3469,7 @@ let rowNum = rowIdx + 1;
                 let currentRem = (idx <= h1CutoffIndex) ? (remG3_H1 + remFree) : (remG3_Total + remFree);
                 let qStatus = "지원금 미사용";
                 if (!r.hasG3 && !r.hasFree) qStatus = "수익자";
-                else if (accOver > 0) qStatus = "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
+                else if (accOver > 0) qStatus = ((accExp - accOver) === 0) ? "지원금 소진" : "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
 
                 res[q] = { exp, usedG3: q_usedG3, usedFree: q_usedFree, over: q_over, status: qStatus, hasManual, hasManualSu, hasManualGy, hasManualJ };
                 res.allocs[q] = q_allocs;
@@ -3480,7 +3480,7 @@ let rowNum = rowIdx + 1;
             let totalSpent = res.total.usedG3 + res.total.usedFree;
             let status = "지원금 미사용";
             if (!r.hasG3 && !r.hasFree) status = "수익자";
-            else if (res.total.over > 0) status = "지원금 초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "지원금 소진"; else if (res.total.exp > 0) status = "지원금 사용중";
+            else if (res.total.over > 0) status = (totalSpent === 0) ? "지원금 소진" : "지원금 초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "지원금 소진"; else if (res.total.exp > 0) status = "지원금 사용중";
 
             return { ...res, remG3: remG3_Total, remFree, totalAllowance, totalSpent, status };
         }
@@ -4060,7 +4060,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                             sumQs[i] += c[`q${i}`].exp;
                             // ✨ 수기적용 뱃지와 초과 금액을 간격이 좁은 박스로 변경하고 순서 조정
                             let mBadge = c[`q${i}`].hasManual ? `<div class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px; line-height:1; margin-top:3px;">✏️수기적용</div>` : '';
-                            let qOverHtml = (!isBeneficiary && c[`q${i}`].over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; line-height:1; margin-top:3px;">초과: ${formatMoney(c[`q${i}`].over)}</div>` : '';
+                            let qOverHtml = (!isBeneficiary && c[`q${i}`].over > 0 && (c[`q${i}`].usedG3 + c[`q${i}`].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; line-height:1; margin-top:3px;">초과: ${formatMoney(c[`q${i}`].over)}</div>` : '';
                             
                             expTds += `<td class="text-right" style="vertical-align:middle;">
                                 <div style="line-height: 1.0; ${isBeneficiary ? 'color:#0369a1;' : ''}">${formatMoney(c[`q${i}`].exp)}</div>
@@ -4081,7 +4081,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         
                         let stClass = c.status==='수익자'?'st-beneficiary' : c.status==='지원금 미사용'?'st-none' : c.status==='지원금 사용중'?'st-use' : c.status==='지원금 소진'?'st-done':'st-over';
                         
-                        let overHtml = (!isBeneficiary && c.total.over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
+                        let overHtml = (!isBeneficiary && c.total.over > 0 && (c.total.usedG3 + c.total.usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
 
                        tBody.insertAdjacentHTML('beforeend', `
                             <tr>
@@ -4314,7 +4314,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                                 
 								<td class="text-right" style="font-weight: 800; color: ${(!r.hasG3 && !r.hasFree) ? '#0369a1' : '#111827'};">
                                     <div style="line-height: 1.0;">${formatMoney(c[q].exp)}</div>
-                                    ${((r.hasG3 || r.hasFree) && c[q].over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c[q].over)}</div>` : ''}
+                                    ${((r.hasG3 || r.hasFree) && c[q].over > 0 && (c[q].usedG3 + c[q].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c[q].over)}</div>` : ''}
                                 </td>
                                 
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
