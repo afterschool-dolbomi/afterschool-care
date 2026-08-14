@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.7</span>
+                <span class="brand-version">V10.8</span>
             </div>
     </div>
     
@@ -2182,7 +2182,7 @@
                 cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
             });
-            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:12},{width:10},{width:10},{width:20},{width:16}];
+            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
         }
 
        function addRosterDataRows(ws, rows, themeColor) {
@@ -2294,6 +2294,7 @@
                 r4.getCell(3).value = `${rows.length}명`;
                 r4.getCell(4).value = '총 합계';
                 r4.getCell(5).value = totalAmt;
+                r4.getCell(5).numFmt = '#,##0';
                 ws.mergeCells(4, 5, 4, 8); // E4:H4 합계 금액 칸 병합
 
                 r4.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -2327,6 +2328,7 @@
                 // 학생 목록: 테두리 + 지원금 부족 학생 빨간 글씨
                 rows.forEach(r => {
                     let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
+                    row.getCell(6).numFmt = '#,##0';
                     let isShort = r.note === '지원금부족';
                     row.eachCell(cell => {
                         cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
