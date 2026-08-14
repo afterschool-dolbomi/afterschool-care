@@ -2143,7 +2143,7 @@
                     let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
 
                    if (hasG3Amt) {
-                        let note = hasSkAmt ? (hasFreeAmt ? '자유수강으로 넘어감' : '수익자로 넘어감') : '';
+                        let note = hasFreeAmt ? '자유로 넘어감' : (hasSkAmt ? '수익자로 넘어감' : '');
                         g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, gy: g3Gy, j: g3J, note });
                     }
                     if (hasFreeAmt) {
@@ -3289,44 +3289,46 @@ let rowNum = rowIdx + 1;
                 let q_allocs = [];
                 let availableG3ForQ = (idx <= h1CutoffIndex) ? remG3_H1 : remG3_Total;
 
-                if(r[q] && r[q].subs) {
+               if(r[q] && r[q].subs) {
                    r[q].subs.forEach((s, sIdx) => {
                         if (toNum(s.g) > 0 || toNum(s.s) > 0) s.su = toNum(s.g) + toNum(s.s);
                         let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
-                        let netSu = Math.max(0, toNum(s.su) - rSu), netGy = Math.max(0, toNum(s.gy) - rGy), netJ = Math.max(0, toNum(s.j) - rJ);
-                        exp += (netSu + netGy + netJ);
+                        let grossSu = toNum(s.su), grossGy = toNum(s.gy), grossJ = toNum(s.j); // ✨ 환불 반영 전 원본 결제금액
+                        let netSu = Math.max(0, grossSu - rSu), netGy = Math.max(0, grossGy - rGy), netJ = Math.max(0, grossJ - rJ);
+                        exp += (netSu + netGy + netJ); // exp는 그대로 "실제로 낸 순금액" 기준 유지
 
-                        // ✨ 육아기근로단축 차시 비율 적용 - 지원 대상 밖 금액은 미리 떼어내서 본인부담으로 강제 전환
+                        // ✨ 육아기근로단축 차시 비율 적용 - 환불과 무관한 구조적 제외라 GROSS 기준으로 적용
                         let exclSu = 0, exclGy = 0, exclJ = 0;
                         if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
                             let sessionRatio = Math.max(0, Math.min(1, toNum(s.coveredSessions) / toNum(s.totalSessions)));
-                            exclSu = Math.round(netSu * (1 - sessionRatio));
-                            exclGy = Math.round(netGy * (1 - sessionRatio));
-                            exclJ = Math.round(netJ * (1 - sessionRatio));
-                            netSu -= exclSu; netGy -= exclGy; netJ -= exclJ;
+                            exclSu = Math.round(grossSu * (1 - sessionRatio));
+                            exclGy = Math.round(grossGy * (1 - sessionRatio));
+                            exclJ = Math.round(grossJ * (1 - sessionRatio));
                         }
+                        // ✨ 배분 계산의 기준 금액 = 환불 반영 전(gross) - 차시제외분. 이후 5단계에서 환불을 실사용 비율대로 되돌림
+                        let allocBaseSu = Math.max(0, grossSu - exclSu);
+                        let allocBaseGy = Math.max(0, grossGy - exclGy);
+                        let allocBaseJ = Math.max(0, grossJ - exclJ);
 
 
-
-
-
-                       // 1. 수동 입력값 세팅 (우선순위 1순위) - ✨ 환불 발생 시 수동금액도 순수 결제액(net) 이하로 자동 제한하여 무조건 잔액 반환
+                       // 1. 수동 입력값 세팅 (우선순위 1순위) - ✨ GROSS(환불 반영 전) 기준으로 제한
                         let m_g3Su = s.mG3Su !== undefined ? s.mG3Su : 0, m_frSu = s.mFreeSu !== undefined ? s.mFreeSu : 0, m_skSu = s.mSuikSu !== undefined ? s.mSuikSu : 0;
-                        let g3Su = Math.min(m_g3Su, netSu); let frSu = Math.min(m_frSu, netSu - g3Su); let skSu = Math.min(m_skSu, netSu - g3Su - frSu);
+                        let g3Su = Math.min(m_g3Su, allocBaseSu); let frSu = Math.min(m_frSu, allocBaseSu - g3Su); let skSu = Math.min(m_skSu, allocBaseSu - g3Su - frSu);
                         
                         let m_g3Gy = s.mG3Gy !== undefined ? s.mG3Gy : 0, m_frGy = s.mFreeGy !== undefined ? s.mFreeGy : 0, m_skGy = s.mSuikGy !== undefined ? s.mSuikGy : 0;
-                        let g3Gy = Math.min(m_g3Gy, netGy); let frGy = Math.min(m_frGy, netGy - g3Gy); let skGy = Math.min(m_skGy, netGy - g3Gy - frGy);
+                        let g3Gy = Math.min(m_g3Gy, allocBaseGy); let frGy = Math.min(m_frGy, allocBaseGy - g3Gy); let skGy = Math.min(m_skGy, allocBaseGy - g3Gy - frGy);
                         
                         let m_g3J = s.mG3J !== undefined ? s.mG3J : 0, m_frJ = s.mFreeJ !== undefined ? s.mFreeJ : 0, m_skJ = s.mSuikJ !== undefined ? s.mSuikJ : 0;
-                        let g3J = Math.min(m_g3J, netJ); let frJ = Math.min(m_frJ, netJ - g3J); let skJ = Math.min(m_skJ, netJ - g3J - frJ);
+                        let g3J = Math.min(m_g3J, allocBaseJ); let frJ = Math.min(m_frJ, allocBaseJ - g3J); let skJ = Math.min(m_skJ, allocBaseJ - g3J - frJ);
 
                         let a = {
                             g3Su, g3Gy, g3J, frSu, frGy, frJ, skSu, skGy, skJ,
                             mg3Su: s.mG3Su !== undefined, mg3Gy: s.mG3Gy !== undefined, mg3J: s.mG3J !== undefined,
                             mfrSu: s.mFreeSu !== undefined, mfrGy: s.mFreeGy !== undefined, mfrJ: s.mFreeJ !== undefined,
                             mskSu: s.mSuikSu !== undefined, mskGy: s.mSuikGy !== undefined, mskJ: s.mSuikJ !== undefined,
-                            netSu, netGy, netJ, sIdx, hasMats: (netGy > 0 || netJ > 0) ? 1 : 0,
-                            exclSu, exclGy, exclJ
+                            netSu: allocBaseSu, netGy: allocBaseGy, netJ: allocBaseJ, sIdx, hasMats: (allocBaseGy > 0 || allocBaseJ > 0) ? 1 : 0,
+                            exclSu, exclGy, exclJ,
+                            rSu, rGy, rJ // ✨ 5단계 환불 비율 배분용
                         };
 
                         // 2. 수동 입력 금액을 한도에서 가장 먼저 차감
@@ -3408,11 +3410,38 @@ let rowNum = rowIdx + 1;
                             }
                         }
                         
-                     // ✨ 차시 비율로 제외된 금액을 최종 본인부담에 합산
+                    // ✨ 차시 비율로 제외된 금액을 최종 본인부담에 합산
                         a.skSu += (a.exclSu || 0); a.skGy += (a.exclGy || 0); a.skJ += (a.exclJ || 0);
 
                         // 최종 수익자 합산
                         q_over += (a.skSu + a.skGy + a.skJ);
+                    });
+
+                    // ✨ 5. 환불 반영: 새로 배분하지 않고, "실제 결제했던 비율" 그대로 환불액을 되돌림
+                    q_allocs.forEach(a => {
+                        if (!a) return;
+                        [['Su','rSu'], ['Gy','rGy'], ['J','rJ']].forEach(([suffix, rKey]) => {
+                            let refundAmt = a[rKey];
+                            if (refundAmt > 0) {
+                                let g3Key = 'g3'+suffix, frKey = 'fr'+suffix, skKey = 'sk'+suffix;
+                                let base = a[g3Key] + a[frKey] + a[skKey];
+                                if (base > 0) {
+                                    let applyRefund = Math.min(refundAmt, base);
+                                    let refG3 = Math.round(applyRefund * (a[g3Key] / base));
+                                    let refFr = Math.round(applyRefund * (a[frKey] / base));
+                                    let refSk = applyRefund - refG3 - refFr; // 반올림 오차는 수익자쪽에서 흡수
+                                    a[g3Key] -= refG3; a[frKey] -= refFr; a[skKey] -= refSk;
+                                    remG3_Total += refG3; if(idx <= h1CutoffIndex) remG3_H1 += refG3; availableG3ForQ += refG3;
+                                    remFree += refFr;
+                                    q_usedG3 -= refG3; q_usedFree -= refFr;
+                                    q_over -= refSk;
+                                }
+                            }
+                        });
+                        // ✨ 환불 반영 후 최종 net 값으로 갱신 (다운스트림 화면에서 쓰는 "순 배분액" 의미 유지)
+                        a.netSu = a.g3Su + a.frSu + a.skSu;
+                        a.netGy = a.g3Gy + a.frGy + a.skGy;
+                        a.netJ = a.g3J + a.frJ + a.skJ;
                     });
                 
 
