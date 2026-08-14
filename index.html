@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.8</title>
+    <title>방과후 지원금 돌보미 V10.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.8</span>
+                <span class="brand-version">V10.9</span>
             </div>
     </div>
     
@@ -2185,14 +2185,26 @@
             ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
         }
 
-       function addRosterDataRows(ws, rows, themeColor) {
+function addRosterDataRows(ws, rows, themeColor) {
             rows = [...rows].sort((a, b) => {
                 if (a.subject !== b.subject) return a.subject.localeCompare(b.subject); // ✨ 1순위: 과목명
                 return (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum); // ✨ 2순위: 학번
             });
-            rows.forEach(r => {
+            // ✨ 시트 테마색에 어울리는 진한 구분선 색상 매핑
+            let dividerColorMap = { 'FFFECACA': 'FFDC2626', 'FFBAE6FD': 'FF0284C7', 'FFE9D5FF': 'FF9333EA' };
+            let dividerColor = dividerColorMap[themeColor] || 'FF6B7280';
+
+            rows.forEach((r, i) => {
                 let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
-                row.eachCell(cell => { cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} }; });
+                let isSubjectEnd = (i === rows.length - 1) || (rows[i+1].subject !== r.subject); // ✨ 다음 줄과 과목이 다르면 이 줄이 그 과목의 마지막 줄
+                row.eachCell(cell => {
+                    cell.border = {
+                        top:{style:'thin', color:{argb:'FFE5E7EB'}},
+                        bottom: isSubjectEnd ? {style:'medium', color:{argb:dividerColor}} : {style:'thin', color:{argb:'FFE5E7EB'}},
+                        left:{style:'thin', color:{argb:'FFE5E7EB'}},
+                        right:{style:'thin', color:{argb:'FFE5E7EB'}}
+                    };
+                });
             });
 
             let totalAmount = rows.reduce((a,b)=>a+b.amount,0);
@@ -3417,7 +3429,7 @@ let rowNum = rowIdx + 1;
                         q_over += (a.skSu + a.skGy + a.skJ);
                     });
 
-                    // ✨ 5. 환불 반영: 새로 배분하지 않고, "실제 결제했던 비율" 그대로 환불액을 되돌림
+                   // ✨ 5. 환불 반영: 수익자 부담분에서 먼저 빼고, 그걸로 부족하면 지원금(초3/자유)에서 비율대로 마저 뺌
                     q_allocs.forEach(a => {
                         if (!a) return;
                         a.refG3Su=0; a.refFrSu=0; a.refSkSu=0; a.refG3Gy=0; a.refFrGy=0; a.refSkGy=0; a.refG3J=0; a.refFrJ=0; a.refSkJ=0; // ✨ 화면 표시용 환불 배분액 (과목별 보기에서 사용)
@@ -3428,15 +3440,26 @@ let rowNum = rowIdx + 1;
                                 let base = a[g3Key] + a[frKey] + a[skKey];
                                 if (base > 0) {
                                     let applyRefund = Math.min(refundAmt, base);
-                                    let refG3 = Math.round(applyRefund * (a[g3Key] / base));
-                                    let refFr = Math.round(applyRefund * (a[frKey] / base));
-                                    let refSk = applyRefund - refG3 - refFr; // 반올림 오차는 수익자쪽에서 흡수
+
+                                    // ✨ 1순위: 수익자 부담분에서 먼저 최대한 뺀다
+                                    let refSk = Math.min(applyRefund, a[skKey]);
+                                    let remainRefund = applyRefund - refSk;
+
+                                    // ✨ 그래도 남으면, 초3/자유 지원금 쓴 비율대로 나머지를 뺀다
+                                    let refG3 = 0, refFr = 0;
+                                    if (remainRefund > 0) {
+                                        let g3frBase = a[g3Key] + a[frKey];
+                                        if (g3frBase > 0) {
+                                            refG3 = Math.round(remainRefund * (a[g3Key] / g3frBase));
+                                            refFr = remainRefund - refG3;
+                                        }
+                                    }
+
                                     a[g3Key] -= refG3; a[frKey] -= refFr; a[skKey] -= refSk;
                                     remG3_Total += refG3; if(idx <= h1CutoffIndex) remG3_H1 += refG3; availableG3ForQ += refG3;
                                     remFree += refFr;
                                     q_usedG3 -= refG3; q_usedFree -= refFr;
                                     q_over -= refSk;
-                                    a['ref'+g3Key[0].toUpperCase()+g3Key.slice(1)+''] = refG3; // 예비, 아래 직접 지정이 최종본
                                     a['refG3'+suffix] = refG3; a['refFr'+suffix] = refFr; a['refSk'+suffix] = refSk;
                                 }
                             }
