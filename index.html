@@ -3420,6 +3420,7 @@ let rowNum = rowIdx + 1;
                     // ✨ 5. 환불 반영: 새로 배분하지 않고, "실제 결제했던 비율" 그대로 환불액을 되돌림
                     q_allocs.forEach(a => {
                         if (!a) return;
+                        a.refG3Su=0; a.refFrSu=0; a.refSkSu=0; a.refG3Gy=0; a.refFrGy=0; a.refSkGy=0; a.refG3J=0; a.refFrJ=0; a.refSkJ=0; // ✨ 화면 표시용 환불 배분액 (과목별 보기에서 사용)
                         [['Su','rSu'], ['Gy','rGy'], ['J','rJ']].forEach(([suffix, rKey]) => {
                             let refundAmt = a[rKey];
                             if (refundAmt > 0) {
@@ -3435,6 +3436,8 @@ let rowNum = rowIdx + 1;
                                     remFree += refFr;
                                     q_usedG3 -= refG3; q_usedFree -= refFr;
                                     q_over -= refSk;
+                                    a['ref'+g3Key[0].toUpperCase()+g3Key.slice(1)+''] = refG3; // 예비, 아래 직접 지정이 최종본
+                                    a['refG3'+suffix] = refG3; a['refFr'+suffix] = refFr; a['refSk'+suffix] = refSk;
                                 }
                             }
                         });
@@ -3728,16 +3731,7 @@ if(fFund === 'free' && !r.hasFree) return false;
             if (viewMode === 'subject') {
                 let subjectRows = [];
 
-               viewData.forEach(({r, c}) => {
-                    // ✨ 환불 전(gross) 배분 계산 - 지원금별 환불액 산출용
-                    let r_gross = JSON.parse(JSON.stringify(r));
-                    for(let qi=1; qi<=6; qi++) {
-                        if(r_gross[`q${qi}`] && r_gross[`q${qi}`].subs) {
-                            r_gross[`q${qi}`].subs.forEach(s => { s.rG=0; s.rS=0; s.rSu=0; s.rGy=0; s.rJ=0; });
-                        }
-                    }
-                    let c_gross = calcStudent(r_gross);
-
+viewData.forEach(({r, c}) => {
                     let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
                     let remG3_H1 = r.hasG3 ? 250000 : 0;
                    let remG3_Total = allowanceG3;
@@ -3795,17 +3789,16 @@ if(fFund === 'free' && !r.hasFree) return false;
                                 let realJ = supJ + skJ;
                                 let realTot = realSu + realGy + realJ;
 
-                               let allocGross = c_gross.allocs && c_gross.allocs[q] && c_gross.allocs[q][sIdx] ? c_gross.allocs[q][sIdx] : {};
-                                // ✨ 다른 과목 재배분 여파로 생기는 음수값은 0으로 고정 (표시값 = 합계값 일치시킴)
-                                let g3RefundSu = Math.max(0, (allocGross.g3Su||0) - g3Su);
-                                let g3RefundGy = Math.max(0, (allocGross.g3Gy||0) - g3Gy);
-                                let g3RefundJ  = Math.max(0, (allocGross.g3J||0) - g3J);
-                                let freeRefundSu = Math.max(0, (allocGross.frSu||0) - freeSu);
-                                let freeRefundGy = Math.max(0, (allocGross.frGy||0) - freeGy);
-                                let freeRefundJ  = Math.max(0, (allocGross.frJ||0) - freeJ);
-                                let skRefundSu = Math.max(0, (allocGross.skSu||0) - skSu);
-                                let skRefundGy = Math.max(0, (allocGross.skGy||0) - skGy);
-                                let skRefundJ  = Math.max(0, (allocGross.skJ||0) - skJ);
+                               // ✨ 계산 엔진(5단계)이 이미 정확히 계산해둔 환불 배분값을 그대로 사용 (별도 gross 비교 계산 불필요)
+                                let g3RefundSu = alloc.refG3Su || 0;
+                                let g3RefundGy = alloc.refG3Gy || 0;
+                                let g3RefundJ  = alloc.refG3J || 0;
+                                let freeRefundSu = alloc.refFrSu || 0;
+                                let freeRefundGy = alloc.refFrGy || 0;
+                                let freeRefundJ  = alloc.refFrJ || 0;
+                                let skRefundSu = alloc.refSkSu || 0;
+                                let skRefundGy = alloc.refSkGy || 0;
+                                let skRefundJ  = alloc.refSkJ || 0;
 
                                 subjectRows.push({
                                     r, c, qStr: q, qNum: qIdx + 1, sName: subName, isNew: s.isNew,
