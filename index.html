@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.9</title>
+    <title>방과후 지원금 돌보미 V11.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.9</span>
+                <span class="brand-version">V11.0</span>
             </div>
     </div>
     
@@ -1597,7 +1597,10 @@
     </div>
 
 
-              <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
+                           <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
+        <div id="eduExamplePanel" style="position:fixed; top:50%; left:calc(50% + 285px); transform:translateY(-50%); width:0; overflow:hidden; transition:width 0.4s ease; z-index:4002; background:white; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.35); pointer-events:none;">
+        <img src="https://i.ibb.co/ZpHyjhzz/image.png" style="width:600px; height:auto; display:block; border-radius:12px;">
+    </div>
     <div class="slide-panel-overlay" id="eduWizardOverlay" onclick="closeEduWizard()" style="z-index: 4000;"></div>
     <div class="detail-modal subject" id="eduWizardModal" style="width: 550px; max-height: 85vh; z-index: 4001;">
         <div class="detail-header" style="background: #8b5cf6;">
@@ -1615,8 +1618,12 @@
                     <label style="display:flex; align-items:center; font-weight:bold; cursor:pointer;">
                         <input type="radio" name="eduFileType" value="existing" onchange="updateEduStep3UI()" style="margin-right:8px;"> 기존 입력했던 파일 이어서 시작
                     </label>
-                    <div style="margin-top:16px;">
+                                        <div style="margin-top:16px;">
                         <input type="file" id="eduUploadFile" accept=".xlsx" style="display:block; width:100%; padding:8px; border:1px solid #c084fc; border-radius:4px; background:white;">
+                    </div>
+                    <div style="margin-top:10px; font-size:12.5px; color:#6b21a8; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span>📎 <b>교육청 자유수강자 관리 엑셀 - '학생별 지원 내역 관리 서식'</b>을 업로드하세요</span>
+                        <span onmouseenter="showEduExampleImage()" style="cursor:pointer; text-decoration:underline; color:#8b5cf6; font-weight:bold; white-space:nowrap;">🖼️ 예제 보기</span>
                     </div>
                 </div>
             </div>
@@ -1652,7 +1659,7 @@
             </div>
             
             <div style="display:flex; justify-content:space-between; margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color);">
-                <button class="btn-tool" id="btnEduPrev" style="display:none; padding:8px 24px;" onclick="prevEduStep()">이전</button>
+                <button class="btn-tool" id="btnEduPrev" style="display:none; padding:8px 24px; border:1px solid #c084fc; color:#6b21a8;" onclick="prevEduStep()">이전</button>
                 <div style="flex:1;"></div>
                 <button class="btn-save" id="btnEduNext" style="background:#8b5cf6; padding:8px 32px;" onclick="nextEduStep()">다음 단계</button>
                 <button class="btn-save" id="btnEduExec" style="display:none; background:#10b981; padding:8px 32px;" onclick="executeEduExport()">엑셀 저장 및 생성 🚀</button>
@@ -7544,6 +7551,7 @@ document.getElementById('tierList').innerHTML = html;
         function openEduWizard() {
             eduCurrentStep = 1;
             document.getElementById('eduUploadFile').value = '';
+            showEduExampleImage(); // ✨ 마법사 창 열리면 자동으로 예제 이미지 보여주기
             
             let snapHtml = '';
             let validSnaps = snapshots.filter(s => !s.isAuto);
@@ -7563,6 +7571,13 @@ document.getElementById('tierList').innerHTML = html;
             updateEduWizardUI();
             document.getElementById('eduWizardOverlay').classList.add('active');
             document.getElementById('eduWizardModal').style.display = 'flex';
+        }
+
+                function showEduExampleImage() {
+            let panel = document.getElementById('eduExamplePanel');
+            panel.style.width = '600px';
+            clearTimeout(window._eduExampleTimer);
+            window._eduExampleTimer = setTimeout(() => { panel.style.width = '0px'; }, 4000);
         }
 
         function closeEduWizard() {
