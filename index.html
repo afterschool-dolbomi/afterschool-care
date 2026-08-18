@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.0</title>
+    <title>방과후 지원금 돌보미 V11.1</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.0</span>
+                <span class="brand-version">V11.1</span>
             </div>
     </div>
     
@@ -3819,6 +3819,12 @@ viewData.forEach(({r, c}) => {
                                 let realJ = supJ + skJ;
                                 let realTot = realSu + realGy + realJ;
 
+                                                              // ✨ '환불발생' 필터가 켜져있으면, 이 과목 자체에 환불이 있는지로 걸러줌 (학생 단위 아님)
+                                if (fStatusList.includes('환불발생')) {
+                                    let hasSubjectRefund = toNum(s.rSu) > 0 || toNum(s.rGy) > 0 || toNum(s.rJ) > 0 || toNum(s.rG) > 0 || toNum(s.rS) > 0;
+                                    if (!hasSubjectRefund) return;
+                                }
+
                                // ✨ 계산 엔진(5단계)이 이미 정확히 계산해둔 환불 배분값을 그대로 사용 (별도 gross 비교 계산 불필요)
                                 let g3RefundSu = alloc.refG3Su || 0;
                                 let g3RefundGy = alloc.refG3Gy || 0;
@@ -5198,12 +5204,15 @@ document.getElementById('fTier').value = r.freeTier || "";
                     }
                     let c_no_q_ref = calcStudent(r_no_q_ref);
 
-                    let origG3 = c_no_q_ref[`q${q}`].usedG3;
+                                        let origG3 = c_no_q_ref[`q${q}`].usedG3;
                     let origFree = c_no_q_ref[`q${q}`].usedFree;
+                    let origSk = c_no_q_ref[`q${q}`].over;
                     let usedG3 = c[`q${q}`].usedG3;
                     let usedFree = c[`q${q}`].usedFree;
+                    let usedSk = c[`q${q}`].over;
                     let refG3 = origG3 - usedG3;
                     let refFree = origFree - usedFree;
+                    let refSk = origSk - usedSk;
 
                     html += `
                         <div class="detail-box">
@@ -5221,21 +5230,23 @@ document.getElementById('fTier').value = r.freeTier || "";
 									
                                         <tr>
                                         <th rowspan="3" style="background:#f3f4f6; position:sticky; left:0; z-index:2; border-right:2px solid var(--border-color);">과목명</th>
-                                          <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
-                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fffbeb; color:#d97706; border:1px solid #fde68a; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterFees('${r.id}', ${q})">🗑️ 신청금액 지우기</button>
-                                    ${(r.hasG3 || r.hasFree) ? `<div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
-                                        (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span>)
-                                    </div>` : ''}
+                                                                                                                             <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
+                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fffbeb; color:#d97706; border:1px solid #fde68a; border-radius:4px; font-weight:bold; cursor:pointer; white-space:nowrap;" onclick="clearStudentQuarterFees('${r.id}', ${q})">🗑️ 신청금액 지우기</button>
+                                                                        <div style="height:22px;"></div>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
+                                        (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span> | <span style="color:#b91c1c;">수익자 사용: ${formatMoney(origSk)}</span>)
+                                    </div>
                                     <div>${q}분기 수강 신청금액</div>
                                 </th>
 											
                                         </th>
                                        
                                         <th colspan="6" rowspan="2" style="background:#fef2f2; color:#b91c1c; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
-                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterRefunds('${r.id}', ${q})">↩️ 환불금액 지우기</button>
-                                    ${(r.hasG3 || r.hasFree) ? `<div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
-                                        (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span>)
-                                    </div>` : ''}
+                                                                        <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; border-radius:4px; font-weight:bold; cursor:pointer; white-space:nowrap;" onclick="clearStudentQuarterRefunds('${r.id}', ${q})">↩️ 환불금액 지우기</button>
+                                                                        <div style="height:22px;"></div>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
+                                        (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span> | <span style="color:#b91c1c;">수익자 환불: ${formatMoney(refSk)}</span>)
+                                    </div>
                                     <div>${q}분기 환불금액 (입력)</div>
                                 </th>
 										
