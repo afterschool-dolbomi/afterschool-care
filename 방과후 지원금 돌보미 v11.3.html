@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.2</title>
+    <title>방과후 지원금 돌보미 V11.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.2</span>
+                <span class="brand-version">V11.3</span>
             </div>
     </div>
     
@@ -2010,13 +2010,13 @@
                 }
                 if (isFree) studentGroups[key].isFree = true;
 
-                // ✨ 과목 목록 관리에 이 분기 기준단가(수강료)가 설정돼 있으면 최우선 사용, 없으면 코디마스터 기수수강료 사용
+                               // ✨ 수강료(P열, 기수수강료)는 항상 코디마스터 파일 값을 그대로 사용
                 let su = quarterSu;
                 let g = 0, s = 0;
+                // ✨ 과목명이 '과목 목록 관리'에 있고, 그 단가가 코디마스터 금액과 정확히 같으면 강사료/수용비만 가져옴
                 let master = savedSubjects.find(sub => sub.name === subjectName);
-                if (master && master.fees && master.fees[q] && toNum(master.fees[q].su) > 0) {
+                if (master && master.fees && master.fees[q] && toNum(master.fees[q].su) === quarterSu) {
                     let mf = master.fees[q];
-                    su = toNum(mf.su);
                     g = toNum(mf.g) || 0;
                     s = toNum(mf.s) || 0;
                 }
