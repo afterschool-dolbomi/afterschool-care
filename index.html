@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.1</title>
+    <title>방과후 지원금 돌보미 V11.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -690,7 +690,7 @@
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
-                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 '수강료(강좌별)-오른쪽 마우스-엑셀내보내기' 자료 등록</div>
+                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 '수강료(강좌별)-오른쪽 마우스-<br>엑셀내보내기' 자료 등록</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
             <div style="padding:24px;">
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.1</span>
+                <span class="brand-version">V11.2</span>
             </div>
     </div>
     
@@ -7591,9 +7591,11 @@ document.getElementById('tierList').innerHTML = html;
             window._eduExampleTimer = setTimeout(() => { panel.style.width = '0px'; }, 4000);
         }
 
-        function closeEduWizard() {
+                function closeEduWizard() {
             document.getElementById('eduWizardOverlay').classList.remove('active');
             document.getElementById('eduWizardModal').style.display = 'none';
+            clearTimeout(window._eduExampleTimer); // ✨ 4초 타이머 취소
+            document.getElementById('eduExamplePanel').style.width = '0px'; // ✨ 즉시 접기
         }
 
         function updateEduStep3UI() {
@@ -8064,7 +8066,7 @@ document.getElementById('tierList').innerHTML = html;
 
           <div id="donatePopup" style="display:none; position:fixed; bottom:80px; left:30px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; width:210px; box-shadow:0 8px 20px rgba(0,0,0,0.18); z-index:9999;">
         <div style="font-size:13px; color:#334155; font-weight:600; line-height:1.6; margin-bottom:10px;">
-            프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️
+            프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️<br>(좋으면 500원~ 부터^^)
         </div>
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
         <a href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="text-decoration:none;">

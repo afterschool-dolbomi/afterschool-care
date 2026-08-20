@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V10.2</title>
+    <title>방과후 지원금 돌보미 V11.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -658,11 +658,39 @@
  
 
          
-         <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+       <div id="adminRosterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
+                <div style="width:46px; height:46px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">🏛️</div>
+                <div style="color:white; font-size:17px; font-weight:800;">행정실 CMS 엑셀 수납 명단 저장</div>
+                <div style="color:#94a3b8; font-size:12px; margin-top:4px;">수익자·초3지원·자유수강 명단을 한번에 생성합니다</div>
+            </div>
+            <div style="padding:24px;">
+                <div style="font-size:12.5px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #d4af37; border-radius:8px; padding:14px; margin-bottom:20px; line-height:1.7;">
+                    <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📋 이렇게 만들어져요</div>
+                    · <b>강좌별 전체 수익자/초3지원금/자유수강자 명단</b> 시트 3개<br>
+                    · 지원금이 부족해 수익자로 넘어간 학생은 <b>해당 지원금 시트 + 수익자 시트 양쪽에 모두</b> 표시<br>
+                    · 초3→자유수강, 자유수강→수익자로 넘어간 내역은 각 행 끝에 <b>비고</b>로 표시<br>
+                    · 과목마다 <b>수익자 몫만 따로 뽑은 상세 시트</b>(교육비 + 교재비 또는 재료비)가 자동 생성돼요
+                </div>
+                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
+                    몇 분기 명단을 만들까요?
+                </div>
+                <div id="adminRosterQBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="closeAdminRosterModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
+                    <button onclick="confirmAdminRosterQuarter()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">명단 생성</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
-                <div style="color:white; font-size:17px; font-weight:800; letter-spacing:-0.3px;">코디마스터 수강료 자료 등록</div>
+                <div style="color:white; font-size:17px; font-weight:800;">코디마스터 '수강료(강좌별)-오른쪽 마우스-<br>엑셀내보내기' 자료 등록</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
             <div style="padding:24px;">
@@ -670,7 +698,7 @@
                     <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
                     등록할 분기를 선택하세요
 				    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
-                    코디마스터-수강료(학생별)-엑셀가져오기를 하여 엑셀을 불러오세요.
+                    코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하여 엑셀을 불러오세요.
                 </div>
                 <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
                 <div style="display:flex; gap:8px;">
@@ -825,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V10.2</span>
+                <span class="brand-version">V11.2</span>
             </div>
     </div>
     
@@ -862,7 +890,7 @@
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
-                <button class="btn-3d btn-side" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터<br>수강료(학생별)업로드</button>
+                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
                 <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
@@ -917,7 +945,7 @@
         <div class="header-tools">
            <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
             <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
-            <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 저장 및 인쇄</button>
+            <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 업무,저장,인쇄</button>
 			<div class="toolbar-divider"></div>
 			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
 			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
@@ -971,6 +999,16 @@
         <div style="font-size:11px; color:#94a3b8; margin-top:4px;">원하는 조건으로 학생 명단을 좁혀보세요</div>
     </div>
     <div style="padding:20px 24px;">
+
+    <!-- 과목 필터 (과목별 보기에서만 실제로 적용됨) - 가장 많이 쓰는 필터라 맨 위로 배치 -->
+    <div class="stat-section">
+        <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
+            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:2px solid #d4af37; background:#1f2937; color:white; font-size:13px;">
+                <option value="">모든 과목</option>
+            </select>
+        </div>
+    </div>
     
    <!-- 학년 필터 -->
     <div class="stat-section">
@@ -989,13 +1027,15 @@
     <div class="stat-section">
         <div class="stat-title" style="color: #60a5fa;">💡 지원금 상태 필터</div>
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-          <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="" checked onchange="renderGrid()"> 모든 상태</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 미사용" onchange="renderGrid()"> 지원금 미사용</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 사용중" onchange="renderGrid()"> 지원금 사용중</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 소진" onchange="renderGrid()"> 지원금 소진</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="지원금 초과" onchange="renderGrid()"> 지원금 초과</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="수익자" onchange="renderGrid()"> 수익자</label>
-            <label style="cursor: pointer;"><input type="radio" name="fltStatus" value="환불발생" onchange="renderGrid()"> 환불발생</label>
+          <div style="font-size:11px; color:#94a3b8; margin-bottom:6px;">✔️ 여러개 동시 선택 가능 (예: 수익자 + 지원금 소진 → 이번 분기 전액 수익자로 낸 학생 전부 보기)</div>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="지원금 미사용" onchange="renderGrid()"> 지원금 미사용</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="지원금 사용중" onchange="renderGrid()"> 지원금 사용중</label>
+<label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="지원금 소진" onchange="renderGrid()"> 지원금 소진(전체 수익자변환)</label>
+            <label style="cursor: pointer; margin-left:16px; font-size:12.5px;"><input type="checkbox" name="fltStatus" value="초3지원금 소진" onchange="renderGrid()"> ㄴ <span id="fltG3ShortLabel">초3지원금</span>만 소진(수익자)</label>
+            <label style="cursor: pointer; margin-left:16px; font-size:12.5px;"><input type="checkbox" name="fltStatus" value="자유수강 소진" onchange="renderGrid()"> ㄴ 자유수강만 소진(수익자)</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="지원금 초과" onchange="renderGrid()"> 지원금 초과</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="수익자" onchange="renderGrid()"> 수익자</label>
+            <label style="cursor: pointer;"><input type="checkbox" name="fltStatus" value="환불발생" onchange="renderGrid()"> 환불발생</label>
         </div>
     </div>
 
@@ -1011,16 +1051,7 @@
         </div>
     </div>
 
-    <!-- 과목 필터 (과목별 보기에서만 실제로 적용됨) -->
-    <div class="stat-section">
-        <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#1f2937; color:white; font-size:13px;">
-                <option value="">모든 과목</option>
-            </select>
-        </div>
-    </div>
-    </div>
+</div>
 </div>
 		   
 		   
@@ -1159,14 +1190,14 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자(일반수강생)</span>도 편하게 관리할 수 있습니다.</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span></span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하세요)</span></span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
                     <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
                         💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center; justify-content:center; text-align:center;"><span style="color:#3b82f6; font-weight:900;">지금 바로 '학년도 지원금 설정' 을 눌러보세요</span>
 			   </div>
             </div>
-            </div>
+          
             
             <!-- 하단 닫기 및 체크박스 영역 -->
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0;">
@@ -1379,6 +1410,7 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <!-- ✨ 교육청 제출 서식 엑셀 버튼 추가 -->
                 <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
+                <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
                 <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff; display: flex; justify-content: center; align-items: center;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
             </div>
@@ -1565,7 +1597,10 @@
     </div>
 
 
-              <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
+                           <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
+        <div id="eduExamplePanel" style="position:fixed; top:50%; left:calc(50% + 285px); transform:translateY(-50%); width:0; overflow:hidden; transition:width 0.4s ease; z-index:4002; background:white; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.35); pointer-events:none;">
+        <img src="https://i.ibb.co/ZpHyjhzz/image.png" style="width:600px; height:auto; display:block; border-radius:12px;">
+    </div>
     <div class="slide-panel-overlay" id="eduWizardOverlay" onclick="closeEduWizard()" style="z-index: 4000;"></div>
     <div class="detail-modal subject" id="eduWizardModal" style="width: 550px; max-height: 85vh; z-index: 4001;">
         <div class="detail-header" style="background: #8b5cf6;">
@@ -1583,8 +1618,12 @@
                     <label style="display:flex; align-items:center; font-weight:bold; cursor:pointer;">
                         <input type="radio" name="eduFileType" value="existing" onchange="updateEduStep3UI()" style="margin-right:8px;"> 기존 입력했던 파일 이어서 시작
                     </label>
-                    <div style="margin-top:16px;">
+                                        <div style="margin-top:16px;">
                         <input type="file" id="eduUploadFile" accept=".xlsx" style="display:block; width:100%; padding:8px; border:1px solid #c084fc; border-radius:4px; background:white;">
+                    </div>
+                    <div style="margin-top:10px; font-size:12.5px; color:#6b21a8; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span>📎 <b>교육청 자유수강자 관리 엑셀 - '학생별 지원 내역 관리 서식'</b>을 업로드하세요</span>
+                        <span onmouseenter="showEduExampleImage()" style="cursor:pointer; text-decoration:underline; color:#8b5cf6; font-weight:bold; white-space:nowrap;">🖼️ 예제 보기</span>
                     </div>
                 </div>
             </div>
@@ -1620,7 +1659,7 @@
             </div>
             
             <div style="display:flex; justify-content:space-between; margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color);">
-                <button class="btn-tool" id="btnEduPrev" style="display:none; padding:8px 24px;" onclick="prevEduStep()">이전</button>
+                <button class="btn-tool" id="btnEduPrev" style="display:none; padding:8px 24px; border:1px solid #c084fc; color:#6b21a8;" onclick="prevEduStep()">이전</button>
                 <div style="flex:1;"></div>
                 <button class="btn-save" id="btnEduNext" style="background:#8b5cf6; padding:8px 32px;" onclick="nextEduStep()">다음 단계</button>
                 <button class="btn-save" id="btnEduExec" style="display:none; background:#10b981; padding:8px 32px;" onclick="executeEduExport()">엑셀 저장 및 생성 🚀</button>
@@ -1662,13 +1701,12 @@
         let snapshots = []; // ✨ 타임머신 과거 기록 보관소
         let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
         let isSuikViewOn = true; // ✨ 수익자 관리 프로그램이라 항상 켜진 상태로 고정
-        
-        window.toggleSuikView = function() {
-            isSuikViewOn = !isSuikViewOn;
-            renderGrid();
-        };
 
         let isRefundViewOn = false;
+        let isG3RefundOn = false, isFreeRefundOn = false, isSkRefundOn = false; // ✨ 과목별 보기 - 지원금별 환불보기 토글
+        function toggleG3Refund() { isG3RefundOn = !isG3RefundOn; renderGrid(); }
+        function toggleFreeRefund() { isFreeRefundOn = !isFreeRefundOn; renderGrid(); }
+        function toggleSkRefund() { isSkRefundOn = !isSkRefundOn; renderGrid(); }
         
        window.toggleRefundView = function() {
             isRefundViewOn = !isRefundViewOn;
@@ -1944,51 +1982,57 @@
 
             let newCount = 0, mergeCount = 0, freeDetected = 0, skipped = [];
 
+            // ✨ 1단계: 엑셀은 학생-과목 한 줄씩이라, 먼저 학생별로 묶어줌
+            let studentGroups = {};
+
             ws.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) return; // 헤더줄 건너뜀
 
-                let grade = toNum(row.getCell(4).value);
-                let classNum = toNum(row.getCell(5).value);
-                let studentNum = toNum(row.getCell(6).value);
-                let name = String(row.getCell(7).value || '').trim();
-                let hClass = String(row.getCell(8).value || '');
-                let subjectListRaw = String(row.getCell(17).value || '').trim();
+                let subjectName = String(row.getCell(5).value || '').trim();  // E: 과목명
+                subjectName = subjectName.replace(/\d+부\([^)]*\)$/, '').trim(); // ✨ "요리1부(수)" → "요리"로 정리
+                let fClass = String(row.getCell(6).value || '');              // F: 구분(3학년지원비/자유수강지원금)
+                let grade = toNum(row.getCell(7).value);                       // G: 학년
+                let classNum = toNum(row.getCell(8).value);                    // H: 반
+                let studentNum = toNum(row.getCell(9).value);                  // I: 번호
+                let studentName = String(row.getCell(10).value || '').trim();  // J: 이름
 
-                if (!grade || !name || !subjectListRaw) { return; }
+                if (!grade || !studentName || !subjectName) return;
 
-                let isFree = hClass.includes('자유수강');
+                let quarterSu = Math.floor(toNum(row.getCell(16).value)); // P: 기수수강료 (이미 분기 최종 반영된 금액)
+                let quarterGy = Math.floor(toNum(row.getCell(18).value)); // R: 기수교재비
+                let quarterJ = Math.floor(toNum(row.getCell(19).value)); // S: 기수재료비
 
-                // ✨ Q열 과목 문자열 파싱: "요리1부(수)(30760/0/78000/0) - 댄스2부(목)(30760/0/0/1460)"
-                let monthsPerQuarter = 12 / maxQuarter; // ✨ 4분기제→3개월, 6분기제→2개월
-                let entries = subjectListRaw.split(' - ').map(s => s.trim()).filter(s => s);
-                let parsedSubs = [];
-                entries.forEach(entry => {
-                    let m = entry.match(/^(.+?)\d+부\([^)]*\)\(([-\d.]+)\/([-\d.]+)\/([-\d.]+)\/([-\d.]+)\)$/);
-                    if (!m) { skipped.push(`(파싱실패) ${grade}학년 ${classNum}반 ${studentNum}번 ${name}: ${entry}`); return; }
-                    let subName = m[1].trim();
-                    let su = Math.floor(toNum(m[2]) * monthsPerQuarter); // ✨ 월 수강료 × 분기당 개월수
-                    let gy = Math.floor(toNum(m[3]));
-                    let j = Math.floor(toNum(m[4])); // ✨ 4번째 숫자(실비)는 무시
+                let isFree = fClass.includes('자유수강');
 
-                    // ✨ 과목 목록 관리 기준단가와 금액이 같으면, 거기 등록된 강사료/수용비를 그대로 가져옴
-                    let g = 0, s = 0;
-                    let master = savedSubjects.find(sub => sub.name === subName);
-                    if (master && master.fees && master.fees[q]) {
-                        let mf = master.fees[q];
-                        if (toNum(mf.su) === su && (toNum(mf.g) > 0 || toNum(mf.s) > 0)) {
-                            g = toNum(mf.g); s = toNum(mf.s);
-                        }
-                    }
+                let key = `${grade}-${classNum}-${studentNum}`;
+                if (!studentGroups[key]) {
+                    studentGroups[key] = { grade, classNum, studentNum, name: studentName, isFree: false, subs: [] };
+                }
+                if (isFree) studentGroups[key].isFree = true;
 
-                    parsedSubs.push({ name: subName, g, s, su, gy, j });
-                });
-                let ex = db.find(x => x.grade === grade && x.classNum === classNum && x.studentNum === studentNum);
+                // ✨ 과목 목록 관리에 이 분기 기준단가(수강료)가 설정돼 있으면 최우선 사용, 없으면 코디마스터 기수수강료 사용
+                let su = quarterSu;
+                let g = 0, s = 0;
+                let master = savedSubjects.find(sub => sub.name === subjectName);
+                if (master && master.fees && master.fees[q] && toNum(master.fees[q].su) > 0) {
+                    let mf = master.fees[q];
+                    su = toNum(mf.su);
+                    g = toNum(mf.g) || 0;
+                    s = toNum(mf.s) || 0;
+                }
+
+                // 교재비/재료비는 항상 코디마스터 파일의 학생별 개별 금액 그대로 사용
+                studentGroups[key].subs.push({ name: subjectName, g, s, su, gy: quarterGy, j: quarterJ });
+            });
+
+            // ✨ 2단계: 묶인 학생 데이터를 실제 명단(db)에 반영
+            Object.values(studentGroups).forEach(sg => {
+                let ex = db.find(x => x.grade === sg.grade && x.classNum === sg.classNum && x.studentNum === sg.studentNum);
 
                 if (ex) {
-                    // ✨ 자유수강 새로 감지되면 추가 활성화 (기존 지원유형은 유지)
-                    if (isFree && !ex.hasFree) { ex.hasFree = true; freeDetected++; }
+                    if (sg.isFree && !ex.hasFree) { ex.hasFree = true; freeDetected++; }
 
-                    parsedSubs.forEach(ps => {
+                    sg.subs.forEach(ps => {
                         let existingSub = ex[qKey].subs.find(s => s.name === ps.name);
                         if (existingSub) {
                             existingSub.g = ps.g; existingSub.s = ps.s; existingSub.su = ps.su; existingSub.gy = ps.gy; existingSub.j = ps.j;
@@ -2005,15 +2049,15 @@
                 } else {
                     let newRec = {
                         id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-                        grade, classNum, studentNum, name,
-                        hasG3: (grade >= 3 && grade <= getG3MaxGrade()),
-                        hasFree: isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
+                        grade: sg.grade, classNum: sg.classNum, studentNum: sg.studentNum, name: sg.name,
+                        hasG3: (sg.grade >= 3 && sg.grade <= getG3MaxGrade()), // ✨ 구분란과 무관하게 학년 기준으로 무조건 체크
+                        hasFree: sg.isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
                         memo: '', createdAt: Date.now()
                     };
                     for (let qi = 1; qi <= 6; qi++) newRec[`q${qi}`] = { subs: [{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0}] };
-                    parsedSubs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
+                    sg.subs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
                     db.push(newRec);
-                    if (isFree) freeDetected++;
+                    if (sg.isFree) freeDetected++;
                     newCount++;
                 }
             });
@@ -2023,18 +2067,322 @@
             renderSubjectList();
             renderGrid();
 
-            let msg = `${q}분기 코디마스터 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
+            let msg = `${q}분기 코디마스터(강좌별) 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
             if (skipped.length > 0) {
-                msg += `\n\n[⚠️ 과목 형식을 못 읽은 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
+                msg += `\n\n[⚠️ 처리 못한 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
                 if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
             }
-           alert(msg);
+            alert(msg);
             codimasterPendingWb = null;
-            codimasterSelectedQ = null;
         }
 
   
-         function toggleSidebar() {
+     let adminRosterSelectedQ = null;
+
+        function openAdminRosterModal() {
+            adminRosterSelectedQ = null;
+            let btnsHtml = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                btnsHtml += `<button type="button" id="arQBtn${q}" onclick="selectAdminRosterQuarter(${q})" style="padding:14px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:800; font-size:14px; cursor:pointer;">${q}분기</button>`;
+            }
+            document.getElementById('adminRosterQBtns').innerHTML = btnsHtml;
+            document.getElementById('adminRosterModal').style.display = 'flex';
+        }
+
+        function selectAdminRosterQuarter(q) {
+            adminRosterSelectedQ = q;
+            for (let i = 1; i <= maxQuarter; i++) {
+                let btn = document.getElementById(`arQBtn${i}`);
+                if (!btn) continue;
+                if (i === q) { btn.style.border = '2px solid #d4af37'; btn.style.background = '#1e3a5f'; btn.style.color = 'white'; }
+                else { btn.style.border = '2px solid #cbd5e1'; btn.style.background = 'white'; btn.style.color = '#334155'; }
+            }
+        }
+
+        function closeAdminRosterModal() {
+            document.getElementById('adminRosterModal').style.display = 'none';
+            adminRosterSelectedQ = null;
+        }
+
+        function confirmAdminRosterQuarter() {
+            if (!adminRosterSelectedQ) { alert('먼저 분기를 선택해주세요.'); return; }
+            document.getElementById('adminRosterModal').style.display = 'none';
+            try {
+                generateAdminRoster(adminRosterSelectedQ);
+            } catch (err) {
+                alert('명단 생성 중 오류가 발생했습니다: ' + err.message);
+                console.error(err);
+            }
+            adminRosterSelectedQ = null;
+        }
+
+        // ✨ 분기별 학생-과목 데이터를 초3/자유/수익자로 나눠 집계 (기존 계산 엔진의 allocs 결과를 그대로 활용)
+        function computeAdminRosterData(q) {
+            let qKey = `q${q}`;
+            let g3Rows = [], freeRows = [], skRows = [];
+            let courseCounts = {};
+            let subjectSkDetail = {};
+
+            db.forEach(r => {
+                if (!r[qKey] || !r[qKey].subs) return;
+                let c = calcStudent(r);
+
+                r[qKey].subs.forEach((s, sIdx) => {
+                    let subName = (s.name || '').trim();
+                    if (!subName) return;
+                    let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
+                    if (!hasAmount) return;
+
+                    let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
+                    let g3Su = toNum(alloc.g3Su), g3Gy = toNum(alloc.g3Gy), g3J = toNum(alloc.g3J);
+                    let frSu = toNum(alloc.frSu), frGy = toNum(alloc.frGy), frJ = toNum(alloc.frJ);
+                    let skSu = toNum(alloc.skSu), skGy = toNum(alloc.skGy), skJ = toNum(alloc.skJ);
+
+                    let hasG3Amt = g3Su > 0 || g3Gy > 0 || g3J > 0;
+                    let hasFreeAmt = frSu > 0 || frGy > 0 || frJ > 0;
+                    let hasSkAmt = skSu > 0 || skGy > 0 || skJ > 0;
+
+                    if (!courseCounts[subName]) courseCounts[subName] = { sk: 0, free: 0, g3: 0 };
+                    if (hasG3Amt) courseCounts[subName].g3++;
+                    if (hasFreeAmt) courseCounts[subName].free++;
+                    if (hasSkAmt) courseCounts[subName].sk++;
+
+                    let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
+
+                   if (hasG3Amt) {
+                        let note = hasFreeAmt ? '자유로 넘어감' : (hasSkAmt ? '수익자로 넘어감' : '');
+                        g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, gy: g3Gy, j: g3J, note });
+                    }
+                    if (hasFreeAmt) {
+                        let notes = [];
+                        if (hasG3Amt) notes.push('초3에서 넘어옴');
+                        if (hasSkAmt) notes.push('수익자로 넘어감');
+                        freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, gy: frGy, j: frJ, note: notes.join(', ') });
+                    }
+                    if (hasSkAmt) {
+                        let note = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
+                        skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, gy: skGy, j: skJ, note });
+
+                        let detailNote = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
+                        if (!subjectSkDetail[subName]) subjectSkDetail[subName] = { eduRows: [], gyRows: [], jRows: [] };
+                        if (skSu > 0) subjectSkDetail[subName].eduRows.push({ ...base, amount: skSu, note: detailNote });
+                        if (skGy > 0) subjectSkDetail[subName].gyRows.push({ ...base, amount: skGy, note: detailNote });
+                        if (skJ > 0) subjectSkDetail[subName].jRows.push({ ...base, amount: skJ, note: detailNote });
+                    }
+                });
+            });
+
+            return { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail };
+        }
+
+       function addRosterHeaderRow(ws, title, themeColor) {
+            ws.mergeCells('A1:K1');
+            ws.getCell('A1').value = title;
+            ws.getCell('A1').font = { bold: true, size: 14 };
+            ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+            ws.getRow(1).height = 24;
+            ws.addRow([]);
+            let headerRow = ws.addRow(['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '수강료', '교재비', '재료비', '강좌', '비고']);
+            headerRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: themeColor } };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            });
+            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
+        }
+
+function addRosterDataRows(ws, rows, themeColor) {
+            rows = [...rows].sort((a, b) => {
+                if (a.subject !== b.subject) return a.subject.localeCompare(b.subject); // ✨ 1순위: 과목명
+                return (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum); // ✨ 2순위: 학번
+            });
+            // ✨ 시트 테마색에 어울리는 진한 구분선 색상 매핑
+            let dividerColorMap = { 'FFFECACA': 'FFDC2626', 'FFBAE6FD': 'FF0284C7', 'FFE9D5FF': 'FF9333EA' };
+            let dividerColor = dividerColorMap[themeColor] || 'FF6B7280';
+
+            rows.forEach((r, i) => {
+                let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
+                let isSubjectEnd = (i === rows.length - 1) || (rows[i+1].subject !== r.subject); // ✨ 다음 줄과 과목이 다르면 이 줄이 그 과목의 마지막 줄
+                row.eachCell(cell => {
+                    cell.border = {
+                        top:{style:'thin', color:{argb:'FFE5E7EB'}},
+                        bottom: isSubjectEnd ? {style:'medium', color:{argb:dividerColor}} : {style:'thin', color:{argb:'FFE5E7EB'}},
+                        left:{style:'thin', color:{argb:'FFE5E7EB'}},
+                        right:{style:'thin', color:{argb:'FFE5E7EB'}}
+                    };
+                });
+            });
+
+            let totalAmount = rows.reduce((a,b)=>a+b.amount,0);
+            let totalSu = rows.reduce((a,b)=>a+b.su,0);
+            let totalGy = rows.reduce((a,b)=>a+b.gy,0);
+            let totalJ = rows.reduce((a,b)=>a+b.j,0);
+            let totalRow = ws.addRow(['', '', '', '', '총 합계', totalAmount, totalSu, totalGy, totalJ, '', '']);
+            totalRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor: { argb: themeColor } };
+                cell.border = { top:{style:'double'}, bottom:{style:'double'}, left:{style:'thin'}, right:{style:'thin'} };
+            });
+        }
+
+        function addCourseCountTable(ws, courseCounts) {
+            let startCol = 14; // N열부터
+            ws.mergeCells(2, startCol, 2, startCol+4);
+            ws.getCell(2, startCol).value = '강좌별 인원';
+            ws.getCell(2, startCol).font = { bold: true, size: 12 };
+            ws.getCell(2, startCol).alignment = { horizontal: 'center' };
+
+            let hRow = ws.getRow(4);
+            let headers = ['강좌명','수익자','자유수강','초3지원금','인원 합계'];
+            headers.forEach((h, i) => {
+                let cell = hRow.getCell(startCol+i);
+                cell.value = h;
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1E3A5F'} };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: 'center' };
+            });
+
+            let rIdx = 5;
+            let totSk=0, totFree=0, totG3=0;
+            savedSubjects.forEach((sub, idx) => {
+                let c = courseCounts[sub.name] || { sk: 0, free: 0, g3: 0 };
+                totSk += c.sk; totFree += c.free; totG3 += c.g3;
+                let row = ws.getRow(rIdx++);
+                let zebra = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
+                let vals = [sub.name, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
+                vals.forEach((v, i) => {
+                    let cell = row.getCell(startCol+i);
+                    cell.value = v;
+                    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:zebra} };
+                    cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} };
+                    cell.alignment = { horizontal: i===0 ? 'left' : 'center' };
+                });
+            });
+
+            let totRow = ws.getRow(rIdx);
+            let totVals = ['총합계', totSk, totFree, totG3, totSk+totFree+totG3];
+            totVals.forEach((v, i) => {
+                let cell = totRow.getCell(startCol+i);
+                cell.value = v;
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1E3A5F'} };
+                cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                cell.alignment = { horizontal: i===0 ? 'left' : 'center' };
+            });
+        }
+
+        async function generateAdminRoster(q) {
+            const wb = new ExcelJS.Workbook();
+            let { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail } = computeAdminRosterData(q);
+
+            // 1. 수익자 명단 (붉은 계열)
+            let wsSk = wb.addWorksheet('강좌별 전체 수익자 명단');
+            addRosterHeaderRow(wsSk, `${q}분기 (수익자) 목록`, 'FFFECACA');
+            addRosterDataRows(wsSk, skRows, 'FFFECACA');
+            addCourseCountTable(wsSk, courseCounts);
+
+            // 2. 3학년지원대상자 명단 (하늘색 계열)
+            let wsG3 = wb.addWorksheet('강좌별 전체 3학년지원대상자 명단');
+            addRosterHeaderRow(wsG3, `${q}분기 (3학년지원금대상자) 목록`, 'FFBAE6FD');
+            addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
+
+            // 3. 자유수강자 명단 (보라색 계열)
+            let wsFree = wb.addWorksheet('강좌별 전체 자유수강자 명단');
+            addRosterHeaderRow(wsFree, `${q}분기 (자유수강대상자) 목록`, 'FFE9D5FF');
+            addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
+
+           // ✨ 과목별 수익자 상세 시트 공통 생성 함수 (캡처해주신 디자인 그대로)
+            function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q) {
+                let ws = wb.addWorksheet(`${subName}-${feeLabel}`.slice(0, 31));
+
+                // 제목: 병합 + 가운데 정렬
+                ws.mergeCells('A2:H2');
+                ws.getCell('A2').value = `${new Date().getFullYear()}년 ${q}분기 ${subName}부 ${feeLabel}(수익자)`;
+                ws.getCell('A2').font = { bold: true, size: 13 };
+                ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+                ws.getCell('A2').border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                ws.getRow(2).height = 22;
+
+                // 4행: 과목명 / 값 / 인원수 / 총 합계 요약 줄
+                let totalAmt = rows.reduce((a,b)=>a+b.amount,0);
+                let r4 = ws.getRow(4);
+                r4.getCell(1).value = '과목명';
+                r4.getCell(2).value = subName;
+                r4.getCell(3).value = `${rows.length}명`;
+                r4.getCell(4).value = '총 합계';
+                r4.getCell(5).value = totalAmt;
+                r4.getCell(5).numFmt = '#,##0';
+                ws.mergeCells(4, 5, 4, 8); // E4:H4 합계 금액 칸 병합
+
+                r4.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(2).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFFFFFF'} };
+                r4.getCell(2).border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                r4.getCell(3).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(3).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(3).alignment = { horizontal: 'center' };
+                r4.getCell(4).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                r4.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF16A34A'} };
+                r4.getCell(4).alignment = { horizontal: 'center' };
+                r4.getCell(5).font = { bold: true, size: 13 };
+                r4.getCell(5).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFEF3C7'} };
+                r4.getCell(5).alignment = { horizontal: 'center' };
+                r4.getCell(5).border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                r4.height = 22;
+
+                // 5행: 헤더 (초록 배경 + 비고 칸 추가)
+                let hRow = ws.getRow(5);
+                let headers = ['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '*강좌명', '비고'];
+                headers.forEach((h, i) => {
+                    let cell = hRow.getCell(i+1);
+                    cell.value = h;
+                    cell.font = { bold: true };
+                    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFA7D8A0'} };
+                    cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                    cell.alignment = { horizontal: 'center' };
+                });
+
+                // 학생 목록: 테두리 + 지원금 부족 학생 빨간 글씨
+                rows.forEach(r => {
+                    let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
+                    row.getCell(6).numFmt = '#,##0';
+                    let isShort = r.note === '지원금부족';
+                    row.eachCell(cell => {
+                        cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                        if (isShort) cell.font = { color: { argb: 'FFDC2626' } };
+                    });
+                });
+
+                ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:16},{width:14}];
+            }
+
+            // 4. 과목별 수익자 상세 시트
+            Object.keys(subjectSkDetail).forEach(subName => {
+                let detail = subjectSkDetail[subName];
+
+                if (detail.eduRows.length > 0) {
+                    buildSubjectDetailSheet(wb, subName, '교육비', detail.eduRows, q);
+                }
+
+                let feeType = detail.jRows.length > 0 ? 'j' : (detail.gyRows.length > 0 ? 'gy' : null);
+                if (feeType) {
+                    let feeRows = feeType === 'j' ? detail.jRows : detail.gyRows;
+                    let feeLabel = feeType === 'j' ? '재료비' : '교재비';
+                    buildSubjectDetailSheet(wb, subName, feeLabel, feeRows, q);
+                }
+            });
+
+            const buffer = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${q}분기_행정실_수납명단_${new Date().toISOString().slice(0,10)}.xlsx`;
+            link.click();
+        }
+
+        function toggleSidebar() {
             let sb = document.querySelector('.sidebar');
             sb.classList.toggle('collapsed');
             let isCollapsed = sb.classList.contains('collapsed');
@@ -2098,9 +2446,11 @@ function toggleStatusPanel() {
                     let c = counts[name];
                     let sum = c.beneficiary + c.free + c.g3;
                     totalBen += c.beneficiary; totalFree += c.free; totalG3 += c.g3; totalAll += sum;
+let rowNum = rowIdx + 1;
                     let zebra = (rowIdx++ % 2 === 0) ? '#ffffff' : '#f5f3ff';
                     return `<tr style="background:${zebra};">
-                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${name}</td>
+                        <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${rowNum}</td>
+                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb; white-space:normal; word-break:keep-all; overflow-wrap:break-word; line-height:1.3;">${name}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${c.beneficiary}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#7c3aed; font-weight:700;">${c.free}</td>
                         <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#2563eb; font-weight:700;">${c.g3}</td>
@@ -2109,11 +2459,20 @@ function toggleStatusPanel() {
                 }).join('');
                 
                html += `
-                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 300px; min-width:270px; border-top:3px solid #6366f1;">
+                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 330px; min-width:300px; border-top:3px solid #6366f1;">
                     <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${q}분기 강좌별 인원</div>
-                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                   <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
+                        <colgroup>
+                            <col style="width:22px;">
+                            <col>
+                            <col style="width:44px;">
+                            <col style="width:52px;">
+                            <col style="width:32px;">
+                            <col style="width:40px;">
+                        </colgroup>
                         <thead>
                             <tr style="border-bottom:2px solid #6366f1;">
+                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">No.</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
                                 <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
@@ -2122,7 +2481,8 @@ function toggleStatusPanel() {
                             </tr>
                         </thead>
                         <tbody>${rowsHtml}
-                          <tr style="border-top:2px solid #111827;">
+                         <tr style="border-top:2px solid #111827;">
+                                <td style="padding:6px 5px; text-align:center; background:#fef08a !important;"></td>
                                 <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
                                 <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
                                 <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalFree}</td>
@@ -2212,11 +2572,12 @@ function toggleStatusPanel() {
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
             { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
+            { target: 'btn-codimaster-upload', text: '코디마스터-수강료(강좌별)-엑셀내보내기 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
             { target: 'th-name', text: '학생의 1~4분기 수강 목록과 환불 금액을 적으려면 이름을 클릭하세요', align: 'bottom', type: 'column' },
-            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span>', align: 'bottom' },
+            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span><br><br>여기서 <b>교육청 자유수강 관리 엑셀</b>도 자동으로 만들 수 있고, <b style="color:#d4af37;">행정실 수납명단(수익자/초3/자유수강 분류)</b>도 자동으로 생성·저장할 수 있어요!', align: 'bottom' },
             { target: 'btn-excel-export', text: '컴퓨터를 바꾸거나 프로그램이 손상됨 방지를 위해 자주 백업(저장) 버튼을 눌러주세요. 환불, 메모 기록도 자동 저장 됩니다.', align: 'right', critical: true }
         ];
         let currentTutorialStep = 0;
@@ -2228,9 +2589,11 @@ function toggleStatusPanel() {
             checkUpdatePopup();
         }
 
-        function startTutorial() {
+       function startTutorial() {
             localStorage.setItem('edusync_tutorial_done', 'true');
             document.getElementById('tutorialWelcomeOverlay').classList.remove('active');
+            let noticePopup = document.getElementById('beneficiaryNoticePopup'); // ✨ 튜토리얼 시작 전 업데이트 공지 팝업이 남아있으면 강제로 닫아서 안 가리게 함
+            if (noticePopup) noticePopup.style.display = 'none';
             document.getElementById('tutorialWelcomeModal').style.display = 'none';
             
             document.getElementById('tutorialClickBlocker').style.display = 'block';
@@ -2945,44 +3308,46 @@ function toggleStatusPanel() {
                 let q_allocs = [];
                 let availableG3ForQ = (idx <= h1CutoffIndex) ? remG3_H1 : remG3_Total;
 
-                if(r[q] && r[q].subs) {
+               if(r[q] && r[q].subs) {
                    r[q].subs.forEach((s, sIdx) => {
                         if (toNum(s.g) > 0 || toNum(s.s) > 0) s.su = toNum(s.g) + toNum(s.s);
                         let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
-                        let netSu = Math.max(0, toNum(s.su) - rSu), netGy = Math.max(0, toNum(s.gy) - rGy), netJ = Math.max(0, toNum(s.j) - rJ);
-                        exp += (netSu + netGy + netJ);
+                        let grossSu = toNum(s.su), grossGy = toNum(s.gy), grossJ = toNum(s.j); // ✨ 환불 반영 전 원본 결제금액
+                        let netSu = Math.max(0, grossSu - rSu), netGy = Math.max(0, grossGy - rGy), netJ = Math.max(0, grossJ - rJ);
+                        exp += (netSu + netGy + netJ); // exp는 그대로 "실제로 낸 순금액" 기준 유지
 
-                        // ✨ 육아기근로단축 차시 비율 적용 - 지원 대상 밖 금액은 미리 떼어내서 본인부담으로 강제 전환
+                        // ✨ 육아기근로단축 차시 비율 적용 - 환불과 무관한 구조적 제외라 GROSS 기준으로 적용
                         let exclSu = 0, exclGy = 0, exclJ = 0;
                         if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
                             let sessionRatio = Math.max(0, Math.min(1, toNum(s.coveredSessions) / toNum(s.totalSessions)));
-                            exclSu = Math.round(netSu * (1 - sessionRatio));
-                            exclGy = Math.round(netGy * (1 - sessionRatio));
-                            exclJ = Math.round(netJ * (1 - sessionRatio));
-                            netSu -= exclSu; netGy -= exclGy; netJ -= exclJ;
+                            exclSu = Math.round(grossSu * (1 - sessionRatio));
+                            exclGy = Math.round(grossGy * (1 - sessionRatio));
+                            exclJ = Math.round(grossJ * (1 - sessionRatio));
                         }
+                        // ✨ 배분 계산의 기준 금액 = 환불 반영 전(gross) - 차시제외분. 이후 5단계에서 환불을 실사용 비율대로 되돌림
+                        let allocBaseSu = Math.max(0, grossSu - exclSu);
+                        let allocBaseGy = Math.max(0, grossGy - exclGy);
+                        let allocBaseJ = Math.max(0, grossJ - exclJ);
 
 
-
-
-
-                       // 1. 수동 입력값 세팅 (우선순위 1순위) - ✨ 환불 발생 시 수동금액도 순수 결제액(net) 이하로 자동 제한하여 무조건 잔액 반환
+                       // 1. 수동 입력값 세팅 (우선순위 1순위) - ✨ GROSS(환불 반영 전) 기준으로 제한
                         let m_g3Su = s.mG3Su !== undefined ? s.mG3Su : 0, m_frSu = s.mFreeSu !== undefined ? s.mFreeSu : 0, m_skSu = s.mSuikSu !== undefined ? s.mSuikSu : 0;
-                        let g3Su = Math.min(m_g3Su, netSu); let frSu = Math.min(m_frSu, netSu - g3Su); let skSu = Math.min(m_skSu, netSu - g3Su - frSu);
+                        let g3Su = Math.min(m_g3Su, allocBaseSu); let frSu = Math.min(m_frSu, allocBaseSu - g3Su); let skSu = Math.min(m_skSu, allocBaseSu - g3Su - frSu);
                         
                         let m_g3Gy = s.mG3Gy !== undefined ? s.mG3Gy : 0, m_frGy = s.mFreeGy !== undefined ? s.mFreeGy : 0, m_skGy = s.mSuikGy !== undefined ? s.mSuikGy : 0;
-                        let g3Gy = Math.min(m_g3Gy, netGy); let frGy = Math.min(m_frGy, netGy - g3Gy); let skGy = Math.min(m_skGy, netGy - g3Gy - frGy);
+                        let g3Gy = Math.min(m_g3Gy, allocBaseGy); let frGy = Math.min(m_frGy, allocBaseGy - g3Gy); let skGy = Math.min(m_skGy, allocBaseGy - g3Gy - frGy);
                         
                         let m_g3J = s.mG3J !== undefined ? s.mG3J : 0, m_frJ = s.mFreeJ !== undefined ? s.mFreeJ : 0, m_skJ = s.mSuikJ !== undefined ? s.mSuikJ : 0;
-                        let g3J = Math.min(m_g3J, netJ); let frJ = Math.min(m_frJ, netJ - g3J); let skJ = Math.min(m_skJ, netJ - g3J - frJ);
+                        let g3J = Math.min(m_g3J, allocBaseJ); let frJ = Math.min(m_frJ, allocBaseJ - g3J); let skJ = Math.min(m_skJ, allocBaseJ - g3J - frJ);
 
                         let a = {
                             g3Su, g3Gy, g3J, frSu, frGy, frJ, skSu, skGy, skJ,
                             mg3Su: s.mG3Su !== undefined, mg3Gy: s.mG3Gy !== undefined, mg3J: s.mG3J !== undefined,
                             mfrSu: s.mFreeSu !== undefined, mfrGy: s.mFreeGy !== undefined, mfrJ: s.mFreeJ !== undefined,
                             mskSu: s.mSuikSu !== undefined, mskGy: s.mSuikGy !== undefined, mskJ: s.mSuikJ !== undefined,
-                            netSu, netGy, netJ, sIdx, hasMats: (netGy > 0 || netJ > 0) ? 1 : 0,
-                            exclSu, exclGy, exclJ
+                            netSu: allocBaseSu, netGy: allocBaseGy, netJ: allocBaseJ, sIdx, hasMats: (allocBaseGy > 0 || allocBaseJ > 0) ? 1 : 0,
+                            exclSu, exclGy, exclJ,
+                            rSu, rGy, rJ // ✨ 5단계 환불 비율 배분용
                         };
 
                         // 2. 수동 입력 금액을 한도에서 가장 먼저 차감
@@ -3064,11 +3429,52 @@ function toggleStatusPanel() {
                             }
                         }
                         
-                     // ✨ 차시 비율로 제외된 금액을 최종 본인부담에 합산
+                    // ✨ 차시 비율로 제외된 금액을 최종 본인부담에 합산
                         a.skSu += (a.exclSu || 0); a.skGy += (a.exclGy || 0); a.skJ += (a.exclJ || 0);
 
                         // 최종 수익자 합산
                         q_over += (a.skSu + a.skGy + a.skJ);
+                    });
+
+                   // ✨ 5. 환불 반영: 수익자 부담분에서 먼저 빼고, 그걸로 부족하면 지원금(초3/자유)에서 비율대로 마저 뺌
+                    q_allocs.forEach(a => {
+                        if (!a) return;
+                        a.refG3Su=0; a.refFrSu=0; a.refSkSu=0; a.refG3Gy=0; a.refFrGy=0; a.refSkGy=0; a.refG3J=0; a.refFrJ=0; a.refSkJ=0; // ✨ 화면 표시용 환불 배분액 (과목별 보기에서 사용)
+                        [['Su','rSu'], ['Gy','rGy'], ['J','rJ']].forEach(([suffix, rKey]) => {
+                            let refundAmt = a[rKey];
+                            if (refundAmt > 0) {
+                                let g3Key = 'g3'+suffix, frKey = 'fr'+suffix, skKey = 'sk'+suffix;
+                                let base = a[g3Key] + a[frKey] + a[skKey];
+                                if (base > 0) {
+                                    let applyRefund = Math.min(refundAmt, base);
+
+                                    // ✨ 1순위: 수익자 부담분에서 먼저 최대한 뺀다
+                                    let refSk = Math.min(applyRefund, a[skKey]);
+                                    let remainRefund = applyRefund - refSk;
+
+                                    // ✨ 그래도 남으면, 초3/자유 지원금 쓴 비율대로 나머지를 뺀다
+                                    let refG3 = 0, refFr = 0;
+                                    if (remainRefund > 0) {
+                                        let g3frBase = a[g3Key] + a[frKey];
+                                        if (g3frBase > 0) {
+                                            refG3 = Math.round(remainRefund * (a[g3Key] / g3frBase));
+                                            refFr = remainRefund - refG3;
+                                        }
+                                    }
+
+                                    a[g3Key] -= refG3; a[frKey] -= refFr; a[skKey] -= refSk;
+                                    remG3_Total += refG3; if(idx <= h1CutoffIndex) remG3_H1 += refG3; availableG3ForQ += refG3;
+                                    remFree += refFr;
+                                    q_usedG3 -= refG3; q_usedFree -= refFr;
+                                    q_over -= refSk;
+                                    a['refG3'+suffix] = refG3; a['refFr'+suffix] = refFr; a['refSk'+suffix] = refSk;
+                                }
+                            }
+                        });
+                        // ✨ 환불 반영 후 최종 net 값으로 갱신 (다운스트림 화면에서 쓰는 "순 배분액" 의미 유지)
+                        a.netSu = a.g3Su + a.frSu + a.skSu;
+                        a.netGy = a.g3Gy + a.frGy + a.skGy;
+                        a.netJ = a.g3J + a.frJ + a.skJ;
                     });
                 
 
@@ -3129,7 +3535,7 @@ function toggleStatusPanel() {
                 let currentRem = (idx <= h1CutoffIndex) ? (remG3_H1 + remFree) : (remG3_Total + remFree);
                 let qStatus = "지원금 미사용";
                 if (!r.hasG3 && !r.hasFree) qStatus = "수익자";
-                else if (accOver > 0) qStatus = "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
+                else if (accOver > 0) qStatus = ((q_usedG3 + q_usedFree) === 0) ? "지원금 소진" : "지원금 초과"; else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
 
                 res[q] = { exp, usedG3: q_usedG3, usedFree: q_usedFree, over: q_over, status: qStatus, hasManual, hasManualSu, hasManualGy, hasManualJ };
                 res.allocs[q] = q_allocs;
@@ -3140,7 +3546,7 @@ function toggleStatusPanel() {
             let totalSpent = res.total.usedG3 + res.total.usedFree;
             let status = "지원금 미사용";
             if (!r.hasG3 && !r.hasFree) status = "수익자";
-            else if (res.total.over > 0) status = "지원금 초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "지원금 소진"; else if (res.total.exp > 0) status = "지원금 사용중";
+            else if (res.total.over > 0) status = (totalSpent === 0) ? "지원금 소진" : "지원금 초과"; else if (res.total.exp > 0 && totalSpent >= totalAllowance && totalAllowance > 0) status = "지원금 소진"; else if (res.total.exp > 0) status = "지원금 사용중";
 
             return { ...res, remG3: remG3_Total, remFree, totalAllowance, totalSpent, status };
         }
@@ -3203,6 +3609,7 @@ function toggleStatusPanel() {
             if (statG3UsedEl) statG3UsedEl.innerText = `${getG3Label()} 총 사용액`;
 			
             let fl1 = document.getElementById('fltG3Label'); if(fl1) fl1.innerText = getG3Label();
+            let fl3 = document.getElementById('fltG3ShortLabel'); if(fl3) fl3.innerText = getG3Label();
             let fl2 = document.getElementById('fltG3Label2'); if(fl2) fl2.innerText = getG3Label().replace('지원금','');
             let fp1 = document.getElementById('fundPopupG3'); if(fp1) fp1.innerText = getG3Label();
             let fp2 = document.getElementById('fundPopupG3b'); if(fp2) fp2.innerText = getG3Label();
@@ -3283,7 +3690,7 @@ function toggleStatusPanel() {
             const fName = document.getElementById('filterName').value.trim().toLowerCase();
            const fGradeList = Array.from(document.querySelectorAll('input[name="fltGrade"]:checked')).map(el => el.value);
 			
-            const fStatus = document.querySelector('input[name="fltStatus"]:checked')?.value || "";
+            const fStatusList = Array.from(document.querySelectorAll('input[name="fltStatus"]:checked')).map(el => el.value);
             const fFund = document.querySelector('input[name="fltFund"]:checked')?.value || "";
             const fSubjectEl = document.getElementById('filterSubject');
             const fSubject = fSubjectEl ? fSubjectEl.value : '';
@@ -3302,25 +3709,34 @@ function toggleStatusPanel() {
                     if (!hasSubject && !hasExp) return false;
                 }
 
-                if(fStatus) {
-                    if (fStatus === '환불발생') {
-                        let hasRefund = false;
-                        let qList = currentTab === 'all' ? ['q1','q2','q3','q4','q5','q6'].slice(0, maxQuarter) : [currentTab];
-                        for(let q of qList) {
-                            if (r[q] && r[q].subs) {
-                                for(let s of r[q].subs) {
-                                    if (toNum(s.rSu) > 0 || toNum(s.rGy) > 0 || toNum(s.rJ) > 0 || toNum(s.rG) > 0 || toNum(s.rS) > 0) {
-                                        hasRefund = true; break;
+                if(fStatusList.length > 0) {
+                    let matchesAny = fStatusList.some(fs => {
+                        if (fs === '환불발생') {
+                            let hasRefund = false;
+                            let qList = currentTab === 'all' ? ['q1','q2','q3','q4','q5','q6'].slice(0, maxQuarter) : [currentTab];
+                            for(let q of qList) {
+                                if (r[q] && r[q].subs) {
+                                    for(let s of r[q].subs) {
+                                        if (toNum(s.rSu) > 0 || toNum(s.rGy) > 0 || toNum(s.rJ) > 0 || toNum(s.rG) > 0 || toNum(s.rS) > 0) {
+                                            hasRefund = true; break;
+                                        }
                                     }
                                 }
+                                if (hasRefund) break;
                             }
-                            if (hasRefund) break;
+                            return hasRefund;
+                        } else if (fs === '초3지원금 소진') {
+                            let cs = currentTab === 'all' ? c.total : c[currentTab];
+                            return r.hasG3 && !r.hasFree && cs.exp > 0 && cs.usedG3 === 0;
+                        } else if (fs === '자유수강 소진') {
+                            let cs = currentTab === 'all' ? c.total : c[currentTab];
+                            return r.hasFree && !r.hasG3 && cs.exp > 0 && cs.usedFree === 0;
+                        } else {
+                            let targetStatus = currentTab === 'all' ? c.status : c[currentTab].status;
+                            return targetStatus === fs;
                         }
-                        if (!hasRefund) return false;
-                    } else {
-                        let targetStatus = currentTab === 'all' ? c.status : c[currentTab].status;
-                        if(targetStatus !== fStatus) return false;
-                    }
+                    });
+                    if (!matchesAny) return false;
                 }
 
 if(fFund === 'free' && !r.hasFree) return false;
@@ -3345,7 +3761,7 @@ if(fFund === 'free' && !r.hasFree) return false;
             if (viewMode === 'subject') {
                 let subjectRows = [];
 
-                viewData.forEach(({r, c}) => {
+viewData.forEach(({r, c}) => {
                     let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
                     let remG3_H1 = r.hasG3 ? 250000 : 0;
                    let remG3_Total = allowanceG3;
@@ -3403,13 +3819,33 @@ if(fFund === 'free' && !r.hasFree) return false;
                                 let realJ = supJ + skJ;
                                 let realTot = realSu + realGy + realJ;
 
+                                                              // ✨ '환불발생' 필터가 켜져있으면, 이 과목 자체에 환불이 있는지로 걸러줌 (학생 단위 아님)
+                                if (fStatusList.includes('환불발생')) {
+                                    let hasSubjectRefund = toNum(s.rSu) > 0 || toNum(s.rGy) > 0 || toNum(s.rJ) > 0 || toNum(s.rG) > 0 || toNum(s.rS) > 0;
+                                    if (!hasSubjectRefund) return;
+                                }
+
+                               // ✨ 계산 엔진(5단계)이 이미 정확히 계산해둔 환불 배분값을 그대로 사용 (별도 gross 비교 계산 불필요)
+                                let g3RefundSu = alloc.refG3Su || 0;
+                                let g3RefundGy = alloc.refG3Gy || 0;
+                                let g3RefundJ  = alloc.refG3J || 0;
+                                let freeRefundSu = alloc.refFrSu || 0;
+                                let freeRefundGy = alloc.refFrGy || 0;
+                                let freeRefundJ  = alloc.refFrJ || 0;
+                                let skRefundSu = alloc.refSkSu || 0;
+                                let skRefundGy = alloc.refSkGy || 0;
+                                let skRefundJ  = alloc.refSkJ || 0;
+
                                 subjectRows.push({
                                     r, c, qStr: q, qNum: qIdx + 1, sName: subName, isNew: s.isNew,
                                     alloc, // ✨ 뱃지 표시용 원본 연결
                                     g3Su, g3Gy, g3J, g3Tot: g3Su+g3Gy+g3J,
                                     freeSu, freeGy, freeJ, freeTot: freeSu+freeGy+freeJ,
                                     netSu: supSu, netGy: supGy, netJ: supJ, netTot: supSu+supGy+supJ,
-                                    skSu, skGy, skJ, skTot, realSu, realGy, realJ, realTot // ✨ 수익자/총합 상세 전달
+                                    skSu, skGy, skJ, skTot, realSu, realGy, realJ, realTot, // ✨ 수익자/총합 상세 전달
+                                    g3RefundSu, g3RefundGy, g3RefundJ, g3RefundTot: g3RefundSu+g3RefundGy+g3RefundJ,
+                                    freeRefundSu, freeRefundGy, freeRefundJ, freeRefundTot: freeRefundSu+freeRefundGy+freeRefundJ,
+                                    skRefundSu, skRefundGy, skRefundJ, skRefundTot: skRefundSu+skRefundGy+skRefundJ
                                 });
                             });
                         }
@@ -3448,8 +3884,7 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                 currentSubjectViewData = subjectRows;
 
-               // ✨ 표 위쪽 타이틀(배너) 영역에 수익자 금액 보기 버튼 배치
-                document.getElementById('tabBanner').innerHTML = `
+               document.getElementById('tabBanner').innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
@@ -3485,7 +3920,8 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                 // ✨ 수익자 아코디언 토글 시 생성되는 헤더 2줄 (4칸 + 4칸)
                 let suikH1 = isSuikViewOn ? `
-                    <th colspan="4" class="text-center" style="${br} color:#b91c1c; font-size:14px; background:#fef2f2;">수익자 부담금</th>
+                    <th colspan="4" class="text-center" style="${br} color:#b91c1c; font-size:14px; background:#fef2f2;">수익자 부담금 <button onclick="toggleSkRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid #b91c1c; background:white; color:#b91c1c; cursor:pointer; margin-left:4px; vertical-align:middle;">${isSkRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                    ${isSkRefundOn ? `<th colspan="4" class="text-center" style="${br} color:#991b1b; font-size:14px; background:#fecaca;">수익자 환불내역</th>` : ''}
                     <th colspan="4" class="text-center" style="${br} color:#111827; font-size:14px; background:#f3f4f6;">총 수강 금액(지원금+수익자)</th>
                 ` : '';
                 
@@ -3494,6 +3930,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">교재비</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">재료비</th>
                     <th class="text-center" style="${br} top:39px; font-weight:800; background:#fef2f2; color:#b91c1c;">합계</th>
+                    ${isSkRefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">교재비</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">재료비</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fca5a5; color:#7f1d1d;">합계</th>` : ''}
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">수강료</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">교재비</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">재료비</th>
@@ -3502,21 +3939,25 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                 tHead.innerHTML = `
                     <tr>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">No.</th>
-                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
+                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:#f3f4f6 !important;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                        <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()}</th>
-                        <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강</th>
+                       <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                        ${isG3RefundOn ? `<th colspan="4" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">${getG3LabelShort()} 환불내역</th>` : ''}
+                        <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강 <button onclick="toggleFreeRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-free); background:white; color:var(--color-free); cursor:pointer; margin-left:4px; vertical-align:middle;">${isFreeRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                        ${isFreeRefundOn ? `<th colspan="4" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">자유수강 환불내역</th>` : ''}
                         <th colspan="4" class="text-center" style="${br} color:#10b981; font-size:14px;">총 지원금</th>
                         ${suikH1}
                         <th rowspan="2" class="text-center no-print" style="vertical-align:middle;" id="th-manage">관리</th>
                     </tr>
                     <tr>
                         <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
+                        ${isG3RefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">교재</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fde8e8; color:#dc2626;">합계</th>` : ''}
                         <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
+                        ${isFreeRefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">교재</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fde8e8; color:#dc2626;">합계</th>` : ''}
                         <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">총합계</th>
                         ${suikH2}
                     </tr>
@@ -3524,11 +3965,14 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                 tBody.innerHTML = '';
                 
-                let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
+               let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
                 let sum_frSu=0, sum_frGy=0, sum_frJ=0, sum_frTot=0;
                 let sum_nSu=0, sum_nGy=0, sum_nJ=0, sum_nTot=0;
                  let sum_skSu=0, sum_skGy=0, sum_skJ=0, sum_skTot=0;
                 let sum_realSu=0, sum_realGy=0, sum_realJ=0, sum_realTot=0; // 수익자 및 총수강금액 합계 변수
+                let sum_g3RSu=0, sum_g3RGy=0, sum_g3RJ=0, sum_g3RTot=0;
+                let sum_frRSu=0, sum_frRGy=0, sum_frRJ=0, sum_frRTot=0;
+                let sum_skRSu=0, sum_skRGy=0, sum_skRJ=0, sum_skRTot=0;
 
                 subjectRows.forEach((row, index) => {
                     sum_g3Su+=row.g3Su; sum_g3Gy+=row.g3Gy; sum_g3J+=row.g3J; sum_g3Tot+=row.g3Tot;
@@ -3536,6 +3980,9 @@ if(fFund === 'free' && !r.hasFree) return false;
                     sum_nSu+=row.netSu; sum_nGy+=row.netGy; sum_nJ+=row.netJ; sum_nTot+=row.netTot;
                     sum_skSu+=row.skSu; sum_skGy+=row.skGy; sum_skJ+=row.skJ; sum_skTot+=row.skTot;
                     sum_realSu+=row.realSu; sum_realGy+=row.realGy; sum_realJ+=row.realJ; sum_realTot+=row.realTot;
+                    sum_g3RSu+=row.g3RefundSu; sum_g3RGy+=row.g3RefundGy; sum_g3RJ+=row.g3RefundJ; sum_g3RTot+=row.g3RefundTot;
+                    sum_frRSu+=row.freeRefundSu; sum_frRGy+=row.freeRefundGy; sum_frRJ+=row.freeRefundJ; sum_frRTot+=row.freeRefundTot;
+                    sum_skRSu+=row.skRefundSu; sum_skRGy+=row.skRefundGy; sum_skRJ+=row.skRefundJ; sum_skRTot+=row.skRefundTot;
 
                     let badge = '';
                     if(row.r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
@@ -3552,6 +3999,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skGy)}${row.alloc.mskGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                         <td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skJ)}${row.alloc.mskJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                         <td class="text-right" style="${br} color:#b91c1c; font-weight:800; background:#fef2f2; padding:8px 6px; vertical-align:middle;">${formatMoney(row.skTot)}</td>
+                        ${isSkRefundOn ? `<td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundSu > 0 ? formatMoney(row.skRefundSu) : '-'}</td><td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundGy > 0 ? formatMoney(row.skRefundGy) : '-'}</td><td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundJ > 0 ? formatMoney(row.skRefundJ) : '-'}</td><td class="text-right" style="${br} color:#7f1d1d; font-weight:800; background:#fca5a5; padding:8px 6px; vertical-align:middle;">${row.skRefundTot > 0 ? formatMoney(row.skRefundTot) : '-'}</td>` : ''}
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realSu)}</td>
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realGy)}</td>
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realJ)}</td>
@@ -3560,28 +4008,29 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                     tBody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td class="text-center" style="${br} font-weight: 700; color: #9ca3af;">${index + 1}</td>
-                            ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px;">${qBadgeHtml}</td>` : ''}
-                            <td style="${br} text-align:center; font-weight:600;">
+                            <td class="text-center" style="${br} font-weight: 700; color: #9ca3af; position:sticky; left:0; z-index:1; background:var(--card-bg);">${index + 1}</td>
+                            ${currentTab === 'all' ? `<td class="text-center" style="${br} padding:8px 4px; position:sticky; left:40px; z-index:1; background:var(--card-bg);">${qBadgeHtml}</td>` : ''}
+                            <td style="${br} text-align:center; font-weight:600; position:sticky; left:${currentTab === 'all' ? 95 : 40}px; z-index:1; background:var(--card-bg);">
                                ${row.r.grade}-${row.r.classNum}-${row.r.studentNum}<br>
                                ${getYukaDdayBadge(row.r)}
                                ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
                             </td>
-                            <td style="${br}">
+                            <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                             </td>
                            <td style="${br}">${badge}</td>
                             <td style="${br} font-weight:700;">${row.sName}${newBadge}</td>
                             
-                            <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.g3Gy)}${row.alloc.mg3Gy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.g3J)}${row.alloc.mg3J ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="${br} color:var(--color-g3); font-weight:800; background:rgba(14,165,233,0.05); padding:8px 6px; vertical-align:middle;">${formatMoney(row.g3Tot)}</td>
-                            
-                            <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.freeSu)}${row.alloc.mfrSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.freeGy)}${row.alloc.mfrGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px; vertical-align:middle;">${formatMoney(row.freeJ)}${row.alloc.mfrJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                            <td class="text-right" style="${br} color:var(--color-free); font-weight:800; background:rgba(139,92,246,0.05); padding:8px 6px;">${formatMoney(row.freeTot)}</td>
+                           <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Gy)}${row.alloc.mg3Gy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3J)}${row.alloc.mg3J ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="${br} color:var(--color-g3); font-weight:800;">${formatMoney(row.g3Tot)}</td>
+                                ${isG3RefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundSu > 0 ? formatMoney(row.g3RefundSu) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundGy > 0 ? formatMoney(row.g3RefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundJ > 0 ? formatMoney(row.g3RefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.g3RefundTot > 0 ? formatMoney(row.g3RefundTot) : '-'}</td>` : ''}
+                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeSu)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeGy)}${row.alloc.mFreeGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeJ)}${row.alloc.mFreeJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="${br} color:var(--color-free); font-weight:800;">${formatMoney(row.freeTot)}</td>
+                                ${isFreeRefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundSu > 0 ? formatMoney(row.freeRefundSu) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundGy > 0 ? formatMoney(row.freeRefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundJ > 0 ? formatMoney(row.freeRefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.freeRefundTot > 0 ? formatMoney(row.freeRefundTot) : '-'}</td>` : ''}
 
                             <td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netSu)}</td>
                             <td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netGy)}</td>
@@ -3606,6 +4055,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                         <td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skGy)}</td>
                         <td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skJ)}</td>
                         <td class="text-right" style="${br} color:#b91c1c; padding:8px 6px; background:#fef2f2;">${formatMoney(sum_skTot)}</td>
+                        ${isSkRefundOn ? `<td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRSu)}</td><td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRGy)}</td><td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRJ)}</td><td class="text-right" style="${br} color:#7f1d1d; font-weight:800; padding:8px 6px; background:#fca5a5;">${formatMoney(sum_skRTot)}</td>` : ''}
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realSu)}</td>
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realGy)}</td>
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realJ)}</td>
@@ -3624,10 +4074,12 @@ if(fFund === 'free' && !r.hasFree) return false;
                             <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3Gy)}</td>
                             <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3J)}</td>
                             <td class="text-right" style="${br} color:var(--color-g3); padding:8px 6px;">${formatMoney(sum_g3Tot)}</td>
+                            ${isG3RefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RSu)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RGy)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RJ)}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; padding:8px 6px; background:#fde8e8;">${formatMoney(sum_g3RTot)}</td>` : ''}
                             <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frSu)}</td>
                             <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frGy)}</td>
                             <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frJ)}</td>
                             <td class="text-right" style="${br} color:var(--color-free); padding:8px 6px;">${formatMoney(sum_frTot)}</td>
+                            ${isFreeRefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRSu)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRGy)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRJ)}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; padding:8px 6px; background:#fde8e8;">${formatMoney(sum_frRTot)}</td>` : ''}
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nSu)}</td>
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nGy)}</td>
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nJ)}</td>
@@ -3681,9 +4133,9 @@ if(fFund === 'free' && !r.hasFree) return false;
                     colGroup.innerHTML = colHtml;
 
                     let thHtml = `<tr>
-                        <th class="text-center">No.</th>
-                        <th class="text-center" id="th-id" style="cursor:pointer;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
-                        <th class="text-center" id="th-name" style="cursor:pointer;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
+                        <th class="text-center" id="th-id" style="cursor:pointer; position:sticky !important; top:0 !important; left:50px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" id="th-name" style="cursor:pointer; position:sticky !important; top:0 !important; left:105px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>`;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
@@ -3720,7 +4172,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                             sumQs[i] += c[`q${i}`].exp;
                             // ✨ 수기적용 뱃지와 초과 금액을 간격이 좁은 박스로 변경하고 순서 조정
                             let mBadge = c[`q${i}`].hasManual ? `<div class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px; line-height:1; margin-top:3px;">✏️수기적용</div>` : '';
-                            let qOverHtml = (!isBeneficiary && c[`q${i}`].over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; line-height:1; margin-top:3px;">초과: ${formatMoney(c[`q${i}`].over)}</div>` : '';
+                            let qOverHtml = (!isBeneficiary && c[`q${i}`].over > 0 && (c[`q${i}`].usedG3 + c[`q${i}`].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; line-height:1; margin-top:3px;">초과: ${formatMoney(c[`q${i}`].over)}</div>` : '';
                             
                             expTds += `<td class="text-right" style="vertical-align:middle;">
                                 <div style="line-height: 1.0; ${isBeneficiary ? 'color:#0369a1;' : ''}">${formatMoney(c[`q${i}`].exp)}</div>
@@ -3741,17 +4193,17 @@ if(fFund === 'free' && !r.hasFree) return false;
                         
                         let stClass = c.status==='수익자'?'st-beneficiary' : c.status==='지원금 미사용'?'st-none' : c.status==='지원금 사용중'?'st-use' : c.status==='지원금 소진'?'st-done':'st-over';
                         
-                        let overHtml = (!isBeneficiary && c.total.over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
+                        let overHtml = (!isBeneficiary && c.total.over > 0 && (c.total.usedG3 + c.total.usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c.total.over)}</div>` : '';
 
-                       tBody.insertAdjacentHTML('beforeend', `
+tBody.insertAdjacentHTML('beforeend', `
                             <tr>
-                                <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
-<td class="text-center" style="font-weight:600;">
+                                <td class="text-center" style="font-weight: 700; color: #9ca3af; position:sticky; left:0; z-index:1; background:var(--card-bg);">${index + 1}</td>
+                                <td class="text-center" style="font-weight:600; position:sticky; left:50px; z-index:1; background:var(--card-bg);">
                                    ${r.grade}-${r.classNum}-${r.studentNum}<br>
                                    ${getYukaDdayBadge(r)}
                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
                                 </td>
-                                <td>
+                                <td style="position:sticky; left:105px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                 </td>
                                 <td>${badge}</td>
@@ -3862,9 +4314,9 @@ if(fFund === 'free' && !r.hasFree) return false;
                     ` : '';
 
                   tHead.innerHTML = `<tr>
-                        <th class="text-center">No.</th>
-                        <th class="text-center" id="th-id">학번</th>
-                        <th class="text-center" id="th-name">이름</th>
+                       <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
+                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:45px !important; z-index:20 !important; background:#f3f4f6 !important;">학번</th>
+                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:95px !important; z-index:20 !important; background:#f3f4f6 !important;">이름</th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>
                         <th class="text-right">${qText} 강사료</th>
@@ -3955,13 +4407,13 @@ if(fFund === 'free' && !r.hasFree) return false;
 
                         tBody.insertAdjacentHTML('beforeend', `
                             <tr>
-                                <td class="text-center" style="font-weight: 700; color: #9ca3af;">${index + 1}</td>
-                                <td class="text-center" style="font-weight:600;">
+                               <td class="text-center" style="font-weight: 700; color: #9ca3af; position:sticky; left:0; z-index:1; background:var(--card-bg);">${index + 1}</td>
+                                <td class="text-center" style="font-weight:600; position:sticky; left:45px; z-index:1; background:var(--card-bg);">
                                   ${r.grade}-${r.classNum}-${r.studentNum}<br>
                                   ${getYukaDdayBadge(r)}
                                   ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
                                 </td>
-                                <td>
+                                <td style="position:sticky; left:95px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
                                 </td>
                                 <td>${badge}</td>
@@ -3974,7 +4426,7 @@ if(fFund === 'free' && !r.hasFree) return false;
                                 
 								<td class="text-right" style="font-weight: 800; color: ${(!r.hasG3 && !r.hasFree) ? '#0369a1' : '#111827'};">
                                     <div style="line-height: 1.0;">${formatMoney(c[q].exp)}</div>
-                                    ${((r.hasG3 || r.hasFree) && c[q].over > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c[q].over)}</div>` : ''}
+                                    ${((r.hasG3 || r.hasFree) && c[q].over > 0 && (c[q].usedG3 + c[q].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">초과: ${formatMoney(c[q].over)}</div>` : ''}
                                 </td>
                                 
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
@@ -4722,16 +5174,16 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 <td style="background:#f0fdf4; vertical-align:top; text-align:center;">${formatMoney(netJ)}</td>
                                 <td style="background:#dcfce7; font-weight:bold; color:#15803d; vertical-align:top; border-right:2px solid var(--border-color);">${formatMoney(netTotal)}</td>
                                 
-                                ${r.hasG3 ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Su, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Su)}" value="${fmt(s.mG3Su)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Su', this.value)"></td>
-                                <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Gy, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Gy)}" value="${fmt(s.mG3Gy)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Gy', this.value)"></td>
-                                <td style="background:#f8fafc; text-align:center; border-right:1px solid #bae6fd;"><input type="text" class="alloc-input" style="${getStyle(s.mG3J, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3J)}" value="${fmt(s.mG3J)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3J', this.value)"></td>` : ''}
-                                ${r.hasFree ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeSu, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frSu)}" value="${fmt(s.mFreeSu)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeSu', this.value)"></td>
-                                <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeGy, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frGy)}" value="${fmt(s.mFreeGy)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeGy', this.value)"></td>
-                                <td style="background:#f8fafc; text-align:center; border-right:1px solid #d8b4fe;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeJ, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frJ)}" value="${fmt(s.mFreeJ)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeJ', this.value)"></td>` : ''}
+                                ${r.hasG3 ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Su, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Su)}" value="${s.mG3Su !== undefined ? fmt(alloc.g3Su) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Su', this.value)"></td>
+                                <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Gy, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Gy)}" value="${s.mG3Gy !== undefined ? fmt(alloc.g3Gy) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Gy', this.value)"></td>
+                                <td style="background:#f8fafc; text-align:center; border-right:1px solid #bae6fd;"><input type="text" class="alloc-input" style="${getStyle(s.mG3J, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3J)}" value="${s.mG3J !== undefined ? fmt(alloc.g3J) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3J', this.value)"></td>` : ''}
+                                ${r.hasFree ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeSu, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frSu)}" value="${s.mFreeSu !== undefined ? fmt(alloc.frSu) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeSu', this.value)"></td>
+                                <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeGy, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frGy)}" value="${s.mFreeGy !== undefined ? fmt(alloc.frGy) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeGy', this.value)"></td>
+                                <td style="background:#f8fafc; text-align:center; border-right:1px solid #d8b4fe;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeJ, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frJ)}" value="${s.mFreeJ !== undefined ? fmt(alloc.frJ) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeJ', this.value)"></td>` : ''}
 
-                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikSu, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skSu)}" value="${fmt(s.mSuikSu)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikSu', this.value)"></td>
-                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikGy, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skGy)}" value="${fmt(s.mSuikGy)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikGy', this.value)"></td>
-                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikJ, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skJ)}" value="${fmt(s.mSuikJ)}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikJ', this.value)"></td>
+                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikSu, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skSu)}" value="${s.mSuikSu !== undefined ? fmt(alloc.skSu) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikSu', this.value)"></td>
+                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikGy, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skGy)}" value="${s.mSuikGy !== undefined ? fmt(alloc.skGy) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikGy', this.value)"></td>
+                                <td style="background:#fef2f2; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mSuikJ, '#b91c1c')} border-color:#fca5a5;" placeholder="${formatAlloc(alloc.skJ)}" value="${s.mSuikJ !== undefined ? fmt(alloc.skJ) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mSuikJ', this.value)"></td>
                             </tr>
                         `;
                     }).join('');
@@ -4752,12 +5204,15 @@ document.getElementById('fTier').value = r.freeTier || "";
                     }
                     let c_no_q_ref = calcStudent(r_no_q_ref);
 
-                    let origG3 = c_no_q_ref[`q${q}`].usedG3;
+                                        let origG3 = c_no_q_ref[`q${q}`].usedG3;
                     let origFree = c_no_q_ref[`q${q}`].usedFree;
+                    let origSk = c_no_q_ref[`q${q}`].over;
                     let usedG3 = c[`q${q}`].usedG3;
                     let usedFree = c[`q${q}`].usedFree;
+                    let usedSk = c[`q${q}`].over;
                     let refG3 = origG3 - usedG3;
                     let refFree = origFree - usedFree;
+                    let refSk = origSk - usedSk;
 
                     html += `
                         <div class="detail-box">
@@ -4775,21 +5230,23 @@ document.getElementById('fTier').value = r.freeTier || "";
 									
                                         <tr>
                                         <th rowspan="3" style="background:#f3f4f6; position:sticky; left:0; z-index:2; border-right:2px solid var(--border-color);">과목명</th>
-                                          <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
-                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fffbeb; color:#d97706; border:1px solid #fde68a; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterFees('${r.id}', ${q})">🗑️ 신청금액 지우기</button>
-                                    ${(r.hasG3 || r.hasFree) ? `<div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
-                                        (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span>)
-                                    </div>` : ''}
+                                                                                                                             <th colspan="6" rowspan="2" style="background:#e0f2fe; color:#0369a1; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
+                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fffbeb; color:#d97706; border:1px solid #fde68a; border-radius:4px; font-weight:bold; cursor:pointer; white-space:nowrap;" onclick="clearStudentQuarterFees('${r.id}', ${q})">🗑️ 신청금액 지우기</button>
+                                                                        <div style="height:22px;"></div>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#0284c7;">
+                                        (<span style="color:var(--color-g3);">초3지원 사용: ${formatMoney(origG3)}</span> | <span style="color:var(--color-free);">자유수강 사용: ${formatMoney(origFree)}</span> | <span style="color:#b91c1c;">수익자 사용: ${formatMoney(origSk)}</span>)
+                                    </div>
                                     <div>${q}분기 수강 신청금액</div>
                                 </th>
 											
                                         </th>
                                        
                                         <th colspan="6" rowspan="2" style="background:#fef2f2; color:#b91c1c; border-right:2px solid var(--border-color); font-size:13px; padding-top:10px; padding-bottom:10px; position:relative;">
-                                    <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="clearStudentQuarterRefunds('${r.id}', ${q})">↩️ 환불금액 지우기</button>
-                                    ${(r.hasG3 || r.hasFree) ? `<div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
-                                        (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span>)
-                                    </div>` : ''}
+                                                                        <button class="btn-tool no-print" style="position:absolute; top:8px; right:8px; padding:4px 8px; font-size:11px; background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; border-radius:4px; font-weight:bold; cursor:pointer; white-space:nowrap;" onclick="clearStudentQuarterRefunds('${r.id}', ${q})">↩️ 환불금액 지우기</button>
+                                                                        <div style="height:22px;"></div>
+                                    <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:#b91c1c;">
+                                        (<span style="color:var(--color-g3);">초3지원 환불: ${formatMoney(refG3)}</span> | <span style="color:var(--color-free);">자유수강 환불: ${formatMoney(refFree)}</span> | <span style="color:#b91c1c;">수익자 환불: ${formatMoney(refSk)}</span>)
+                                    </div>
                                     <div>${q}분기 환불금액 (입력)</div>
                                 </th>
 										
@@ -5815,7 +6272,7 @@ document.getElementById('tierList').innerHTML = html;
                     let bigBackupColIndex = hiddenColIndex + 1;
                     ws.getColumn(bigBackupColIndex).hidden = true;
                     ws.getCell(2, bigBackupColIndex).value = "시스템 백업용 데이터2 (수정금지)";
-                    let bigBackupStr = JSON.stringify({ specialList: specialList, neisList: neisList, snapshots: snapshots });
+                    let bigBackupStr = JSON.stringify({ specialList: specialList, neisList: neisList, snapshots: snapshots, savedSubjects: savedSubjects });
                     let bigBackupChunks = [];
                     for(let ci=0; ci<bigBackupStr.length; ci+=30000) bigBackupChunks.push(bigBackupStr.slice(ci, ci+30000));
                     let chunkCursor = 0;
@@ -6111,11 +6568,23 @@ document.getElementById('tierList').innerHTML = html;
                         });
                         persistNeisList();
                     }
-                    if (bigBackupData.snapshots) {
+                   if (bigBackupData.snapshots) {
                         bigBackupData.snapshots.forEach(snap => {
                             if(!snapshots.some(s => s.id === snap.id)) snapshots.push(snap);
                         });
                         localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
+                    }
+                    if (bigBackupData.savedSubjects) {
+                        bigBackupData.savedSubjects.forEach(sub => {
+                            let existing = savedSubjects.find(s => s.name === sub.name);
+                            if (existing) {
+                                existing.fees = sub.fees; // ✨ 이미 있는 과목이면 단가(강사료/수용비/수강료 등)를 백업 내용으로 갱신
+                            } else {
+                                savedSubjects.push(sub); // ✨ 백업엔 있는데 지금 목록엔 없는 과목은 새로 추가
+                            }
+                        });
+                        persistSubjects();
+                        renderSubjectList();
                     }
                 }
             } catch(e) {}
@@ -7093,6 +7562,7 @@ document.getElementById('tierList').innerHTML = html;
         function openEduWizard() {
             eduCurrentStep = 1;
             document.getElementById('eduUploadFile').value = '';
+            showEduExampleImage(); // ✨ 마법사 창 열리면 자동으로 예제 이미지 보여주기
             
             let snapHtml = '';
             let validSnaps = snapshots.filter(s => !s.isAuto);
@@ -7114,9 +7584,18 @@ document.getElementById('tierList').innerHTML = html;
             document.getElementById('eduWizardModal').style.display = 'flex';
         }
 
-        function closeEduWizard() {
+                function showEduExampleImage() {
+            let panel = document.getElementById('eduExamplePanel');
+            panel.style.width = '600px';
+            clearTimeout(window._eduExampleTimer);
+            window._eduExampleTimer = setTimeout(() => { panel.style.width = '0px'; }, 4000);
+        }
+
+                function closeEduWizard() {
             document.getElementById('eduWizardOverlay').classList.remove('active');
             document.getElementById('eduWizardModal').style.display = 'none';
+            clearTimeout(window._eduExampleTimer); // ✨ 4초 타이머 취소
+            document.getElementById('eduExamplePanel').style.width = '0px'; // ✨ 즉시 접기
         }
 
         function updateEduStep3UI() {
@@ -7587,7 +8066,7 @@ document.getElementById('tierList').innerHTML = html;
 
           <div id="donatePopup" style="display:none; position:fixed; bottom:80px; left:30px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; width:210px; box-shadow:0 8px 20px rgba(0,0,0,0.18); z-index:9999;">
         <div style="font-size:13px; color:#334155; font-weight:600; line-height:1.6; margin-bottom:10px;">
-            프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️
+            프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️<br>(좋으면 500원~ 부터^^)
         </div>
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
         <a href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="text-decoration:none;">
@@ -7739,7 +8218,7 @@ document.addEventListener('keydown', function(e) {
       // ✨ 수익자 관리 업데이트 팝업 로직
     document.addEventListener("DOMContentLoaded", function() {
         // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10');
+       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10_3');
         
         // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
         if (!hidePopup) {
@@ -7755,7 +8234,7 @@ document.addEventListener('keydown', function(e) {
         if (isChecked) {
             // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
             // 식별자를 'hideBeneficiaryPopup_v10'으로 주어 나중에 또 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v10', 'true');
+            localStorage.setItem('hideBeneficiaryPopup_v10_3', 'true');
         }
         
         // 팝업창 숨기기
