@@ -1794,12 +1794,12 @@
                             q2: { g:98200, s:4300, su:102500, gy:0, j:0, subs: [ {name:'컴퓨터', g:98200, s:4300, su:102500, gy:0, j:0} ] }
                         },
                         {
-                            id: defaultTime + 'b', grade: 3, classNum: 1, studentNum: 2, name: '이리오', hasG3: true, hasFree: true, freeTier: '기초생활수급자', memo: '', createdAt: defaultTime,
+                            id: defaultTime + 'b', grade: 3, classNum: 1, studentNum: 2, name: '소지섭', hasG3: true, hasFree: true, freeTier: '기초생활수급자', memo: '', createdAt: defaultTime,
                             q1: { g:120000, s:6000, su:126000, gy:0, j:100000, subs: [ {name:'영어', g:120000, s:6000, su:126000, gy:0, j:100000} ] },
                             q2: { g:5000, s:15000, su:20000, gy:0, j:0, subs: [ {name:'영어', g:5000, s:15000, su:20000, gy:0, j:0} ] }
                         },
                         {
-                            id: defaultTime + 'c', grade: 1, classNum: 2, studentNum: 15, name: '나재민', hasG3: false, hasFree: true, freeTier: '한부모가족', memo: '', createdAt: defaultTime,
+                            id: defaultTime + 'c', grade: 1, classNum: 2, studentNum: 15, name: '마동석', hasG3: false, hasFree: true, freeTier: '한부모가족', memo: '', createdAt: defaultTime,
                             q1: { g:172300, s:8830, su:181130, gy:15000, j:90000, subs: [ {name:'바둑&체스', g:90000, s:4500, su:94500, gy:0, j:90000}, {name:'코딩', g:82300, s:4330, su:86630, gy:15000, j:0} ] },
                             q2: { g:24870, s:100000, su:124870, gy:90000, j:4500, subs: [ {name:'컴퓨터', g:24870, s:100000, su:124870, gy:90000, j:4500} ] },
                             q3: { g:0, s:0, su:0, gy:4500, j:0, subs: [ {name:'컴퓨터', g:0, s:0, su:0, gy:4500, j:0} ] }
@@ -1811,6 +1811,11 @@
                         {
                             id: defaultTime + 'e', grade: 2, classNum: 3, studentNum: 15, name: '공명', hasG3: false, hasFree: true, freeTier: '중위소득90%이하', memo: '', createdAt: defaultTime,
                             q1: { g:0, s:0, su:0, gy:0, j:0, subs: [] }
+                        },
+                        {
+                            // ✨ 지원금 없이 전액 본인부담(수익자)으로만 다니는 예제 학생
+                            id: defaultTime + 'f', grade: 6, classNum: 2, studentNum: 17, name: '변우석', hasG3: false, hasFree: false, freeTier: '', memo: '', createdAt: defaultTime,
+                            q1: { g:100000, s:10000, su:110000, gy:14000, j:85000, subs: [ {name:'컴퓨터', g:100000, s:10000, su:110000, gy:14000, j:0}, {name:'요리', g:80000, s:8000, su:88000, gy:0, j:85000} ] }
                         }
                     ];
                 }
