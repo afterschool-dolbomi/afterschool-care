@@ -7693,10 +7693,25 @@ document.getElementById('tierList').innerHTML = html;
         async function executeEduExport() {
             document.getElementById('loading-overlay').style.display = 'flex';
             try {
-                const fileInput = document.getElementById('eduUploadFile');
+                                const fileInput = document.getElementById('eduUploadFile');
                 const wb = new ExcelJS.Workbook();
                 await wb.xlsx.load(await fileInput.files[0].arrayBuffer());
                 const ws = wb.worksheets[0];
+
+                // ✨ "연번" 글자가 있는 헤더 줄을 찾아서, 그 뒤 4줄(세부헤더2줄+학교요약1줄) 다음을 실제 데이터 시작줄로 자동 계산
+                function detectEduStartRow(sheet) {
+                    for (let r = 1; r <= 15; r++) {
+                        let row = sheet.getRow(r);
+                        for (let c = 1; c <= 5; c++) {
+                            let v = row.getCell(c).value;
+                            if (v && String(v).trim() === '연번') {
+                                return r + 4;
+                            }
+                        }
+                    }
+                    return 10; // 못 찾으면 예전 기본값으로 대체
+                }
+                let eduStartRow = detectEduStartRow(ws);
 
                 let isNewFile = document.querySelector('input[name="eduFileType"]:checked').value === 'empty';
                 let isSort = true;
@@ -7705,9 +7720,9 @@ document.getElementById('tierList').innerHTML = html;
                     if(sortEl && sortEl.value === 'append') isSort = false;
                 }
 
-                if(isNewFile) {
+                               if(isNewFile) {
                     let hasData = false;
-                    for(let r = 10; r <= Math.min(ws.rowCount, 100); r++) {
+                    for(let r = eduStartRow; r <= Math.min(ws.rowCount, eduStartRow + 90); r++) {
                         let row = ws.getRow(r);
                         if(row.getCell(2).value || row.getCell(5).value) { hasData = true; break; }
                     }
@@ -7750,7 +7765,7 @@ document.getElementById('tierList').innerHTML = html;
                     }
                 }
 
-                let startRow = 10;
+                                let startRow = eduStartRow;
                 let maxRow = Math.max(ws.rowCount, startRow);
                 
                 let styleTemplate = [];
@@ -8005,7 +8020,8 @@ document.getElementById('tierList').innerHTML = html;
                     }
 
                     targetRow.getCell(15).value = null;
-                    let stFreeLimit = st.freeLimit || getFreeAllowanceDefault();
+                    let dbStudent = db.find(x => x.grade === data.grade && x.classNum === data.classNum && x.studentNum === data.studentNum && x.name === data.name);
+                    let stFreeLimit = (dbStudent && dbStudent.freeLimit) || getFreeAllowanceDefault();
                     targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>0,${stFreeLimit}-N${rIdx},IF(${stFreeLimit}-N${rIdx}=0,"지원금 0원","지원금 초과사용")),"")` };
 
                     targetRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
