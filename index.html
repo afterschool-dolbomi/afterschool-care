@@ -7712,6 +7712,7 @@ document.getElementById('tierList').innerHTML = html;
                     return 10; // 못 찾으면 예전 기본값으로 대체
                 }
                 let eduStartRow = detectEduStartRow(ws);
+                let eduHeaderRow = eduStartRow - 4;   // ← 이 줄 추가: 날짜헤더("1차...")가 있는 실제 행
 
                 let isNewFile = document.querySelector('input[name="eduFileType"]:checked').value === 'empty';
                 let isSort = true;
@@ -7799,31 +7800,36 @@ document.getElementById('tierList').innerHTML = html;
                 });
                 if(isSort) combined.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum);
 
-                function ensureColStyle(cBase) {
-                    if (cBase > 52) { 
-                        try {
-                            for(let i=0; i<4; i++) {
-                                let refColNum = 16 + i; 
-                                let newColNum = cBase + i;
-                                let refCol = ws.getColumn(refColNum);
-                                let newCol = ws.getColumn(newColNum);
-                                if (refCol && refCol.width) newCol.width = refCol.width;
-                                
-                                for(let r=6; r<=9; r++) {
-                                    let srcCell = ws.getRow(r).getCell(refColNum);
-                                    let dstCell = ws.getRow(r).getCell(newColNum);
-                                    if(srcCell.style) dstCell.style = JSON.parse(JSON.stringify(srcCell.style));
-                                    if(r>=7 && r<=9) dstCell.value = srcCell.value; 
-                                }
-                                if(!styleTemplate[newColNum]) {
-                                    let srcCell = ws.getRow(startRow).getCell(refColNum);
-                                    if(srcCell.style) styleTemplate[newColNum] = JSON.parse(JSON.stringify(srcCell.style));
-                                }
-                            }
-                            ws.mergeCells(6, cBase, 6, cBase + 3);
-                        } catch(e) {}
+               function ensureColStyle(cBase) {
+    if (cBase > 52) { 
+        try {
+            for(let i=0; i<4; i++) {
+                let refColNum = 16 + i; 
+                let newColNum = cBase + i;
+                let refCol = ws.getColumn(refColNum);
+                let newCol = ws.getColumn(newColNum);
+                if (refCol && refCol.width) newCol.width = refCol.width;
+                
+                for(let r=eduHeaderRow; r<=eduHeaderRow+3; r++) {
+                    let srcCell = ws.getRow(r).getCell(refColNum);
+                    let dstCell = ws.getRow(r).getCell(newColNum);
+                    if(srcCell.style) dstCell.style = JSON.parse(JSON.stringify(srcCell.style));
+                    if (r === eduHeaderRow+3) {
+                        let newLetter = ws.getColumn(newColNum).letter;
+                        dstCell.value = { formula: `SUM(${newLetter}${startRow}:${newLetter}${maxRow})` };
+                    } else if (r >= eduHeaderRow+1 && r <= eduHeaderRow+2) {
+                        dstCell.value = srcCell.value; 
                     }
                 }
+                if(!styleTemplate[newColNum]) {
+                    let srcCell = ws.getRow(startRow).getCell(refColNum);
+                    if(srcCell.style) styleTemplate[newColNum] = JSON.parse(JSON.stringify(srcCell.style));
+                }
+            }
+            ws.mergeCells(eduHeaderRow, cBase, eduHeaderRow, cBase + 3);
+        } catch(e) {}
+    }
+}
 
                 function formatSnapDate(dStr) {
                     if(!dStr) return '';
@@ -7837,7 +7843,7 @@ document.getElementById('tierList').innerHTML = html;
                 function getNextEmptyColBase() {
                     let found = false;
                     while (!found && currentSearchCol <= 200) {
-                        let cellText = String(ws.getRow(6).getCell(currentSearchCol).value || '').trim();
+                        let cellText = String(ws.getRow(eduHeaderRow).getCell(currentSearchCol).value || '').trim();
                         let isEmptyTemplate = cellText === '' || cellText.includes('( 월 일)') || cellText.includes('(0월0일)') || cellText.includes('(0월 0일)');
                         if (isNewFile || isEmptyTemplate) {
                             found = true;
@@ -7861,7 +7867,7 @@ document.getElementById('tierList').innerHTML = html;
                         if (cBase) {
                             let snap = selectedSnaps[i];
                             let roundNum = Math.floor((cBase - 16) / 4) + 1; 
-                            ws.getRow(6).getCell(cBase).value = `${roundNum}차(${formatSnapDate(snap.date)})-${snap.memo||''}`;
+                            ws.getRow(eduHeaderRow).getCell(cBase).value = `${roundNum}차(${formatSnapDate(snap.date)})-${snap.memo||''}`;
                             snapColMapping.push({ snap: snap, cBase: cBase, autoMode: 'manual' });
                         }
                     }
@@ -7928,7 +7934,17 @@ document.getElementById('tierList').innerHTML = html;
                     return { gross: grossFree, refund: refundFree };
                 }
 
-                if(ws.rowCount >= startRow) ws.spliceRows(startRow, ws.rowCount - startRow + 1);
+                               // ✨ spliceRows(행 삭제)는 새 서식의 공유 수식(shared formula)을 깨뜨려 파일 손상을 유발할 수 있어서,
+                //    행 구조는 그대로 두고 내용(값)만 비우는 방식으로 변경
+                {
+                    let templateMaxRow = ws.rowCount;
+                    for (let r = startRow; r <= templateMaxRow; r++) {
+                        let clearRow = ws.getRow(r);
+                        clearRow.eachCell({ includeEmpty: true }, (cell) => {
+                            if (!cell.formula) cell.value = null; // 수식이 있는 칸(M,N,O,R 등)은 건드리지 않고, 순수 입력값 칸만 비움
+                        });
+                    }
+                }
 
                 for(let i=0; i<combined.length; i++) {
                     let rIdx = startRow + i;
@@ -7952,10 +7968,17 @@ document.getElementById('tierList').innerHTML = html;
                     let prevRefundSum = 0;
                     let firstNewCol = snapColMapping.length > 0 ? snapColMapping[0].cBase : 16;
                     
-                    if (data.isExisting) {
+                                       if (data.isExisting) {
                         for(let c = 16; c < firstNewCol; c += 4) {
                             if (data.cells && data.cells[c]) prevGrossSum += toNum(data.cells[c]);
                             if (data.cells && data.cells[c+1]) prevRefundSum += toNum(data.cells[c+1]);
+                            // ✨ 추가: 이미 채워져 있던 이전 세트(사용액/환불액/비고)는 지우지 말고 그대로 복원
+                            for (let cc = c; cc <= c + 3; cc++) {
+                                let cell = targetRow.getCell(cc);
+                                if (!cell.formula && data.cells && data.cells[cc] !== undefined) {
+                                    cell.value = data.cells[cc];
+                                }
+                            }
                         }
                     }
 
@@ -8022,7 +8045,7 @@ document.getElementById('tierList').innerHTML = html;
                     targetRow.getCell(15).value = null;
                     let dbStudent = db.find(x => x.grade === data.grade && x.classNum === data.classNum && x.studentNum === data.studentNum && x.name === data.name);
                     let stFreeLimit = (dbStudent && dbStudent.freeLimit) || getFreeAllowanceDefault();
-                    targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>0,${stFreeLimit}-N${rIdx},IF(${stFreeLimit}-N${rIdx}=0,"지원금 0원","지원금 초과사용")),"")` };
+                   targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>=0,${stFreeLimit}-N${rIdx},"지원금 초과사용"),"")` };
 
                     targetRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
                         if (styleTemplate[colNum]) cell.style = JSON.parse(JSON.stringify(styleTemplate[colNum]));
