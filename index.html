@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.3</title>
+    <title>방과후 지원금 돌보미 V11.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.3</span>
+                <span class="brand-version">V11.4</span>
             </div>
     </div>
     
@@ -5400,13 +5400,29 @@ document.getElementById('fTier').value = r.freeTier || "";
             let scrollWrap3 = document.getElementById('receiptScrollWrap_' + q);
             let scrollPos3 = scrollWrap3 ? scrollWrap3.scrollLeft : 0;
             
-            persistData();
-            showDetailModal(id);
-            
+                       persistData();
+
+            // ✨ 클릭으로 다음 칸에 포커스가 넘어갈 시간을 준 뒤(0ms) 다시 그려서, 재렌더링 때문에 클릭이 씹히는 것을 방지
             setTimeout(() => {
+                let focusedId = document.activeElement ? document.activeElement.id : null;
+                let selStart = null, selEnd = null;
+                try {
+                    if (document.activeElement && typeof document.activeElement.selectionStart === 'number') {
+                        selStart = document.activeElement.selectionStart;
+                        selEnd = document.activeElement.selectionEnd;
+                    }
+                } catch(e) {}
+
+                showDetailModal(id);
+
+                let target = focusedId ? document.getElementById(focusedId) : null;
+                if (target) {
+                    target.focus();
+                    if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd);
+                }
                 let newWrap3 = document.getElementById('receiptScrollWrap_' + q);
                 if(newWrap3) newWrap3.scrollLeft = scrollPos3;
-            }, 10);
+            }, 0);
             renderGrid();
         };
 
@@ -5539,19 +5555,29 @@ document.getElementById('fTier').value = r.freeTier || "";
             let scrollWrap1 = document.getElementById('receiptScrollWrap_' + q);
             let scrollPos1 = scrollWrap1 ? scrollWrap1.scrollLeft : 0;
             
-            persistData();
-            showDetailModal(id);
-            
+                       persistData();
+
+            // ✨ 클릭으로 다음 칸에 포커스가 넘어갈 시간을 준 뒤(0ms) 다시 그려서, 재렌더링 때문에 클릭이 씹히는 것을 방지
             setTimeout(() => {
-                let el = document.getElementById(`live_${field}_${q}_${sIdx}`);
-                if(el) {
-                    el.focus();
-                    let len = el.value.length;
-                    if(el.setSelectionRange) el.setSelectionRange(len, len);
+                let focusedId = document.activeElement ? document.activeElement.id : null;
+                let selStart = null, selEnd = null;
+                try {
+                    if (document.activeElement && typeof document.activeElement.selectionStart === 'number') {
+                        selStart = document.activeElement.selectionStart;
+                        selEnd = document.activeElement.selectionEnd;
+                    }
+                } catch(e) {}
+
+                showDetailModal(id);
+
+                let target = focusedId ? document.getElementById(focusedId) : null;
+                if (target) {
+                    target.focus();
+                    if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd);
                 }
                 let newWrap1 = document.getElementById('receiptScrollWrap_' + q);
                 if(newWrap1) newWrap1.scrollLeft = scrollPos1;
-            }, 10);
+            }, 0);
             renderGrid();
         };
 
@@ -5569,18 +5595,29 @@ document.getElementById('fTier').value = r.freeTier || "";
             let scrollWrap2 = document.getElementById('receiptScrollWrap_' + q);
             let scrollPos2 = scrollWrap2 ? scrollWrap2.scrollLeft : 0;
             
-            persistData();
-            showDetailModal(id);
+                        persistData();
+
+            // ✨ 클릭으로 다음 칸에 포커스가 넘어갈 시간을 준 뒤(0ms) 다시 그려서, 재렌더링 때문에 클릭이 씹히는 것을 방지
             setTimeout(() => {
-                let el = document.getElementById(`live_${field}_${q}_${sIdx}`);
-                if(el) {
-                    el.focus();
-                    let len = el.value.length;
-                    if(el.setSelectionRange) el.setSelectionRange(len, len);
+                let focusedId = document.activeElement ? document.activeElement.id : null;
+                let selStart = null, selEnd = null;
+                try {
+                    if (document.activeElement && typeof document.activeElement.selectionStart === 'number') {
+                        selStart = document.activeElement.selectionStart;
+                        selEnd = document.activeElement.selectionEnd;
+                    }
+                } catch(e) {}
+
+                showDetailModal(id);
+
+                let target = focusedId ? document.getElementById(focusedId) : null;
+                if (target) {
+                    target.focus();
+                    if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd);
                 }
                 let newWrap2 = document.getElementById('receiptScrollWrap_' + q);
                 if(newWrap2) newWrap2.scrollLeft = scrollPos2;
-            }, 10);
+            }, 0);
             renderGrid();
         }
 
