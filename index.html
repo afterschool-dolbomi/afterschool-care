@@ -6891,7 +6891,7 @@ document.getElementById('tierList').innerHTML = html;
         }
 
         // ✨ 추가 및 수정 병합 저장 처리
-        function saveSpecialStudent() {
+                function saveSpecialStudent() {
             let editIdx = parseInt(document.getElementById('sp_edit_idx').value);
             let grade = parseInt(document.getElementById('sp_g').value);
             let classNum = parseInt(document.getElementById('sp_c').value);
@@ -6908,6 +6908,18 @@ document.getElementById('tierList').innerHTML = html;
             if(editIdx === -1) { // 신규 추가 모드
                 if(exists !== -1) { alert("이미 등록된 학번입니다."); return; }
                 specialList.push({grade, classNum, studentNum, name});
+
+                // ✨ 자유수강자 명단 관리에 이미 같은 학번이 등록되어 있으면 알려주고, 그 학생은 특수반(중복불가)으로 자동 처리
+                let dupInNeis = neisList.filter(s => s.grade === grade && s.classNum === classNum && s.studentNum === studentNum);
+                if (dupInNeis.length > 0) {
+                    dupInNeis.forEach(s => {
+                        s.status = '특수반';
+                        s.afterSchool = '특수학급[중복불가]';
+                    });
+                    persistNeisList();
+                    renderNeisList();
+                    alert(`⚠️ ${grade}학년 ${classNum}반 ${studentNum}번 ${name} 학생은 이미 '자유수강자 명단 관리'에 등록되어 있었습니다.\n특수학급 아동은 자유수강 지원 대상이 될 수 없으므로, 해당 학생을 자유수강자 명단에서 [특수반/중복불가]로 자동 제외 처리했습니다.`);
+                }
             } else { // 기존 데이터 수정 모드
                 if(exists !== -1 && exists !== editIdx) { alert("다른 학생과 중복되는 학번으로 수정할 수 없습니다."); return; }
                 specialList[editIdx] = {grade, classNum, studentNum, name};
@@ -6917,6 +6929,9 @@ document.getElementById('tierList').innerHTML = html;
             persistSpecialList(); 
             renderSpecialList();
         }
+		
+		
+		
 
         function deleteSpecialStudent(idx) {
             if(confirm('선택한 학생을 특수학급 명단에서 삭제하시겠습니까?')) {
