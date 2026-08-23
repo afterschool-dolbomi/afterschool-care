@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.4</title>
+    <title>방과후 지원금 돌보미 V11.5</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.4</span>
+                <span class="brand-version">V11.5</span>
             </div>
     </div>
     
@@ -2349,8 +2349,9 @@ function addRosterDataRows(ws, rows, themeColor) {
                     cell.alignment = { horizontal: 'center' };
                 });
 
-                // 학생 목록: 테두리 + 지원금 부족 학생 빨간 글씨
-                rows.forEach(r => {
+                                // 학생 목록: 학번순 정렬 후 테두리 + 지원금 부족 학생 빨간 글씨
+                let sortedRows = [...rows].sort((a, b) => (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum));
+                sortedRows.forEach(r => {
                     let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
                     row.getCell(6).numFmt = '#,##0';
                     let isShort = r.note === '지원금부족';
