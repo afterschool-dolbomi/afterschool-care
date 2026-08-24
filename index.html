@@ -236,8 +236,10 @@
         .apply-input { width:65px; text-align:right; padding:4px 6px; border:1px solid #9ca3af; border-radius:4px; font-size:12px; outline:none; transition:0.2s; background:white; color:var(--text-dark); }
         .apply-input:focus { border-color:var(--sidebar-accent); box-shadow:0 0 0 2px rgba(59,130,246,0.2); }
 
-        .subject-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border-color); background: white; border-radius: 4px; margin-bottom: 4px; transition: 0.3s; }
+                .subject-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border-color); background: white; border-radius: 4px; margin-bottom: 4px; transition: 0.3s; }
         .subject-item:hover { background: #f3f4f6; }
+        .subject-item.paste-flash { animation: pasteFlash 0.9s ease-out; }
+        @keyframes pasteFlash { 0% { background-color:#86efac; box-shadow:0 0 0 2px #22c55e inset; } 100% { background-color:transparent; box-shadow:none; } }
         .subject-actions { display: flex; gap: 6px; }
         .btn-edit-sub { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-edit-sub:hover { background: #059669; }
@@ -1187,21 +1189,19 @@
             
             <!-- 상단 타이틀 영역 (그라데이션 배경) -->
             <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px 20px; text-align: center; color: white;">
-                <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V10</h2>
+                               <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V12.0</h2>
                 <p style="margin: 8px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9;">프로그램이 더욱 강력해졌습니다.</p>
             </div>
             
             <!-- 본문 안내 영역 -->
             <div style="padding: 24px 24px 20px;">
                 <div style="font-size: 14.5px; color: #374151; line-height: 1.7; font-weight: 600; text-align: left; margin-bottom: 4px; display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자(일반수강생)</span>도 편하게 관리할 수 있습니다.</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>학년도 지원금 설정</b><br> (각 시도마다 지원금을 다르게 설정 가능)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>내년도 초3방과후 지원금을 <b>초3~4지원금</b>으로 변경 가능!<br> (3~5학년, 3~6학년 지원도 변환 가능)</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자</span> 관리 가능</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>과목 목록 관리</b> (과목 금액 복사 가능)</span></div>
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>각 과목별 <b>부서로 관리</b> 가능! (댄스 1부, 댄스 2부)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하세요)</span></span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
-                    <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align:center; display: inline-block; font-size: 13.5px; color: #4b5563; border: 1px solid #e5e7eb;">
-                        💡 <b>수익자 아동 명단</b>도 함께 올려서<br>하나의 프로그램으로 통합 관리해 보세요!
-                    </div>
+                    
 			   </div>
             </div>
           
@@ -2825,6 +2825,34 @@ function toggleStatusPanel() {
             document.getElementById('subjectModal').style.display = 'flex';
         }
 
+           let copiedFeeSource = null; // ✨ 복사해둔 단가 { subRef, fees }
+
+      function copySubjectFees(idx) {
+            let sub = savedSubjects[idx];
+            copiedFeeSource = { subRef: sub, fees: JSON.parse(JSON.stringify(sub.fees)) };
+            renderSubjectManagerList();
+        }
+
+      function cancelCopySubjectFees() {
+            copiedFeeSource = null;
+            renderSubjectManagerList();
+        }
+
+      function pasteSubjectFees(idx) {
+            if (!copiedFeeSource) return;
+            let sub = savedSubjects[idx];
+            sub.fees = JSON.parse(JSON.stringify(copiedFeeSource.fees));
+            persistSubjects();
+            copiedFeeSource = null;
+            renderSubjectManagerList();
+
+            let target = document.querySelector(`#subjectListArea .subject-item[data-sub-idx="${idx}"]`);
+            if (target) {
+                target.classList.add('paste-flash');
+                setTimeout(() => target.classList.remove('paste-flash'), 900);
+            }
+        }
+
       function renderSubjectManagerList() {
             let html = '<button onclick="editSubjectForm(-1)" class="btn-tool" style="margin-bottom:16px; background:#1e3a5f; color:white; border:none; padding:9px 18px; font-weight:700;">+ 새 과목 및 기준단가 추가</button>';
             html += '<button onclick="openMergeSubjectForm()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#1e3a5f; border:1.5px solid #d4af37; padding:9px 18px; font-weight:700;">🔗 과목 통합</button>';
@@ -2835,10 +2863,27 @@ function toggleStatusPanel() {
                 html += '<div style="text-align:center; color:#9ca3af; padding:20px;">등록된 과목이 없습니다.</div>';
             } else {
                 savedSubjects.forEach((sub, idx) => {
+                    let isCopySource = copiedFeeSource && copiedFeeSource.subRef === sub;
+                    let copyPasteBtn;
+                    if (isCopySource) {
+                        copyPasteBtn = `<button class="btn-edit-sub" style="background:#d4af37; color:white; border-color:#d4af37;" onclick="cancelCopySubjectFees()">✅ 복사됨(취소)</button>`;
+                    } else if (copiedFeeSource) {
+                        copyPasteBtn = `<button class="btn-edit-sub" style="background:#16a34a; color:white; border-color:#16a34a;" onclick="pasteSubjectFees(${idx})">📥 단가 붙여넣기</button>`;
+                    } else {
+                                                copyPasteBtn = `
+                        <span style="position:relative; display:inline-block;">
+                            <button class="btn-edit-sub" style="background:#2563eb; border-color:#2563eb;"
+                                onclick="copySubjectFees(${idx})"
+                                onmouseover="this.nextElementSibling.style.opacity='1'; this.nextElementSibling.style.visibility='visible';"
+                                onmouseout="this.nextElementSibling.style.opacity='0'; this.nextElementSibling.style.visibility='hidden';">📋 단가 복사</button>
+                            <span style="visibility:hidden; opacity:0; position:absolute; top:28px; right:0; background:#111827; color:#fff; font-size:11px; font-weight:400; padding:5px 9px; border-radius:5px; white-space:nowrap; transition:opacity 0.15s; pointer-events:none; z-index:10;">다른 과목에 1~4분기 금액을 복사할 수 있습니다</span>
+                        </span>`;
+                    }
                     html += `
-                    <div class="subject-item">
+                    <div class="subject-item" data-sub-idx="${idx}">
                         <span style="font-weight:600; font-size:13px; color:var(--text-dark);">${sub.name}</span>
                         <div class="subject-actions">
+                            ${copyPasteBtn}
                             <button class="btn-edit-sub" onclick="editSubjectForm(${idx})">단가설정/수정</button>
                             <button class="btn-del-sub" onclick="deleteSubject(${idx})">삭제</button>
                         </div>
@@ -8346,7 +8391,7 @@ document.addEventListener('keydown', function(e) {
       // ✨ 수익자 관리 업데이트 팝업 로직
     document.addEventListener("DOMContentLoaded", function() {
         // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v10_3');
+       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v12_0');
         
         // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
         if (!hidePopup) {
@@ -8362,7 +8407,7 @@ document.addEventListener('keydown', function(e) {
         if (isChecked) {
             // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
             // 식별자를 'hideBeneficiaryPopup_v10'으로 주어 나중에 또 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v10_3', 'true');
+            localStorage.setItem('hideBeneficiaryPopup_v12_0', 'true');
         }
         
         // 팝업창 숨기기
