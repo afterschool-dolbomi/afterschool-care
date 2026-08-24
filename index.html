@@ -7944,51 +7944,35 @@ document.getElementById('tierList').innerHTML = html;
                 }
 
                  // ✨ 완벽한 자유수강 영수증 스캔 함수 (환불 전 순수 수강액과 환불액 분리)
-                function getFreeTotals(snapDb, grade, classNum, studentNum, name, specificQ = null) {
+                                function getFreeTotals(snapDb, grade, classNum, studentNum, name, specificQ = null) {
                     let st = snapDb.find(x => String(x.grade) === String(grade) && String(x.classNum) === String(classNum) && String(x.studentNum) === String(studentNum) && x.name === name);
                     
                     if(!st) return { gross: 0, refund: 0 };
 
-                    // 1. 환불이 차감된 후의 실제 결제액(Net) 계산
-                    let c_net = calcStudent(st); 
-
-                    // 2. 환불액을 0으로 강제 세팅한 가상의 학생 데이터로 '환불 전 순수 수강금액(Gross)' 계산
-                    let st_gross = JSON.parse(JSON.stringify(st));
-                    for(let q=1; q<=6; q++) {
-                        if(st_gross[`q${q}`] && st_gross[`q${q}`].subs) {
-                            st_gross[`q${q}`].subs.forEach(s => {
-                                s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
-                            });
-                        }
-                    }
-                    let c_gross = calcStudent(st_gross);
+                    // ✨ 환불을 0으로 지운 가상 데이터로 다시 계산하면, 환불로 되살아난 자유수강 잔여한도가
+                    //    가상 세계에서는 없던 일이 되어 한도 초과(수익자)로 잘못 밀려날 수 있음.
+                    //    그래서 실제(환불 반영) 계산 결과 하나만 쓰고, calcStudent가 이미 계산해둔
+                    //    "환불로 자유수강 배정에서 되돌아간 금액"(refFrSu/refFrGy/refFrJ)을 그대로 활용함.
+                    let c = calcStudent(st);
 
                     let grossFree = 0;
-                    let netFree = 0;
-                    
+                    let refundFree = 0;
+
                     let qList = specificQ ? [specificQ] : [1,2,3,4,5,6].slice(0, maxQuarter);
-                    
+
                     qList.forEach(q => {
                         let qKey = `q${q}`;
-                        
-                        // 환불 전 순수 수강금액 합산 (엑셀 1세트 1번째 칸용)
-                        if(c_gross.allocs && c_gross.allocs[qKey]) {
-                            c_gross.allocs[qKey].forEach(alloc => {
-                                if(alloc) grossFree += (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0);
-                            });
-                        }
-                        
-                        // 환불 후 실제 최종액 합산
-                        if(c_net.allocs && c_net.allocs[qKey]) {
-                            c_net.allocs[qKey].forEach(alloc => {
-                                if(alloc) netFree += (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0);
+                        if (c.allocs && c.allocs[qKey]) {
+                            c.allocs[qKey].forEach(alloc => {
+                                if (!alloc) return;
+                                let netFreeSub = (alloc.frSu || 0) + (alloc.frGy || 0) + (alloc.frJ || 0); // 환불 반영 후 최종 자유수강 배정액
+                                let refundFreeSub = (alloc.refFrSu || 0) + (alloc.refFrGy || 0) + (alloc.refFrJ || 0); // 그 중 환불로 되돌아간 금액
+                                grossFree += netFreeSub + refundFreeSub; // 환불 전 총 배정액 (엑셀 1세트 1번째 칸용)
+                                refundFree += refundFreeSub; // 환불액 (엑셀 1세트 2번째 칸용)
                             });
                         }
                     });
-                    
-                    // 환불액 = 환불 전 총액 - 환불 후 최종액 (엑셀 1세트 2번째 칸용)
-                    let refundFree = grossFree - netFree;
-                    
+
                     return { gross: grossFree, refund: refundFree };
                 }
 
