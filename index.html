@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V11.5</title>
+    <title>방과후 지원금 돌보미 V12.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -853,7 +853,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V11.5</span>
+                <span class="brand-version">V12.0</span>
             </div>
     </div>
     
@@ -994,6 +994,13 @@
        <!-- 🎯 상세 필터창 (오른쪽 스르륵 패널) -->
 <div id="filterPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:var(--sidebar-bg); padding:0; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto; color: white;">
     <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; position:sticky; top:0; z-index:2; border-bottom:2px solid #d4af37;">
+                <button onclick="resetAllFilters()"
+            onmouseover="this.querySelector('span').style.opacity='1'; this.querySelector('span').style.visibility='visible';"
+            onmouseout="this.querySelector('span').style.opacity='0'; this.querySelector('span').style.visibility='hidden';"
+            style="position:absolute; top:14px; right:48px; background:none; border:none; color:#94a3b8; cursor:pointer; padding:4px; display:flex; align-items:center;">
+            <i data-lucide="filter-x" style="width:18px; height:18px;"></i>
+            <span style="visibility:hidden; opacity:0; position:absolute; top:28px; right:0; background:#111827; color:#fff; font-size:11px; font-weight:400; padding:5px 9px; border-radius:5px; white-space:nowrap; transition:opacity 0.15s; pointer-events:none;">필터 초기화</span>
+        </button>
         <button onclick="toggleFilterPanel()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
         <div style="font-size:17px; font-weight:800; color:white;">🎯 상세 필터 설정</div>
         <div style="font-size:11px; color:#94a3b8; margin-top:4px;">원하는 조건으로 학생 명단을 좁혀보세요</div>
@@ -1150,8 +1157,8 @@
             </div>
         </div>
 
-        <div class="tier-popup" id="tierPopup">
-            <div style="font-weight:700; margin-bottom:12px; color:var(--text-dark);">자유수강권 계층 인원</div>
+                <div class="tier-popup" id="tierPopup">
+            <div style="font-weight:700; margin-bottom:12px; color:var(--text-dark);">현재 지원금을 사용 중인 자유수강권 인원</div>
             <div id="tierList"></div>
         </div>
 
@@ -1994,7 +2001,7 @@
                 if (rowNumber === 1) return; // 헤더줄 건너뜀
 
                 let subjectName = String(row.getCell(5).value || '').trim();  // E: 과목명
-                subjectName = subjectName.replace(/\d+부\([^)]*\)$/, '').trim(); // ✨ "요리1부(수)" → "요리"로 정리
+                subjectName = subjectName.replace(/(\d+부)\([^)]*\)$/, '$1').trim(); // ✨ 모든 분기 공통: "배드민턴1부(월)" → "배드민턴1부" (N부는 유지, 요일만 정리)
                 let fClass = String(row.getCell(6).value || '');              // F: 구분(3학년지원비/자유수강지원금)
                 let grade = toNum(row.getCell(7).value);                       // G: 학년
                 let classNum = toNum(row.getCell(8).value);                    // H: 반
@@ -2122,6 +2129,10 @@
         }
 
         // ✨ 분기별 학생-과목 데이터를 초3/자유/수익자로 나눠 집계 (기존 계산 엔진의 allocs 결과를 그대로 활용)
+        function baseSubjectName(name) {
+            return String(name || '').replace(/\s*\d+부(\([^)]*\))?$/, '').trim();
+        }
+
         function computeAdminRosterData(q) {
             let qKey = `q${q}`;
             let g3Rows = [], freeRows = [], skRows = [];
@@ -2147,10 +2158,11 @@
                     let hasFreeAmt = frSu > 0 || frGy > 0 || frJ > 0;
                     let hasSkAmt = skSu > 0 || skGy > 0 || skJ > 0;
 
-                    if (!courseCounts[subName]) courseCounts[subName] = { sk: 0, free: 0, g3: 0 };
-                    if (hasG3Amt) courseCounts[subName].g3++;
-                    if (hasFreeAmt) courseCounts[subName].free++;
-                    if (hasSkAmt) courseCounts[subName].sk++;
+                    let courseKey = baseSubjectName(subName); // ✨ N부는 합쳐서 인원 집계
+                    if (!courseCounts[courseKey]) courseCounts[courseKey] = { sk: 0, free: 0, g3: 0 };
+                    if (hasG3Amt) courseCounts[courseKey].g3++;
+                    if (hasFreeAmt) courseCounts[courseKey].free++;
+                    if (hasSkAmt) courseCounts[courseKey].sk++;
 
                     let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
 
@@ -2169,10 +2181,11 @@
                         skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, gy: skGy, j: skJ, note });
 
                         let detailNote = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
-                        if (!subjectSkDetail[subName]) subjectSkDetail[subName] = { eduRows: [], gyRows: [], jRows: [] };
-                        if (skSu > 0) subjectSkDetail[subName].eduRows.push({ ...base, amount: skSu, note: detailNote });
-                        if (skGy > 0) subjectSkDetail[subName].gyRows.push({ ...base, amount: skGy, note: detailNote });
-                        if (skJ > 0) subjectSkDetail[subName].jRows.push({ ...base, amount: skJ, note: detailNote });
+                        let detailKey = baseSubjectName(subName); // ✨ N부는 같은 시트로 합침
+                        if (!subjectSkDetail[detailKey]) subjectSkDetail[detailKey] = { eduRows: [], gyRows: [], jRows: [] };
+                        if (skSu > 0) subjectSkDetail[detailKey].eduRows.push({ ...base, amount: skSu, note: detailNote });
+                        if (skGy > 0) subjectSkDetail[detailKey].gyRows.push({ ...base, amount: skGy, note: detailNote });
+                        if (skJ > 0) subjectSkDetail[detailKey].jRows.push({ ...base, amount: skJ, note: detailNote });
                     }
                 });
             });
@@ -2208,7 +2221,7 @@ function addRosterDataRows(ws, rows, themeColor) {
 
             rows.forEach((r, i) => {
                 let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
-                let isSubjectEnd = (i === rows.length - 1) || (rows[i+1].subject !== r.subject); // ✨ 다음 줄과 과목이 다르면 이 줄이 그 과목의 마지막 줄
+                              let isSubjectEnd = (i === rows.length - 1) || (baseSubjectName(rows[i+1].subject) !== baseSubjectName(r.subject)); // ✨ N부끼리는 구분선 없이, 진짜 과목이 바뀔 때만 구분선
                 row.eachCell(cell => {
                     cell.border = {
                         top:{style:'thin', color:{argb:'FFE5E7EB'}},
@@ -2249,14 +2262,21 @@ function addRosterDataRows(ws, rows, themeColor) {
                 cell.alignment = { horizontal: 'center' };
             });
 
-            let rIdx = 5;
+                                  let rIdx = 5;
             let totSk=0, totFree=0, totG3=0;
-            savedSubjects.forEach((sub, idx) => {
-                let c = courseCounts[sub.name] || { sk: 0, free: 0, g3: 0 };
+            let displayIdx = 0; // ✨ 표시되는 행 기준으로 지그재그 배경색
+            let shownCourseNames = new Set(); // ✨ 배드민턴 1부/2부가 중복으로 표시/집계되지 않게
+            savedSubjects.forEach((sub) => {
+                let courseKey = baseSubjectName(sub.name);
+                if (shownCourseNames.has(courseKey)) return;
+                shownCourseNames.add(courseKey);
+                let c = courseCounts[courseKey] || { sk: 0, free: 0, g3: 0 };
                 totSk += c.sk; totFree += c.free; totG3 += c.g3;
+                if (c.sk + c.free + c.g3 === 0) return; // ✨ 수익자/초3/자유수강 모두 0명인 과목은 표에서 제외
                 let row = ws.getRow(rIdx++);
-                let zebra = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
-                let vals = [sub.name, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
+                let zebra = displayIdx % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
+                displayIdx++;
+                let vals = [courseKey, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
                 vals.forEach((v, i) => {
                     let cell = row.getCell(startCol+i);
                     cell.value = v;
@@ -2448,11 +2468,14 @@ function toggleStatusPanel() {
                 
                 let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
                let rowIdx = 0;
-               let rowsHtml = Object.keys(counts).map(name => {
+               let rowsHtml = Object.keys(counts).filter(name => {
+                    let c = counts[name];
+                    return (c.beneficiary + c.free + c.g3) > 0; // ✨ 수익자/자유수강/초3 모두 0명인 과목은 표에서 제외
+                }).map(name => {
                     let c = counts[name];
                     let sum = c.beneficiary + c.free + c.g3;
                     totalBen += c.beneficiary; totalFree += c.free; totalG3 += c.g3; totalAll += sum;
-let rowNum = rowIdx + 1;
+                   let rowNum = rowIdx + 1;
                     let zebra = (rowIdx++ % 2 === 0) ? '#ffffff' : '#f5f3ff';
                     return `<tr style="background:${zebra};">
                         <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${rowNum}</td>
@@ -2762,6 +2785,10 @@ let rowNum = rowIdx + 1;
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
         }
 
+        function baseSubjectName(name) {
+            return String(name || '').replace(/\d+부$/, '').trim(); // ✨ "배드민턴1부" → "배드민턴" (필터 통합용)
+        }
+
         function renderSubjectList() {
             const list = document.getElementById('subjectList');
             const filterSelect = document.getElementById('filterSubject');
@@ -2770,16 +2797,23 @@ let rowNum = rowIdx + 1;
             let currentFilter = filterSelect ? filterSelect.value : '';
             if(filterSelect) filterSelect.innerHTML = '<option value="">모든 과목</option>';
             
+            let addedBaseNames = new Set();
+            
+                       let addedFilterNames = new Set(); // ✨ 필터는 N부 통합해서 중복 없이
             savedSubjects.forEach(s => {
                 let opt = document.createElement('option');
                 opt.value = s.name;
                 list.appendChild(opt);
                 
                 if(filterSelect) {
-                    let fOpt = document.createElement('option');
-                    fOpt.value = s.name;
-                    fOpt.innerText = s.name;
-                    filterSelect.appendChild(fOpt);
+                    let baseName = baseSubjectName(s.name);
+                    if (!addedFilterNames.has(baseName)) {
+                        addedFilterNames.add(baseName);
+                        let fOpt = document.createElement('option');
+                        fOpt.value = baseName;
+                        fOpt.innerText = baseName;
+                        filterSelect.appendChild(fOpt);
+                    }
                 }
             });
             if(filterSelect) filterSelect.value = currentFilter;
@@ -3796,7 +3830,7 @@ viewData.forEach(({r, c}) => {
                                 if (netSu === 0 && netGy === 0 && netJ === 0 && !subName) return;
                                 if (!subName) return;
 
-                                if (fSubject && subName !== fSubject) return; 
+                                if (fSubject && baseSubjectName(subName) !== fSubject) return; 
 
                                   let alloc = c.allocs && c.allocs[q] && c.allocs[q][sIdx] ? c.allocs[q][sIdx] : {};
                                 
@@ -5796,19 +5830,23 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('fundPopup').style.display = 'none';
             if(pop.style.display === 'block') { pop.style.display = 'none'; return; }
             
-            let tiers = { "기초생활수급자": 0, "한부모가족": 0, "법적차상위": 0, "중위소득90%이하": 0, "학교장추천": 0, "난민인정자": 0, "육아기근로단축": 0 };
+                        let tiers = { "기초생활수급자": 0, "한부모가족": 0, "법적차상위": 0, "중위소득90%이하": 0, "학교장추천": 0, "난민인정자": 0, "육아기근로단축": 0 };
             let hasFreeStudents = false;
             
             db.filter(x => x.hasFree).forEach(x => { 
+                let c = calcStudent(x);
+                if (c.total.usedFree <= 0) return; // ✨ 자유수강 지원금을 한 푼도 안 쓴 학생(지원금 미사용)은 집계에서 제외
                 hasFreeStudents = true;
                 if(tiers[x.freeTier] !== undefined) tiers[x.freeTier]++; 
             });
             
             let html = '';
-            for(let t in tiers) html += `<div class="tier-item"><span>${t}</span><span class="fw-bold">${tiers[t]}명</span></div>`; 
-            if(!hasFreeStudents) html = "<div style='color:#ef4444; font-size:12px; margin-bottom:12px; text-align:center;'>현재 자유수강권 등록 학생이 없습니다.</div>" + html;
+            let tierTotal = 0;
+            for(let t in tiers) { html += `<div class="tier-item"><span>${t}</span><span class="fw-bold">${tiers[t]}명</span></div>`; tierTotal += tiers[t]; }
+            if(!hasFreeStudents) html = "<div style='color:#ef4444; font-size:12px; margin-bottom:12px; text-align:center;'>현재 지원금을 사용 중인 자유수강권 학생이 없습니다.</div>" + html;
+            html += `<div class="tier-item" style="border-top:2px solid var(--sidebar-accent); margin-top:8px; padding-top:8px; font-weight:800;"><span>총합</span><span class="fw-bold">${tierTotal}명</span></div>`;
             
-document.getElementById('tierList').innerHTML = html;
+            document.getElementById('tierList').innerHTML = html;
             
             let btn = document.getElementById('btnTierInfo');
             if (btn) {
@@ -8254,6 +8292,15 @@ document.getElementById('tierList').innerHTML = html;
 		
 		
 		// 필터창 스르륵 열기/닫기 함수
+function resetAllFilters() {
+    document.getElementById('filterSubject').value = '';
+    document.querySelectorAll('input[name="fltGrade"]').forEach(el => el.checked = false);
+    document.querySelectorAll('input[name="fltStatus"]').forEach(el => el.checked = false);
+    let fundAll = document.querySelector('input[name="fltFund"][value=""]');
+    if (fundAll) fundAll.checked = true;
+    renderGrid();
+}
+
 function toggleFilterPanel() {
     const panel = document.getElementById('filterPanelWrap');
     panel.classList.toggle('open');
