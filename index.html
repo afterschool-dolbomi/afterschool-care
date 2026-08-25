@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.0</title>
+    <title>방과후 지원금 돌보미 V12.1</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -575,8 +575,10 @@
 		
 		
 		/* ✨ V6.3: 표 디자인 고도화 */
-        #neisListBody td { text-align: center !important; } /* 모든 셀 가운데 정렬 */
+                #neisListBody td { text-align: center !important; } /* 모든 셀 가운데 정렬 */
         #neisListBody td:first-child { width: 30px !important; } /* No. 셀 너비 대폭 축소 */
+        #neisListBody tr.neis-add-flash { animation: neisAddFlash 0.9s ease-out; }
+        @keyframes neisAddFlash { 0% { background-color:#86efac; } 100% { background-color:transparent; } }
 		
 		
 		
@@ -696,11 +698,13 @@
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
             <div style="padding:24px;">
-                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:10px; display:flex; align-items:flex-start; gap:6px;">
                     <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
-                    등록할 분기를 선택하세요
-				    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
-                    코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하여 엑셀을 불러오세요.
+                    <span>등록할 분기를 선택하세요</span>
+                </div>
+                <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:flex-start; gap:6px;">
+                    <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
+                    <span>코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하여 엑셀을 불러오세요.</span>
                 </div>
                 <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
                 <div style="display:flex; gap:8px;">
@@ -712,9 +716,11 @@
     </div>
 
 
+    
+
     <div id="sessionRatioModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:340px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
-            <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 육아기근로단축 차시 비율 적용</div>
+                           <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 차시 비율 적용</div>
             <div style="font-size:12.5px; color:#4b5563; line-height:1.6; margin-bottom:16px; background:#eff6ff; border-radius:8px; padding:10px;">
                 이번 분기에 이 과목이 실제로 진행되는 <b>총 수업 횟수(차시)</b>와, 그중 <b>지원 대상 기간에 해당하는 차시 수</b>를 입력하세요.<br><br>
                 예) 이번 분기 총 12차시 중, 지원기간은 8차시만 해당된다면 → 총차시 12, 지원차시 8<br><br>
@@ -855,7 +861,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.0</span>
+                <span class="brand-version">V12.1</span>
             </div>
     </div>
     
@@ -1201,7 +1207,7 @@
                     <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>각 과목별 <b>부서로 관리</b> 가능! (댄스 1부, 댄스 2부)</span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하세요)</span></span></div>
                     <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
-                    
+                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">6.</span> <span style="color:#dc2626; font-weight:800;">자유수강자 분기 중간에 들어와도 차시만 입력하면 금액 자동계산!</span></div>
 			   </div>
             </div>
           
@@ -1255,8 +1261,14 @@
                     <label class="checkbox-label" style="margin-top:16px;">
                         <input type="checkbox" id="fFree" onchange="toggleTier()"> <span style="color:var(--color-free);">자유수강권</span>
                     </label>
-                    <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
-                    
+                                        <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
+
+                    <div id="freeAutoStartGroup" style="display:none; margin-top:8px; background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:8px;">
+                                                <label style="font-size:12px; color:#166534; font-weight:700; display:block; margin-bottom:4px;">📅 자유수강권 지원 개시일 (학기 중간에 선정된 경우만, NEIS 신청일자)</label>
+                        <input type="date" id="fFreeAutoStartDate" style="padding:5px; border:1px solid #86efac; border-radius:4px; font-size:13px;">
+                        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">기록용 날짜예요. 실제 지원금액은 자동 계산되지 않으니, 아래 과목의 "🍼 차시 비율 적용" 버튼으로 정확한 차시를 입력해주세요.</div>
+                    </div>
+
                    <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
                         <select id="fTier" onchange="toggleTier()" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
                             <option value="">계층 선택 (필수)</option>
@@ -1830,7 +1842,7 @@
 
             
             
-            let storedMq = localStorage.getItem('edusync_maxQuarter');
+             let storedMq = localStorage.getItem('edusync_maxQuarter');
             if(storedMq) maxQuarter = parseInt(storedMq);
             if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
             if(maxQuarter === 6) {
@@ -1908,7 +1920,7 @@
             if(isTimeTravelMode) return;
             localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
         }
-        function persistSpecialList() {
+         function persistSpecialList() {
             if(isTimeTravelMode) return;
             localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
         }
@@ -3374,6 +3386,8 @@ function toggleStatusPanel() {
             return getYearSetting(getCurrentAcademicYear()).free;
         }
 
+
+
     function calcStudent(r) {
             let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
             let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
@@ -3390,7 +3404,7 @@ function toggleStatusPanel() {
             let isYuka = (r.freeTier === '육아기근로단축');
 
             quartersToLoop.forEach((q, idx) => {
-                let exp = 0, q_usedG3 = 0, q_usedFree = 0, q_over = 0;
+                                               let exp = 0, q_usedG3 = 0, q_usedFree = 0, q_over = 0;
                 let q_allocs = [];
                 let availableG3ForQ = (idx <= h1CutoffIndex) ? remG3_H1 : remG3_Total;
 
@@ -4738,6 +4752,8 @@ tBody.insertAdjacentHTML('beforeend', `
             document.getElementById('tierGroup').style.display = document.getElementById('fFree').checked ? 'block' : 'none';
             let tier = document.getElementById('fTier').value;
             document.getElementById('yukaDateGroup').style.display = (tier === '육아기근로단축') ? 'block' : 'none';
+            let showAutoStart = document.getElementById('fFree').checked && tier !== '육아기근로단축';
+            document.getElementById('freeAutoStartGroup').style.display = showAutoStart ? 'block' : 'none';
         }
 
        function checkFundLogic(event) {
@@ -4789,6 +4805,7 @@ function openPanel(mode, id = null) {
                 document.getElementById('fFreeLimit').value = "600,000";
                 document.getElementById('fFreeStartDate').value = "";
                 document.getElementById('fFreeEndDate').value = "";
+                document.getElementById('fFreeAutoStartDate').value = "";
                 
                 for(let q=1; q<=maxQuarter; q++) {
                     visibleRows[q] = 3;
@@ -4812,6 +4829,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                 document.getElementById('fFreeLimit').value = (r.freeLimit || getFreeAllowanceDefault()).toLocaleString();
                 document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
                 document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
+                document.getElementById('fFreeAutoStartDate').value = r.freeAutoStartDate || "";
                 toggleTier();
 
                 for(let q=1; q<=maxQuarter; q++) {
@@ -4903,21 +4921,34 @@ document.getElementById('fTier').value = r.freeTier || "";
 		 
           let freeStartDate = document.getElementById('fFreeStartDate').value;
           let freeEndDate = document.getElementById('fFreeEndDate').value;
+          let freeAutoStartDate = document.getElementById('fFreeAutoStartDate').value;
 
           if(hasFree && freeTier === '육아기근로단축' && (!freeStartDate || !freeEndDate)) {
               alert("육아기근로단축은 지원 시작일과 마감일을 모두 입력해야 합니다.");
               return;
           }
 
-            if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
+                        if(hasFree && !freeTier) { alert("자유수강권 계층을 선택해주세요."); return; }
            
 
             let oldR = db.find(x => x.id == id);
             let memo = oldR ? oldR.memo : '';
 
+            // ✨ NEIS 자유수강자 명단과 교차 확인
+            let wasFreeBefore = oldR ? !!oldR.hasFree : false;
+            let studentNameForCheck = document.getElementById('fName').value.trim();
+            let neisMatch = neisList.find(s => String(s.grade)===String(grade) && String(s.classNum)===String(classNum) && String(s.studentNum)===String(studentNum) && s.name === studentNameForCheck);
+
+            if (hasFree && !wasFreeBefore && !neisMatch) {
+                if (!confirm(`⚠️ 'NEIS 자유수강자 명단 관리'에 없는 학생입니다.\n\n${grade}학년 ${classNum}반 ${studentNum}번 ${studentNameForCheck}\n\n그래도 자유수강권 대상자로 저장할까요?`)) return;
+            }
+            if (hasFree && neisMatch && freeAutoStartDate && neisMatch.reqDate && freeAutoStartDate !== neisMatch.reqDate) {
+                alert(`⚠️ NEIS 명단의 신청일자(${neisMatch.reqDate})와 입력하신 지원 개시일(${freeAutoStartDate})이 다릅니다. 다시 한 번 확인해주세요.`);
+            }
+
             let isAnyNewSubject = false;
             for(let q=1; q<=maxQuarter; q++) {
-                for(let s=1; s<=6; s++) {
+                                for(let s=1; s<=6; s++) {
                     let nEl = document.getElementById(`fq${q}_n${s}`);
                     if(nEl && nEl.value.trim()) {
                         let name = nEl.value.trim();
@@ -4942,7 +4973,7 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             let saveTime = Date.now();
             let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, memo, createdAt };
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, freeAutoStartDate, memo, createdAt };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -5232,7 +5263,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                             <button type="button" title="아래로 이동 (우선순위 낮춤)" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:3px; cursor:pointer; font-size:9px; padding:1px 4px; color:#64748b;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'" onclick="moveSubjectOrder('${r.id}', ${q}, ${sIdx}, 1)">▼</button>
                                         </div>
                                     </div>
-                                             ${(r.hasFree && r.freeTier === '육아기근로단축') ? `
+                                      ${r.hasFree ? `
                                     <button type="button" class="no-print" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})" style="margin-top:6px; font-size:11px; padding:4px 8px; border-radius:5px; border:none; background:${s.sessionRatioEnabled ? '#2563eb' : '#1e3a8a'}; color:white; cursor:pointer; font-weight:700; white-space:nowrap;">
                                         🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 적용중` : '차시 비율 적용'}
                                     </button>
@@ -5590,7 +5621,7 @@ document.getElementById('fTier').value = r.freeTier || "";
         }
 
         function closeSessionRatioModal() {
-            document.getElementById('sessionRatioModal').style.display = 'none';
+        document.getElementById('sessionRatioModal').style.display = 'none';
             sessionRatioTarget = null;
         }
 
@@ -7112,7 +7143,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                     afterSchoolHtml = `<span style="color:#10b981; font-weight:bold;">${st.afterSchool}</span>`;
                 }
 
-                html += `<tr style="${trStyle}">
+                                html += `<tr style="${trStyle}" data-neis-idx="${idx}">
                     <td style="color:#6b7280; font-weight:bold; text-align:center;">${displayIdx + 1}</td>
                     <td style="text-align:center;">${st.grade}</td>
                     <td style="text-align:center;">${st.classNum}</td>
@@ -7125,6 +7156,13 @@ document.getElementById('fTier').value = r.freeTier || "";
                     <td style="text-align:center; white-space:nowrap;">
                         <button class="btn-tool" style="color:white; background:#3b82f6; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; margin-right:4px;" onclick="editNeisDate(${idx})">수정</button>
                         <button class="btn-tool" style="color:white; background:#ef4444; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="deleteNeisStudent(${idx})">삭제</button>
+                        <span style="position:relative; display:inline-block; margin-left:4px;">
+                            <button class="btn-tool" style="color:white; background:#10b981; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;"
+                                onclick="addSingleNeisToProgram(${idx})"
+                                onmouseover="this.nextElementSibling.style.opacity='1'; this.nextElementSibling.style.visibility='visible';"
+                                onmouseout="this.nextElementSibling.style.opacity='0'; this.nextElementSibling.style.visibility='hidden';">➕ 등록</button>
+                            <span style="visibility:hidden; opacity:0; position:absolute; top:28px; right:0; background:#111827; color:#fff; font-size:11px; font-weight:400; padding:5px 9px; border-radius:5px; white-space:nowrap; transition:opacity 0.15s; pointer-events:none; z-index:10;">프로그램에 해당 아동이 등록 됩니다</span>
+                        </span>
                     </td>
                 </tr>`;
             });
@@ -7467,6 +7505,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                         grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
                         hasG3: (st.grade >= 3 && st.grade <= getG3MaxGrade()), hasFree: true,
                         freeTier: translateFreeTier(st.familyTier), 
+                        freeAutoStartDate: st.reqDate || '', // ✨ NEIS 신청일자를 지원 개시일로 자동 연동
                         memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
                     };
                     for(let q=1; q<=6; q++) {
@@ -7481,6 +7520,42 @@ document.getElementById('fTier').value = r.freeTier || "";
             if (newCount > 0) { persistData(); renderGrid(); }
             alert(`🎉 총 ${newCount}명 신규로 메인 프로그램에 등록 되었습니다!`);
             closeNeisModal();
+        }
+
+        // ✨ 한 명씩 개별 등록
+        function addSingleNeisToProgram(idx) {
+            let st = neisList[idx];
+            if (!st) return;
+            if (st.status === '제외' || st.status === '통보X' || st.status === '특수반') {
+                alert('명단누락/지원제외/특수반 상태인 학생은 등록할 수 없습니다.');
+                return;
+            }
+            let exists = db.some(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
+            if (exists) { alert('이미 프로그램에 등록된 학생입니다.'); return; }
+
+            let rec = {
+                id: Date.now() + Math.random().toString(36).substr(2, 5),
+                createdAt: Date.now(),
+                grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
+                               hasG3: (st.grade >= 3 && st.grade <= getG3MaxGrade()), hasFree: true,
+                freeTier: translateFreeTier(st.familyTier),
+                freeAutoStartDate: st.reqDate || '', // ✨ NEIS 신청일자를 지원 개시일로 자동 연동
+                memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
+            };
+            for(let q=1; q<=6; q++) {
+                let subs = [];
+                for(let subIdx=1; subIdx<=6; subIdx++) subs.push({ name:'', g:0, s:0, su:0, gy:0, j:0, rG:0, rS:0, rSu:0, rGy:0, rJ:0 });
+                rec[`q${q}`] = { subs, g:0, s:0, su:0, gy:0, j:0 };
+            }
+            db.push(rec);
+            persistData();
+            renderGrid();
+
+            let row = document.querySelector(`#neisListBody tr[data-neis-idx="${idx}"]`);
+            if (row) {
+                row.classList.add('neis-add-flash');
+                setTimeout(() => row.classList.remove('neis-add-flash'), 900);
+            }
         }
 
         // ============================================================================
