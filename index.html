@@ -3418,11 +3418,12 @@ function toggleStatusPanel() {
 
                         // ✨ 육아기근로단축 차시 비율 적용 - 환불과 무관한 구조적 제외라 GROSS 기준으로 적용
                         let exclSu = 0, exclGy = 0, exclJ = 0;
-                        if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
+                                                if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
                             let sessionRatio = Math.max(0, Math.min(1, toNum(s.coveredSessions) / toNum(s.totalSessions)));
-                            exclSu = Math.round(grossSu * (1 - sessionRatio));
-                            exclGy = Math.round(grossGy * (1 - sessionRatio));
-                            exclJ = Math.round(grossJ * (1 - sessionRatio));
+                            exclSu = Math.round(grossSu * (1 - sessionRatio)); // ✨ 수강료만 차시 비율대로 분할
+                            // ✨ 교재비/재료비는 차시별로 쪼갤 수 없는 일시불 성격이라, 이미 수업 초반에 전액 지급 완료된 것으로 보고 통째로 본인부담(수익자) 처리
+                            exclGy = grossGy;
+                            exclJ = grossJ;
                         }
                         // ✨ 배분 계산의 기준 금액 = 환불 반영 전(gross) - 차시제외분. 이후 5단계에서 환불을 실사용 비율대로 되돌림
                         let allocBaseSu = Math.max(0, grossSu - exclSu);
