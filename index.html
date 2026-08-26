@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.3</title>
+    <title>방과후 지원금 돌보미 V12.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -861,7 +861,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.3</span>
+                <span class="brand-version">V12.4</span>
             </div>
     </div>
     
@@ -6515,8 +6515,12 @@ document.getElementById('fTier').value = r.freeTier || "";
 
 
 							   
-                              let backupData = {
+                                    let backupData = {
                                     memo: r.memo || '',
+                                    freeAutoStartDate: r.freeAutoStartDate || '',
+                                    freeStartDate: r.freeStartDate || '',
+                                    freeEndDate: r.freeEndDate || '',
+                                    freeLimit: r.freeLimit || '',
                                     b: targetQs.map(qNum => {
                                         let qObj = r[`q${qNum}`] || {subs:[]};
                                         return qObj.subs.map(x => ({
@@ -6526,7 +6530,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                                             // ✨ 수기 입력값 백업 보존
                                             mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
                                             mFreeSu:x.mFreeSu, mFreeGy:x.mFreeGy, mFreeJ:x.mFreeJ,
-                                            mSuikSu:x.mSuikSu, mSuikGy:x.mSuikGy, mSuikJ:x.mSuikJ
+                                            mSuikSu:x.mSuikSu, mSuikGy:x.mSuikGy, mSuikJ:x.mSuikJ,
+                                            // ✨ 차시 비율(자유수강 중간선정) 적용 정보 백업 보존
+                                            sessionRatioEnabled: x.sessionRatioEnabled || false,
+                                            totalSessions: x.totalSessions,
+                                            coveredSessions: x.coveredSessions
                                         }));
                                     })
                                 };
@@ -6649,7 +6657,16 @@ document.getElementById('fTier').value = r.freeTier || "";
                         mergedAny = true; // ✨ 지원금 유형 변동도 '업데이트'로 집계
                     }
                     
-                    let isBackupRestore = !!currentStudent._backupBurdens; // ✨ 백업 파일 복원인지 여부 (숨김 백업열 유무로 판단)
+                                        let isBackupRestore = !!currentStudent._backupBurdens; // ✨ 백업 파일 복원인지 여부 (숨김 백업열 유무로 판단)
+
+                    // ✨ 백업 복원일 때만 메모/자유수강 지원개시일 등 학생 단위 정보도 최신 백업 내용으로 갱신 (일반 명단 업로드는 건드리지 않음)
+                    if (isBackupRestore) {
+                        if (currentStudent.memo) currentExStudent.memo = currentStudent.memo;
+                        if (currentStudent.freeAutoStartDate) currentExStudent.freeAutoStartDate = currentStudent.freeAutoStartDate;
+                        if (currentStudent.freeStartDate) currentExStudent.freeStartDate = currentStudent.freeStartDate;
+                        if (currentStudent.freeEndDate) currentExStudent.freeEndDate = currentStudent.freeEndDate;
+                        if (currentStudent.freeLimit) currentExStudent.freeLimit = currentStudent.freeLimit;
+                    }
 
                     for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 동적 연동
                         let newSubs = currentStudent[`q${q}`].subs;
@@ -6836,11 +6853,15 @@ document.getElementById('fTier').value = r.freeTier || "";
                             currentIsMerge = false;
                         }
 
-                          currentStudent = {
+                            currentStudent = {
                             id: Date.now() + Math.random().toString(36).substr(2, 5) + rowNumber,
                             createdAt: currentExStudent && currentExStudent.createdAt ? currentExStudent.createdAt : Date.now(), // ✨ 신규 생성 시간
                             grade, classNum, studentNum, name: sName,
                             hasG3: (v(5)==='O' || v(5)==='o'), hasFree: (v(6)==='O' || v(6)==='o'), freeTier: String(v(7)).trim(),
+                            freeAutoStartDate: backupData ? (backupData.freeAutoStartDate || '') : '',
+                            freeStartDate: backupData ? (backupData.freeStartDate || '') : '',
+                            freeEndDate: backupData ? (backupData.freeEndDate || '') : '',
+                            freeLimit: backupData && backupData.freeLimit ? backupData.freeLimit : undefined,
                             q1: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
                             q2: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
                             q3: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
@@ -6869,10 +6890,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 let sIdx = currentStudent[`q${q}`].subs.length;
                                 
 								
-								let bSu, bGy, bJ;
+																let bSu, bGy, bJ;
                                 let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
+                                let sessionRatioEnabled, totalSessions, coveredSessions; // ✨ 차시 비율 적용 복원용 변수
 
                                 if(currentStudent._backupBurdens && currentStudent._backupBurdens[q-1] && currentStudent._backupBurdens[q-1][sIdx]) {
                                     let bk = currentStudent._backupBurdens[q-1][sIdx];
@@ -6884,10 +6906,14 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     mG3Su = bk.mG3Su; mG3Gy = bk.mG3Gy; mG3J = bk.mG3J;
                                     mFreeSu = bk.mFreeSu; mFreeGy = bk.mFreeGy; mFreeJ = bk.mFreeJ;
                                     mSuikSu = bk.mSuikSu; mSuikGy = bk.mSuikGy; mSuikJ = bk.mSuikJ;
+
+                                    // ✨ 차시 비율(자유수강 중간선정) 적용 복원
+                                    sessionRatioEnabled = bk.sessionRatioEnabled || false;
+                                    totalSessions = bk.totalSessions;
+                                    coveredSessions = bk.coveredSessions;
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ });
-								
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
