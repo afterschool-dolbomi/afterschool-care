@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.2</title>
+    <title>방과후 지원금 돌보미 V12.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -861,7 +861,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.2</span>
+                <span class="brand-version">V12.3</span>
             </div>
     </div>
     
@@ -2128,11 +2128,11 @@
             adminRosterSelectedQ = null;
         }
 
-        function confirmAdminRosterQuarter() {
+            async function confirmAdminRosterQuarter() {
             if (!adminRosterSelectedQ) { alert('먼저 분기를 선택해주세요.'); return; }
             document.getElementById('adminRosterModal').style.display = 'none';
             try {
-                generateAdminRoster(adminRosterSelectedQ);
+                await generateAdminRoster(adminRosterSelectedQ);
             } catch (err) {
                 alert('명단 생성 중 오류가 발생했습니다: ' + err.message);
                 console.error(err);
@@ -2140,9 +2140,14 @@
             adminRosterSelectedQ = null;
         }
 
-        // ✨ 분기별 학생-과목 데이터를 초3/자유/수익자로 나눠 집계 (기존 계산 엔진의 allocs 결과를 그대로 활용)
+               // ✨ 분기별 학생-과목 데이터를 초3/자유/수익자로 나눠 집계 (기존 계산 엔진의 allocs 결과를 그대로 활용)
         function baseSubjectName(name) {
             return String(name || '').replace(/\s*\d+부(\([^)]*\))?$/, '').trim();
+        }
+
+        // ✨ 엑셀 시트 이름에 못 쓰는 특수문자(\ / ? * [ ] :) 제거 (예: "바둑/체스A" 같은 과목명 대응)
+        function safeSheetName(name) {
+            return String(name || '').replace(/[\\\/\?\*\[\]:]/g, '_').slice(0, 31) || 'Sheet';
         }
 
         function computeAdminRosterData(q) {
@@ -2332,7 +2337,7 @@ function addRosterDataRows(ws, rows, themeColor) {
 
            // ✨ 과목별 수익자 상세 시트 공통 생성 함수 (캡처해주신 디자인 그대로)
             function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q) {
-                let ws = wb.addWorksheet(`${subName}-${feeLabel}`.slice(0, 31));
+                let ws = wb.addWorksheet(safeSheetName(`${subName}-${feeLabel}`));
 
                 // 제목: 병합 + 가운데 정렬
                 ws.mergeCells('A2:H2');
