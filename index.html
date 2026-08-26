@@ -3418,9 +3418,10 @@ function toggleStatusPanel() {
 
                         // ✨ 육아기근로단축 차시 비율 적용 - 환불과 무관한 구조적 제외라 GROSS 기준으로 적용
                         let exclSu = 0, exclGy = 0, exclJ = 0;
-                                                if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
+                            if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
                             let sessionRatio = Math.max(0, Math.min(1, toNum(s.coveredSessions) / toNum(s.totalSessions)));
-                            exclSu = Math.round(grossSu * (1 - sessionRatio)); // ✨ 수강료만 차시 비율대로 분할
+                            let coveredSu = Math.ceil((grossSu * sessionRatio) / 10) * 10; // ✨ 지원 대상액(환불액)은 10원 단위로 올림 처리
+                            exclSu = Math.max(0, grossSu - coveredSu); // ✨ 올림한 만큼 본인부담분에서 더 가져옴
                             // ✨ 교재비/재료비는 차시별로 쪼갤 수 없는 일시불 성격이라, 이미 수업 초반에 전액 지급 완료된 것으로 보고 통째로 본인부담(수익자) 처리
                             exclGy = grossGy;
                             exclJ = grossJ;
@@ -7219,6 +7220,17 @@ document.getElementById('fTier').value = r.freeTier || "";
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
 
+                // ✨ NEIS 명단에 반영된 학생이 이미 프로그램에 등록돼있으면 자유수강권/지원개시일 자동 연동
+        function syncNeisStudentToDb(st) {
+            let r = db.find(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
+            if (!r) return false;
+            let changed = false;
+            if (!r.hasFree) { r.hasFree = true; changed = true; }
+            if (!r.freeTier) { r.freeTier = translateFreeTier(st.familyTier); changed = true; }
+            if (st.reqDate && r.freeAutoStartDate !== st.reqDate) { r.freeAutoStartDate = st.reqDate; changed = true; }
+            return changed;
+        }
+
         function addManualNeisStudent() {
             let grade = parseInt(document.getElementById('nm_g').value);
             let classNum = parseInt(document.getElementById('nm_c').value);
@@ -7240,16 +7252,20 @@ document.getElementById('fTier').value = r.freeTier || "";
                 alert("이미 수혜수급자 명단에 등록되어 있는 학생입니다."); return;
             }
 
-            neisList.unshift({
+                        let newNeisEntry = {
                 grade, classNum, studentNum, name,
                 afterSchool: '수기추가[O]',
                 familyTier: familyTier, reqDate: reqDate, confirmDate: confirmDate,
                 status: '신규'
-            });
+            };
+            neisList.unshift(newNeisEntry);
 
             document.getElementById('nm_g').value=''; document.getElementById('nm_c').value='';
             document.getElementById('nm_n').value=''; document.getElementById('nm_name').value='';
             document.getElementById('nm_req').value=''; document.getElementById('nm_conf').value='';
+
+            // ✨ 이미 프로그램에 등록된 학생이면 자유수강권/개시일 자동 연동
+            if (syncNeisStudentToDb(newNeisEntry)) { persistData(); renderGrid(); }
 
             persistNeisList(); renderNeisList();
         }
@@ -7351,7 +7367,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let existingMap = new Map();
             neisList.forEach(st => { st._matched = false; let key = `${st.grade}-${st.classNum}-${st.studentNum}-${st.name}`; existingMap.set(key, st); });
 
-            let addedCount = 0, updatedCount = 0, rejectedCount = 0, specialCount = 0;
+            let addedCount = 0, updatedCount = 0, rejectedCount = 0, specialCount = 0, dbSyncedCount = 0;
 
             for(let i=0; i<rows.length; i++) {
                 let cols = rows[i];
@@ -7409,7 +7425,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                     rejectedCount++;
                 } 
                 // ✨ 3순위: 정상 지원 대상 (통보[O], 완료[O] 등)
-                else {
+                                else {
                     if (existingMap.has(key)) {
                         let st = existingMap.get(key);
                         st._matched = true; st.status = '유지';
@@ -7418,15 +7434,18 @@ document.getElementById('fTier').value = r.freeTier || "";
                         if(reqDate) st.reqDate = reqDate;
                         if(confirmDate) st.confirmDate = confirmDate;
                         updatedCount++;
+                        if (syncNeisStudentToDb(st)) dbSyncedCount++;
                     } else {
-                        neisList.push({
+                        let newSt = {
                             grade, classNum, studentNum, name,
                             afterSchool: afterSchool || '상태미상', 
                             familyTier: colFamily !== -1 ? String(cols[colFamily] || '').trim() : '',
                             reqDate: reqDate, confirmDate: confirmDate,
                             status: '신규', _matched: true
-                        });
+                        };
+                        neisList.push(newSt);
                         addedCount++;
+                        if (syncNeisStudentToDb(newSt)) dbSyncedCount++;
                     }
                 }
             }
@@ -7448,10 +7467,13 @@ document.getElementById('fTier').value = r.freeTier || "";
                 return a.studentNum - b.studentNum;
             });
 
+            if (dbSyncedCount > 0) { persistData(); renderGrid(); }
+
             persistNeisList(); renderNeisList();
 
             let msg = `✅ 명단 업로드 완료!\n- 신규 추가: ${addedCount}명\n- 중복 유지: ${updatedCount}명\n- 명단 누락: ${droppedCount}명\n- 통보[X]: ${rejectedCount}명`;
             if (specialCount > 0) msg += `\n- 특수반(차단): ${specialCount}명`;
+            if (dbSyncedCount > 0) msg += `\n- 프로그램 자동 연동(자유수강권/개시일): ${dbSyncedCount}명`;
             alert(msg);
         }
 
