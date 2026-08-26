@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.1</title>
+    <title>방과후 지원금 돌보미 V12.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -861,7 +861,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.1</span>
+                <span class="brand-version">V12.2</span>
             </div>
     </div>
     
@@ -3418,10 +3418,10 @@ function toggleStatusPanel() {
 
                         // ✨ 육아기근로단축 차시 비율 적용 - 환불과 무관한 구조적 제외라 GROSS 기준으로 적용
                         let exclSu = 0, exclGy = 0, exclJ = 0;
-                            if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
-                            let sessionRatio = Math.max(0, Math.min(1, toNum(s.coveredSessions) / toNum(s.totalSessions)));
-                            let coveredSu = Math.ceil((grossSu * sessionRatio) / 10) * 10; // ✨ 지원 대상액(환불액)은 10원 단위로 올림 처리
-                            exclSu = Math.max(0, grossSu - coveredSu); // ✨ 올림한 만큼 본인부담분에서 더 가져옴
+                                                    if (s.sessionRatioEnabled && toNum(s.totalSessions) > 0) {
+                            let perSessionSu = Math.ceil((grossSu / toNum(s.totalSessions)) / 10) * 10; // ✨ 차시당 단가를 먼저 10원 단위로 올림 (몇 차시를 환불하든 항상 같은 단가 유지)
+                            let coveredSu = perSessionSu * toNum(s.coveredSessions); // ✨ 올림한 단가 × 지원차시 수
+                            exclSu = Math.max(0, grossSu - coveredSu); // ✨ 그만큼 본인부담분에서 더 가져옴
                             // ✨ 교재비/재료비는 차시별로 쪼갤 수 없는 일시불 성격이라, 이미 수업 초반에 전액 지급 완료된 것으로 보고 통째로 본인부담(수익자) 처리
                             exclGy = grossGy;
                             exclJ = grossJ;
@@ -5296,7 +5296,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 ${r.hasG3 ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Su, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Su)}" value="${s.mG3Su !== undefined ? fmt(alloc.g3Su) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Su', this.value)"></td>
                                 <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mG3Gy, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3Gy)}" value="${s.mG3Gy !== undefined ? fmt(alloc.g3Gy) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3Gy', this.value)"></td>
                                 <td style="background:#f8fafc; text-align:center; border-right:1px solid #bae6fd;"><input type="text" class="alloc-input" style="${getStyle(s.mG3J, 'var(--color-g3)')}" placeholder="${formatAlloc(alloc.g3J)}" value="${s.mG3J !== undefined ? fmt(alloc.g3J) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mG3J', this.value)"></td>` : ''}
-                                ${r.hasFree ? `<td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeSu, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frSu)}" value="${s.mFreeSu !== undefined ? fmt(alloc.frSu) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeSu', this.value)"></td>
+                                ${r.hasFree ? `<td style="background:#f8fafc; text-align:center;"><span style="position:relative; display:inline-block;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeSu, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frSu)}" value="${s.mFreeSu !== undefined ? fmt(alloc.frSu) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeSu', this.value)">${s.sessionRatioEnabled ? '<div style="position:absolute; left:0; right:0; top:100%; margin-top:4px; font-size:10px; color:#9333ea; white-space:nowrap; line-height:1.2;">10의자리올림</div>' : ''}</span></td>
                                 <td style="background:#f8fafc; text-align:center;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeGy, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frGy)}" value="${s.mFreeGy !== undefined ? fmt(alloc.frGy) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeGy', this.value)"></td>
                                 <td style="background:#f8fafc; text-align:center; border-right:1px solid #d8b4fe;"><input type="text" class="alloc-input" style="${getStyle(s.mFreeJ, 'var(--color-free)')}" placeholder="${formatAlloc(alloc.frJ)}" value="${s.mFreeJ !== undefined ? fmt(alloc.frJ) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, 'mFreeJ', this.value)"></td>` : ''}
 
