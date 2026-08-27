@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.5</title>
+    <title>방과후 지원금 돌보미 V12.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -588,6 +588,9 @@
 
 /* 라디오 버튼 디자인 정렬 */
 #filterPanelWrap input[type="radio"] { margin-right: 8px; accent-color: var(--sidebar-accent); }
+
+/* 옆으로 스크롤 시 틀고정(sticky) 셀 성능 최적화 - 별도 GPU 레이어로 합성해서 버벅임 방지 */
+[style*="position:sticky"] { transform: translateZ(0); will-change: transform; }
 		
 		
 		
@@ -861,7 +864,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.5</span>
+                <span class="brand-version">V12.6</span>
             </div>
     </div>
     
@@ -1132,7 +1135,46 @@
                     <div class="stat-value" id="s_stOver" style="font-size:15px; color:#ef4444;">0명</div>
                 </div>
             </div>
-           <div id="quarterSubjectTables" style="margin-top:24px;"></div>
+           <div style="margin-top:16px; margin-bottom:8px;">
+                <button type="button" style="padding:14px 26px; font-size:15px; font-weight:800; color:#0f172a; background:linear-gradient(135deg, #fde68a, #d4af37); border:none; border-radius:30px; box-shadow:0 4px 14px rgba(212,175,55,0.45); cursor:pointer;" onclick="openQuarterTableExportModal()">🖨️ 현황표 인쇄 · 엑셀저장</button>
+            </div>
+           <div id="quarterSubjectTables" style="margin-top:8px;"></div>
+
+                        <div id="quarterTableExportModal" onclick="event.stopPropagation();" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+                <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+                    <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
+                        <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">🖨️</div>
+                        <div style="color:white; font-size:17px; font-weight:800;">현황표 인쇄 · 엑셀저장 자료 선택</div>
+                        <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
+                    </div>
+                    <div style="padding:24px;">
+                        <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:10px; display:flex; align-items:flex-start; gap:6px;">
+                            <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">1</span>
+                            <span>표 기준을 선택하세요</span>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px;">
+                            <button type="button" id="qtExportTypeBtn_dup" onclick="selectQTableExportType('dup')" style="padding:12px 6px; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;">중복 표시 표</button>
+                            <button type="button" id="qtExportTypeBtn_dedup" onclick="selectQTableExportType('dedup')" style="padding:12px 6px; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;">중복안함 표</button>
+                        </div>
+
+                        <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:10px; display:flex; align-items:flex-start; gap:6px;">
+                            <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
+                            <span>출력할 분기를 선택하세요 (여러 개 선택 가능)</span>
+                        </div>
+                        <div id="qTableExportQChecks" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
+
+                        <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:10px; display:flex; align-items:flex-start; gap:6px;">
+                            <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">3</span>
+                            <span>실행 방식을 선택하세요</span>
+                        </div>
+                        <div style="display:flex; gap:8px; margin-bottom:10px;">
+                            <button type="button" onclick="printQuarterTables()" style="flex:1; padding:11px; border-radius:8px; border:none; background:#334155; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(51,65,85,0.35);">🖨️ 인쇄</button>
+                            <button type="button" onclick="exportQuarterTablesExcel()" style="flex:1; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">📥 엑셀 저장</button>
+                        </div>
+                        <button type="button" onclick="closeQuarterTableExportModal()" style="width:100%; padding:9px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13px;">취소</button>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
 		   
@@ -2440,107 +2482,293 @@ function toggleStatusPanel() {
             if (panel && panel.classList.contains('open')) renderQuarterSubjectTables();
         }
 
-      function renderQuarterSubjectTables() {
+        // ✨ N부는 baseSubjectName으로 합치고, '중복표시'/'중복안함' 두 기준을 한번에 집계
+        function computeQuarterSubjectCounts(q) {
+            let qKey = `q${q}`;
+            let counts = {};      // 중복 표시: 지원금이 걸친 칸 전부 카운트
+            let countsDedup = {}; // 중복안함: 초3 > 자유수강 > 수익자 우선순위로 딱 한 칸만
+
+            db.forEach(r => {
+                if (!r[qKey] || !r[qKey].subs) return;
+                let c = calcStudent(r);
+                r[qKey].subs.forEach((s, sIdx) => {
+                    let subName = s.name ? s.name.trim() : '';
+                    if (!subName) return;
+                    let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
+                    if (!hasAmount) return;
+
+                    let courseKey = baseSubjectName(subName); // ✨ N부는 합쳐서 집계
+                    if (!counts[courseKey]) counts[courseKey] = { beneficiary: 0, free: 0, g3: 0 };
+                    if (!countsDedup[courseKey]) countsDedup[courseKey] = { beneficiary: 0, free: 0, g3: 0 };
+
+                    let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
+                    let hasG3Amt = toNum(alloc.g3Su) > 0 || toNum(alloc.g3Gy) > 0 || toNum(alloc.g3J) > 0;
+                    let hasFreeAmt = toNum(alloc.frSu) > 0 || toNum(alloc.frGy) > 0 || toNum(alloc.frJ) > 0;
+                    let hasSkAmt = toNum(alloc.skSu) > 0 || toNum(alloc.skGy) > 0 || toNum(alloc.skJ) > 0;
+
+                    // 중복 표시: 해당하는 칸 전부 카운트
+                    if (hasG3Amt) counts[courseKey].g3++;
+                    if (hasFreeAmt) counts[courseKey].free++;
+                    if (hasSkAmt) counts[courseKey].beneficiary++;
+
+                    // ✨ 중복안함: 원래 지원유형(초3/자유수강)이 있으면 그 칸으로, 지원금을 완전히 다 써서 100% 수익자로 넘어간 경우만 수익자 칸
+                    if (hasG3Amt) countsDedup[courseKey].g3++;
+                    else if (hasFreeAmt) countsDedup[courseKey].free++;
+                    else if (hasSkAmt) countsDedup[courseKey].beneficiary++;
+                });
+            });
+
+            return { counts, countsDedup };
+        }
+
+        // ✨ savedSubjects 순서 기준, N부 합치고 0명 과목 제외한 표 행 목록
+        function buildSubjectCountRows(counts) {
+            let shown = new Set();
+            let rows = [];
+            savedSubjects.forEach(sub => {
+                let courseKey = baseSubjectName(sub.name);
+                if (shown.has(courseKey)) return;
+                shown.add(courseKey);
+                let c = counts[courseKey] || { beneficiary: 0, free: 0, g3: 0 };
+                let sum = c.beneficiary + c.free + c.g3;
+                if (sum === 0) return;
+                rows.push({ name: courseKey, beneficiary: c.beneficiary, free: c.free, g3: c.g3, sum });
+            });
+            return rows;
+        }
+
+        // ✨ 표 하나를 HTML로 렌더링 (화면/인쇄 공통 사용)
+        function renderSubjectCountTableHtml(q, rows, title, cardBorderColor) {
+            let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
+            let rowsHtml = rows.map((r, idx) => {
+                totalBen += r.beneficiary; totalFree += r.free; totalG3 += r.g3; totalAll += r.sum;
+                let zebra = (idx % 2 === 0) ? '#ffffff' : '#f5f3ff';
+                return `<tr style="background:${zebra};">
+                    <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${idx + 1}</td>
+                    <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb; white-space:normal; word-break:keep-all; overflow-wrap:break-word; line-height:1.3;">${r.name}</td>
+                    <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${r.beneficiary}</td>
+                    <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#7c3aed; font-weight:700;">${r.free}</td>
+                    <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#2563eb; font-weight:700;">${r.g3}</td>
+                    <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; font-weight:800; border-left:2px solid #c7d2fe;">${r.sum}</td>
+                </tr>`;
+            }).join('');
+
+            return `
+            <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 330px; min-width:300px; border-top:3px solid ${cardBorderColor};">
+                <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${title}</div>
+                <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
+                    <colgroup>
+                        <col style="width:22px;"><col><col style="width:44px;"><col style="width:52px;"><col style="width:32px;"><col style="width:40px;">
+                    </colgroup>
+                    <thead>
+                        <tr style="border-bottom:2px solid ${cardBorderColor};">
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">No.</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">초3</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827; border-left:2px solid ${cardBorderColor};">합계</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}
+                        <tr style="border-top:2px solid #111827;">
+                            <td style="padding:6px 5px; text-align:center; background:#fef08a !important;"></td>
+                            <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
+                            <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
+                            <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalFree}</td>
+                            <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalG3}</td>
+                            <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800; border-left:2px solid #111827;">${totalAll}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+        }
+
+        function renderQuarterSubjectTables() {
             let container = document.getElementById('quarterSubjectTables');
             if (!container) return;
-            
+
             let html = `
                 <div style="background:#FCFCF0FF; border:1px solid #fde68a; border-left:4px solid #d4af37; border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:14px; color:#374151; line-height:1.8; max-width:900px;">
-                    <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📌 강좌별 인원 집계 기준 (한 학생이 여러 칸에 동시에 포함될 수 있어요)</div>
+                    <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📌 [중복 표시 표] 강좌별 인원 집계 기준 (한 학생이 여러 칸에 동시에 포함될 수 있어요)</div>
                     · 지원금으로 순수하게 다 결제되면 → <b style="color:#d4af37;">해당 지원금 칸</b>에 1명<br>
                     · 지원금이 <b style="color:#d4af37;">부족해서 일부만 수익자로 넘어가면</b> → 지원금 칸 1명 + <b style="color:#d4af37;">수익자 칸에도 1명</b> 같이 표시<br>
                     · 초3·자유수강권을 둘 다 가진 학생이 초3이 부족해 자유수강으로 넘어가면 → 초3 칸 1명 + <b style="color:#d4af37;">자유수강 칸에도 1명</b><br>
                     · 지원금 잔액이 아예 없어 전액 수익자로 결제되면 → <b style="color:#d4af37;">수익자 칸에만</b> 1명
                 </div>
-               <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">
-				`;
+                <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">`;
             for (let q = 1; q <= maxQuarter; q++) {
-                let qKey = `q${q}`;
-                let counts = {};
-                
-                savedSubjects.forEach(s => { counts[s.name] = { beneficiary: 0, free: 0, g3: 0 }; });
-                
-               db.forEach(r => {
-                    if (!r[qKey] || !r[qKey].subs) return;
-                    let c = calcStudent(r); // ✨ 이미 계산된 과목별 지원금/수익자 배분 결과를 그대로 활용
-                    r[qKey].subs.forEach((s, sIdx) => {
-                        let subName = s.name ? s.name.trim() : '';
-                        if (!subName) return;
-                        let hasAmount = toNum(s.g) > 0 || toNum(s.s) > 0 || toNum(s.su) > 0 || toNum(s.gy) > 0 || toNum(s.j) > 0;
-                        if (!hasAmount) return;
-                        
-                        if (!counts[subName]) counts[subName] = { beneficiary: 0, free: 0, g3: 0 };
-                        
-                        let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
-                        let hasG3Amt = toNum(alloc.g3Su) > 0 || toNum(alloc.g3Gy) > 0 || toNum(alloc.g3J) > 0;
-                        let hasFreeAmt = toNum(alloc.frSu) > 0 || toNum(alloc.frGy) > 0 || toNum(alloc.frJ) > 0;
-                        let hasSkAmt = toNum(alloc.skSu) > 0 || toNum(alloc.skGy) > 0 || toNum(alloc.skJ) > 0;
-                        
-                        // ✨ 한 과목이 여러 지원금에 걸쳐 있으면 해당하는 칸에 전부 카운트 (중복 표시 허용)
-                        if (hasG3Amt) counts[subName].g3++;
-                        if (hasFreeAmt) counts[subName].free++;
-                        if (hasSkAmt) counts[subName].beneficiary++;
-                    });
-                });
-                
-                let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
-               let rowIdx = 0;
-               let rowsHtml = Object.keys(counts).filter(name => {
-                    let c = counts[name];
-                    return (c.beneficiary + c.free + c.g3) > 0; // ✨ 수익자/자유수강/초3 모두 0명인 과목은 표에서 제외
-                }).map(name => {
-                    let c = counts[name];
-                    let sum = c.beneficiary + c.free + c.g3;
-                    totalBen += c.beneficiary; totalFree += c.free; totalG3 += c.g3; totalAll += sum;
-                   let rowNum = rowIdx + 1;
-                    let zebra = (rowIdx++ % 2 === 0) ? '#ffffff' : '#f5f3ff';
-                    return `<tr style="background:${zebra};">
-                        <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${rowNum}</td>
-                        <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb; white-space:normal; word-break:keep-all; overflow-wrap:break-word; line-height:1.3;">${name}</td>
-                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${c.beneficiary}</td>
-                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#7c3aed; font-weight:700;">${c.free}</td>
-                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#2563eb; font-weight:700;">${c.g3}</td>
-                        <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; font-weight:800; border-left:2px solid #c7d2fe;">${sum}</td>
-                    </tr>`;
-                }).join('');
-                
-               html += `
-                <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 330px; min-width:300px; border-top:3px solid #6366f1;">
-                    <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${q}분기 강좌별 인원</div>
-                   <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
-                        <colgroup>
-                            <col style="width:22px;">
-                            <col>
-                            <col style="width:44px;">
-                            <col style="width:52px;">
-                            <col style="width:32px;">
-                            <col style="width:40px;">
-                        </colgroup>
-                        <thead>
-                            <tr style="border-bottom:2px solid #6366f1;">
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">No.</th>
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">초3</th>
-                                <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827; border-left:2px solid #6366f1;">합계</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rowsHtml}
-                         <tr style="border-top:2px solid #111827;">
-                                <td style="padding:6px 5px; text-align:center; background:#fef08a !important;"></td>
-                                <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
-                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
-                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalFree}</td>
-                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalG3}</td>
-                                <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800; border-left:2px solid #111827;">${totalAll}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>`;
+                let { counts } = computeQuarterSubjectCounts(q);
+                let rows = buildSubjectCountRows(counts);
+                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(수익자+지원금 중복 표시)`, '#6366f1');
             }
             html += '</div>';
+
+            html += `
+                <div style="background:#F0F9FF; border:1px solid #bae6fd; border-left:4px solid #0284c7; border-radius:8px; padding:14px 18px; margin:20px 0 16px 0; font-size:14px; color:#374151; line-height:1.8; max-width:900px;">
+                    <div style="font-weight:800; color:#075985; margin-bottom:6px;">📌 [중복안함 표] 강좌별 인원 집계 기준 (학생 1명은 딱 한 칸에만 표시돼요)</div>
+                    · 원래 초3이나 자유수강 대상 학생이면, 일부 금액이 수익자로 넘어가 있어도 <b style="color:#0284c7;">원래 지원유형(초3/자유수강) 칸</b>에 1명<br>
+                    · 초3지원금을 다 써서 100% 자유수강으로 넘어간 학생은 <b style="color:#0284c7;">자유수강 칸</b>에 1명<br>
+                    · 자유수강권까지 다 써서 100% 수익자로 넘어간 학생만 <b style="color:#0284c7;">수익자 칸</b>에 1명<br>
+                    · 우선순위: 초3 → 자유수강 → 수익자 (한 학생-과목당 딱 1칸에만 집계)
+                </div>
+                <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">`;
+            for (let q = 1; q <= maxQuarter; q++) {
+                let { countsDedup } = computeQuarterSubjectCounts(q);
+                let rows = buildSubjectCountRows(countsDedup);
+                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(중복안함)`, '#0284c7');
+            }
+            html += '</div>';
+
             container.innerHTML = html;
+        }
+
+                let qTableExportType = 'dup';
+        let qTableExportSelectedQs = new Set();
+
+        function openQuarterTableExportModal() {
+            qTableExportType = 'dup';
+            qTableExportSelectedQs = new Set();
+            for (let q = 1; q <= maxQuarter; q++) qTableExportSelectedQs.add(q);
+
+            selectQTableExportType('dup');
+            renderQTableExportQuarterBtns();
+
+            document.getElementById('quarterTableExportModal').style.display = 'flex';
+        }
+        function closeQuarterTableExportModal() {
+            document.getElementById('quarterTableExportModal').style.display = 'none';
+        }
+        function selectQTableExportType(type) {
+            qTableExportType = type;
+            let dupBtn = document.getElementById('qtExportTypeBtn_dup');
+            let dedupBtn = document.getElementById('qtExportTypeBtn_dedup');
+            if (dupBtn && dedupBtn) {
+                let activeStyle = 'padding:12px 6px; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;';
+                let inactiveStyle = 'padding:12px 6px; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+                dupBtn.style.cssText = type === 'dup' ? activeStyle : inactiveStyle;
+                dedupBtn.style.cssText = type === 'dedup' ? activeStyle : inactiveStyle;
+            }
+        }
+        function toggleQTableExportQuarter(q) {
+            if (qTableExportSelectedQs.has(q)) qTableExportSelectedQs.delete(q);
+            else qTableExportSelectedQs.add(q);
+            renderQTableExportQuarterBtns();
+        }
+        function renderQTableExportQuarterBtns() {
+            let wrap = document.getElementById('qTableExportQChecks');
+            if (!wrap) return;
+            let html = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                let isOn = qTableExportSelectedQs.has(q);
+                let style = isOn
+                    ? 'padding:12px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13px;'
+                    : 'padding:12px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
+                html += `<button type="button" onclick="toggleQTableExportQuarter(${q})" style="${style}">${q}분기</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function getSelectedQuarterExportOptions() {
+            let qs = Array.from(qTableExportSelectedQs).sort((a,b)=>a-b);
+            if (qs.length === 0) { alert('분기를 하나 이상 선택해주세요.'); return null; }
+            return { type: qTableExportType, qs };
+        }
+
+                function printQuarterTables() {
+            let opt = getSelectedQuarterExportOptions();
+            if (!opt) return;
+            let title = opt.type === 'dup' ? '강좌별 인원(수익자+지원금 중복 표시)' : '강좌별 인원(중복안함)';
+            let cardsHtml = opt.qs.map(q => {
+                let { counts, countsDedup } = computeQuarterSubjectCounts(q);
+                let rows = buildSubjectCountRows(opt.type === 'dup' ? counts : countsDedup);
+                return renderSubjectCountTableHtml(q, rows, `${q}분기 ${title}`, opt.type === 'dup' ? '#6366f1' : '#0284c7');
+            }).join('');
+
+            let win = window.open('', '_blank');
+            win.document.write(`
+                <html><head><title>${title}</title>
+                <meta charset="utf-8">
+                <style>
+                    @page { size: landscape; margin: 10mm; }
+                    body { font-family: 'Malgun Gothic', sans-serif; margin:0; padding:12px; }
+                    h2 { font-size:15px; margin:0 0 10px 0; }
+                    .card-grid { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start; }
+                    .card-grid > div {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    table { font-size:10px !important; width:100%; }
+                    th, td { padding:3px 2px !important; }
+                </style>
+                </head><body>
+                <h2>${title}</h2>
+                <div class="card-grid">${cardsHtml}</div>
+                </body></html>
+            `);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); }, 300);
+            closeQuarterTableExportModal();
+        }
+
+        async function exportQuarterTablesExcel() {
+            let opt = getSelectedQuarterExportOptions();
+            if (!opt) return;
+            let typeLabel = opt.type === 'dup' ? '중복표시' : '중복안함';
+
+            const wb = new ExcelJS.Workbook();
+            opt.qs.forEach(q => {
+                let { counts, countsDedup } = computeQuarterSubjectCounts(q);
+                let rows = buildSubjectCountRows(opt.type === 'dup' ? counts : countsDedup);
+
+                const ws = wb.addWorksheet(`${q}분기_${typeLabel}`.slice(0, 31));
+                ws.mergeCells(1, 1, 1, 6);
+                ws.getCell(1, 1).value = `${q}분기 강좌별 인원(${opt.type === 'dup' ? '수익자+지원금 중복 표시' : '중복안함'})`;
+                ws.getCell(1, 1).font = { bold: true, size: 13 };
+                ws.getCell(1, 1).alignment = { horizontal: 'center', vertical: 'middle' };
+                ws.getRow(1).height = 24;
+
+                let headerRow = ws.addRow(['No.', '강좌명', '수익자', '자유수강', '초3', '합계']);
+                headerRow.eachCell(cell => {
+                    cell.font = { bold: true };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } };
+                    cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                });
+
+                let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
+                rows.forEach((r, idx) => {
+                    totalBen += r.beneficiary; totalFree += r.free; totalG3 += r.g3; totalAll += r.sum;
+                    let row = ws.addRow([idx + 1, r.name, r.beneficiary, r.free, r.g3, r.sum]);
+                    row.eachCell(cell => { cell.alignment = { horizontal: 'center', vertical: 'middle' }; cell.border = { top:{style:'thin', color:{argb:'FFE5E7EB'}}, bottom:{style:'thin', color:{argb:'FFE5E7EB'}}, left:{style:'thin', color:{argb:'FFE5E7EB'}}, right:{style:'thin', color:{argb:'FFE5E7EB'}} }; });
+                });
+
+                let totRow = ws.addRow(['', '총합계', totalBen, totalFree, totalG3, totalAll]);
+                totRow.eachCell(cell => {
+                    cell.font = { bold: true };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF08A' } };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = { top:{style:'double'}, bottom:{style:'double'}, left:{style:'thin'}, right:{style:'thin'} };
+                });
+
+                // ✨ 글자 크기에 맞춰 열 너비 자동 조절 (표가 너무 커지지 않게)
+                ws.columns.forEach((column, colIdx) => {
+                    let maxLength = 0;
+                    column.eachCell({ includeEmpty: true }, (cell, rowNumber) => {
+                        if (rowNumber === 1) return;
+                        let v = (cell.value !== null && cell.value !== undefined) ? cell.value.toString() : '';
+                        let koreanCharCount = (v.match(/[가-힣]/g) || []).length;
+                        let otherCharCount = v.length - koreanCharCount;
+                        let adjustedLength = (koreanCharCount * 2.0) + (otherCharCount * 1.2);
+                        if (adjustedLength > maxLength) maxLength = adjustedLength;
+                    });
+                    column.width = colIdx === 1 ? Math.max(10, maxLength + 2) : Math.max(6, maxLength + 2);
+                });
+            });
+
+            const buffer = await wb.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `강좌별인원_${typeLabel}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            closeQuarterTableExportModal();
         }
   
   
@@ -4041,17 +4269,17 @@ viewData.forEach(({r, c}) => {
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">수강료</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">교재비</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">재료비</th>
-                    <th class="text-center" style="${br} top:39px; font-weight:800; background:#e5e7eb; color:#111827;">총합계</th>
+                    <th class="text-center" style="${br} top:39px; font-weight:800; background:#f3f4f6; color:#111827;">총합계</th>
                 ` : '';
 
                 tHead.innerHTML = `
                     <tr>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
-                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:#f3f4f6 !important;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
+                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
+                                               <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 205 : 150}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155;" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                        <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                         ${isG3RefundOn ? `<th colspan="4" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">${getG3LabelShort()} 환불내역</th>` : ''}
                         <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강 <button onclick="toggleFreeRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-free); background:white; color:var(--color-free); cursor:pointer; margin-left:4px; vertical-align:middle;">${isFreeRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
@@ -4110,7 +4338,7 @@ viewData.forEach(({r, c}) => {
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realSu)}</td>
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realGy)}</td>
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realJ)}</td>
-                        <td class="text-right" style="${br} color:#111827; font-weight:800; background:#e5e7eb; padding:8px 6px; vertical-align:middle;">${formatMoney(row.realTot)}</td>
+                        <td class="text-right" style="${br} color:#111827; font-weight:800; background:#f3f4f6; padding:8px 6px; vertical-align:middle;">${formatMoney(row.realTot)}</td>
                     ` : '';
 
                     tBody.insertAdjacentHTML('beforeend', `
@@ -4122,11 +4350,11 @@ viewData.forEach(({r, c}) => {
                                ${getYukaDdayBadge(row.r)}
                                ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
                             </td>
-                            <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
+                                                        <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg);">
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                             </td>
                            <td style="${br}">${badge}</td>
-                            <td style="${br} font-weight:700;">${row.sName}${newBadge}</td>
+                            <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}</td>
                             
                            <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Gy)}${row.alloc.mg3Gy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
@@ -4166,7 +4394,7 @@ viewData.forEach(({r, c}) => {
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realSu)}</td>
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realGy)}</td>
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realJ)}</td>
-                        <td class="text-right" style="${br} color:#111827; padding:8px 6px; background:#e5e7eb;">${formatMoney(sum_realTot)}</td>
+                        <td class="text-right" style="${br} color:#111827; padding:8px 6px; background:#f3f4f6;">${formatMoney(sum_realTot)}</td>
                     ` : '';
 
                    tBody.insertAdjacentHTML('beforeend', `
@@ -4240,9 +4468,9 @@ viewData.forEach(({r, c}) => {
                     colGroup.innerHTML = colHtml;
 
                     let thHtml = `<tr>
-                        <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
-                        <th class="text-center" id="th-id" style="cursor:pointer; position:sticky !important; top:0 !important; left:50px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
-                        <th class="text-center" id="th-name" style="cursor:pointer; position:sticky !important; top:0 !important; left:105px !important; z-index:20 !important; background:#f3f4f6 !important;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
+                        <th class="text-center" id="th-id" style="cursor:pointer; position:sticky !important; top:0 !important; left:50px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" id="th-name" style="cursor:pointer; position:sticky !important; top:0 !important; left:105px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>`;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
@@ -4421,9 +4649,9 @@ tBody.insertAdjacentHTML('beforeend', `
                     ` : '';
 
                   tHead.innerHTML = `<tr>
-                       <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important;">No.</th>
-                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:45px !important; z-index:20 !important; background:#f3f4f6 !important;">학번</th>
-                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:95px !important; z-index:20 !important; background:#f3f4f6 !important;">이름</th>
+                       <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
+                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:45px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">학번</th>
+                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:95px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">이름</th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>
                         <th class="text-right">${qText} 강사료</th>
