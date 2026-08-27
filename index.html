@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.4</title>
+    <title>방과후 지원금 돌보미 V12.5</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -861,7 +861,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.4</span>
+                <span class="brand-version">V12.5</span>
             </div>
     </div>
     
@@ -6068,12 +6068,12 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             if (viewMode === 'subject') {
                 if(currentTab === 'all') {
-                    titleStr = '메인 홈 (과목별 상세 현황)';
-                    headers = ['No.', '분기', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
+                                        titleStr = '메인 홈 (과목별 상세 현황)';
+                    headers = ['No.', '분기', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '지원금총합계', '수익자(수강료)', '수익자(교재)', '수익자(재료)', '수익자(합계)', '지원금+수익자(수강료)', '지원금+수익자(교재)', '지원금+수익자(재료)', '지원금+수익자 합계'];
                 } else {
                     let qText = currentTab.replace('q','') + '분기';
-                    titleStr = qText + ' 과목별 상세 현황';
-                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '총합계'];
+                                        titleStr = qText + ' 과목별 상세 현황';
+                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '과목명', `${getG3LabelShort()}(수강료)`, `${getG3LabelShort()}(교재)`, `${getG3LabelShort()}(재료)`, `${getG3LabelShort()}(합계)`, '자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '지원금총합계', '수익자(수강료)', '수익자(교재)', '수익자(재료)', '수익자(합계)', '지원금+수익자(수강료)', '지원금+수익자(교재)', '지원금+수익자(재료)', '지원금+수익자 합계'];
                 }
             } else {
                 if(currentTab === 'all') {
@@ -6081,11 +6081,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                     // ✨ 6분기 설정에 맞춰 엑셀 헤더 동적 생성
                     headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '상태'];
                     for(let i=1; i<=maxQuarter; i++) headers.push(i+'분기');
-                    headers.push('총 집행액', `${getG3LabelShort()} 사용`, `${getG3LabelShort()} 잔액`, '자유수강 사용', '자유수강 잔액', '총 지원금 사용', '총 지원금 잔액');
+                    headers.push('총 집행액', '수익자부담', `${getG3LabelShort()} 사용`, `${getG3LabelShort()} 잔액`, '자유수강 사용', '자유수강 잔액', '총 지원금 사용', '총 지원금 잔액');
                 } else {
                     let qText = currentTab.replace('q','') + '분기';
                     titleStr = qText + ' 현황';
-                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '상태', qText+' 강사료', qText+' 수용비', qText+' 수강료', qText+' 교재비', qText+' 재료비', qText+' 합계', `${getG3LabelShort()} 분기사용액`, `${getG3LabelShort()} 분기잔액`, '자유 분기사용액', '자유 분기잔액', '총분기사용액', '총분기잔액'];
+                    headers = ['No.', '학년', '반', '번호', '이름', getG3LabelShort(), '자유수강', '상태', qText+' 강사료', qText+' 수용비', qText+' 수강료', qText+' 교재비', qText+' 재료비', qText+' 합계', '수익자 분기부담', `${getG3LabelShort()} 분기사용액`, `${getG3LabelShort()} 분기잔액`, '자유 분기사용액', '자유 분기잔액', '총분기사용액', '총분기잔액'];
                 }
             }
             
@@ -6105,9 +6105,11 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             if (viewMode === 'subject') {
                 // (기존 과목별 로직 유지)
-                let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
+                                 let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
                 let sum_frSu=0, sum_frGy=0, sum_frJ=0, sum_frTot=0;
                 let sum_nSu=0, sum_nGy=0, sum_nJ=0, sum_nTot=0;
+                let sum_skSu=0, sum_skGy=0, sum_skJ=0, sum_skTot=0;
+                let sum_realSu=0, sum_realGy=0, sum_realJ=0, sum_realTot=0;
 
                 currentSubjectViewData.forEach((rowObj, index) => {
                     let r = rowObj.r;
@@ -6117,11 +6119,13 @@ document.getElementById('fTier').value = r.freeTier || "";
                     let rowData = [ index + 1 ];
                     if (currentTab === 'all') rowData.push(rowObj.qNum + '분기');
                     
-                    rowData.push( r.grade, r.classNum, r.studentNum, r.name, g3Str, freeStr, rowObj.sName, rowObj.g3Su, rowObj.g3Gy, rowObj.g3J, rowObj.g3Tot, rowObj.freeSu, rowObj.freeGy, rowObj.freeJ, rowObj.freeTot, rowObj.netSu, rowObj.netGy, rowObj.netJ, rowObj.netTot );
+                    rowData.push( r.grade, r.classNum, r.studentNum, r.name, g3Str, freeStr, rowObj.sName, rowObj.g3Su, rowObj.g3Gy, rowObj.g3J, rowObj.g3Tot, rowObj.freeSu, rowObj.freeGy, rowObj.freeJ, rowObj.freeTot, rowObj.netSu, rowObj.netGy, rowObj.netJ, rowObj.netTot, rowObj.skSu, rowObj.skGy, rowObj.skJ, rowObj.skTot, rowObj.realSu, rowObj.realGy, rowObj.realJ, rowObj.realTot );
                     
                     sum_g3Su+=rowObj.g3Su; sum_g3Gy+=rowObj.g3Gy; sum_g3J+=rowObj.g3J; sum_g3Tot+=rowObj.g3Tot;
                     sum_frSu+=rowObj.freeSu; sum_frGy+=rowObj.freeGy; sum_frJ+=rowObj.freeJ; sum_frTot+=rowObj.freeTot;
                     sum_nSu+=rowObj.netSu; sum_nGy+=rowObj.netGy; sum_nJ+=rowObj.netJ; sum_nTot+=rowObj.netTot;
+                    sum_skSu+=rowObj.skSu; sum_skGy+=rowObj.skGy; sum_skJ+=rowObj.skJ; sum_skTot+=rowObj.skTot;
+                    sum_realSu+=rowObj.realSu; sum_realGy+=rowObj.realGy; sum_realJ+=rowObj.realJ; sum_realTot+=rowObj.realTot;
 
                     let newRow = ws.addRow(rowData);
                     newRow.eachCell((cell) => {
@@ -6132,11 +6136,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                     });
                 });
 
-                if (currentSubjectViewData.length > 0) {
+                    if (currentSubjectViewData.length > 0) {
                     let totData = ['과목별 전체 총합'];
                     let emptyPad = currentTab === 'all' ? 9 : 8; 
                     for(let i=1; i<emptyPad; i++) totData.push('');
-                    totData.push(sum_g3Su, sum_g3Gy, sum_g3J, sum_g3Tot, sum_frSu, sum_frGy, sum_frJ, sum_frTot, sum_nSu, sum_nGy, sum_nJ, sum_nTot);
+                    totData.push(sum_g3Su, sum_g3Gy, sum_g3J, sum_g3Tot, sum_frSu, sum_frGy, sum_frJ, sum_frTot, sum_nSu, sum_nGy, sum_nJ, sum_nTot, sum_skSu, sum_skGy, sum_skJ, sum_skTot, sum_realSu, sum_realGy, sum_realJ, sum_realTot);
                     let tRow = ws.addRow(totData);
                     ws.mergeCells(tRow.number, 1, tRow.number, emptyPad); 
                     tRow.eachCell(cell => { cell.font = { bold: true }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } }; if(typeof cell.value === 'number') { cell.numFmt = '#,##0'; cell.alignment = { horizontal: 'right', vertical: 'middle' }; } else { cell.alignment = { horizontal: 'center', vertical: 'middle' }; } });
@@ -6151,7 +6155,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                         rowData.push(c.status);
                         for(let i=1; i<=maxQuarter; i++) rowData.push(c[`q${i}`].exp); // ✨ 동적 삽입
                         // ✨ 총 지원금 사용 = 초3지원 사용액 + 자유수강 사용액
-                        rowData.push(c.total.exp, c.total.usedG3, c.remG3, c.total.usedFree, c.remFree, (c.total.usedG3 + c.total.usedFree), (c.remG3+c.remFree));
+                        rowData.push(c.total.exp, c.total.over, c.total.usedG3, c.remG3, c.total.usedFree, c.remFree, (c.total.usedG3 + c.total.usedFree), (c.remG3+c.remFree));
                     } else {
                         let q = currentTab;
                         let netG=0, netS=0, netSu=0, netGy=0, netJ=0;
@@ -6166,7 +6170,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                       let allowanceG3 = r.hasG3 ? getG3Allowance() : 0; let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
                         let remG3_until_Q = allowanceG3 - accUsedG3; let remFree_until_Q = allowanceFree - accUsedFree; let remTotal_until_Q = remG3_until_Q + remFree_until_Q;
 
-                        rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
+                        rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].over, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
                     }
                     
                     let newRow = ws.addRow(rowData);
@@ -6185,27 +6189,27 @@ document.getElementById('fTier').value = r.freeTier || "";
                     let tRow;
                     if (currentTab === 'all') {
                         let sumQs = {}; for(let i=1; i<=maxQuarter; i++) sumQs[i] = 0;
-                        let sumTotalExp=0, sumG3Used=0, sumG3Rem=0, sumFreeUsed=0, sumFreeRem=0, sumTotAllow=0, sumTotRem=0;
+                        let sumTotalExp=0, sumTotalOver=0, sumG3Used=0, sumG3Rem=0, sumFreeUsed=0, sumFreeRem=0, sumTotAllow=0, sumTotRem=0;
                         currentViewData.forEach(({c}) => {
                             for(let i=1; i<=maxQuarter; i++) sumQs[i] += c[`q${i}`].exp;
-                            sumTotalExp+=c.total.exp; sumG3Used+=c.total.usedG3; sumG3Rem+=c.remG3; sumFreeUsed+=c.total.usedFree; sumFreeRem+=c.remFree; sumTotAllow+=c.totalAllowance; sumTotRem+=(c.remG3+c.remFree);
+                            sumTotalExp+=c.total.exp; sumTotalOver+=c.total.over; sumG3Used+=c.total.usedG3; sumG3Rem+=c.remG3; sumFreeUsed+=c.total.usedFree; sumFreeRem+=c.remFree; sumTotAllow+=c.totalAllowance; sumTotRem+=(c.remG3+c.remFree);
                         });
                        let totData = ['전체 총합', '', '', '', '', '', '', ''];
                         for(let i=1; i<=maxQuarter; i++) totData.push(sumQs[i]);
                         // ✨ 총 지원금 사용 칸에 지원액(sumTotAllow)이 아닌 사용액 합산(sumG3Used + sumFreeUsed) 적용
-                        totData.push(sumTotalExp, sumG3Used, sumG3Rem, sumFreeUsed, sumFreeRem, (sumG3Used + sumFreeUsed), sumTotRem);
+                        totData.push(sumTotalExp, sumTotalOver, sumG3Used, sumG3Rem, sumFreeUsed, sumFreeRem, (sumG3Used + sumFreeUsed), sumTotRem);
                         tRow = ws.addRow(totData);
                         ws.mergeCells(tRow.number, 1, tRow.number, 8);
                     } else {
                         let q = currentTab;
-                        let sumQ_g=0, sumQ_s=0, sumQ_su=0, sumQ_gy=0, sumQ_j=0, sumExp=0, sumG3=0, sumFree=0;
+                                                let sumQ_g=0, sumQ_s=0, sumQ_su=0, sumQ_gy=0, sumQ_j=0, sumExp=0, sumOver=0, sumG3=0, sumFree=0;
                         currentViewData.forEach(({r, c}) => {
-                            sumExp+=c[q].exp; sumG3+=c[q].usedG3; sumFree+=c[q].usedFree;
+                            sumExp+=c[q].exp; sumOver+=c[q].over; sumG3+=c[q].usedG3; sumFree+=c[q].usedFree;
                             if(r[q] && r[q].subs) {
                                 r[q].subs.forEach(s => { sumQ_g += Math.max(0, toNum(s.g) - toNum(s.rG)); sumQ_s += Math.max(0, toNum(s.s) - toNum(s.rS)); sumQ_su += Math.max(0, toNum(s.su) - toNum(s.rSu)); sumQ_gy += Math.max(0, toNum(s.gy) - toNum(s.rGy)); sumQ_j += Math.max(0, toNum(s.j) - toNum(s.rJ)); });
                             }
                         });
-                        let totData = ['전체 총합', '', '', '', '', '', '', '', sumQ_g, sumQ_s, sumQ_su, sumQ_gy, sumQ_j, sumExp, sumG3, '', sumFree, '', (sumG3 + sumFree), ''];
+                        let totData = ['전체 총합', '', '', '', '', '', '', '', sumQ_g, sumQ_s, sumQ_su, sumQ_gy, sumQ_j, sumExp, sumOver, sumG3, '', sumFree, '', (sumG3 + sumFree), ''];
                         tRow = ws.addRow(totData);
                         ws.mergeCells(tRow.number, 1, tRow.number, 8);
                     }
@@ -6215,7 +6219,34 @@ document.getElementById('fTier').value = r.freeTier || "";
                 }
             }
 
-            ws.columns.forEach(function (column) {
+            const narrowColWidths = { 'No.': 6, '분기': 7, '학년': 6, '반': 5, '번호': 6, '이름': 9 }; // ✨ No/학년/반/번호/이름은 내용 길이와 무관하게 고정폭 사용
+                        // ✨ 화면에서 쓰는 색 규칙 그대로: 초3=하늘색, 자유수강=보라색, 총지원금=민트색, 수익자=붉은색 (전체현황/과목별 보기 둘 다 적용)
+            const g3LabelForColor = getG3LabelShort();
+            const skyLabels = [`${g3LabelForColor}(수강료)`, `${g3LabelForColor}(교재)`, `${g3LabelForColor}(재료)`, `${g3LabelForColor}(합계)`, `${g3LabelForColor} 사용`, `${g3LabelForColor} 잔액`, `${g3LabelForColor} 분기사용액`, `${g3LabelForColor} 분기잔액`];
+            const purpleLabels = ['자유수강(수강료)', '자유수강(교재)', '자유수강(재료)', '자유수강(합계)', '자유수강 사용', '자유수강 잔액', '자유 분기사용액', '자유 분기잔액'];
+            const mintLabels = ['총지원금(수강료)', '총지원금(교재)', '총지원금(재료)', '지원금총합계', '총 지원금 사용', '총 지원금 잔액', '총분기사용액', '총분기잔액'];
+            const redLabels = ['수익자(수강료)', '수익자(교재)', '수익자(재료)', '수익자(합계)', '수익자부담', '수익자 분기부담'];
+            const grayLabels = ['지원금+수익자(수강료)', '지원금+수익자(교재)', '지원금+수익자(재료)', '지원금+수익자 합계'];
+            ws.getRow(2).eachCell((headerCell, colNumber) => {
+                let fillColor = null;
+                if (skyLabels.includes(headerCell.value)) fillColor = 'FFF0F9FF';         // 파스텔 하늘색 (초3)
+                else if (purpleLabels.includes(headerCell.value)) fillColor = 'FFF5F3FF';  // 파스텔 보라색 (자유수강)
+                else if (mintLabels.includes(headerCell.value)) fillColor = 'FFECFDF5';    // 파스텔 민트색 (총지원금) - 이전보다 연하게
+                else if (redLabels.includes(headerCell.value)) fillColor = 'FFFFF1F2';      // 파스텔 붉은색 (수익자)
+                else if (grayLabels.includes(headerCell.value)) fillColor = 'FFF3F4F6';     // 파스텔 회색 (지원금+수익자 합계)
+                if (!fillColor) return;
+                ws.eachRow((row, rowNumber) => {
+                    if (rowNumber === 1) return; // 맨 위 제목 병합칸 제외
+                    row.getCell(colNumber).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+                });
+            });
+
+            ws.columns.forEach(function (column, colIdx) {
+                let headerText = ws.getRow(2).getCell(colIdx + 1).value;
+                if (narrowColWidths[headerText] !== undefined) {
+                    column.width = narrowColWidths[headerText];
+                    return;
+                }
                 let maxLength = 0;
                 column.eachCell({ includeEmpty: true }, function (cell, rowNumber) {
                     if (rowNumber === 1) return; 
@@ -6227,7 +6258,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                         if (adjustedLength > maxLength) maxLength = adjustedLength;
                     });
                 });
-                column.width = Math.max(12, maxLength + 2); 
+                column.width = Math.max(10, maxLength + 2); 
             });
 
             const buffer = await wb.xlsx.writeBuffer();
