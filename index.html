@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.9</title>
+    <title>방과후 지원금 돌보미 V13.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -722,7 +722,7 @@
                     <span>코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하여 엑셀을 불러오세요.</span>
                 </div>
                 <div id="codimasterQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:20px;"></div>
-                <div style="display:flex; gap:8px;">
+                               <div style="display:flex; gap:8px;">
                     <button onclick="closeCodimasterQuarterModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
                     <button onclick="confirmCodimasterQuarter()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">엑셀 불러오기</button>
                 </div>
@@ -730,6 +730,71 @@
         </div>
     </div>
 
+    <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
+                <button onclick="closeRefundManagerModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+                <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🔄</div>
+                <div style="color:white; font-size:16.5px; font-weight:800;">환불 관리</div>
+                <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">과목·차시·학생이 서로 달라도 하나씩 담아서 한 번에 적용할 수 있습니다</div>
+            </div>
+            <div style="padding:20px 24px; overflow-y:auto;">
+
+                <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체)</div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
+                    <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">과목 선택</div>
+                    <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
+                        <option value="">과목을 선택하세요</option>
+                    </select>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:11.5px; color:#64748b;">대상 학생 (체크 해제로 제외) <span id="rqaCheckedCount" style="color:#b91c1c; font-weight:800;">0명 선택됨</span></span>
+                        <span style="font-size:11px;">
+                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(true)" style="color:#2563eb; text-decoration:underline; margin-right:6px;">전체선택</a>
+                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(false)" style="color:#94a3b8; text-decoration:underline;">전체해제</a>
+                        </span>
+                    </div>
+                    <div id="rqaStudentList" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:8px; background:white; margin-bottom:10px; font-size:12px;">
+                        <div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+                        <button type="button" onclick="addRqaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">전체 담기</button>
+                    </div>
+                </div>
+
+                               <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">✏️ 개별 담기 (학생마다 과목·차시가 달라도 OK)</div>
+                    <div style="position:relative; margin-bottom:10px;">
+                        <input type="text" id="riaStudentSearch" oninput="searchRiaStudent()" placeholder="학생 이름 또는 학년반번호 검색" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+                        <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
+                    </div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
+                    <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                    <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
+                        <option value="">학생과 분기를 먼저 선택하세요</option>
+                    </select>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+                        <button type="button" onclick="addRiaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">한 명 담기</button>
+                    </div>
+                </div>
+
+                <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">🧾 담은 환불 목록 <span id="refundCartCount" style="font-size:12px; color:#b91c1c; font-weight:800;"></span></div>
+                <div id="refundCartTable" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:16px; overflow-x:auto;">
+                    <div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>
+                </div>
+
+                <div style="display:flex; gap:8px;">
+                    <button onclick="closeRefundManagerModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">닫기</button>
+                    <button onclick="applyRefundCart()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#b91c1c; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(185,28,28,0.35);">전체 적용</button>
+                </div>
+            </div>
+               </div>
+    </div>
+
+    <div id="refundToast" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(30,58,95,0.92); color:white; padding:16px 28px; border-radius:12px; font-size:14px; font-weight:700; z-index:100000; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; pointer-events:none;"></div>
 
     
 
@@ -876,7 +941,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.9</span>
+                <span class="brand-version">V13.0</span>
             </div>
     </div>
     
@@ -961,14 +1026,15 @@
             <button class="tab-btn" id="tabQ6" onclick="switchTab('q6')" style="display:none;">6분기</button>
             
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
-            <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
+            <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; width: 110px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
-        <div class="header-tools">
+                <div class="header-tools">
            <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
             <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
             <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 업무,저장,인쇄</button>
+            <button class="btn-tool" id="btn-refund-manage" onclick="openRefundManagerModal()" title="환불 관리"><i data-lucide="rotate-ccw"></i> 환불관리</button>
 			<div class="toolbar-divider"></div>
 			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
 			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
@@ -3208,7 +3274,7 @@ function toggleStatusPanel() {
 
       function copySubjectFees(idx) {
             let sub = savedSubjects[idx];
-            copiedFeeSource = { subRef: sub, fees: JSON.parse(JSON.stringify(sub.fees)) };
+            copiedFeeSource = { subRef: sub, fees: JSON.parse(JSON.stringify(sub.fees)), sessions: JSON.parse(JSON.stringify(sub.sessions || {})) };
             renderSubjectManagerList();
         }
 
@@ -3217,10 +3283,11 @@ function toggleStatusPanel() {
             renderSubjectManagerList();
         }
 
-      function pasteSubjectFees(idx) {
+            function pasteSubjectFees(idx) {
             if (!copiedFeeSource) return;
             let sub = savedSubjects[idx];
             sub.fees = JSON.parse(JSON.stringify(copiedFeeSource.fees));
+            sub.sessions = JSON.parse(JSON.stringify(copiedFeeSource.sessions || {}));
             persistSubjects();
             copiedFeeSource = null;
             renderSubjectManagerList();
@@ -3243,6 +3310,18 @@ function toggleStatusPanel() {
             } else {
                 let sortedEntries = savedSubjects.map((sub, idx) => ({ sub, idx })).sort((a, b) => a.sub.name.localeCompare(b.sub.name, 'ko')); // ✨ 과목명 가나다순 정렬 (코딩1부/코딩2부처럼 이름이 같으면 붙어서 정렬됨)
                 sortedEntries.forEach(({ sub, idx }) => {
+                    let missingInfo = [];
+                    let hasMissingSu = false, hasMissingSessions = false;
+                    for (let q = 1; q <= maxQuarter; q++) {
+                        let feeQ = sub.fees && sub.fees[q];
+                        let sessQ = sub.sessions && sub.sessions[q];
+                        if (!feeQ || !toNum(feeQ.su)) hasMissingSu = true;
+                        if (!sessQ || !toNum(sessQ)) hasMissingSessions = true;
+                    }
+                    if (hasMissingSu) missingInfo.push('수강료');
+                    if (hasMissingSessions) missingInfo.push('차시');
+                    let missingWarning = missingInfo.length ? ` <span style="color:#dc2626; font-size:11px; font-weight:700;">⚠️ ${missingInfo.join('·')} 미입력</span>` : '';
+
                     let isCopySource = copiedFeeSource && copiedFeeSource.subRef === sub;
                     let copyPasteBtn;
                     if (isCopySource) {
@@ -3261,7 +3340,7 @@ function toggleStatusPanel() {
                     }
                     html += `
                     <div class="subject-item" data-sub-idx="${idx}">
-                        <span style="font-weight:600; font-size:13px; color:var(--text-dark);">${sub.name}</span>
+                        <span style="font-weight:600; font-size:13px; color:var(--text-dark);">${sub.name}</span>${missingWarning}
                         <div class="subject-actions">
                             ${copyPasteBtn}
                             <button class="btn-edit-sub" onclick="editSubjectForm(${idx})">단가설정/수정</button>
@@ -3275,12 +3354,14 @@ function toggleStatusPanel() {
         }
 
         // ✨ 과목 단가(fees) 객체에 1~6분기 키가 항상 존재하도록 보정 (구버전 데이터/4분기 전용 데이터 호환)
-        function ensureSubjectFees(sub) {
+               function ensureSubjectFees(sub) {
             if(!sub.fees) sub.fees = {};
+            if(!sub.sessions) sub.sessions = {};
             for(let q=1; q<=6; q++) {
                 if(!sub.fees[q]) sub.fees[q] = {g:0, s:0, su:0, gy:0, j:0};
                 if(sub.fees[q].g === undefined) sub.fees[q].g = 0;
                 if(sub.fees[q].s === undefined) sub.fees[q].s = 0;
+                if(sub.sessions[q] === undefined) sub.sessions[q] = 0;
             }
             return sub;
         }
@@ -3381,15 +3462,16 @@ function toggleStatusPanel() {
                   <div style="overflow-x:auto; border-radius:8px; border:1px solid #e2e8f0;">
                     <table class="detail-inner-table" style="background:#f9fafb; min-width:700px;">
                         <thead>
-                            <tr><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">분기</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">강사료</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">수용비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 수강료<br><span style="font-size:11px; font-weight:normal; color:#475569;">(강사료+수용비 입력시 자동계산)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 교재비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 재료비</th></tr>
+                            <tr><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">분기</th><th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:14px;">분기 총 차시<br><span style="font-size:10px; font-weight:normal; color:#475569;">(환불 자동계산용)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">강사료</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">수용비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 수강료<br><span style="font-size:11px; font-weight:normal; color:#475569;">(강사료+수용비 입력시 자동계산)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 교재비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 재료비</th></tr>
                         </thead>
                         <tbody>
             `;
             
             for(let q=1; q<=maxQuarter; q++) {
                 html += `
-                    <tr>
+                                       <tr>
                         <td style="text-align:center; font-weight:bold;">${q}분기</td>
+                        <td><input type="number" id="es_q${q}_sessions" value="${sub.sessions[q]||''}" placeholder="예:12" style="width:60px; text-align:center; padding:6px; border-radius:6px; border:1px solid #fca5a5; background:#fef2f2;"></td>
                         <td><input type="number" id="es_q${q}_g" value="${sub.fees[q].g||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
                         <td><input type="number" id="es_q${q}_s" value="${sub.fees[q].s||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
                         <td><input type="number" id="es_q${q}_su" value="${sub.fees[q].su}" onfocus="if(this.value=='0') this.value='';" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:2px solid #d4af37;"></td>
@@ -3420,7 +3502,9 @@ function toggleStatusPanel() {
             let su1 = document.getElementById('es_q1_su').value;
             let gy1 = document.getElementById('es_q1_gy').value;
             let j1 = document.getElementById('es_q1_j').value;
+            let sessions1 = document.getElementById('es_q1_sessions').value;
             for(let q=2; q<=maxQuarter; q++) {
+                document.getElementById(`es_q${q}_sessions`).value = sessions1;
                 document.getElementById(`es_q${q}_g`).value = g1;
                 document.getElementById(`es_q${q}_s`).value = s1;
                 document.getElementById(`es_q${q}_su`).value = su1;
@@ -3456,8 +3540,9 @@ function toggleStatusPanel() {
                 return alert("이미 존재하는 과목명입니다.");
             }
 
-            let fees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : {};
+                        let fees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : {};
             let oldFees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : null;
+            let sessions = (idx !== -1 && savedSubjects[idx].sessions) ? JSON.parse(JSON.stringify(savedSubjects[idx].sessions)) : {};
             for(let q=1; q<=maxQuarter; q++) {
                 let gVal = toNum(document.getElementById(`es_q${q}_g`).value);
                 let sVal = toNum(document.getElementById(`es_q${q}_s`).value);
@@ -3467,11 +3552,12 @@ function toggleStatusPanel() {
                     gy: toNum(document.getElementById(`es_q${q}_gy`).value),
                     j: toNum(document.getElementById(`es_q${q}_j`).value)
                 };
+                sessions[q] = toNum(document.getElementById(`es_q${q}_sessions`).value);
             }
-            for(let q=1; q<=6; q++) { if(!fees[q]) fees[q] = {su:0, gy:0, j:0}; }
+            for(let q=1; q<=6; q++) { if(!fees[q]) fees[q] = {su:0, gy:0, j:0}; if(sessions[q] === undefined) sessions[q] = 0; }
 
             if(idx === -1) {
-                savedSubjects.push({ name: newName, fees });
+                savedSubjects.push({ name: newName, fees, sessions });
                 persistSubjects();
                 renderSubjectList();
                 renderSubjectManagerList();
@@ -3482,7 +3568,7 @@ function toggleStatusPanel() {
             let nameChanged = (oldName !== newName);
             let feesChanged = oldFees && JSON.stringify(oldFees) !== JSON.stringify(fees);
 
-            savedSubjects[idx] = { name: newName, fees };
+            savedSubjects[idx] = { name: newName, fees, sessions };
             persistSubjects();
             renderSubjectList();
             renderSubjectManagerList();
@@ -5650,7 +5736,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rG_${q}_${sIdx}" class="refund-input" value="${fmtFee(rG)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rG', this.value)"></td>
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rS_${q}_${sIdx}" class="refund-input" value="${fmtFee(rS)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rS', this.value)"></td>
-                                <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rSu_${q}_${sIdx}" class="refund-input" value="${fmtFee(rSu)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rSu', this.value)"></td>
+                                                               <td style="background:#fff5f5; vertical-align:top;">
+                                    <input type="text" id="live_rSu_${q}_${sIdx}" class="refund-input" value="${fmtFee(rSu)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rSu', this.value)">
+                                    ${(s.refundLog && s.refundLog.length) ? `<div class="no-print" style="font-size:9px; color:#b91c1c; margin-top:3px; line-height:1.6;">${s.refundLog.map((l, li) => `<div>${l.sessions}차시 ${formatMoney(l.amount)} 적용 <span onclick="deleteRefundLogEntry('${r.id}', ${q}, ${sIdx}, ${li})" title="이 환불기록 삭제" style="cursor:pointer; color:#9ca3af; font-weight:900; padding:0 2px;">✕</span></div>`).join('')}</div>` : ''}
+                                </td>
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rGy_${q}_${sIdx}" class="refund-input" value="${fmtFee(rGy)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rGy', this.value)"></td>
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rJ_${q}_${sIdx}" class="refund-input" value="${fmtFee(rJ)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rJ', this.value)"></td>
                                 <td style="background:#fef2f2; color:#b91c1c; font-weight:bold; border-right:2px solid var(--border-color); vertical-align:top;">${formatMoney(refTotal)}</td>
@@ -5993,6 +6082,321 @@ document.getElementById('fTier').value = r.freeTier || "";
 
 
     let sessionRatioTarget = null;
+
+        let refundCart = [];
+        let rqaState = { q: null, subject: '' };
+        let riaState = { studentId: null, q: null };
+
+        function openRefundManagerModal() {
+            refundCart = [];
+            rqaState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, subject: '' };
+            riaState = { studentId: null, q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1 };
+
+            renderRqaQuarterBtns();
+            renderRqaSubjectOptions();
+            document.getElementById('rqaSessionCount').value = '';
+            document.getElementById('rqaStudentList').innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
+
+            document.getElementById('riaStudentSearch').value = '';
+            document.getElementById('riaStudentResults').style.display = 'none';
+            document.getElementById('riaSessionCount').value = '';
+            renderRiaQuarterBtns();
+            renderRiaSubjectSelect();
+
+            renderRefundCartTable();
+            document.getElementById('refundManagerModal').style.display = 'flex';
+        }
+        function closeRefundManagerModal() {
+            document.getElementById('refundManagerModal').style.display = 'none';
+        }
+
+        // ✨ 차시당 환불금액 계산 (학생 실제 결제 수강료 ÷ 총차시, 10원 단위 올림)
+        function computeSessionRefund(studentId, q, sIdx, sessionCount) {
+            let r = db.find(x => x.id == studentId);
+            if (!r) return null;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s) return null;
+            let sub = savedSubjects.find(x => x.name === s.name);
+            let masterSessions = sub && sub.sessions ? toNum(sub.sessions[q]) : 0;
+            let totalSessions = toNum(s.totalSessions) || masterSessions;
+            if (!totalSessions) return { ok:false };
+            let perSessionSu = Math.ceil((toNum(s.su) / totalSessions) / 10) * 10;
+            let amount = perSessionSu * sessionCount;
+            return { ok:true, amount, totalSessions, perSessionSu, hasSessionRatio: !!s.sessionRatioEnabled, existingRSu: toNum(s.rSu) };
+        }
+
+               function showRefundToast(count) {
+            let el = document.getElementById('refundToast');
+            if (!el) return;
+            el.innerText = `학생 ${count}명이 맨 아래 환불 목록에 담아졌습니다`;
+            el.style.transition = '';
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            clearTimeout(window._refundToastTimer);
+            window._refundToastTimer = setTimeout(() => {
+                el.style.transition = 'opacity 0.4s';
+                el.style.opacity = '0';
+                setTimeout(() => { el.style.display = 'none'; }, 400);
+            }, 1500);
+        }
+
+        // ===== 빠른 담기 (과목 전체 학생) =====
+        function renderRqaQuarterBtns() {
+            let wrap = document.getElementById('rqaQuarterBtns');
+            let html = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                let isOn = (rqaState.q === q);
+                let style = isOn
+                    ? 'padding:9px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+                    : 'padding:9px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+                html += `<button type="button" style="${style}" onclick="selectRqaQuarter(${q})">${q}분기</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function selectRqaQuarter(q) {
+            rqaState.q = q;
+            renderRqaQuarterBtns();
+            renderRqaStudentList();
+        }
+        function renderRqaSubjectOptions() {
+            let sel = document.getElementById('rqaSubjectSelect');
+            let names = savedSubjects.map(s => s.name).sort((a,b) => a.localeCompare(b, 'ko'));
+            sel.innerHTML = '<option value="">과목을 선택하세요</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+            sel.value = rqaState.subject || '';
+        }
+        function onRqaSubjectChange() {
+            rqaState.subject = document.getElementById('rqaSubjectSelect').value;
+            renderRqaStudentList();
+        }
+        function findRqaTargets() {
+            let q = rqaState.q, subjectName = rqaState.subject;
+            if (!q || !subjectName) return [];
+            let list = [];
+            db.forEach(r => {
+                let subs = (r[`q${q}`] && r[`q${q}`].subs) || [];
+                subs.forEach((s, sIdx) => { if (s.name === subjectName) list.push({ r, s, sIdx }); });
+            });
+            return list.sort((a,b) => (a.r.grade-b.r.grade)||(a.r.classNum-b.r.classNum)||(a.r.studentNum-b.r.studentNum));
+        }
+        function renderRqaStudentList() {
+            let wrap = document.getElementById('rqaStudentList');
+                        if (!rqaState.q || !rqaState.subject) {
+                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
+                updateRqaCheckedCount();
+                return;
+            }
+            let targets = findRqaTargets();
+            if (targets.length === 0) {
+                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">해당 분기에 이 과목을 수강 중인 학생이 없습니다.</div>';
+                updateRqaCheckedCount();
+                return;
+            }
+                        wrap.innerHTML = targets.map(t => `
+                <label style="display:flex; align-items:center; gap:8px; padding:4px; cursor:pointer; border-bottom:1px solid #f1f5f9;">
+                    <input type="checkbox" class="rqa-student-chk" value="${t.r.id}|${t.sIdx}" checked onchange="updateRqaCheckedCount()">
+                    <span>${t.r.grade}학년 ${t.r.classNum}반 ${t.r.studentNum}번 ${t.r.name}</span>
+                    ${t.s.sessionRatioEnabled ? `<span style="color:#2563eb; font-size:10.5px; font-weight:700; margin-left:auto;">🍼차시비율</span>` : ''}
+                </label>
+            `).join('');
+            updateRqaCheckedCount();
+        }
+        function updateRqaCheckedCount() {
+            let el = document.getElementById('rqaCheckedCount');
+            if (!el) return;
+            let count = document.querySelectorAll('.rqa-student-chk:checked').length;
+            el.innerText = `${count}명 선택됨`;
+        }
+        function toggleAllRqaStudents(checked) {
+            document.querySelectorAll('.rqa-student-chk').forEach(el => el.checked = checked);
+            updateRqaCheckedCount();
+        }
+        function addRqaToCart() {
+            if (!rqaState.q) return alert('분기를 선택해주세요.');
+            if (!rqaState.subject) return alert('과목을 선택해주세요.');
+            let sessionCount = toNum(document.getElementById('rqaSessionCount').value);
+            if (!sessionCount || sessionCount <= 0) return alert('환불할 차시 수를 입력해주세요.');
+            let checked = Array.from(document.querySelectorAll('.rqa-student-chk:checked')).map(el => el.value);
+            if (checked.length === 0) return alert('담을 학생을 한 명 이상 선택해주세요.');
+            checked.forEach(val => {
+                let [rid, sIdxStr] = val.split('|');
+                let sIdx = Number(sIdxStr);
+                let r = db.find(x => x.id == rid);
+                if (!r) return;
+                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, sIdx, subjectName: rqaState.subject, sessionCount });
+            });
+            renderRefundCartTable();
+            showRefundToast(checked.length);
+        }
+
+        // ===== 개별 담기 (학생 1명씩) =====
+        function searchRiaStudent() {
+            let kw = document.getElementById('riaStudentSearch').value.trim();
+            let resultsWrap = document.getElementById('riaStudentResults');
+            if (!kw) { resultsWrap.style.display = 'none'; resultsWrap.innerHTML=''; return; }
+            let matches = db.filter(r => r.name.includes(kw) || `${r.grade}${r.classNum}${r.studentNum}`.includes(kw)).slice(0, 8);
+            if (matches.length === 0) { resultsWrap.innerHTML = '<div style="padding:8px; color:#9ca3af; font-size:12px;">검색 결과가 없습니다.</div>'; resultsWrap.style.display='block'; return; }
+            resultsWrap.innerHTML = matches.map(r => `<div style="padding:7px 10px; cursor:pointer; font-size:12.5px; border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'" onclick="selectRiaStudent('${r.id}')">${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name}</div>`).join('');
+            resultsWrap.style.display = 'block';
+        }
+        function selectRiaStudent(id) {
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            riaState.studentId = id;
+            document.getElementById('riaStudentSearch').value = `${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name}`;
+            document.getElementById('riaStudentResults').style.display = 'none';
+            if (!riaState.q) riaState.q = (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1;
+            renderRiaQuarterBtns();
+            renderRiaSubjectSelect();
+        }
+        function renderRiaQuarterBtns() {
+            let wrap = document.getElementById('riaQuarterBtns');
+            let html = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                let isOn = (riaState.q === q);
+                let style = isOn
+                    ? 'padding:9px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+                    : 'padding:9px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+                html += `<button type="button" style="${style}" onclick="selectRiaQuarter(${q})">${q}분기</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function selectRiaQuarter(q) {
+            riaState.q = q;
+            renderRiaQuarterBtns();
+            renderRiaSubjectSelect();
+        }
+        function renderRiaSubjectSelect() {
+            let sel = document.getElementById('riaSubjectSelect');
+            if (!riaState.studentId || !riaState.q) { sel.innerHTML = '<option value="">학생과 분기를 먼저 선택하세요</option>'; return; }
+            let r = db.find(x => x.id == riaState.studentId);
+            let subs = (r && r[`q${riaState.q}`] && r[`q${riaState.q}`].subs) || [];
+            let opts = subs.map((s, sIdx) => s.name ? `<option value="${sIdx}">${s.name}${s.sessionRatioEnabled ? ' (🍼차시비율)' : ''}</option>` : '').join('');
+            sel.innerHTML = '<option value="">과목을 선택하세요</option>' + opts;
+        }
+        function addRiaToCart() {
+            if (!riaState.studentId) return alert('학생을 먼저 검색해서 선택해주세요.');
+            if (!riaState.q) return alert('분기를 선택해주세요.');
+            let sIdxVal = document.getElementById('riaSubjectSelect').value;
+            if (sIdxVal === '') return alert('과목을 선택해주세요.');
+            let sIdx = Number(sIdxVal);
+            let sessionCount = toNum(document.getElementById('riaSessionCount').value);
+            if (!sessionCount || sessionCount <= 0) return alert('환불할 차시 수를 입력해주세요.');
+
+            let r = db.find(x => x.id == riaState.studentId);
+            let s = r[`q${riaState.q}`].subs[sIdx];
+                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, sIdx, subjectName: s.name, sessionCount });
+            renderRefundCartTable();
+            document.getElementById('riaSessionCount').value = '';
+            showRefundToast(1);
+        }
+
+        // ===== 카트(담은 목록) =====
+                      function renderRefundCartTable() {
+            let wrap = document.getElementById('refundCartTable');
+            let countEl = document.getElementById('refundCartCount');
+            if (refundCart.length === 0) {
+                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>';
+                if (countEl) countEl.innerText = '';
+                return;
+            }
+            let previews = refundCart.map(item => computeSessionRefund(item.studentId, item.q, item.sIdx, item.sessionCount));
+            if (countEl) {
+                let uniqueStudents = new Set(refundCart.map(item => item.studentId)).size;
+                let totalAmount = previews.reduce((sum, p) => sum + (p && p.ok ? p.amount : 0), 0);
+                countEl.innerText = `${refundCart.length}건 (학생 ${uniqueStudents}명) · 합계 ${formatMoney(totalAmount)}`;
+            }
+            wrap.innerHTML = `
+                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:520px;">
+                    <thead><tr style="background:#f3f4f6;">
+                        <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
+                    </tr></thead>
+                    <tbody>
+                        ${refundCart.map((item, idx) => {
+                            let preview = previews[idx];
+                            let warn = '';
+                            if (!preview || !preview.ok) warn = '<div style="color:#dc2626; font-size:10.5px;">⚠️총차시 미설정</div>';
+                            else {
+                                if (preview.hasSessionRatio) warn += '<div style="color:#2563eb; font-size:10.5px;">🍼차시비율 적용학생</div>';
+                                if (preview.existingRSu > 0) warn += `<div style="color:#dc2626; font-size:10.5px;">기존환불 ${formatMoney(preview.existingRSu)}</div>`;
+                            }
+                            return `<tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:6px;">${item.studentLabel}</td>
+                                <td style="padding:6px; text-align:center;">${item.q}분기</td>
+                                <td style="padding:6px;">${item.subjectName}${warn}</td>
+                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:50px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
+                                <td style="padding:6px; text-align:right; font-weight:700; color:${preview && preview.ok ? '#b91c1c' : '#9ca3af'};">${preview && preview.ok ? formatMoney(preview.amount) : '-'}</td>
+                                <td style="padding:6px; text-align:center;"><button type="button" onclick="removeRefundCartItem(${idx})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">✕</button></td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        function updateRefundCartSessionCount(idx, val) {
+            refundCart[idx].sessionCount = toNum(val);
+            renderRefundCartTable();
+        }
+        function removeRefundCartItem(idx) {
+            refundCart.splice(idx, 1);
+            renderRefundCartTable();
+        }
+        function applyRefundCart() {
+            if (refundCart.length === 0) return alert('담은 환불 항목이 없습니다.');
+            let today = new Date().toISOString().slice(0,10);
+            let appliedCount = 0, skippedNoSession = 0, skippedByUser = 0;
+
+            refundCart.forEach(item => {
+                let r = db.find(x => x.id == item.studentId);
+                if (!r) return;
+                let s = r[`q${item.q}`] && r[`q${item.q}`].subs[item.sIdx];
+                if (!s) return;
+
+                let preview = computeSessionRefund(item.studentId, item.q, item.sIdx, item.sessionCount);
+                if (!preview || !preview.ok) { skippedNoSession++; return; }
+
+                if (s.sessionRatioEnabled) {
+                    let ok = confirm(`${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생은 '차시 비율 적용'이 되어있는 학생입니다.\n이 학생에게도 지금 입력한 환불(${item.subjectName}, ${item.sessionCount}차시, ${formatMoney(preview.amount)})을 적용할까요?`);
+                    if (!ok) { skippedByUser++; return; }
+                }
+
+                if (preview.existingRSu > 0) {
+                    let ok = confirm(`기존에 환불이 있는 ${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생입니다.\n이 학생도 현재 환불을 기존환불 금액(${formatMoney(preview.existingRSu)}) + 현재입력 환불 금액(${formatMoney(preview.amount)})으로 추가 적용할까요?`);
+                    if (!ok) { skippedByUser++; return; }
+                }
+
+                s.rSu = preview.existingRSu + preview.amount;
+                if (!s.refundLog) s.refundLog = [];
+                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount });
+
+                let memoNote = `[${today}] ${item.q}분기 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})`;
+                r.memo = r.memo ? (r.memo + '\n' + memoNote) : memoNote;
+
+                appliedCount++;
+            });
+
+            persistData();
+            renderGrid();
+            refundCart = [];
+            renderRefundCartTable();
+
+            let msg = `환불 일괄 적용 완료\n적용: ${appliedCount}건`;
+            if (skippedNoSession > 0) msg += `\n총차시 미설정으로 건너뜀: ${skippedNoSession}건`;
+            if (skippedByUser > 0) msg += `\n사용자가 건너뜀: ${skippedByUser}건`;
+            alert(msg);
+        }
+
+        function deleteRefundLogEntry(id, q, sIdx, logIdx) {
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`].subs[sIdx];
+            if (!s || !s.refundLog || !s.refundLog[logIdx]) return;
+            let entry = s.refundLog[logIdx];
+            if (!confirm(`${entry.sessions}차시 ${formatMoney(entry.amount)} 환불 기록을 삭제할까요?\n환불금액(${formatMoney(entry.amount)})도 함께 차감됩니다.`)) return;
+            s.rSu = Math.max(0, toNum(s.rSu) - entry.amount);
+            s.refundLog.splice(logIdx, 1);
+            persistData();
+            showDetailModal(id);
+        }
 
         function setSessionRatio(id, q, sIdx) {
             let r = db.find(x => x.id == id);
