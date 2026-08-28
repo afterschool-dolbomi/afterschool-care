@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.7</title>
+    <title>방과후 지원금 돌보미 V12.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -594,6 +594,15 @@
 
 /* 옆으로 스크롤 시 틀고정(sticky) 셀 성능 최적화 - 별도 GPU 레이어로 합성해서 버벅임 방지 */
 [style*="position:sticky"] { transform: translateZ(0); will-change: transform; }
+
+/* ✨ N분기 강좌별 인원 표 - 강좌 순서 수동 드래그 정렬 */
+.qs-drag-row { cursor: grab; }
+.qs-drag-row:active { cursor: grabbing; }
+.qs-drag-handle { cursor: grab; color: #9ca3af; user-select: none; touch-action: none; }
+.qs-drag-handle:hover { color: #4338ca; }
+.qs-drag-row.qs-dragging { opacity: 0.35; }
+.qs-drag-row.qs-drag-over-top { box-shadow: inset 0 2px 0 0 #4338ca; }
+.qs-drag-row.qs-drag-over-bottom { box-shadow: inset 0 -2px 0 0 #4338ca; }
 		
 		
 		
@@ -867,7 +876,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.7</span>
+                <span class="brand-version">V12.9</span>
             </div>
     </div>
     
@@ -1139,8 +1148,10 @@
                     <div class="stat-value" id="s_stOver" style="font-size:15px; color:#ef4444;">0명</div>
                 </div>
             </div>
-           <div style="margin-top:16px; margin-bottom:8px;">
+           <div style="margin-top:16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                 <button type="button" style="padding:14px 26px; font-size:15px; font-weight:800; color:#0f172a; background:linear-gradient(135deg, #fde68a, #d4af37); border:none; border-radius:30px; box-shadow:0 4px 14px rgba(212,175,55,0.45); cursor:pointer;" onclick="openQuarterTableExportModal()">🖨️ 현황표 인쇄 · 엑셀저장</button>
+                <button type="button" style="padding:10px 18px; font-size:13px; font-weight:700; color:#334155; background:white; border:1px solid #cbd5e1; border-radius:24px; cursor:pointer;" onclick="resetSubjectOrder()" title="드래그로 바꾼 강좌 순서를 기본 순서로 되돌립니다">↺ 강좌 순서 초기화</button>
+                <span style="font-size:12.5px; color:#6b7280;">💡 아래 표의 <b>⠿</b> 아이콘을 마우스로 눌러 위아래로 드래그하면 강좌 줄 순서를 바꿀 수 있어요. (분기끼리 강좌를 같은 줄에 맞출 때 사용하세요)</span>
             </div>
            <div id="quarterSubjectTables" style="margin-top:8px;"></div>
 
@@ -2191,6 +2202,11 @@
             return String(name || '').replace(/\s*\d+부(\([^)]*\))?$/, '').trim();
         }
 
+        // ✨ HTML 속성(data-course 등)에 안전하게 넣기 위한 이스케이프
+        function escHtmlAttr(s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         // ✨ 엑셀 시트 이름에 못 쓰는 특수문자(\ / ? * [ ] :) 제거 (예: "바둑/체스A" 같은 과목명 대응)
         function safeSheetName(name) {
             return String(name || '').replace(/[\\\/\?\*\[\]:]/g, '_').slice(0, 31) || 'Sheet';
@@ -2525,14 +2541,63 @@ function toggleStatusPanel() {
             return { counts, countsDedup };
         }
 
-        // ✨ savedSubjects 순서 기준, N부 합치고 0명 과목 제외한 표 행 목록
-        function buildSubjectCountRows(counts) {
-            let shown = new Set();
-            let rows = [];
+        // ✨ 강좌별 인원 표 - 사용자가 드래그로 정한 수동 순서 (없으면 savedSubjects 등록순으로 자동 채움)
+        let subjectOrderList = null;
+
+        function ensureSubjectOrderList() {
+            if (subjectOrderList === null) {
+                try {
+                    let saved = JSON.parse(localStorage.getItem('edusync_subject_order_v1') || 'null');
+                    subjectOrderList = Array.isArray(saved) ? saved.filter(k => typeof k === 'string') : [];
+                } catch (e) {
+                    subjectOrderList = [];
+                }
+            }
+            // savedSubjects에 새로 생긴 과목(=순서 목록에 아직 없는 과목)은 기존 등록순 그대로 뒤에 추가
+            let existing = new Set(subjectOrderList);
+            let seenNew = new Set();
             savedSubjects.forEach(sub => {
-                let courseKey = baseSubjectName(sub.name);
-                if (shown.has(courseKey)) return;
-                shown.add(courseKey);
+                let key = baseSubjectName(sub.name);
+                if (!key || seenNew.has(key)) return;
+                seenNew.add(key);
+                if (!existing.has(key)) {
+                    subjectOrderList.push(key);
+                    existing.add(key);
+                }
+            });
+            return subjectOrderList;
+        }
+
+        function saveSubjectOrderList() {
+            try { localStorage.setItem('edusync_subject_order_v1', JSON.stringify(subjectOrderList || [])); } catch (e) {}
+        }
+
+        // ✨ 드래그로 옮긴 강좌를 목표 강좌 앞/뒤로 이동시키고 저장 + 전체 표 다시 렌더링
+        function qsMoveSubjectOrder(draggedKey, targetKey, placeAfter) {
+            if (!draggedKey || !targetKey || draggedKey === targetKey) return;
+            let list = ensureSubjectOrderList();
+            let fromIdx = list.indexOf(draggedKey);
+            if (fromIdx === -1) return;
+            list.splice(fromIdx, 1);
+            let toIdx = list.indexOf(targetKey);
+            if (toIdx === -1) { list.push(draggedKey); }
+            else { list.splice(placeAfter ? toIdx + 1 : toIdx, 0, draggedKey); }
+            saveSubjectOrderList();
+            renderQuarterSubjectTables();
+        }
+
+        function resetSubjectOrder() {
+            if (!confirm('강좌 순서를 기본(과목 등록) 순서로 되돌릴까요?')) return;
+            subjectOrderList = [];
+            saveSubjectOrderList();
+            renderQuarterSubjectTables();
+        }
+
+        // ✨ 수동 정렬 순서 기준, N부 합치고 0명 과목 제외한 표 행 목록
+        function buildSubjectCountRows(counts) {
+            let orderList = ensureSubjectOrderList();
+            let rows = [];
+            orderList.forEach(courseKey => {
                 let c = counts[courseKey] || { beneficiary: 0, free: 0, g3: 0 };
                 let sum = c.beneficiary + c.free + c.g3;
                 if (sum === 0) return;
@@ -2542,12 +2607,17 @@ function toggleStatusPanel() {
         }
 
         // ✨ 표 하나를 HTML로 렌더링 (화면/인쇄 공통 사용)
-        function renderSubjectCountTableHtml(q, rows, title, cardBorderColor) {
+        function renderSubjectCountTableHtml(q, rows, title, cardBorderColor, allowDrag) {
             let totalBen = 0, totalFree = 0, totalG3 = 0, totalAll = 0;
             let rowsHtml = rows.map((r, idx) => {
                 totalBen += r.beneficiary; totalFree += r.free; totalG3 += r.g3; totalAll += r.sum;
                 let zebra = (idx % 2 === 0) ? '#ffffff' : '#f5f3ff';
-                return `<tr style="background:${zebra};">
+                let courseAttr = escHtmlAttr(r.name);
+                let dragCell = allowDrag
+                    ? `<td class="qs-drag-handle" style="text-align:center; padding:4px 1px; border-bottom:1px solid #e5e7eb; font-size:13px;" title="드래그해서 순서 이동">⠿</td>`
+                    : '';
+                return `<tr class="${allowDrag ? 'qs-drag-row' : ''}" ${allowDrag ? `draggable="true" data-course="${courseAttr}"` : ''} style="background:${zebra};">
+                    ${dragCell}
                     <td style="text-align:center; color:#9ca3af; padding:4px 5px; border-bottom:1px solid #e5e7eb;">${idx + 1}</td>
                     <td style="text-align:center; font-weight:600; padding:4px 5px; border-bottom:1px solid #e5e7eb; white-space:normal; word-break:keep-all; overflow-wrap:break-word; line-height:1.3;">${r.name}</td>
                     <td style="text-align:center; padding:4px 5px; border-bottom:1px solid #e5e7eb; color:#0369a1; font-weight:700;">${r.beneficiary}</td>
@@ -2557,15 +2627,20 @@ function toggleStatusPanel() {
                 </tr>`;
             }).join('');
 
+            let handleColgroup = allowDrag ? '<col style="width:16px;">' : '';
+            let handleHeaderCell = allowDrag ? '<th style="padding:5px 1px;"></th>' : '';
+            let handleTotalCell = allowDrag ? '<td style="padding:6px 1px; background:#fef08a !important;"></td>' : '';
+
             return `
             <div style="background:white; border-radius:10px; padding:12px; margin-bottom:0; box-shadow:0 2px 8px rgba(0,0,0,0.12); flex:0 1 330px; min-width:300px; border-top:3px solid ${cardBorderColor};">
                 <div style="font-weight:800; font-size:14px; margin-bottom:8px; color:#4338ca;">📗 ${title}</div>
                 <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
                     <colgroup>
-                        <col style="width:22px;"><col><col style="width:44px;"><col style="width:52px;"><col style="width:32px;"><col style="width:40px;">
+                        ${handleColgroup}<col style="width:22px;"><col><col style="width:44px;"><col style="width:52px;"><col style="width:32px;"><col style="width:40px;">
                     </colgroup>
                     <thead>
                         <tr style="border-bottom:2px solid ${cardBorderColor};">
+                            ${handleHeaderCell}
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">No.</th>
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
@@ -2576,6 +2651,7 @@ function toggleStatusPanel() {
                     </thead>
                     <tbody>${rowsHtml}
                         <tr style="border-top:2px solid #111827;">
+                            ${handleTotalCell}
                             <td style="padding:6px 5px; text-align:center; background:#fef08a !important;"></td>
                             <td style="padding:6px 5px; text-align:center; background:#fef08a !important; color:#111827; font-weight:800;">총합계</td>
                             <td style="text-align:center; padding:6px 5px; background:#fef08a !important; color:#111827; font-weight:800;">${totalBen}</td>
@@ -2604,7 +2680,7 @@ function toggleStatusPanel() {
             for (let q = 1; q <= maxQuarter; q++) {
                 let { counts } = computeQuarterSubjectCounts(q);
                 let rows = buildSubjectCountRows(counts);
-                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(수익자+지원금 중복 표시)`, '#6366f1');
+                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(수익자+지원금 중복 표시)`, '#6366f1', true);
             }
             html += '</div>';
 
@@ -2620,11 +2696,65 @@ function toggleStatusPanel() {
             for (let q = 1; q <= maxQuarter; q++) {
                 let { countsDedup } = computeQuarterSubjectCounts(q);
                 let rows = buildSubjectCountRows(countsDedup);
-                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(중복안함)`, '#0284c7');
+                html += renderSubjectCountTableHtml(q, rows, `${q}분기 강좌별 인원(중복안함)`, '#0284c7', true);
             }
             html += '</div>';
 
             container.innerHTML = html;
+            initSubjectDragEvents(container);
+        }
+
+        // ✨ 강좌별 인원 표 - ⠿ 핸들 드래그 앤 드롭으로 강좌 순서 수동 변경 (이벤트 위임: 표가 다시 그려져도 재바인딩 불필요)
+        let qsDraggedEl = null;
+
+        function initSubjectDragEvents(container) {
+            if (!container || container._qsDragInit) return;
+            container._qsDragInit = true;
+
+            container.addEventListener('dragstart', function (e) {
+                let row = e.target.closest('.qs-drag-row');
+                if (!row) return;
+                qsDraggedEl = row;
+                row.classList.add('qs-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                try { e.dataTransfer.setData('text/plain', row.dataset.course || ''); } catch (err) {}
+            });
+
+            container.addEventListener('dragover', function (e) {
+                let row = e.target.closest('.qs-drag-row');
+                if (!row || !qsDraggedEl || row === qsDraggedEl) return;
+                if (row.closest('table') !== qsDraggedEl.closest('table')) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                let rect = row.getBoundingClientRect();
+                let isAfter = (e.clientY - rect.top) > rect.height / 2;
+                row.classList.toggle('qs-drag-over-bottom', isAfter);
+                row.classList.toggle('qs-drag-over-top', !isAfter);
+            });
+
+            container.addEventListener('dragleave', function (e) {
+                let row = e.target.closest('.qs-drag-row');
+                if (row) row.classList.remove('qs-drag-over-top', 'qs-drag-over-bottom');
+            });
+
+            container.addEventListener('drop', function (e) {
+                let row = e.target.closest('.qs-drag-row');
+                if (!row || !qsDraggedEl || row === qsDraggedEl) return;
+                if (row.closest('table') !== qsDraggedEl.closest('table')) return;
+                e.preventDefault();
+                let rect = row.getBoundingClientRect();
+                let isAfter = (e.clientY - rect.top) > rect.height / 2;
+                row.classList.remove('qs-drag-over-top', 'qs-drag-over-bottom');
+                let draggedKey = qsDraggedEl.dataset.course;
+                let targetKey = row.dataset.course;
+                qsDraggedEl = null;
+                qsMoveSubjectOrder(draggedKey, targetKey, isAfter); // 내부에서 renderQuarterSubjectTables() 재호출
+            });
+
+            container.addEventListener('dragend', function () {
+                container.querySelectorAll('.qs-drag-row').forEach(r => r.classList.remove('qs-dragging', 'qs-drag-over-top', 'qs-drag-over-bottom'));
+                qsDraggedEl = null;
+            });
         }
 
                 let qTableExportType = 'dup';
