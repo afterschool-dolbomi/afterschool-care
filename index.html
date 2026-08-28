@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V12.6</title>
+    <title>방과후 지원금 돌보미 V12.7</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -867,7 +867,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V12.6</span>
+                <span class="brand-version">V12.7</span>
             </div>
     </div>
     
@@ -3874,7 +3874,7 @@ function toggleStatusPanel() {
                 let currentRem = (idx <= h1CutoffIndex) ? (remG3_H1 + remFree) : (remG3_Total + remFree);
                 let qStatus = "지원금 미사용";
                 if (!r.hasG3 && !r.hasFree) qStatus = "수익자";
-                else if (accOver > 0) qStatus = ((q_usedG3 + q_usedFree) === 0) ? "지원금 소진" : (currentRem > 0 ? "일부 수익자" : "지원금 초과"); else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
+                else if (q_over > 0) qStatus = ((q_usedG3 + q_usedFree) === 0) ? "지원금 소진" : (currentRem > 0 ? "일부 수익자" : "지원금 초과"); else if (accExp > 0 && currentRem <= 0) qStatus = "지원금 소진"; else if (accExp > 0) qStatus = "지원금 사용중";
 
                 res[q] = { exp, usedG3: q_usedG3, usedFree: q_usedFree, over: q_over, status: qStatus, hasManual, hasManualSu, hasManualGy, hasManualJ };
                 res.allocs[q] = q_allocs;
@@ -5505,7 +5505,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                         </div>
                                     </div>
                                       ${r.hasFree ? `
-                                    <button type="button" class="no-print" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})" style="margin-top:6px; font-size:11px; padding:4px 8px; border-radius:5px; border:none; background:${s.sessionRatioEnabled ? '#2563eb' : '#1e3a8a'}; color:white; cursor:pointer; font-weight:700; white-space:nowrap;">
+                                    <button type="button" class="no-print" title="분기 중간에 자유수강자로 선정된 경우 일부만 지원금액 자동 계산" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})" style="margin-top:6px; font-size:11px; padding:4px 8px; border-radius:5px; border:none; background:${s.sessionRatioEnabled ? '#2563eb' : '#1e3a8a'}; color:white; cursor:pointer; font-weight:700; white-space:nowrap;">
                                         🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 적용중` : '차시 비율 적용'}
                                     </button>
                                     ` : ''}
@@ -5707,25 +5707,100 @@ document.getElementById('fTier').value = r.freeTier || "";
                 }
             }
 
-            html += `
-            <div class="detail-box">
-                <h4 style="margin-bottom:8px;">📝 종합 메모 (취소, 환불 등 사유)</h4>
-                <textarea id="studentMemo_${r.id}" placeholder="여기에 메모를 입력하고 우측 저장 버튼을 꼭 누르세요." style="width:100%; height:60px; padding:8px; border:1px solid var(--border-color); border-radius:4px; font-size:13px; outline:none; resize:none;">${r.memo || ''}</textarea>
-                <div style="text-align:right; margin-top:6px;">
-                    <button class="btn-tool no-print" style="background:var(--sidebar-accent); color:white; border:none; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="saveMemo('${r.id}')">메모 저장</button>
+                          html += `
+            <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:stretch;">
+                <div class="detail-box no-print" style="background:#fffbeb; border:1px solid #fde68a; flex:1 1 0; min-width:280px;">
+                    <h4 style="margin-bottom:10px; color:#92400e;">💬 알림톡 문구 생성</h4>
+                    <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;" id="ntQuarterBtns"></div>
+                    <textarea id="ntMessageBox" readonly style="width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid #fcd34d; background:white; font-size:13.5px; line-height:1.6; resize:vertical; font-family:inherit; color:#111827;"></textarea>
+                    <div style="text-align:right; margin-top:8px;">
+                        <button type="button" style="padding:8px 18px; border-radius:6px; border:none; background:#d97706; color:white; font-weight:800; cursor:pointer; font-size:13px;" onclick="copyNotiMessage()">📋 복사</button>
+                    </div>
+                </div>
+                    <div class="detail-box" style="flex:1 1 0; min-width:280px; display:flex; flex-direction:column;">
+                    <h4 style="margin-bottom:8px;">📝 종합 메모 (취소, 환불 등 사유)</h4>
+                    <textarea id="studentMemo_${r.id}" placeholder="여기에 메모를 입력하고 우측 저장 버튼을 꼭 누르세요." style="width:100%; flex:1; min-height:90px; padding:8px; border:1px solid var(--border-color); border-radius:4px; font-size:13px; outline:none; resize:none;">${r.memo || ''}</textarea>
+                    <div style="text-align:right; margin-top:6px;">
+                        <button class="btn-tool no-print" style="background:var(--sidebar-accent); color:white; border:none; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="saveMemo('${r.id}')">메모 저장</button>
+                    </div>
                 </div>
             </div>
             `;
             
-            document.getElementById('detailBody').innerHTML = html;
+                        document.getElementById('detailBody').innerHTML = html;
             document.getElementById('detailOverlay').classList.add('active');
             document.getElementById('detailModal').style.display = 'flex';
-        } 
+
+            currentNotiQ = 1;
+            renderNotiQuarterBtns(r.id);
+            document.getElementById('ntMessageBox').value = buildNotiMessage(r.id, currentNotiQ);
+        }
 	   
 	   
 	   
 	   
 	     // ✨ 과목 순서(우선순위) 위/아래 변경 함수
+        let currentNotiQ = 1;
+        function buildNotiMessage(rId, q) {
+            let r = db.find(x => x.id == rId);
+            if (!r) return '';
+            let c = calcStudent(r);
+            let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+            let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+
+            if (q === 1) {
+                let parts = [];
+                if (r.hasG3) parts.push(`${getG3Label()} ${formatMoney(allowanceG3)}`);
+                if (r.hasFree) parts.push(`자유수강 지원금 ${formatMoney(allowanceFree)}`);
+                let joined = parts.join(', ');
+                return `${r.name} 학생의 연간 방과후 지원금 (${joined})이 지원되오니 방과후에 많은 관심 바랍니다.`;
+            } else {
+                                let usedG3 = 0, usedFree = 0;
+                for (let i = 1; i <= q; i++) {
+                    usedG3 += c[`q${i}`] ? c[`q${i}`].usedG3 : 0;
+                    usedFree += c[`q${i}`] ? c[`q${i}`].usedFree : 0;
+                }
+                                // ✨ 초3지원금은 상반기(1~2분기)/하반기(3~4분기)가 각각 25만원씩 별도라서,
+                // 상반기 안에서는 하반기 몫이 아직 안 풀린 돈이므로 그걸 잔액에 섞어 보여주면 안 됨
+                let h1Cut = maxQuarter === 6 ? 3 : 2;
+                let g3Remain = (q <= h1Cut) ? Math.max(0, 250000 - usedG3) : Math.max(0, allowanceG3 - usedG3);
+                let g3ResetNote = (q <= h1Cut) ? ` (${h1Cut + 1}분기에 ${getG3Label()} ${formatMoney(250000)}을 다시 사용 가능합니다.)` : '';
+                let lines = [];
+                if (r.hasG3) lines.push(`${getG3Label()} ${formatMoney(usedG3)} 사용되었고, 잔액은 ${formatMoney(g3Remain)} 입니다.${g3ResetNote}`);
+                if (r.hasFree) lines.push(`자유수강 지원금 ${formatMoney(usedFree)} 사용되었고, 잔액은 ${formatMoney(Math.max(0, allowanceFree - usedFree))} 입니다.`);
+                return `${r.name} 학생이 이전 분기까지 ${lines.join(' ')}`;
+            }
+        }
+        function renderNotiQuarterBtns(rId) {
+            let wrap = document.getElementById('ntQuarterBtns');
+            if (!wrap) return;
+            let html = '';
+            for (let q = 1; q <= maxQuarter; q++) {
+                let isOn = (currentNotiQ === q);
+                let style = isOn
+                    ? 'padding:6px 14px; border-radius:20px; border:2px solid #d97706; background:#d97706; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+                    : 'padding:6px 14px; border-radius:20px; border:2px solid #fcd34d; background:white; color:#92400e; font-weight:700; cursor:pointer; font-size:12.5px;';
+                html += `<button type="button" style="${style}" onclick="selectNotiQuarter('${rId}', ${q})">${q}분기</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function selectNotiQuarter(rId, q) {
+            currentNotiQ = q;
+            renderNotiQuarterBtns(rId);
+            document.getElementById('ntMessageBox').value = buildNotiMessage(rId, q);
+        }
+        function copyNotiMessage() {
+            let box = document.getElementById('ntMessageBox');
+            box.select();
+            box.setSelectionRange(0, 999999);
+            navigator.clipboard.writeText(box.value).then(() => {
+                alert('알림톡 문구가 복사되었습니다!');
+            }).catch(() => {
+                document.execCommand('copy');
+                alert('알림톡 문구가 복사되었습니다!');
+            });
+        }
+
         window.moveSubjectOrder = function(id, q, sIdx, dir) {
             let r = db.find(x => x.id == id);
             if(!r) return;
