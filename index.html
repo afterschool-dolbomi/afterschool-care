@@ -766,8 +766,9 @@
 
                                <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
                     <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">✏️ 개별 담기 (학생마다 과목·차시가 달라도 OK)</div>
-                    <div style="position:relative; margin-bottom:10px;">
+                                        <div style="position:relative; margin-bottom:10px;">
                         <input type="text" id="riaStudentSearch" oninput="searchRiaStudent()" placeholder="학생 이름 또는 학년반번호 검색" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+                        <div style="font-size:10.5px; color:#94a3b8; margin-top:4px;">예: 3학년 1반 5번 → <b>315</b> 검색</div>
                         <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
                     </div>
                     <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
@@ -6364,7 +6365,18 @@ document.getElementById('fTier').value = r.freeTier || "";
                     if (!ok) { skippedByUser++; return; }
                 }
 
-                s.rSu = preview.existingRSu + preview.amount;
+                let g0 = toNum(s.g), s0 = toNum(s.s);
+                if (g0 > 0 || s0 > 0) {
+                    // ✨ 강사료/수용비가 나눠 등록된 과목이면, 환불금액도 같은 비율로 나눔 (강사료 10원단위 올림, 수용비는 나머지)
+                    let gRatio = g0 / (g0 + s0);
+                    let addG = Math.min(preview.amount, Math.ceil((preview.amount * gRatio) / 10) * 10);
+                    let addS = preview.amount - addG;
+                    s.rG = toNum(s.rG) + addG;
+                    s.rS = toNum(s.rS) + addS;
+                    s.rSu = toNum(s.rG) + toNum(s.rS);
+                } else {
+                    s.rSu = preview.existingRSu + preview.amount;
+                }
                 if (!s.refundLog) s.refundLog = [];
                 s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount });
 
@@ -6385,14 +6397,26 @@ document.getElementById('fTier').value = r.freeTier || "";
             alert(msg);
         }
 
-        function deleteRefundLogEntry(id, q, sIdx, logIdx) {
+               function deleteRefundLogEntry(id, q, sIdx, logIdx) {
             let r = db.find(x => x.id == id);
             if (!r) return;
             let s = r[`q${q}`].subs[sIdx];
             if (!s || !s.refundLog || !s.refundLog[logIdx]) return;
             let entry = s.refundLog[logIdx];
-            if (!confirm(`${entry.sessions}차시 ${formatMoney(entry.amount)} 환불 기록을 삭제할까요?\n환불금액(${formatMoney(entry.amount)})도 함께 차감됩니다.`)) return;
-            s.rSu = Math.max(0, toNum(s.rSu) - entry.amount);
+            if (!confirm(`${entry.sessions}차시 ${formatMoney(entry.amount)} 환불 기록을 삭제할까요?\n환불금액(${formatMoney(entry.amount)})도 강사료/수용비 포함해서 함께 차감됩니다.`)) return;
+
+            let g0 = toNum(s.g), s0 = toNum(s.s);
+            if (g0 > 0 || s0 > 0) {
+                // ✨ 적용할 때와 똑같은 비율로 계산해서, 이 기록만큼만 강사료/수용비에서 정확히 되돌림
+                let gRatio = g0 / (g0 + s0);
+                let subG = Math.min(entry.amount, Math.ceil((entry.amount * gRatio) / 10) * 10);
+                let subS = entry.amount - subG;
+                s.rG = Math.max(0, toNum(s.rG) - subG);
+                s.rS = Math.max(0, toNum(s.rS) - subS);
+                s.rSu = toNum(s.rG) + toNum(s.rS);
+            } else {
+                s.rSu = Math.max(0, toNum(s.rSu) - entry.amount);
+            }
             s.refundLog.splice(logIdx, 1);
             persistData();
             showDetailModal(id);
