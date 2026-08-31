@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.0</title>
+    <title>방과후 지원금 돌보미 V13.1</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -730,21 +730,38 @@
         </div>
     </div>
 
+      <div id="refundMonthTagModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; text-align:center;">
+                <div style="width:44px; height:44px; background:rgba(220,38,38,0.15); border:2px solid #dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:20px;">🏷️</div>
+                <div style="color:white; font-size:15.5px; font-weight:800;">몇 차 환불인지 태그해주세요</div>
+                <div id="rmtMsg" style="color:#94a3b8; font-size:11.5px; margin-top:4px;"></div>
+            </div>
+            <div style="padding:20px 24px;">
+                <div style="font-size:12px; color:#6b7280; margin-bottom:12px; line-height:1.5;">수기로 입력한 환불금액은 나중에 월별 강사료·수용비 정산서를 만들 때 꼭 필요해서, 몇 차(월) 환불인지 표시해두어야 해요.</div>
+                <div id="rmtButtons" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:16px;"></div>
+                <button onclick="closeRefundMonthTagModal()" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#94a3b8; font-weight:700; cursor:pointer; font-size:12.5px;">나중에 태그하기</button>
+            </div>
+        </div>
+    </div>
+
     <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
                 <button onclick="closeRefundManagerModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
                 <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🔄</div>
                 <div style="color:white; font-size:16.5px; font-weight:800;">환불 관리</div>
-                <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">과목·차시·학생이 서로 달라도 하나씩 담아서 한 번에 적용할 수 있습니다</div>
+                <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">같은 과목 수강생을 한번에 환불하거나, 과목·학생이 서로 달라도 하나씩 담아서 한 번에 차시 환불을 적용할 수 있습니다</div>
             </div>
             <div style="padding:20px 24px; overflow-y:auto;">
 
                 <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체)</div>
+                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체 환불)</div>
                     <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
                     <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">과목 선택</div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
+                    <div id="rqaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">과목 선택</div>
                     <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                         <option value="">과목을 선택하세요</option>
                     </select>
@@ -772,7 +789,9 @@
                         <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
                     </div>
                     <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
-                    <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                                        <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
+                    <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
                     <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                         <option value="">학생과 분기를 먼저 선택하세요</option>
                     </select>
@@ -942,7 +961,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.0</span>
+                <span class="brand-version">V13.1</span>
             </div>
     </div>
     
@@ -3314,10 +3333,10 @@ function toggleStatusPanel() {
                     let missingInfo = [];
                     let hasMissingSu = false, hasMissingSessions = false;
                     for (let q = 1; q <= maxQuarter; q++) {
-                        let feeQ = sub.fees && sub.fees[q];
-                        let sessQ = sub.sessions && sub.sessions[q];
+                                                let feeQ = sub.fees && sub.fees[q];
+                        let sessTotalQ = getSubjectTotalSessions(sub, q);
                         if (!feeQ || !toNum(feeQ.su)) hasMissingSu = true;
-                        if (!sessQ || !toNum(sessQ)) hasMissingSessions = true;
+                        if (!sessTotalQ) hasMissingSessions = true;
                     }
                     if (hasMissingSu) missingInfo.push('수강료');
                     if (hasMissingSessions) missingInfo.push('차시');
@@ -3355,14 +3374,30 @@ function toggleStatusPanel() {
         }
 
         // ✨ 과목 단가(fees) 객체에 1~6분기 키가 항상 존재하도록 보정 (구버전 데이터/4분기 전용 데이터 호환)
-               function ensureSubjectFees(sub) {
+                              function ensureSubjectFees(sub) {
             if(!sub.fees) sub.fees = {};
             if(!sub.sessions) sub.sessions = {};
+            let months = getMonthsPerQuarter();
             for(let q=1; q<=6; q++) {
                 if(!sub.fees[q]) sub.fees[q] = {g:0, s:0, su:0, gy:0, j:0};
                 if(sub.fees[q].g === undefined) sub.fees[q].g = 0;
                 if(sub.fees[q].s === undefined) sub.fees[q].s = 0;
-                if(sub.sessions[q] === undefined) sub.sessions[q] = 0;
+                // ✨ 차시: 구버전(분기 총 차시 숫자 하나) → 1차/2차/3차 객체로 자동 마이그레이션
+                if(sub.sessions[q] === undefined || sub.sessions[q] === null) {
+                    sub.sessions[q] = {};
+                } else if(typeof sub.sessions[q] === 'number') {
+                    let oldTotal = sub.sessions[q];
+                    let per = months > 0 ? Math.round(oldTotal / months) : 0;
+                    let obj = {}, assigned = 0;
+                    for(let m=1; m<=months; m++) {
+                        if(m === months) obj[`m${m}`] = oldTotal - assigned; // 마지막 차에 나머지 몰아주기(반올림 오차 보정)
+                        else { obj[`m${m}`] = per; assigned += per; }
+                    }
+                    sub.sessions[q] = obj;
+                }
+                for(let m=1; m<=months; m++) {
+                    if(sub.sessions[q][`m${m}`] === undefined) sub.sessions[q][`m${m}`] = 0;
+                }
             }
             return sub;
         }
@@ -3460,19 +3495,25 @@ function toggleStatusPanel() {
                         <button type="button" class="btn-tool" style="font-size:11px; padding:6px 10px; background:#e0f2fe; color:var(--sidebar-accent); border:1px solid #bae6fd; font-weight:bold;" onclick="copyQ1Fees()">⬇️ 1분기 금액 동일 적용 (2~${maxQuarter}분기)</button>
                     </div>
 
-                  <div style="overflow-x:auto; border-radius:8px; border:1px solid #e2e8f0;">
+                                    <div style="overflow-x:auto; border-radius:8px; border:1px solid #e2e8f0;">
                     <table class="detail-inner-table" style="background:#f9fafb; min-width:700px;">
                         <thead>
-                            <tr><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">분기</th><th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:14px;">분기 총 차시<br><span style="font-size:10px; font-weight:normal; color:#475569;">(환불 자동계산용)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">강사료</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">수용비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 수강료<br><span style="font-size:11px; font-weight:normal; color:#475569;">(강사료+수용비 입력시 자동계산)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 교재비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 재료비</th></tr>
+                            <tr><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">분기</th>${(()=>{let mpq=getMonthsPerQuarter(); let h=''; for(let m=1;m<=mpq;m++) h+=`<th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:13px;">${m}차<br>차시</th>`; h+=`<th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:13px;">분기합계<br><span style="font-size:10px; font-weight:normal; color:#475569;">(자동계산·환불용)</span></th>`; return h;})()}<th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">강사료</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">수용비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 수강료<br><span style="font-size:11px; font-weight:normal; color:#475569;">(강사료+수용비 입력시 자동계산)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 교재비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 재료비</th></tr>
                         </thead>
                         <tbody>
             `;
             
+            let monthsPQ = getMonthsPerQuarter();
             for(let q=1; q<=maxQuarter; q++) {
+                let sessCells = '';
+                for(let m=1; m<=monthsPQ; m++) {
+                    sessCells += `<td><input type="number" id="es_q${q}_sess_m${m}" value="${(sub.sessions[q] && sub.sessions[q][`m${m}`])||''}" placeholder="예:4" oninput="updateEsSessTotal(${q})" style="width:52px; text-align:center; padding:6px; border-radius:6px; border:1px solid #fca5a5; background:#fef2f2;"></td>`;
+                }
+                sessCells += `<td><input type="number" id="es_q${q}_sessions_total" value="${getSubjectTotalSessions(sub,q)||''}" readonly style="width:60px; text-align:center; padding:6px; border-radius:6px; border:2px solid #b91c1c; background:#f3f4f6; color:#b91c1c; font-weight:700;"></td>`;
                 html += `
                                        <tr>
                         <td style="text-align:center; font-weight:bold;">${q}분기</td>
-                        <td><input type="number" id="es_q${q}_sessions" value="${sub.sessions[q]||''}" placeholder="예:12" style="width:60px; text-align:center; padding:6px; border-radius:6px; border:1px solid #fca5a5; background:#fef2f2;"></td>
+                        ${sessCells}
                         <td><input type="number" id="es_q${q}_g" value="${sub.fees[q].g||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
                         <td><input type="number" id="es_q${q}_s" value="${sub.fees[q].s||0}" oninput="updateEsSu(${q})" onfocus="if(this.value=='0') this.value='';" style="width:90px; text-align:right; padding:6px; border-radius:6px; border:1px solid #cbd5e1;"></td>
                         <td><input type="number" id="es_q${q}_su" value="${sub.fees[q].su}" onfocus="if(this.value=='0') this.value='';" style="width:100px; text-align:right; padding:6px; border-radius:6px; border:2px solid #d4af37;"></td>
@@ -3494,7 +3535,19 @@ function toggleStatusPanel() {
             `;
            document.getElementById('subjectEditArea').innerHTML = html;
             document.getElementById('subjectListArea').style.display = 'none';
-            for(let q=1; q<=maxQuarter; q++) updateEsSu(q); // ✨ 처음 열 때 강사료/수용비 있으면 수강료 자동 잠금 반영
+                       for(let q=1; q<=maxQuarter; q++) { updateEsSu(q); updateEsSessTotal(q); } // ✨ 처음 열 때 강사료/수용비·차시합계 자동 반영
+        }
+
+        // ✨ 1차+2차(+3차) 입력값을 합산해 "분기합계" 칸에 자동으로 채움
+        function updateEsSessTotal(q) {
+            let months = getMonthsPerQuarter();
+            let sum = 0;
+            for(let m=1; m<=months; m++) {
+                let el = document.getElementById(`es_q${q}_sess_m${m}`);
+                if (el) sum += toNum(el.value);
+            }
+            let totalEl = document.getElementById(`es_q${q}_sessions_total`);
+            if (totalEl) totalEl.value = sum || '';
         }
 
        function copyQ1Fees() {
@@ -3503,15 +3556,18 @@ function toggleStatusPanel() {
             let su1 = document.getElementById('es_q1_su').value;
             let gy1 = document.getElementById('es_q1_gy').value;
             let j1 = document.getElementById('es_q1_j').value;
-            let sessions1 = document.getElementById('es_q1_sessions').value;
+            let months = getMonthsPerQuarter();
+            let sessVals1 = [];
+            for(let m=1; m<=months; m++) sessVals1.push(document.getElementById(`es_q1_sess_m${m}`).value);
             for(let q=2; q<=maxQuarter; q++) {
-                document.getElementById(`es_q${q}_sessions`).value = sessions1;
+                for(let m=1; m<=months; m++) document.getElementById(`es_q${q}_sess_m${m}`).value = sessVals1[m-1];
                 document.getElementById(`es_q${q}_g`).value = g1;
                 document.getElementById(`es_q${q}_s`).value = s1;
                 document.getElementById(`es_q${q}_su`).value = su1;
                 document.getElementById(`es_q${q}_gy`).value = gy1;
                 document.getElementById(`es_q${q}_j`).value = j1;
                 updateEsSu(q);
+                updateEsSessTotal(q);
             }
         }
 
@@ -3543,7 +3599,8 @@ function toggleStatusPanel() {
 
                         let fees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : {};
             let oldFees = (idx !== -1 && savedSubjects[idx].fees) ? JSON.parse(JSON.stringify(savedSubjects[idx].fees)) : null;
-            let sessions = (idx !== -1 && savedSubjects[idx].sessions) ? JSON.parse(JSON.stringify(savedSubjects[idx].sessions)) : {};
+                        let sessions = (idx !== -1 && savedSubjects[idx].sessions) ? JSON.parse(JSON.stringify(savedSubjects[idx].sessions)) : {};
+            let monthsSave = getMonthsPerQuarter();
             for(let q=1; q<=maxQuarter; q++) {
                 let gVal = toNum(document.getElementById(`es_q${q}_g`).value);
                 let sVal = toNum(document.getElementById(`es_q${q}_s`).value);
@@ -3553,9 +3610,11 @@ function toggleStatusPanel() {
                     gy: toNum(document.getElementById(`es_q${q}_gy`).value),
                     j: toNum(document.getElementById(`es_q${q}_j`).value)
                 };
-                sessions[q] = toNum(document.getElementById(`es_q${q}_sessions`).value);
+                let sObj = {};
+                for(let m=1; m<=monthsSave; m++) sObj[`m${m}`] = toNum(document.getElementById(`es_q${q}_sess_m${m}`).value);
+                sessions[q] = sObj;
             }
-            for(let q=1; q<=6; q++) { if(!fees[q]) fees[q] = {su:0, gy:0, j:0}; if(sessions[q] === undefined) sessions[q] = 0; }
+            for(let q=1; q<=6; q++) { if(!fees[q]) fees[q] = {su:0, gy:0, j:0}; if(sessions[q] === undefined) sessions[q] = {}; }
 
             if(idx === -1) {
                 savedSubjects.push({ name: newName, fees, sessions });
@@ -3822,9 +3881,28 @@ function toggleStatusPanel() {
             return max <= 3 ? '초3지원금' : `초3~${max}지원금`;
         }
 
-        function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3지원" / "초3~4지원")
+                function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3지원" / "초3~4지원")
             let max = getG3MaxGrade();
             return max <= 3 ? '초3지원' : `초3~${max}지원`;
+        }
+
+        // ✨ 분기당 "차"(월) 개수: 4분기제=1분기 3달(1~3차), 6분기제=1분기 2달(1~2차)
+        function getMonthsPerQuarter() {
+            return maxQuarter === 6 ? 2 : 3;
+        }
+
+        // ✨ 과목의 해당 분기 총 차시 = 1차+2차(+3차) 합산. 구버전(숫자 하나로 저장된) 데이터도 그대로 호환.
+        function getSubjectTotalSessions(sub, q) {
+            if (!sub || !sub.sessions) return 0;
+            let sq = sub.sessions[q];
+            if (sq === undefined || sq === null) return 0;
+            if (typeof sq === 'object') {
+                let sum = 0;
+                let months = getMonthsPerQuarter();
+                for (let m = 1; m <= months; m++) sum += toNum(sq[`m${m}`]);
+                return sum;
+            }
+            return toNum(sq); // 구버전 호환: 숫자 하나만 저장돼 있던 경우
         }
 		
 		
@@ -5709,7 +5787,15 @@ document.getElementById('fTier').value = r.freeTier || "";
                         let fmt = (val) => val !== undefined ? val.toLocaleString() : '';
                         let formatAlloc = (val) => val ? val.toLocaleString() : '0';
                         let onInputCode = `this.value = this.value.replace(/[^0-9]/g, '').replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');`;
-                        let fmtFee = (v) => v ? v.toLocaleString() : ''; // ✨ 일반 입력칸용 콤마 포맷
+                                               let fmtFee = (v) => v ? v.toLocaleString() : ''; // ✨ 일반 입력칸용 콤마 포맷
+
+                        // ✨ 수기 환불분이 있는데 몇차 태그가 안 돼 있으면 경고 배지, 태그돼 있으면 태그 표시(클릭해서 변경 가능)
+                        let manualUntagged = computeManualUntaggedRefund(s);
+                        let refTagHtml = (refTotal > 0 && manualUntagged > 0)
+                            ? (s.rMonth
+                                ? `<div class="no-print" style="font-size:9px; color:#1e40af; font-weight:800; margin-top:3px; cursor:pointer;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">🏷️ ${s.rMonth}차 (변경)</div>`
+                                : `<div class="no-print" style="font-size:9px; color:white; font-weight:800; margin-top:3px; cursor:pointer; background:#dc2626; border-radius:4px; padding:2px 4px; text-align:center;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">⚠️태그필요</div>`)
+                            : '';
 
                         return `
                               <tr>
@@ -5739,11 +5825,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rS_${q}_${sIdx}" class="refund-input" value="${fmtFee(rS)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rS', this.value)"></td>
                                                                <td style="background:#fff5f5; vertical-align:top;">
                                     <input type="text" id="live_rSu_${q}_${sIdx}" class="refund-input" value="${fmtFee(rSu)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rSu', this.value)">
-                                    ${(s.refundLog && s.refundLog.length) ? `<div class="no-print" style="font-size:9px; color:#b91c1c; margin-top:3px; line-height:1.6;">${s.refundLog.map((l, li) => `<div>${l.sessions}차시 ${formatMoney(l.amount)} 적용 <span onclick="deleteRefundLogEntry('${r.id}', ${q}, ${sIdx}, ${li})" title="이 환불기록 삭제" style="cursor:pointer; color:#9ca3af; font-weight:900; padding:0 2px;">✕</span></div>`).join('')}</div>` : ''}
+                                    ${(s.refundLog && s.refundLog.length) ? `<div class="no-print" style="font-size:9px; color:#b91c1c; margin-top:3px; line-height:1.6;">${s.refundLog.map((l, li) => `<div>${l.month ? l.month+'차 ' : ''}${l.sessions}차시 ${formatMoney(l.amount)} 적용 <span onclick="deleteRefundLogEntry('${r.id}', ${q}, ${sIdx}, ${li})" title="이 환불기록 삭제" style="cursor:pointer; color:#9ca3af; font-weight:900; padding:0 2px;">✕</span></div>`).join('')}</div>` : ''}
                                 </td>
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rGy_${q}_${sIdx}" class="refund-input" value="${fmtFee(rGy)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rGy', this.value)"></td>
                                 <td style="background:#fff5f5; vertical-align:top;"><input type="text" id="live_rJ_${q}_${sIdx}" class="refund-input" value="${fmtFee(rJ)}" oninput="${onInputCode}" onchange="updateRefund('${r.id}', ${q}, ${sIdx}, 'rJ', this.value)"></td>
-                                <td style="background:#fef2f2; color:#b91c1c; font-weight:bold; border-right:2px solid var(--border-color); vertical-align:top;">${formatMoney(refTotal)}</td>
+                                                               <td style="background:#fef2f2; color:#b91c1c; font-weight:bold; border-right:2px solid var(--border-color); vertical-align:top;">${formatMoney(refTotal)}${refTagHtml}</td>
 								
                                 <td style="background:#f0fdf4; vertical-align:top;">${formatMoney(netG)}</td>
                                 <td style="background:#f0fdf4; vertical-align:top;">${formatMoney(netS)}</td>
@@ -6084,16 +6170,17 @@ document.getElementById('fTier').value = r.freeTier || "";
 
     let sessionRatioTarget = null;
 
-        let refundCart = [];
-        let rqaState = { q: null, subject: '' };
-        let riaState = { studentId: null, q: null };
+                let refundCart = [];
+        let rqaState = { q: null, subject: '', month: null };
+        let riaState = { studentId: null, q: null, month: null };
 
         function openRefundManagerModal() {
             refundCart = [];
-            rqaState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, subject: '' };
-            riaState = { studentId: null, q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1 };
+            rqaState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, subject: '', month: null };
+            riaState = { studentId: null, q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, month: null };
 
             renderRqaQuarterBtns();
+            renderRqaMonthBtns();
             renderRqaSubjectOptions();
             document.getElementById('rqaSessionCount').value = '';
             document.getElementById('rqaStudentList').innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
@@ -6102,6 +6189,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('riaStudentResults').style.display = 'none';
             document.getElementById('riaSessionCount').value = '';
             renderRiaQuarterBtns();
+            renderRiaMonthBtns();
             renderRiaSubjectSelect();
 
             renderRefundCartTable();
@@ -6111,14 +6199,62 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('refundManagerModal').style.display = 'none';
         }
 
+                // ✨ 이 과목·분기의 환불액 중 "환불 관리(카트)"로 이미 차시-태그된 몫을 뺀, 순수 수기 입력분
+        function computeManualUntaggedRefund(s) {
+            let loggedTotal = (s.refundLog || []).reduce((sum, l) => sum + toNum(l.amount), 0);
+            let manualSuPortion = Math.max(0, toNum(s.rSu) - loggedTotal); // 카트는 rSu만 다루므로 rSu 초과분만 수기로 간주
+            return manualSuPortion + toNum(s.rGy) + toNum(s.rJ); // 교재비·재료비 환불은 카트가 다루지 않으므로 항상 수기로 간주
+        }
+
+        let refundTagCtx = null; // {id, q, sIdx}
+
+        function openRefundMonthTagPicker(id, q, sIdx) {
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s) return;
+            refundTagCtx = { id, q, sIdx };
+            document.getElementById('rmtMsg').innerText = `${r.name} · ${q}분기 · ${s.name || ''}`;
+            let months = getMonthsPerQuarter();
+            let wrap = document.getElementById('rmtButtons');
+            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            let html = '';
+            for (let m = 1; m <= months; m++) {
+                let isOn = (s.rMonth === m);
+                let style = isOn
+                    ? 'padding:12px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:13px;'
+                    : 'padding:12px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
+                html += `<button type="button" style="${style}" onclick="confirmRefundMonthTag(${m})">${m}차</button>`;
+            }
+            wrap.innerHTML = html;
+            document.getElementById('refundMonthTagModal').style.display = 'flex';
+        }
+        function closeRefundMonthTagModal() {
+            document.getElementById('refundMonthTagModal').style.display = 'none';
+            refundTagCtx = null;
+        }
+        function confirmRefundMonthTag(m) {
+            if (!refundTagCtx) return;
+            let { id, q, sIdx } = refundTagCtx;
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s) return;
+            s.rMonth = m;
+            persistData();
+            document.getElementById('refundMonthTagModal').style.display = 'none';
+            refundTagCtx = null;
+            showDetailModal(id);
+        }
+
         // ✨ 차시당 환불금액 계산 (학생 실제 결제 수강료 ÷ 총차시, 10원 단위 올림)
         function computeSessionRefund(studentId, q, sIdx, sessionCount) {
             let r = db.find(x => x.id == studentId);
             if (!r) return null;
             let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
             if (!s) return null;
-            let sub = savedSubjects.find(x => x.name === s.name);
-            let masterSessions = sub && sub.sessions ? toNum(sub.sessions[q]) : 0;
+                       let sub = savedSubjects.find(x => x.name === s.name);
+            let masterSessions = sub ? getSubjectTotalSessions(sub, q) : 0;
             let totalSessions = toNum(s.totalSessions) || masterSessions;
             if (!totalSessions) return { ok:false };
             let perSessionSu = Math.ceil((toNum(s.su) / totalSessions) / 10) * 10;
@@ -6154,10 +6290,29 @@ document.getElementById('fTier').value = r.freeTier || "";
             }
             wrap.innerHTML = html;
         }
-        function selectRqaQuarter(q) {
+               function selectRqaQuarter(q) {
             rqaState.q = q;
             renderRqaQuarterBtns();
             renderRqaStudentList();
+        }
+        function renderRqaMonthBtns() {
+            let wrap = document.getElementById('rqaMonthBtns');
+            if (!wrap) return;
+            let months = getMonthsPerQuarter();
+            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            let html = '';
+            for (let m = 1; m <= months; m++) {
+                let isOn = (rqaState.month === m);
+                let style = isOn
+                    ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+                    : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+                html += `<button type="button" style="${style}" onclick="selectRqaMonth(${m})">${m}차</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function selectRqaMonth(m) {
+            rqaState.month = m;
+            renderRqaMonthBtns();
         }
         function renderRqaSubjectOptions() {
             let sel = document.getElementById('rqaSubjectSelect');
@@ -6211,8 +6366,9 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.querySelectorAll('.rqa-student-chk').forEach(el => el.checked = checked);
             updateRqaCheckedCount();
         }
-        function addRqaToCart() {
+               function addRqaToCart() {
             if (!rqaState.q) return alert('분기를 선택해주세요.');
+            if (!rqaState.month) return alert('몇 차 환불인지 선택해주세요. (정산서 작성에 필요합니다)');
             if (!rqaState.subject) return alert('과목을 선택해주세요.');
             let sessionCount = toNum(document.getElementById('rqaSessionCount').value);
             if (!sessionCount || sessionCount <= 0) return alert('환불할 차시 수를 입력해주세요.');
@@ -6223,7 +6379,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                 let sIdx = Number(sIdxStr);
                 let r = db.find(x => x.id == rid);
                 if (!r) return;
-                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, sIdx, subjectName: rqaState.subject, sessionCount });
+                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount });
             });
             renderRefundCartTable();
             showRefundToast(checked.length);
@@ -6245,9 +6401,29 @@ document.getElementById('fTier').value = r.freeTier || "";
             riaState.studentId = id;
             document.getElementById('riaStudentSearch').value = `${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name}`;
             document.getElementById('riaStudentResults').style.display = 'none';
-            if (!riaState.q) riaState.q = (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1;
+                       if (!riaState.q) riaState.q = (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1;
             renderRiaQuarterBtns();
+            renderRiaMonthBtns();
             renderRiaSubjectSelect();
+        }
+        function renderRiaMonthBtns() {
+            let wrap = document.getElementById('riaMonthBtns');
+            if (!wrap) return;
+            let months = getMonthsPerQuarter();
+            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            let html = '';
+            for (let m = 1; m <= months; m++) {
+                let isOn = (riaState.month === m);
+                let style = isOn
+                    ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+                    : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+                html += `<button type="button" style="${style}" onclick="selectRiaMonth(${m})">${m}차</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+        function selectRiaMonth(m) {
+            riaState.month = m;
+            renderRiaMonthBtns();
         }
         function renderRiaQuarterBtns() {
             let wrap = document.getElementById('riaQuarterBtns');
@@ -6274,9 +6450,10 @@ document.getElementById('fTier').value = r.freeTier || "";
             let opts = subs.map((s, sIdx) => s.name ? `<option value="${sIdx}">${s.name}${s.sessionRatioEnabled ? ' (🍼차시비율)' : ''}</option>` : '').join('');
             sel.innerHTML = '<option value="">과목을 선택하세요</option>' + opts;
         }
-        function addRiaToCart() {
+                function addRiaToCart() {
             if (!riaState.studentId) return alert('학생을 먼저 검색해서 선택해주세요.');
             if (!riaState.q) return alert('분기를 선택해주세요.');
+            if (!riaState.month) return alert('몇 차 환불인지 선택해주세요. (정산서 작성에 필요합니다)');
             let sIdxVal = document.getElementById('riaSubjectSelect').value;
             if (sIdxVal === '') return alert('과목을 선택해주세요.');
             let sIdx = Number(sIdxVal);
@@ -6285,7 +6462,7 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             let r = db.find(x => x.id == riaState.studentId);
             let s = r[`q${riaState.q}`].subs[sIdx];
-                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, sIdx, subjectName: s.name, sessionCount });
+                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount });
             renderRefundCartTable();
             document.getElementById('riaSessionCount').value = '';
             showRefundToast(1);
@@ -6307,9 +6484,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                 countEl.innerText = `${refundCart.length}건 (학생 ${uniqueStudents}명) · 합계 ${formatMoney(totalAmount)}`;
             }
             wrap.innerHTML = `
-                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:520px;">
+                                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:560px;">
                     <thead><tr style="background:#f3f4f6;">
-                        <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
+                        <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">몇차</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
                     </tr></thead>
                     <tbody>
                         ${refundCart.map((item, idx) => {
@@ -6323,6 +6500,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                             return `<tr style="border-bottom:1px solid #f1f5f9;">
                                 <td style="padding:6px;">${item.studentLabel}</td>
                                 <td style="padding:6px; text-align:center;">${item.q}분기</td>
+                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month}차</td>
                                 <td style="padding:6px;">${item.subjectName}${warn}</td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:50px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:right; font-weight:700; color:${preview && preview.ok ? '#b91c1c' : '#9ca3af'};">${preview && preview.ok ? formatMoney(preview.amount) : '-'}</td>
@@ -6378,9 +6556,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                     s.rSu = preview.existingRSu + preview.amount;
                 }
                 if (!s.refundLog) s.refundLog = [];
-                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount });
+                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month });
 
-                let memoNote = `[${today}] ${item.q}분기 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})`;
+                let memoNote = `[${today}] ${item.q}분기 ${item.month}차 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})`;
                 r.memo = r.memo ? (r.memo + '\n' + memoNote) : memoNote;
 
                 appliedCount++;
@@ -6403,7 +6581,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let s = r[`q${q}`].subs[sIdx];
             if (!s || !s.refundLog || !s.refundLog[logIdx]) return;
             let entry = s.refundLog[logIdx];
-            if (!confirm(`${entry.sessions}차시 ${formatMoney(entry.amount)} 환불 기록을 삭제할까요?\n환불금액(${formatMoney(entry.amount)})도 강사료/수용비 포함해서 함께 차감됩니다.`)) return;
+            if (!confirm(`${entry.month ? entry.month+'차 ' : ''}${entry.sessions}차시 ${formatMoney(entry.amount)} 환불 기록을 삭제할까요?\n환불금액(${formatMoney(entry.amount)})도 강사료/수용비 포함해서 함께 차감됩니다.`)) return;
 
             let g0 = toNum(s.g), s0 = toNum(s.s);
             if (g0 > 0 || s0 > 0) {
@@ -6572,16 +6750,21 @@ document.getElementById('fTier').value = r.freeTier || "";
             renderGrid();
         };
 
-        function updateRefund(id, q, sIdx, field, val) {
+                function updateRefund(id, q, sIdx, field, val) {
             let r = db.find(x => x.id == id);
             if(!r) return;
             let s = r[`q${q}`].subs[sIdx];
+            let beforeManual = computeManualUntaggedRefund(s); // ✨ 수정 전 수기환불(미태그) 금액 - 이 값보다 "늘었을 때"만 태그를 유도하기 위해 기억해둠
             let numVal = val.toString().replace(/,/g, ''); // ✨ 콤마 제거
             s[field] = numVal === '' ? 0 : toNum(numVal);
             
             if (field === 'rG' || field === 'rS') {
                 s.rSu = toNum(s.rG) + toNum(s.rS);
             }
+
+            let afterManual = computeManualUntaggedRefund(s);
+            // ✨ 수기 환불(카트 자동적용분 제외)이 0으로 돌아가면 몇차 태그도 함께 초기화
+            if (afterManual <= 0) { s.rMonth = undefined; }
             
             let scrollWrap2 = document.getElementById('receiptScrollWrap_' + q);
             let scrollPos2 = scrollWrap2 ? scrollWrap2.scrollLeft : 0;
@@ -6606,8 +6789,13 @@ document.getElementById('fTier').value = r.freeTier || "";
                     target.focus();
                     if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd);
                 }
-                let newWrap2 = document.getElementById('receiptScrollWrap_' + q);
+                                let newWrap2 = document.getElementById('receiptScrollWrap_' + q);
                 if(newWrap2) newWrap2.scrollLeft = scrollPos2;
+
+                // ✨ 금액을 새로 늘렸을 때만 태그를 유도 (줄이거나 지울 때는 팝업 없이 조용히 처리 - 표의 배지로만 안내)
+                if (afterManual > 0 && afterManual > beforeManual && !s.rMonth) {
+                    openRefundMonthTagPicker(id, q, sIdx);
+                }
             }, 0);
             renderGrid();
         }
