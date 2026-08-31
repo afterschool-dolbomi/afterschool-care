@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.1</title>
+    <title>방과후 지원금 돌보미 V13.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -961,7 +961,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.1</span>
+                <span class="brand-version">V13.2</span>
             </div>
     </div>
     
@@ -4857,19 +4857,19 @@ viewData.forEach(({r, c}) => {
                                 </td>
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c.total.over)}</td>
                                 ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:middle;">-</td>` : `
-                                <td class="text-right" style="color:var(--color-g3); line-height: 1.5;">
-                                    <div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c.total.usedG3)}</div>
-                                    <div style="font-size:13px; font-weight:700;">잔액: ${formatMoney(c.remG3)}</div>
+                                                                <td class="text-right" style="color:var(--color-g3); line-height: 1.5;">
+                                    <div style="font-size:12px; font-weight:700;">사용액: ${formatMoney(c.total.usedG3)}</div>
+                                    <div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(c.remG3)}</div>
                                 </td>`}
                                 ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:middle;">-</td>` : `
                                 <td class="text-right" style="color:var(--color-free); line-height: 1.5;">
-                                    <div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c.total.usedFree)}</div>
-                                    <div style="font-size:13px; font-weight:700;">잔액: ${formatMoney(c.remFree)}</div>
+                                    <div style="font-size:12px; font-weight:700;">사용액: ${formatMoney(c.total.usedFree)}</div>
+                                    <div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(c.remFree)}</div>
                                 </td>`}
                                 ${isBeneficiary ? `<td class="text-right" style="color:#9ca3af; vertical-align:middle;">-</td>` : `
                                 <td class="text-right" style="color:#10b981; line-height: 1.5;">
-                                    <div style="font-size:11px; font-weight:normal; opacity:0.8;">총지원액: ${formatMoney(c.totalAllowance)}</div>
-                                    <div style="font-size:13px; font-weight:800;">잔액: ${formatMoney(c.remG3 + c.remFree)}</div>
+                                    <div style="font-size:12px; font-weight:700;">총지원액: ${formatMoney(c.totalAllowance)}</div>
+                                    <div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(c.remG3 + c.remFree)}</div>
                                 </td>`}
                                 <td style="text-align:center;" class="no-print">
                                     <div style="display:flex; gap:4px; justify-content:center;">
@@ -5027,9 +5027,9 @@ viewData.forEach(({r, c}) => {
 
                         sumRemG3 += remG3_until_Q; sumRemFree += remFree_until_Q; sumRemTotal += remTotal_until_Q;
                         
-                        let g3Html = `<div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c[q].usedG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(remG3_until_Q)}</div>`;
-                        let freeHtml = `<div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c[q].usedFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(remFree_until_Q)}</div>`;
-                        let totalHtml = `<div style="font-size:11px; font-weight:normal; opacity:0.8;">사용액: ${formatMoney(c[q].usedG3 + c[q].usedFree)}</div><div style="font-size:12px; font-weight:800;">잔액: ${formatMoney(remTotal_until_Q)}</div>`;
+                                              let g3Html = `<div style="font-size:12px; font-weight:700;">사용액: ${formatMoney(c[q].usedG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(remG3_until_Q)}</div>`;
+                        let freeHtml = `<div style="font-size:12px; font-weight:700;">사용액: ${formatMoney(c[q].usedFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(remFree_until_Q)}</div>`;
+                        let totalHtml = `<div style="font-size:12px; font-weight:700;">사용액: ${formatMoney(c[q].usedG3 + c[q].usedFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(remTotal_until_Q)}</div>`;
 
                         // ✨ 환불 내역 아코디언 셀 생성
                         let refundTds = isRefundViewOn ? `
@@ -5141,9 +5141,9 @@ viewData.forEach(({r, c}) => {
                            <td class="text-right" style="font-weight: 800; color: #111827;">${formatMoney(sumExp)}</td>
                             <td class="text-right" style="color:#b91c1c; font-weight:800;">${formatMoney(sumOver)}</td>
                             ${refundTotTds}
-                            <td class="text-right" style="color:var(--color-g3); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemG3)}</div></td>
-                            <td class="text-right" style="color:var(--color-free); line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemFree)}</div></td>
-                            <td class="text-right" style="color:#10b981; line-height: 1.4;"><div style="font-size:12px; font-weight:normal; opacity:0.8;">사용: ${formatMoney(sumG3 + sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemTotal)}</div></td>
+                                                       <td class="text-right" style="color:var(--color-g3); line-height: 1.4;"><div style="font-size:12px; font-weight:700;">사용: ${formatMoney(sumG3)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemG3)}</div></td>
+                            <td class="text-right" style="color:var(--color-free); line-height: 1.4;"><div style="font-size:12px; font-weight:700;">사용: ${formatMoney(sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemFree)}</div></td>
+                            <td class="text-right" style="color:#10b981; line-height: 1.4;"><div style="font-size:12px; font-weight:700;">사용: ${formatMoney(sumG3 + sumFree)}</div><div style="font-size:12px; font-weight:700;">잔액: ${formatMoney(sumRemTotal)}</div></td>
                            <td class="no-print"></td>
                         </tr>`);
                     }
@@ -5789,12 +5789,12 @@ document.getElementById('fTier').value = r.freeTier || "";
                         let onInputCode = `this.value = this.value.replace(/[^0-9]/g, '').replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');`;
                                                let fmtFee = (v) => v ? v.toLocaleString() : ''; // ✨ 일반 입력칸용 콤마 포맷
 
-                        // ✨ 수기 환불분이 있는데 몇차 태그가 안 돼 있으면 경고 배지, 태그돼 있으면 태그 표시(클릭해서 변경 가능)
+                                                // ✨ 수기 환불분이 있는데 몇차 태그가 안 돼 있으면 설명문구+버튼, 태그돼 있으면 태그 표시(클릭해서 변경 가능)
                         let manualUntagged = computeManualUntaggedRefund(s);
                         let refTagHtml = (refTotal > 0 && manualUntagged > 0)
                             ? (s.rMonth
                                 ? `<div class="no-print" style="font-size:9px; color:#1e40af; font-weight:800; margin-top:3px; cursor:pointer;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">🏷️ ${s.rMonth}차 (변경)</div>`
-                                : `<div class="no-print" style="font-size:9px; color:white; font-weight:800; margin-top:3px; cursor:pointer; background:#dc2626; border-radius:4px; padding:2px 4px; text-align:center;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">⚠️태그필요</div>`)
+                                                                                                    : `<div class="no-print" style="font-size:10px; color:white; font-weight:800; margin-top:3px; cursor:pointer; background:#dc2626; border-radius:4px; padding:2px 4px; text-align:center;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">⚠️태그필요</div>`)
                             : '';
 
                         return `
@@ -5812,7 +5812,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                         🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 적용중` : '차시 비율 적용'}
                                     </button>
                                     ` : ''}
-         </td>
+                                 </td>
                                 
                                 <td style="background:#f8fafc; vertical-align:top;"><input type="text" id="live_g_${q}_${sIdx}" class="apply-input" value="${fmtFee(s.g)}" oninput="${onInputCode}" onchange="updateLiveFee('${r.id}', ${q}, ${sIdx}, 'g', this.value)"></td>
                                 <td style="background:#f8fafc; vertical-align:top;"><input type="text" id="live_s_${q}_${sIdx}" class="apply-input" value="${fmtFee(s.s)}" oninput="${onInputCode}" onchange="updateLiveFee('${r.id}', ${q}, ${sIdx}, 's', this.value)"></td>
