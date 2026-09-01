@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.2</title>
+    <title>방과후 지원금 돌보미 V13.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -215,7 +215,7 @@
 
         .detail-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); z-index: 2000; flex-direction: column; overflow: hidden; transition: 0.3s; border: 1px solid transparent; }
         .detail-modal.student { width: 98vw; max-width: 1800px; max-height: 90vh; }
-        .detail-modal.subject { width: 820px; max-height: 85vh; }
+              .detail-modal.subject { width: 96vw; max-width: 1100px; max-height: 85vh; }
         
         .detail-header { background: var(--sidebar-bg); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
         .detail-header.critical { background: #ef4444; } 
@@ -961,7 +961,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.2</span>
+                <span class="brand-version">V13.3</span>
             </div>
     </div>
     
@@ -1471,8 +1471,9 @@
         </div>
         <div class="detail-body">
             <div style="font-size: 12.5px; color: #475569; margin-bottom: 16px; background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #d4af37; border-radius:8px; padding:12px 14px; line-height:1.6;">
-                ※ 학생 정보 입력 시 새로운 과목을 타이핑하면 목록에 자동 추가됩니다.<br>
-                ※ 기준 수강료/교재비/재료비를 설정해두면, 나중에 <b>기준단가보다 적게 결제된 금액만큼 학생 상세 내역에서 '수익자 부담금'으로 자동 계산</b>되어 뜹니다.
+                               ※ 학생 정보 입력 시 새로운 과목을 타이핑하면 목록에 자동 추가됩니다.<br>
+                ※ <b>차시</b>를 입력해두면, '환불 관리'에서 환불할 차시 수만 입력해도 <b>환불금액이 자동 계산</b>됩니다. 강사료/수용비까지 입력해두면 환불액도 그 비율로 자동 나뉘어요.<br>
+                ※ 코디마스터로 명단을 업로드할 때는, 실제 결제된 수강료는 항상 코디마스터 파일 값 그대로 가져오고, 여기 등록해둔 <b>기준 수강료와 금액이 정확히 같을 때만</b> 강사료/수용비 비율이 자동으로 나뉘어 들어갑니다. (금액이 다르면 강사료/수용비는 0으로 들어가니 학생 상세 페이지에서 직접 나눠 입력해주세요.)
             </div>
             <div id="subjectBody"></div>
         </div>
@@ -3065,13 +3066,13 @@ function toggleStatusPanel() {
       const tutorialSteps = [
             { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
-            { target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
             { target: 'btn-codimaster-upload', text: '코디마스터-수강료(강좌별)-엑셀내보내기 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
+			{ target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
             { target: 'th-name', text: '학생의 1~4분기 수강 목록과 환불 금액을 적으려면 이름을 클릭하세요', align: 'bottom', type: 'column' },
-            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span><br><br>여기서 <b>교육청 자유수강 관리 엑셀</b>도 자동으로 만들 수 있고, <b style="color:#d4af37;">행정실 수납명단(수익자/초3/자유수강 분류)</b>도 자동으로 생성·저장할 수 있어요!', align: 'bottom' },
+            { target: 'btn-print-export', text: '현재 보이는 화면 그대로 엑셀저장이나 인쇄 하려면 누르세요.<br><span style="color:#fde047; font-weight:bold;">단! 이 엑셀 저장은 명단을 백업 하는 기능이 아닙니다!</span><br><br>여기서 <b>교육청 자유수강 관리 엑셀</b>도 자동으로 만들 수 있고, <b style="color:#f5d94e;">행정실 수납명단(수익자/초3/자유수강 분류)</b>도 자동으로 생성·저장할 수 있어요!', align: 'bottom' },
             { target: 'btn-excel-export', text: '컴퓨터를 바꾸거나 프로그램이 손상됨 방지를 위해 자주 백업(저장) 버튼을 눌러주세요. 환불, 메모 기록도 자동 저장 됩니다.', align: 'right', critical: true }
         ];
         let currentTutorialStep = 0;
@@ -3233,7 +3234,7 @@ function toggleStatusPanel() {
                         document.body.appendChild(tip);
                         
                         // 1.5초 후 말풍선 제거
-                        setTimeout(() => tip.remove(), 2500); 
+                        setTimeout(() => tip.remove(), 3000); 
                     }
                 }, 300);
             }
@@ -3355,7 +3356,7 @@ function toggleStatusPanel() {
                                 onclick="copySubjectFees(${idx})"
                                 onmouseover="this.nextElementSibling.style.opacity='1'; this.nextElementSibling.style.visibility='visible';"
                                 onmouseout="this.nextElementSibling.style.opacity='0'; this.nextElementSibling.style.visibility='hidden';">📋 단가 복사</button>
-                            <span style="visibility:hidden; opacity:0; position:absolute; top:28px; right:0; background:#111827; color:#fff; font-size:11px; font-weight:400; padding:5px 9px; border-radius:5px; white-space:nowrap; transition:opacity 0.15s; pointer-events:none; z-index:10;">다른 과목에 1~4분기 금액을 복사할 수 있습니다</span>
+                            <span style="visibility:hidden; opacity:0; position:absolute; top:28px; right:0; background:#111827; color:#fff; font-size:11px; font-weight:400; padding:5px 9px; border-radius:5px; white-space:nowrap; transition:opacity 0.15s; pointer-events:none; z-index:10;">다른 과목에 1~4분기 금액,차시를 복사할 수 있습니다</span>
                         </span>`;
                     }
                     html += `
@@ -3492,11 +3493,11 @@ function toggleStatusPanel() {
                             <label style="font-size:12px; font-weight:bold; margin-right:8px;">과목명:</label>
                             <input type="text" id="es_name" value="${sub.name}" style="padding:6px 12px; border:1px solid #ccc; border-radius:4px; width:200px;">
                         </div>
-                        <button type="button" class="btn-tool" style="font-size:11px; padding:6px 10px; background:#e0f2fe; color:var(--sidebar-accent); border:1px solid #bae6fd; font-weight:bold;" onclick="copyQ1Fees()">⬇️ 1분기 금액 동일 적용 (2~${maxQuarter}분기)</button>
+                        <button type="button" class="btn-tool" style="font-size:11px; padding:6px 10px; background:#e0f2fe; color:var(--sidebar-accent); border:1px solid #bae6fd; font-weight:bold;" onclick="copyQ1Fees()">⬇️ 1분기 금액,차시 동일 적용 (2~${maxQuarter}분기)</button>
                     </div>
 
                                     <div style="overflow-x:auto; border-radius:8px; border:1px solid #e2e8f0;">
-                    <table class="detail-inner-table" style="background:#f9fafb; min-width:700px;">
+                    <table class="detail-inner-table" style="background:#f9fafb; min-width:950px;">
                         <thead>
                             <tr><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">분기</th>${(()=>{let mpq=getMonthsPerQuarter(); let h=''; for(let m=1;m<=mpq;m++) h+=`<th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:13px;">${m}차<br>차시</th>`; h+=`<th style="color:#b91c1c; font-weight:800; background:#eef2f7; font-size:13px;">차시합계<br><span style="font-size:10px; font-weight:normal; color:#475569;">(자동계산·환불용)</span></th>`; return h;})()}<th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">강사료</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">수용비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 수강료<br><span style="font-size:11px; font-weight:normal; color:#475569;">(강사료+수용비 입력시 자동계산)</span></th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 교재비</th><th style="color:#1e3a5f; font-weight:800; background:#eef2f7; font-size:14px;">기준 재료비</th></tr>
                         </thead>
