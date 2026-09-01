@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.3</title>
+    <title>방과후 지원금 돌보미 V13.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -962,7 +962,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.3</span>
+                <span class="brand-version">V13.4</span>
             </div>
     </div>
     
@@ -3324,6 +3324,7 @@ function toggleStatusPanel() {
       function renderSubjectManagerList() {
             let html = '<button onclick="editSubjectForm(-1)" class="btn-tool" style="margin-bottom:16px; background:#1e3a5f; color:white; border:none; padding:9px 18px; font-weight:700;">+ 새 과목 및 기준단가 추가</button>';
             html += '<button onclick="openMergeSubjectForm()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#1e3a5f; border:1.5px solid #d4af37; padding:9px 18px; font-weight:700;">🔗 과목 통합</button>';
+            html += '<button onclick="deleteAllSubjects()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#dc2626; border:1.5px solid #dc2626; padding:9px 18px; font-weight:700;">🗑️ 모든 과목 지우기</button>';
             html += '<div id="subjectEditArea"></div>';
             html += '<div id="subjectListArea">';
             
@@ -3375,8 +3376,18 @@ function toggleStatusPanel() {
             document.getElementById('subjectBody').innerHTML = html;
         }
 
+               // ✨ 과목 목록 전체 삭제 (쓸모없는 샘플 과목이 많을 때 한번에 정리용)
+        function deleteAllSubjects() {
+            if (savedSubjects.length === 0) return alert('삭제할 과목이 없습니다.');
+            if (!confirm(`등록된 과목 ${savedSubjects.length}개를 전부 삭제하시겠습니까?\n\n⚠️ 이미 학생들에게 등록되어 있는 수강 기록(과목명·금액)은 그대로 남아있고, '과목 목록 관리'에서 단가·차시를 다시 불러오는 기능만 사라집니다.`)) return;
+            savedSubjects.length = 0;
+            persistSubjects();
+            renderSubjectList();
+            renderSubjectManagerList();
+        }
+
         // ✨ 과목 단가(fees) 객체에 1~6분기 키가 항상 존재하도록 보정 (구버전 데이터/4분기 전용 데이터 호환)
-                              function ensureSubjectFees(sub) {
+               function ensureSubjectFees(sub) {
             if(!sub.fees) sub.fees = {};
             if(!sub.sessions) sub.sessions = {};
             let months = getMonthsPerQuarter();
