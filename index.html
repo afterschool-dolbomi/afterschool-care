@@ -7844,13 +7844,16 @@ document.getElementById('fTier').value = r.freeTier || "";
                         });
                         localStorage.setItem('edusync_snapshots', JSON.stringify(snapshots));
                     }
-                    if (bigBackupData.savedSubjects) {
+                        if (bigBackupData.savedSubjects) {
                         bigBackupData.savedSubjects.forEach(sub => {
                             let existing = savedSubjects.find(s => s.name === sub.name);
                             if (existing) {
                                 existing.fees = sub.fees; // ✨ 이미 있는 과목이면 단가(강사료/수용비/수강료 등)를 백업 내용으로 갱신
+                                if (sub.sessions) existing.sessions = sub.sessions; // ✨ 차시(1차/2차/3차)도 백업 내용으로 함께 갱신
+                                ensureSubjectFees(existing);
                             } else {
-                                savedSubjects.push(sub); // ✨ 백업엔 있는데 지금 목록엔 없는 과목은 새로 추가
+                                savedSubjects.push(sub); // ✨ 백업엔 있는데 지금 목록엔 없는 과목은 새로 추가 (차시 포함)
+                                ensureSubjectFees(sub);
                             }
                         });
                         persistSubjects();
