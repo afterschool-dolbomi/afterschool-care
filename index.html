@@ -735,7 +735,7 @@
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; text-align:center; flex-shrink:0;">
                 <div style="width:44px; height:44px; background:rgba(185,28,28,0.15); border:2px solid #b91c1c; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:20px;">➕</div>
                 <div style="color:white; font-size:15.5px; font-weight:800;">환불 내역 추가</div>
-                <div id="mrfMsg" style="color:#94a3b8; font-size:11.5px; margin-top:4px;"></div>
+                <div id="mrfMsg" style="color:#e2e8f0; font-size:15.5px; font-weight:700; margin-top:6px;"></div>
             </div>
             <div style="padding:20px 24px; overflow-y:auto;">
                 <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수)</span></div>
@@ -811,61 +811,63 @@
                 <div style="color:white; font-size:16.5px; font-weight:800;">환불 관리</div>
                 <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">같은 과목 수강생을 한번에 환불하거나, 과목·학생이 서로 달라도 하나씩 담아서 한 번에 차시 환불을 적용할 수 있습니다</div>
             </div>
-            <div style="padding:20px 24px; overflow-y:auto;">
+                       <div style="padding:20px 24px; overflow-y:auto;">
 
-                <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체 환불)</div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
-                    <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
-                    <div id="rqaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">과목 선택</div>
-                    <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
-                        <option value="">과목을 선택하세요</option>
-                    </select>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                        <span style="font-size:11.5px; color:#64748b;">대상 학생 (체크 해제로 제외) <span id="rqaCheckedCount" style="color:#b91c1c; font-weight:800;">0명 선택됨</span></span>
-                        <span style="font-size:11px;">
-                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(true)" style="color:#2563eb; text-decoration:underline; margin-right:6px;">전체선택</a>
-                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(false)" style="color:#94a3b8; text-decoration:underline;">전체해제</a>
-                        </span>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; align-items:start;">
+                    <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px;">
+                        <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체 환불)</div>
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
+                        <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
+                        <div id="rqaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">과목 선택</div>
+                        <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
+                            <option value="">과목을 선택하세요</option>
+                        </select>
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                            <span style="font-size:11.5px; color:#64748b;">대상 학생 (체크 해제로 제외) <span id="rqaCheckedCount" style="color:#b91c1c; font-weight:800;">0명 선택됨</span></span>
+                            <span style="font-size:11px;">
+                                <a href="javascript:void(0)" onclick="toggleAllRqaStudents(true)" style="color:#2563eb; text-decoration:underline; margin-right:6px;">전체선택</a>
+                                <a href="javascript:void(0)" onclick="toggleAllRqaStudents(false)" style="color:#94a3b8; text-decoration:underline;">전체해제</a>
+                            </span>
+                        </div>
+                        <div id="rqaStudentList" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:8px; background:white; margin-bottom:10px; font-size:12px;">
+                            <div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="rqaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="number" id="rqaJ" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="text" id="rqaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                        </div>
+                        <button type="button" onclick="addRqaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">전체 담기</button>
                     </div>
-                    <div id="rqaStudentList" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:8px; background:white; margin-bottom:10px; font-size:12px;">
-                        <div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>
-                    </div>
-                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                        <input type="number" id="rqaGy" placeholder="교재비 환불 (선택)" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="number" id="rqaJ" placeholder="재료비 환불 (선택)" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="text" id="rqaReason" placeholder="환불 사유 입력 (선택)" style="flex:1.6; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <button type="button" onclick="addRqaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">전체 담기</button>
-                    </div>
-                </div>
 
-                               <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">✏️ 개별 담기 (학생마다 과목·차시가 달라도 OK)</div>
-                                        <div style="position:relative; margin-bottom:10px;">
-                        <input type="text" id="riaStudentSearch" oninput="searchRiaStudent()" placeholder="학생 이름 또는 학년반번호 검색" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <div style="font-size:10.5px; color:#94a3b8; margin-top:4px;">예: 3학년 1반 5번 → <b>315</b> 검색</div>
-                        <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
-                    </div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
-                                        <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
-                    <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
-                    <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
-                    <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
-                        <option value="">학생과 분기를 먼저 선택하세요</option>
-                    </select>
-                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                        <input type="number" id="riaGy" placeholder="교재비 환불 (선택)" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="number" id="riaJ" placeholder="재료비 환불 (선택)" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="text" id="riaReason" placeholder="환불 사유 입력(선택)" style="flex:1.6; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <button type="button" onclick="addRiaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">한 명 담기</button>
+                    <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px;">
+                        <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">✏️ 개별 담기 (학생마다 과목·차시가 달라도 OK)</div>
+                        <div style="position:relative; margin-bottom:10px;">
+                            <input type="text" id="riaStudentSearch" oninput="searchRiaStudent()" placeholder="학생 이름 또는 학년반번호 검색" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <div style="font-size:10.5px; color:#94a3b8; margin-top:4px;">예: 3학년 1반 5번 → <b>315</b> 검색</div>
+                            <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
+                        </div>
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
+                        <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
+                        <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
+                            <option value="">학생과 분기를 먼저 선택하세요</option>
+                        </select>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="riaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="number" id="riaJ" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="text" id="riaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                        </div>
+                        <button type="button" onclick="addRiaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">한 명 담기</button>
                     </div>
                 </div>
 
@@ -7129,7 +7131,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                 countEl.innerText = `${refundCart.length}건 (학생 ${uniqueStudents}명) · 합계 ${formatMoney(totalAmount)}`;
             }
                         wrap.innerHTML = `
-                                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:820px;">
+                                                            <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:820px; table-layout:fixed;">
+                    <colgroup>
+                        <col style="width:12%;"><col style="width:6%;"><col style="width:6%;"><col style="width:12%;"><col style="width:6%;"><col style="width:7%;"><col style="width:7%;"><col style="width:22%;"><col style="width:12%;"><col style="width:6%;">
+                    </colgroup>
                     <thead><tr style="background:#f3f4f6;">
                         <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">몇차</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">교재비</th><th style="padding:6px;">재료비</th><th style="padding:6px;">사유</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
                     </tr></thead>
@@ -7144,14 +7149,14 @@ document.getElementById('fTier').value = r.freeTier || "";
                             }
                             let rowTotal = (preview && preview.ok ? preview.amount : 0) + toNum(item.gy) + toNum(item.j);
                             return `<tr style="border-bottom:1px solid #f1f5f9;">
-                                <td style="padding:6px;">${item.studentLabel}</td>
+                                <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.studentLabel}</td>
                                 <td style="padding:6px; text-align:center;">${item.q}분기</td>
                                 <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month}차</td>
-                                <td style="padding:6px;">${item.subjectName}${warn}</td>
-                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:50px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
-                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.gy || ''}" style="width:60px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartGy(${idx}, this.value)"></td>
-                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.j || ''}" style="width:60px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartJ(${idx}, this.value)"></td>
-                                <td style="padding:6px;"><input type="text" value="${item.reason || ''}" placeholder="사유" style="width:100px; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px;" onchange="updateRefundCartReason(${idx}, this.value)"></td>
+                                <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.subjectName}${warn}</td>
+                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
+                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.gy || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartGy(${idx}, this.value)"></td>
+                                <td style="padding:6px; text-align:center;"><input type="number" value="${item.j || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartJ(${idx}, this.value)"></td>
+                                <td style="padding:6px;"><input type="text" value="${item.reason || ''}" placeholder="사유" style="width:100%; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px; box-sizing:border-box;" onchange="updateRefundCartReason(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:right; font-weight:700; color:${preview && preview.ok ? '#b91c1c' : '#9ca3af'};">${preview && preview.ok ? formatMoney(rowTotal) : '-'}</td>
                                 <td style="padding:6px; text-align:center;"><button type="button" onclick="removeRefundCartItem(${idx})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">✕</button></td>
                             </tr>`;
