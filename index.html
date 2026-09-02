@@ -2090,7 +2090,7 @@
 
             
             
-             let storedMq = localStorage.getItem('edusync_maxQuarter');
+            let storedMq = localStorage.getItem('edusync_maxQuarter');
             if(storedMq) maxQuarter = parseInt(storedMq);
             if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
             if(maxQuarter === 6) {
@@ -2105,6 +2105,8 @@
             });
 
             migrateRefundLogs(); // ✨ 카트 로그·수기 배분표를 하나의 '환불 내역' 구조로 통합 (1단계, 화면 변화 없음)
+            reconcileRefundLogs(); // ✨ 그 이후에도 어긋난 금액이 생기면 매번 자동 보정
+            repairRefundLogSplitDrift(); // ✨ "미지정" 항목이 중복 생성된 것을 실제 금액은 그대로 두고 한 줄로 정리 (딱 한 번만 실행)
             validateAndFixCalculations();
             renderFormQuarters();
             updateGlobalStats();
@@ -2220,11 +2222,90 @@
                             }
                         }
 
-                        s._refundLogMigratedV2 = true;
+                                                s._refundLogMigratedV2 = true;
                     });
                 }
             });
             if (didMigrate) persistData();
+        }
+
+        // ✨ 어떤 경로로든(과거 데이터, 다른 기능 등) 강사료·수용비·교재비·재료비 합계가 refundLog 기록과 어긋나면,
+        // 매번 실행 시점에 그 차액을 '차 미지정' 항목으로 자동 보정 (migrateRefundLogs와 달리 매번 실행됨)
+             function reconcileRefundLogs() {
+            let didReconcile = false;
+            db.forEach(student => {
+                for (let q = 1; q <= 6; q++) {
+                    let qd = student[`q${q}`];
+                    if (!qd || !qd.subs) continue;
+                    qd.subs.forEach(s => {
+                        if (!s.refundLog) s.refundLog = [];
+                        let loggedG = s.refundLog.reduce((sum, l) => sum + toNum(l.g), 0);
+                        let loggedS = s.refundLog.reduce((sum, l) => sum + toNum(l.s), 0);
+                        let loggedGy = s.refundLog.reduce((sum, l) => sum + toNum(l.gy), 0);
+                        let loggedJ = s.refundLog.reduce((sum, l) => sum + toNum(l.j), 0);
+                        let rG = toNum(s.rG), rS = toNum(s.rS), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
+                        // ✨ 강사료/수용비는 따로 비교하지 않고 합계(수강료)로만 부족분을 판단 (배분만 살짝 어긋난 경우 새 항목이 또 생기는 것 방지)
+                        let untrackedSu = Math.max(0, (rG + rS) - (loggedG + loggedS));
+                        let untrackedGy = Math.max(0, rGy - loggedGy);
+                        let untrackedJ = Math.max(0, rJ - loggedJ);
+                        if (untrackedSu + untrackedGy + untrackedJ > 0.5) {
+                            let addG = Math.max(0, Math.min(untrackedSu, rG - loggedG));
+                            let addS = untrackedSu - addG;
+                            s.refundLog.push({
+                                date: new Date().toISOString().slice(0,10), month: undefined, reason: '',
+                                g: addG, s: addS, gy: untrackedGy, j: untrackedJ,
+                                amount: untrackedSu, source: 'manual'
+                            });
+                            didReconcile = true;
+                        }
+                    });
+                }
+            });
+                       if (didReconcile) persistData();
+        }
+
+        // ✨ 같은 과목 안에 "몇차 미지정" 항목이 여러 개 쌓여 중복(비율 계산 오차로 생긴 자투리 항목 포함)된 경우,
+        // 실제 rG/rS/rGy/rJ 금액은 절대 건드리지 않고 딱 그 금액에 맞는 미지정 항목 하나로 합쳐서 정리 (딱 한 번만 실행)
+        function repairRefundLogSplitDrift() {
+            if (localStorage.getItem('edusync_refundlog_split_repair_v1')) return;
+            let didRepair = false;
+            db.forEach(student => {
+                for (let q = 1; q <= 6; q++) {
+                    let qd = student[`q${q}`];
+                    if (!qd || !qd.subs) continue;
+                    qd.subs.forEach(s => {
+                        if (!s.refundLog || s.refundLog.length < 2) return;
+                        let untagged = s.refundLog.filter(l => l.month === undefined || l.month === null);
+                        let tagged = s.refundLog.filter(l => !(l.month === undefined || l.month === null));
+                        if (untagged.length < 2) return;
+                        let loggedTaggedG = tagged.reduce((sum,l)=>sum+toNum(l.g),0);
+                        let loggedTaggedS = tagged.reduce((sum,l)=>sum+toNum(l.s),0);
+                        let loggedTaggedGy = tagged.reduce((sum,l)=>sum+toNum(l.gy),0);
+                        let loggedTaggedJ = tagged.reduce((sum,l)=>sum+toNum(l.j),0);
+                        let mergedG = Math.max(0, toNum(s.rG) - loggedTaggedG);
+                        let mergedS = Math.max(0, toNum(s.rS) - loggedTaggedS);
+                        let mergedGy = Math.max(0, toNum(s.rGy) - loggedTaggedGy);
+                        let mergedJ = Math.max(0, toNum(s.rJ) - loggedTaggedJ);
+                        if (mergedG + mergedS + mergedGy + mergedJ <= 0) {
+                            s.refundLog = tagged;
+                            didRepair = true;
+                            return;
+                        }
+                        let reasons = untagged.map(l => (l.reason||'').trim()).filter(Boolean);
+                        let mergedEntry = {
+                            date: untagged[0].date || new Date().toISOString().slice(0,10),
+                            month: undefined,
+                            reason: reasons.length ? [...new Set(reasons)].join(', ') : '',
+                            g: mergedG, s: mergedS, gy: mergedGy, j: mergedJ,
+                            amount: mergedG + mergedS, source: 'manual'
+                        };
+                        s.refundLog = tagged.concat([mergedEntry]);
+                        didRepair = true;
+                    });
+                }
+            });
+            localStorage.setItem('edusync_refundlog_split_repair_v1', '1');
+            if (didRepair) persistData();
         }
 
         // ✨ 과거 모드일 때 실데이터 덮어쓰기 방지 (매우 중요)
