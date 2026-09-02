@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.7</title>
+    <title>방과후 지원금 돌보미 V13.8</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -743,7 +743,7 @@
 
                 <div style="font-size:14px; color:#dc2626; font-weight:800; margin-bottom:10px;">⚠️ 수강료(강사료·수용비)는 아래 두 방법 중 한 가지로만 입력해주세요.</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                        <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+                        <div style="border:2px solid #d4af37; border-radius:8px; padding:10px;">
                         <div style="font-size:11.5px; font-weight:800; color:#1e3a5f; margin-bottom:8px;">✏️ 수강료 직접 입력</div>
                         <div style="font-size:11px; color:#64748b; margin-bottom:4px;">수강료 (나누지 않고 총액만 입력해도 OK)</div>
                         <input type="number" id="mrfSu" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box; margin-bottom:8px;" oninput="onMrfSuInput()">
@@ -758,7 +758,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+                                       <div style="border:2px solid #d4af37; border-radius:8px; padding:10px;">
                         <div style="font-size:11.5px; font-weight:800; color:#1e3a5f; margin-bottom:8px;">🧮 수강료 자동계산 <span style="background:#2563eb; color:white; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:10px; margin-left:2px; vertical-align:middle;">추천</span></div>
                         <div style="font-size:11px; color:#64748b; margin-bottom:4px;">환불할 차시 수</div>
                         <input type="number" id="mrfSessionCount" placeholder="예: 2" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfSessionCountInput()">
@@ -803,8 +803,8 @@
         </div>
     </div>
 
-    <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:720px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
+       <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:96%; max-width:980px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
                 <button onclick="closeRefundManagerModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
                 <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🔄</div>
@@ -1062,7 +1062,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.7</span>
+                <span class="brand-version">V13.8</span>
             </div>
     </div>
     
@@ -6200,12 +6200,12 @@ document.getElementById('fTier').value = r.freeTier || "";
                                                 return `<tr>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;">${it.subjectName}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
-                                                    <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${eg ? formatMoney(eg) : '-'}</td>
+                                                                                                        <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${eg ? formatMoney(eg) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${es ? formatMoney(es) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${egy ? formatMoney(egy) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${ej ? formatMoney(ej) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; font-weight:800; color:#b91c1c;">${formatMoney(eTotal)}</td>
-                                                    <td style="padding:6px; border:1px solid #e5e7eb;">${l.reason || ''}</td>
+                                                    <td style="padding:6px; border:1px solid #e5e7eb;"><input type="text" value="${l.reason || ''}" placeholder="사유 입력" style="width:100%; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px; box-sizing:border-box;" onchange="updateRefundLogReason('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)"></td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center;"><button type="button" onclick="deleteRefundLogEntry('${r.id}', ${q}, ${it.sIdx}, ${it.li})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">🗑️</button></td>
                                                 </tr>`;
                                             }).join('')}
@@ -6847,8 +6847,8 @@ document.getElementById('fTier').value = r.freeTier || "";
                     c.alignment = {horizontal:'center', vertical:'middle'};
                 });
                 rows.sort((a,b) => (a.grade-b.grade)||(a.classNum-b.classNum)||(a.studentNum-b.studentNum));
-                rows.forEach(r => {
-                    let row = ws.addRow([r.subject, r.grade, r.classNum, r.studentNum, r.name, '', r.su, r.gy, r.j, r.amount, r.note]);
+                    rows.forEach(r => {
+                    let row = ws.addRow([r.subject, r.grade, r.classNum, r.studentNum, r.name, r.note, r.su, r.gy, r.j, r.amount, '']);
                     [7,8,9,10].forEach(c => row.getCell(c).numFmt = '#,##0');
                     row.eachCell(cell => {
                         cell.font = {name:'맑은 고딕', size:12};
@@ -7220,11 +7220,8 @@ document.getElementById('fTier').value = r.freeTier || "";
                 s.rGy = toNum(s.rGy) + addGy;
                 s.rJ = toNum(s.rJ) + addJ;
 
-                if (!s.refundLog) s.refundLog = [];
+                 if (!s.refundLog) s.refundLog = [];
                 s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '', g: addG, s: addS, gy: addGy, j: addJ, source: 'cart' });
-
-                let memoNote = `[${today}] ${item.q}분기 ${item.month}차 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})${(addGy || addJ) ? ` [교재비 ${formatMoney(addGy)} / 재료비 ${formatMoney(addJ)}]` : ''}${item.reason ? ' - ' + item.reason : ''}`;
-                r.memo = r.memo ? (r.memo + '\n' + memoNote) : memoNote;
 
                 appliedCount++;
             });
@@ -7306,9 +7303,17 @@ document.getElementById('fTier').value = r.freeTier || "";
             closeRefundLogMonthModal();
             showDetailModal(id);
         }
-        function closeRefundLogMonthModal() {
+                function closeRefundLogMonthModal() {
             document.getElementById('refundLogMonthModal').style.display = 'none';
             refundLogMonthCtx = null;
+        }
+        function updateRefundLogReason(id, q, sIdx, li, val) {
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s || !s.refundLog || !s.refundLog[li]) return;
+            s.refundLog[li].reason = val;
+            persistData();
         }
 
         function setSessionRatio(id, q, sIdx) {
