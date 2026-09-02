@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.6</title>
+    <title>방과후 지원금 돌보미 V13.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -730,25 +730,24 @@
             </div>
         </div>
     </div>
+
       <div id="refundMonthTagModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:460px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
-            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; text-align:center; flex-shrink:0;">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
+            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:22px 24px 18px; text-align:center;">
                 <div style="width:44px; height:44px; background:rgba(220,38,38,0.15); border:2px solid #dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:20px;">🏷️</div>
-                <div style="color:white; font-size:15.5px; font-weight:800;">수기환불, 몇 차에 배분할지 적어주세요</div>
+                <div style="color:white; font-size:15.5px; font-weight:800;">몇 차 환불인지 태그해주세요</div>
                 <div id="rmtMsg" style="color:#94a3b8; font-size:11.5px; margin-top:4px;"></div>
             </div>
-            <div style="padding:20px 24px; overflow-y:auto;">
-                <div style="font-size:12px; color:#6b7280; margin-bottom:12px; line-height:1.5;">수기로 입력한 환불금액은 나중에 월별 강사료·수용비 정산서를 만들 때 꼭 필요해서, 총 수기환불금액을 몇 차(월)에 얼마씩 배분했는지 적어주세요. 같은 과목에서 서로 다른 차에 여러 번 수기환불이 생겨도 각각 나눠서 적을 수 있어요.</div>
-                <div id="rmtSumInfo" style="font-size:12.5px; font-weight:800; margin-bottom:12px; padding:8px 10px; border-radius:6px;"></div>
-                <div id="rmtAllocRows"></div>
-                <button onclick="closeRefundMonthTagModal()" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#94a3b8; font-weight:700; cursor:pointer; font-size:12.5px; margin-top:4px;">나중에 배분하기</button>
-                <button onclick="saveManualRefundAlloc()" style="width:100%; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13px; margin-top:8px;">저장</button>
+            <div style="padding:20px 24px;">
+                <div style="font-size:12px; color:#6b7280; margin-bottom:12px; line-height:1.5;">수기로 입력한 환불금액은 나중에 월별 강사료·수용비 정산서를 만들 때 꼭 필요해서, 몇 차(월) 환불인지 표시해두어야 해요.</div>
+                <div id="rmtButtons" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:16px;"></div>
+                <button onclick="closeRefundMonthTagModal()" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#94a3b8; font-weight:700; cursor:pointer; font-size:12.5px;">나중에 태그하기</button>
             </div>
         </div>
     </div>
 
-        <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:720px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
+    <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
                 <button onclick="closeRefundManagerModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
                 <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🔄</div>
@@ -777,9 +776,8 @@
                     <div id="rqaStudentList" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:8px; background:white; margin-bottom:10px; font-size:12px;">
                         <div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>
                     </div>
-                                        <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:center;">
                         <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="text" id="rqaReason" placeholder="환불 사유 입력 (선택)" style="flex:1.6; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
                         <button type="button" onclick="addRqaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">전체 담기</button>
                     </div>
                 </div>
@@ -798,9 +796,8 @@
                     <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                         <option value="">학생과 분기를 먼저 선택하세요</option>
                     </select>
-                                        <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:center;">
                         <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                        <input type="text" id="riaReason" placeholder="환불 사유 입력(선택)" style="flex:1.6; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
                         <button type="button" onclick="addRiaToCart()" style="padding:8px 16px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px; white-space:nowrap;">한 명 담기</button>
                     </div>
                 </div>
@@ -810,45 +807,12 @@
                     <div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>
                 </div>
 
-                               <div style="display:flex; gap:8px;">
+                <div style="display:flex; gap:8px;">
                     <button onclick="closeRefundManagerModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">닫기</button>
                     <button onclick="applyRefundCart()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#b91c1c; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(185,28,28,0.35);">전체 적용</button>
                 </div>
             </div>
                </div>
-    </div>
-
-    <div id="refundRosterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
-            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
-                <button onclick="closeRefundRosterModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
-                <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🧾</div>
-                <div style="color:white; font-size:16.5px; font-weight:800;">환불 명단 엑셀 저장</div>
-                <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">분기만 고르면 그 분기 환불 전체가, 차까지 고르면 그 차 환불만 걸러져서 나옵니다</div>
-            </div>
-            <div style="padding:20px 24px; overflow-y:auto;">
-                <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
-                <div id="rrQBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:14px;"></div>
-                <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">몇 차 환불만 볼지 선택 ('전체'=분기 전체 환불)</div>
-                <div id="rrMonthBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:14px;"></div>
-
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                    <span style="font-size:11.5px; color:#64748b;">환불 목록 (체크 해제로 명단에서 제외) <span id="rrCheckedCount" style="color:#b91c1c; font-weight:800;"></span></span>
-                    <span style="font-size:11px;">
-                        <a href="javascript:void(0)" onclick="toggleAllRrItems(true)" style="color:#2563eb; text-decoration:underline; margin-right:6px;">전체선택</a>
-                        <a href="javascript:void(0)" onclick="toggleAllRrItems(false)" style="color:#94a3b8; text-decoration:underline;">전체해제</a>
-                    </span>
-                </div>
-                <div id="rrListWrap" style="max-height:260px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:6px 8px; background:white; margin-bottom:16px;">
-                    <div style="color:#9ca3af; text-align:center; padding:20px;">분기를 먼저 선택하세요.</div>
-                </div>
-
-                <div style="display:flex; gap:8px;">
-                    <button onclick="closeRefundRosterModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">닫기</button>
-                    <button onclick="generateRefundRoster()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#b91c1c; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(185,28,28,0.35);">명단 생성</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="refundToast" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(30,58,95,0.92); color:white; padding:16px 28px; border-radius:12px; font-size:14px; font-weight:700; z-index:100000; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; pointer-events:none;"></div>
@@ -998,7 +962,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.6</span>
+                <span class="brand-version">V13.4</span>
             </div>
     </div>
     
@@ -1610,8 +1574,7 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <!-- ✨ 교육청 제출 서식 엑셀 버튼 추가 -->
                 <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
-                               <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
-                <button class="btn-save" style="background: #b91c1c; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); openRefundRosterModal();">🧾 환불 명단 엑셀 저장</button>
+                <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
                 <button class="btn-tool" style="width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #ffffff; display: flex; justify-content: center; align-items: center;" onclick="closePrintExportModal(); window.print();">🖨️ 종이 인쇄</button>
             </div>
@@ -5840,11 +5803,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                                                let fmtFee = (v) => v ? v.toLocaleString() : ''; // ✨ 일반 입력칸용 콤마 포맷
 
                                                 // ✨ 수기 환불분이 있는데 몇차 태그가 안 돼 있으면 설명문구+버튼, 태그돼 있으면 태그 표시(클릭해서 변경 가능)
-                                                let manualUntagged = computeManualUntaggedRefund(s);
-                        let manualAllocSum = s.manualAlloc ? Object.values(s.manualAlloc).reduce((sum, a) => sum + toNum(a.amount), 0) : 0;
+                        let manualUntagged = computeManualUntaggedRefund(s);
                         let refTagHtml = (refTotal > 0 && manualUntagged > 0)
-                            ? (manualAllocSum >= manualUntagged
-                                ? `<div class="no-print" style="font-size:9px; color:#1e40af; font-weight:800; margin-top:3px; cursor:pointer;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">🏷️ 배분완료 (변경)</div>`
+                            ? (s.rMonth
+                                ? `<div class="no-print" style="font-size:9px; color:#1e40af; font-weight:800; margin-top:3px; cursor:pointer;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">🏷️ ${s.rMonth}차 (변경)</div>`
                                                                                                     : `<div class="no-print" style="font-size:10px; color:white; font-weight:800; margin-top:3px; cursor:pointer; background:#dc2626; border-radius:4px; padding:2px 4px; text-align:center;" onclick="openRefundMonthTagPicker('${r.id}', ${q}, ${sIdx})">⚠️태그필요</div>`)
                             : '';
 
@@ -6233,14 +6195,12 @@ document.getElementById('fTier').value = r.freeTier || "";
             renderRqaQuarterBtns();
             renderRqaMonthBtns();
             renderRqaSubjectOptions();
-                        document.getElementById('rqaSessionCount').value = '';
-            document.getElementById('rqaReason').value = '';
+            document.getElementById('rqaSessionCount').value = '';
             document.getElementById('rqaStudentList').innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
 
             document.getElementById('riaStudentSearch').value = '';
             document.getElementById('riaStudentResults').style.display = 'none';
             document.getElementById('riaSessionCount').value = '';
-            document.getElementById('riaReason').value = '';
             renderRiaQuarterBtns();
             renderRiaMonthBtns();
             renderRiaSubjectSelect();
@@ -6261,370 +6221,43 @@ document.getElementById('fTier').value = r.freeTier || "";
 
         let refundTagCtx = null; // {id, q, sIdx}
 
-                function openRefundMonthTagPicker(id, q, sIdx) {
+        function openRefundMonthTagPicker(id, q, sIdx) {
             let r = db.find(x => x.id == id);
             if (!r) return;
             let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
             if (!s) return;
             refundTagCtx = { id, q, sIdx };
             document.getElementById('rmtMsg').innerText = `${r.name} · ${q}분기 · ${s.name || ''}`;
-            if (!s.manualAlloc) s.manualAlloc = {};
             let months = getMonthsPerQuarter();
-            let wrap = document.getElementById('rmtAllocRows');
+            let wrap = document.getElementById('rmtButtons');
+            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
             let html = '';
             for (let m = 1; m <= months; m++) {
-                let a = s.manualAlloc[m] || {};
-                html += `
-                <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <span style="font-weight:800; font-size:13px; color:#1e3a5f; width:32px; flex-shrink:0;">${m}차</span>
-                        <input type="number" id="rmtAmt_${m}" value="${a.amount || ''}" placeholder="배분 금액" style="flex:1; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;" oninput="updateRmtSumDisplay()">
-                    </div>
-                    <input type="text" id="rmtReason_${m}" value="${a.reason || ''}" placeholder="사유 (선택)" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px; box-sizing:border-box;">
-                </div>`;
+                let isOn = (s.rMonth === m);
+                let style = isOn
+                    ? 'padding:12px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:13px;'
+                    : 'padding:12px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
+                html += `<button type="button" style="${style}" onclick="confirmRefundMonthTag(${m})">${m}차</button>`;
             }
             wrap.innerHTML = html;
-            updateRmtSumDisplay();
             document.getElementById('refundMonthTagModal').style.display = 'flex';
-        }
-        function updateRmtSumDisplay() {
-            if (!refundTagCtx) return;
-            let { id, q, sIdx } = refundTagCtx;
-            let r = db.find(x => x.id == id);
-            let s = r && r[`q${q}`] && r[`q${q}`].subs[sIdx];
-            if (!s) return;
-            let total = computeManualUntaggedRefund(s);
-            let months = getMonthsPerQuarter();
-            let sum = 0;
-            for (let m = 1; m <= months; m++) {
-                let el = document.getElementById(`rmtAmt_${m}`);
-                if (el) sum += toNum(el.value);
-            }
-            let info = document.getElementById('rmtSumInfo');
-            if (!info) return;
-            let diff = total - sum;
-            if (diff === 0) {
-                info.style.background = '#dcfce7'; info.style.color = '#166534';
-                info.innerText = `배분 합계 ${formatMoney(sum)} / 총 ${formatMoney(total)}원 · 배분 완료`;
-            } else if (diff > 0) {
-                info.style.background = '#fef3c7'; info.style.color = '#92400e';
-                info.innerText = `배분 합계 ${formatMoney(sum)} / 총 ${formatMoney(total)}원 · ${formatMoney(diff)}원 남음`;
-            } else {
-                info.style.background = '#fee2e2'; info.style.color = '#991b1b';
-                info.innerText = `배분 합계 ${formatMoney(sum)} / 총 ${formatMoney(total)}원 · ${formatMoney(-diff)}원 초과됨`;
-            }
         }
         function closeRefundMonthTagModal() {
             document.getElementById('refundMonthTagModal').style.display = 'none';
             refundTagCtx = null;
         }
-                function saveManualRefundAlloc() {
+        function confirmRefundMonthTag(m) {
             if (!refundTagCtx) return;
             let { id, q, sIdx } = refundTagCtx;
             let r = db.find(x => x.id == id);
             if (!r) return;
             let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
             if (!s) return;
-            let total = computeManualUntaggedRefund(s);
-            let months = getMonthsPerQuarter();
-            let sum = 0;
-            let newAlloc = {};
-            for (let m = 1; m <= months; m++) {
-                let amtEl = document.getElementById(`rmtAmt_${m}`);
-                let reasonEl = document.getElementById(`rmtReason_${m}`);
-                let amt = amtEl ? toNum(amtEl.value) : 0;
-                let reason = reasonEl ? reasonEl.value.trim() : '';
-                if (amt > 0 || reason) newAlloc[m] = { amount: amt, reason };
-                sum += amt;
-            }
-            if (sum > total) {
-                if (!confirm(`배분한 합계(${formatMoney(sum)})가 총 수기환불금액(${formatMoney(total)})보다 많습니다.\n그래도 저장할까요?`)) return;
-            }
-            s.manualAlloc = newAlloc;
+            s.rMonth = m;
             persistData();
             document.getElementById('refundMonthTagModal').style.display = 'none';
             refundTagCtx = null;
             showDetailModal(id);
-        }
-
-              // ===== 환불 명단 엑셀 저장 =====
-        let refundRosterState = { q: null, month: 0 }; // month: 0 = 전체(분기 전체), 1/2/3 = 그 차만
-        let refundRosterItems = [];
-
-        function openRefundRosterModal() {
-            refundRosterState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, month: 0 };
-            renderRefundRosterQBtns();
-            renderRefundRosterMonthBtns();
-            renderRefundRosterList();
-            document.getElementById('refundRosterModal').style.display = 'flex';
-        }
-        function closeRefundRosterModal() {
-            document.getElementById('refundRosterModal').style.display = 'none';
-        }
-        function renderRefundRosterQBtns() {
-            let wrap = document.getElementById('rrQBtns');
-            let html = '';
-            for (let q = 1; q <= maxQuarter; q++) {
-                let isOn = (refundRosterState.q === q);
-                let style = isOn
-                    ? 'padding:10px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13px;'
-                    : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
-                html += `<button type="button" style="${style}" onclick="selectRefundRosterQuarter(${q})">${q}분기</button>`;
-            }
-            wrap.innerHTML = html;
-        }
-        function selectRefundRosterQuarter(q) {
-            refundRosterState.q = q;
-            refundRosterState.month = 0; // ✨ 분기를 새로 고르면 '전체'부터 다시 보여줌
-            renderRefundRosterQBtns();
-            renderRefundRosterMonthBtns();
-            renderRefundRosterList();
-        }
-        function renderRefundRosterMonthBtns() {
-            let wrap = document.getElementById('rrMonthBtns');
-            let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
-            let allOn = (refundRosterState.month === 0);
-            let html = `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${allOn ? '#d4af37' : '#cbd5e1'}; background:${allOn ? '#1e3a5f' : 'white'}; color:${allOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(0)">전체</button>`;
-            for (let m = 1; m <= months; m++) {
-                let isOn = (refundRosterState.month === m);
-                html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${isOn ? '#2563eb' : '#cbd5e1'}; background:${isOn ? '#1e40af' : 'white'}; color:${isOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(${m})">${m}차</button>`;
-            }
-            wrap.innerHTML = html;
-        }
-        function selectRefundRosterMonth(m) {
-            refundRosterState.month = m;
-            renderRefundRosterMonthBtns();
-            renderRefundRosterList();
-        }
-
-        // ✨ 학생-과목의 환불액 중, 선택한 "차"(월)에 해당하는 수강료/교재비/재료비 몫만 추출 (month=0이면 분기 전체)
-            function getRefundPortionForMonth(s, month) {
-            let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
-            if (!month) return { su: rSu, gy: rGy, j: rJ };
-            let loggedForMonth = (s.refundLog || []).filter(l => l.month === month).reduce((sum, l) => sum + toNum(l.amount), 0);
-            let loggedTotal = (s.refundLog || []).reduce((sum, l) => sum + toNum(l.amount), 0);
-            let manualSu = Math.max(0, rSu - loggedTotal);
-            let manualTotal = manualSu + rGy + rJ;
-            let allocAmt = (s.manualAlloc && s.manualAlloc[month]) ? toNum(s.manualAlloc[month].amount) : 0;
-            let ratio = manualTotal > 0 ? Math.min(1, allocAmt / manualTotal) : 0;
-            let su = loggedForMonth + manualSu * ratio;
-            let gy = rGy * ratio;
-            let j = rJ * ratio;
-            return { su, gy, j };
-        }
-
-        // ✨ 조건(분기·차)에 맞는 환불 항목을 수익자/초3지원금/자유수강별로 나눠서 목록 생성
-        function computeRefundRosterItems() {
-            let q = refundRosterState.q, month = refundRosterState.month;
-            if (!q) return [];
-            let qKey = `q${q}`;
-            let items = [];
-            let itemId = 0;
-            db.forEach(r => {
-                if (!r[qKey] || !r[qKey].subs) return;
-                let c = calcStudent(r);
-                r[qKey].subs.forEach((s, sIdx) => {
-                    let subName = (s.name || '').trim();
-                    if (!subName) return;
-                    let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
-                    if (rSu <= 0 && rGy <= 0 && rJ <= 0) return;
-
-                    let portion = getRefundPortionForMonth(s, month);
-                    if (portion.su <= 0 && portion.gy <= 0 && portion.j <= 0) return;
-
-                    let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) ? c.allocs[qKey][sIdx] : {};
-                    let ratioSu = rSu > 0 ? portion.su / rSu : 0;
-                    let ratioGy = rGy > 0 ? portion.gy / rGy : 0;
-                    let ratioJ = rJ > 0 ? portion.j / rJ : 0;
-
-                    let cats = [
-                        { key: 'sk', label: '수익자', su: toNum(alloc.refSkSu), gy: toNum(alloc.refSkGy), j: toNum(alloc.refSkJ) },
-                        { key: 'g3', label: getG3Label(), su: toNum(alloc.refG3Su), gy: toNum(alloc.refG3Gy), j: toNum(alloc.refG3J) },
-                        { key: 'free', label: '자유수강', su: toNum(alloc.refFrSu), gy: toNum(alloc.refFrGy), j: toNum(alloc.refFrJ) },
-                    ];
-
-                    let monthSessions = month
-                        ? (s.refundLog || []).filter(l => l.month === month).reduce((sum, l) => sum + toNum(l.sessions || 0), 0)
-                        : (s.refundLog || []).reduce((sum, l) => sum + toNum(l.sessions || 0), 0);
-
-                    // ✨ 카트로 담을 때 적은 사유 + 수기환불 태그 사유를 합쳐서 표시 (없으면 기존처럼 차시 수로 표시)
-                    let reasonList = [];
-                    (s.refundLog || []).forEach(l => {
-                        if (month && l.month !== month) return;
-                        let rtxt = (l.reason || '').trim();
-                        if (rtxt && !reasonList.includes(rtxt)) reasonList.push(rtxt);
-                    });
-                                       if (s.manualAlloc) {
-                        Object.keys(s.manualAlloc).forEach(mKey => {
-                            if (month && Number(mKey) !== month) return;
-                            let a = s.manualAlloc[mKey];
-                            let mtxt = a && (a.reason || '').trim();
-                            if (mtxt && !reasonList.includes(mtxt)) reasonList.push(mtxt);
-                        });
-                    }
-                    let reasonText = reasonList.length > 0 ? reasonList.join(', ') : (monthSessions > 0 ? `${monthSessions}차시환불` : '');
-
-                    cats.forEach(cat => {
-                        let su = Math.round(cat.su * ratioSu);
-                        let gy = Math.round(cat.gy * ratioGy);
-                        let j = Math.round(cat.j * ratioJ);
-                        let amount = su + gy + j;
-                        if (amount <= 0) return;
-                        items.push({
-                            id: itemId++, studentId: r.id, sIdx, category: cat.key, categoryLabel: cat.label,
-                            grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name,
-                            subject: subName, su, gy, j, amount,
-                            note: reasonText,
-                            checked: true
-                        });
-                    });
-                });
-            });
-            items.sort((a,b) => (a.grade-b.grade)||(a.classNum-b.classNum)||(a.studentNum-b.studentNum));
-            return items;
-        }
-
-        function renderRefundRosterList() {
-            refundRosterItems = computeRefundRosterItems();
-            let wrap = document.getElementById('rrListWrap');
-            if (!refundRosterState.q) {
-                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">분기를 먼저 선택하세요.</div>';
-                updateRefundRosterCheckedCount();
-                return;
-            }
-            if (refundRosterItems.length === 0) {
-                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">해당 조건의 환불 내역이 없습니다.</div>';
-                updateRefundRosterCheckedCount();
-                return;
-            }
-            let catColor = { sk: '#b91c1c', g3: '#0284c7', free: '#9333ea' };
-            wrap.innerHTML = refundRosterItems.map(it => `
-                <label style="display:flex; align-items:center; gap:8px; padding:6px 4px; cursor:pointer; border-bottom:1px solid #f1f5f9; font-size:12.5px;">
-                    <input type="checkbox" class="rr-item-chk" data-id="${it.id}" checked onchange="onRrItemToggle(${it.id}, this.checked)">
-                    <span style="width:60px; flex-shrink:0;">${it.grade}-${it.classNum}-${it.studentNum}</span>
-                    <span style="width:50px; flex-shrink:0; font-weight:600;">${it.name}</span>
-                    <span style="flex:1;">${it.subject}</span>
-                    <span style="width:60px; flex-shrink:0; font-weight:700; color:${catColor[it.category]};">${it.categoryLabel}</span>
-                    <span style="width:80px; flex-shrink:0; text-align:right; font-weight:700; color:#b91c1c;">${formatMoney(it.amount)}</span>
-                </label>
-            `).join('');
-            updateRefundRosterCheckedCount();
-        }
-        function onRrItemToggle(id, checked) {
-            let item = refundRosterItems.find(it => it.id === id);
-            if (item) item.checked = checked;
-            updateRefundRosterCheckedCount();
-        }
-        function toggleAllRrItems(checked) {
-            document.querySelectorAll('.rr-item-chk').forEach(el => { el.checked = checked; });
-            refundRosterItems.forEach(it => it.checked = checked);
-            updateRefundRosterCheckedCount();
-        }
-        function updateRefundRosterCheckedCount() {
-            let el = document.getElementById('rrCheckedCount');
-            if (!el) return;
-            let checked = refundRosterItems.filter(it => it.checked);
-            el.innerText = checked.length > 0 ? `${checked.length}건 선택됨 · 합계 ${formatMoney(checked.reduce((s,it)=>s+it.amount,0))}` : '';
-        }
-
-        async function generateRefundRoster() {
-            let checked = refundRosterItems.filter(it => it.checked);
-            if (checked.length === 0) return alert('명단에 포함할 항목이 없습니다.');
-            let q = refundRosterState.q, month = refundRosterState.month;
-            let titleQM = month ? `${q}분기 ${month}차` : `${q}분기`;
-
-            const wb = new ExcelJS.Workbook();
-
-                        let wsSum = wb.addWorksheet(safeSheetName(`합계${month ? ' -'+month : ''}`));
-                        wsSum.mergeCells(2,2,2,7);
-            let sumTitleCell = wsSum.getCell(2,2);
-            sumTitleCell.value = `${titleQM}  반환`;
-            sumTitleCell.font = { name:'맑은 고딕', bold: true, size: 19 };
-            sumTitleCell.alignment = { horizontal:'center', vertical:'middle' };
-            sumTitleCell.border = {top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
-
-            let sumBy = { sk: {su:0,gy:0,j:0}, g3: {su:0,gy:0,j:0}, free: {su:0,gy:0,j:0} };
-            checked.forEach(it => { sumBy[it.category].su += it.su; sumBy[it.category].gy += it.gy; sumBy[it.category].j += it.j; });
-
-            let hRow = wsSum.getRow(4);
-                ['수익자','금액', getG3Label(), '금액', '자유수강 지원금', '금액'].forEach((v,i) => {
-                let c = hRow.getCell(2+i);
-                c.value = v;
-                c.font = {name:'맑은 고딕', bold:true, size:14};
-                c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFC3D69B'}};
-                c.alignment = {horizontal:'center', vertical:'middle'};
-                c.border = {top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
-            });
-            [['교육비반환','su'], ['교재비반환','gy'], ['재료비반환','j']].forEach(([label, key], i) => {
-                let row = wsSum.getRow(5+i);
-                row.getCell(2).value = label; row.getCell(3).value = sumBy.sk[key];
-                row.getCell(4).value = label; row.getCell(5).value = sumBy.g3[key];
-                row.getCell(6).value = label; row.getCell(7).value = sumBy.free[key];
-                    [2,3,4,5,6,7].forEach(c => {
-                    let cell = row.getCell(c);
-                    cell.font = {name:'맑은 고딕', size:14};
-                    cell.alignment = {horizontal:'center', vertical:'middle'};
-                    cell.border = {top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
-                });
-                [3,5,7].forEach(c => row.getCell(c).numFmt = '#,##0');
-            });
-                       wsSum.columns = [{width:2.125},{width:14},{width:10},{width:16},{width:14},{width:20},{width:14},{width:10}];
-
-            function buildDetailSheet(sheetName, titleText, catKey) {
-                let rows = checked.filter(it => it.category === catKey);
-                let ws = wb.addWorksheet(safeSheetName(sheetName));
-                ws.mergeCells(1,1,1,11);
-                let titleCell = ws.getCell(1,1);
-                titleCell.value = `${new Date().getFullYear()}년  ${titleQM}  ${titleText} `;
-                titleCell.font = { name:'맑은 고딕', bold: true, size: 23 };
-                titleCell.alignment = { horizontal:'center', vertical:'middle' };
-                titleCell.border = { bottom:{style:'thin'} };
-                ws.getRow(1).height = 34;
-                ws.getRow(2).height = 19;
-                let hr = ws.getRow(2);
-                ['부서명','학년','반','번호','이름','사유','수강료','교재비','재료비','합계','비고'].forEach((h,i) => {
-                    let c = hr.getCell(i+1);
-                    c.value = h; c.font = {name:'맑은 고딕', size:15};
-                    c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFC3D69B'}};
-                    c.border = {top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
-                    c.alignment = {horizontal:'center', vertical:'middle'};
-                });
-                rows.sort((a,b) => (a.grade-b.grade)||(a.classNum-b.classNum)||(a.studentNum-b.studentNum));
-                rows.forEach(r => {
-                    let row = ws.addRow([r.subject, r.grade, r.classNum, r.studentNum, r.name, '', r.su, r.gy, r.j, r.amount, r.note]);
-                    [7,8,9,10].forEach(c => row.getCell(c).numFmt = '#,##0');
-                    row.eachCell(cell => {
-                        cell.font = {name:'맑은 고딕', size:12};
-                        cell.alignment = {horizontal:'center', vertical:'middle'};
-                        cell.border = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}};
-                    });
-                });
-                if (rows.length > 0) {
-                    let totalRow = ws.addRow(['합계','','','','','', rows.reduce((s,r)=>s+r.su,0), rows.reduce((s,r)=>s+r.gy,0), rows.reduce((s,r)=>s+r.j,0), rows.reduce((s,r)=>s+r.amount,0), '']);
-                    ws.mergeCells(totalRow.number, 1, totalRow.number, 5);
-                        totalRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
-                        cell.font = {name:'맑은 고딕', size: colNum <= 6 ? 14 : 12};
-                        cell.alignment = {horizontal:'center', vertical:'middle'};
-                        cell.border = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}};
-                        if (colNum <= 6) cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFC3D69B'}};
-                        else if (colNum <= 10) cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFFFFF00'}};
-                    });
-                }
-                               ws.columns = [{width:18},{width:7},{width:7},{width:7},{width:11},{width:18},{width:10.5},{width:10.5},{width:10.5},{width:11},{width:19.75}];
-            }
-            buildDetailSheet('수익자-반환', '수익자  반환', 'sk');
-            buildDetailSheet(`${getG3Label()} 반환`, `${getG3Label()} 반환`, 'g3');
-            buildDetailSheet('지원금반환', '자유수강 반환', 'free');
-
-            const buffer = await wb.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: 'application/octet-stream' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${titleQM}_환불명단_${new Date().toISOString().slice(0,10)}.xlsx`;
-            link.click();
-
-            closeRefundRosterModal();
         }
 
         // ✨ 차시당 환불금액 계산 (학생 실제 결제 수강료 ÷ 총차시, 10원 단위 올림)
@@ -6746,13 +6379,12 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.querySelectorAll('.rqa-student-chk').forEach(el => el.checked = checked);
             updateRqaCheckedCount();
         }
-                           function addRqaToCart() {
+               function addRqaToCart() {
             if (!rqaState.q) return alert('분기를 선택해주세요.');
             if (!rqaState.month) return alert('몇 차 환불인지 선택해주세요. (정산서 작성에 필요합니다)');
             if (!rqaState.subject) return alert('과목을 선택해주세요.');
             let sessionCount = toNum(document.getElementById('rqaSessionCount').value);
             if (!sessionCount || sessionCount <= 0) return alert('환불할 차시 수를 입력해주세요.');
-            let reason = (document.getElementById('rqaReason').value || '').trim();
             let checked = Array.from(document.querySelectorAll('.rqa-student-chk:checked')).map(el => el.value);
             if (checked.length === 0) return alert('담을 학생을 한 명 이상 선택해주세요.');
             checked.forEach(val => {
@@ -6760,7 +6392,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                 let sIdx = Number(sIdxStr);
                 let r = db.find(x => x.id == rid);
                 if (!r) return;
-                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount, reason });
+                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount });
             });
             renderRefundCartTable();
             showRefundToast(checked.length);
@@ -6841,13 +6473,11 @@ document.getElementById('fTier').value = r.freeTier || "";
             let sessionCount = toNum(document.getElementById('riaSessionCount').value);
             if (!sessionCount || sessionCount <= 0) return alert('환불할 차시 수를 입력해주세요.');
 
-                       let r = db.find(x => x.id == riaState.studentId);
+            let r = db.find(x => x.id == riaState.studentId);
             let s = r[`q${riaState.q}`].subs[sIdx];
-            let reason = (document.getElementById('riaReason').value || '').trim();
-                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount, reason });
+                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount });
             renderRefundCartTable();
             document.getElementById('riaSessionCount').value = '';
-            document.getElementById('riaReason').value = '';
             showRefundToast(1);
         }
 
@@ -6866,10 +6496,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                 let totalAmount = previews.reduce((sum, p) => sum + (p && p.ok ? p.amount : 0), 0);
                 countEl.innerText = `${refundCart.length}건 (학생 ${uniqueStudents}명) · 합계 ${formatMoney(totalAmount)}`;
             }
-                        wrap.innerHTML = `
-                                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:680px;">
+            wrap.innerHTML = `
+                                <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:560px;">
                     <thead><tr style="background:#f3f4f6;">
-                        <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">몇차</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">사유</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
+                        <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">몇차</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
                     </tr></thead>
                     <tbody>
                         ${refundCart.map((item, idx) => {
@@ -6886,7 +6516,6 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month}차</td>
                                 <td style="padding:6px;">${item.subjectName}${warn}</td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:50px; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
-                                <td style="padding:6px;"><input type="text" value="${item.reason || ''}" placeholder="사유" style="width:100px; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px;" onchange="updateRefundCartReason(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:right; font-weight:700; color:${preview && preview.ok ? '#b91c1c' : '#9ca3af'};">${preview && preview.ok ? formatMoney(preview.amount) : '-'}</td>
                                 <td style="padding:6px; text-align:center;"><button type="button" onclick="removeRefundCartItem(${idx})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">✕</button></td>
                             </tr>`;
@@ -6898,9 +6527,6 @@ document.getElementById('fTier').value = r.freeTier || "";
         function updateRefundCartSessionCount(idx, val) {
             refundCart[idx].sessionCount = toNum(val);
             renderRefundCartTable();
-        }
-        function updateRefundCartReason(idx, val) {
-            refundCart[idx].reason = val;
         }
         function removeRefundCartItem(idx) {
             refundCart.splice(idx, 1);
@@ -6943,9 +6569,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                     s.rSu = preview.existingRSu + preview.amount;
                 }
                 if (!s.refundLog) s.refundLog = [];
-                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '' });
+                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month });
 
-                let memoNote = `[${today}] ${item.q}분기 ${item.month}차 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})${item.reason ? ' - ' + item.reason : ''}`;
+                let memoNote = `[${today}] ${item.q}분기 ${item.month}차 ${item.subjectName} ${item.sessionCount}차시 환불 적용 (${formatMoney(preview.amount)})`;
                 r.memo = r.memo ? (r.memo + '\n' + memoNote) : memoNote;
 
                 appliedCount++;
@@ -7150,8 +6776,8 @@ document.getElementById('fTier').value = r.freeTier || "";
             }
 
             let afterManual = computeManualUntaggedRefund(s);
-            // ✨ 수기 환불(카트 자동적용분 제외)이 0으로 돌아가면 배분표도 함께 초기화
-            if (afterManual <= 0) { s.manualAlloc = {}; }
+            // ✨ 수기 환불(카트 자동적용분 제외)이 0으로 돌아가면 몇차 태그도 함께 초기화
+            if (afterManual <= 0) { s.rMonth = undefined; }
             
             let scrollWrap2 = document.getElementById('receiptScrollWrap_' + q);
             let scrollPos2 = scrollWrap2 ? scrollWrap2.scrollLeft : 0;
@@ -7179,9 +6805,8 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 let newWrap2 = document.getElementById('receiptScrollWrap_' + q);
                 if(newWrap2) newWrap2.scrollLeft = scrollPos2;
 
-                 // ✨ 금액을 새로 늘렸는데 기존 배분 합계로 다 못 채우면 다시 배분하도록 유도 (줄이거나 지울 때는 팝업 없이 조용히 처리 - 표의 배지로만 안내)
-                let allocSumNow = s.manualAlloc ? Object.values(s.manualAlloc).reduce((sum, a) => sum + toNum(a.amount), 0) : 0;
-                if (afterManual > 0 && afterManual > beforeManual && allocSumNow < afterManual) {
+                // ✨ 금액을 새로 늘렸을 때만 태그를 유도 (줄이거나 지울 때는 팝업 없이 조용히 처리 - 표의 배지로만 안내)
+                if (afterManual > 0 && afterManual > beforeManual && !s.rMonth) {
                     openRefundMonthTagPicker(id, q, sIdx);
                 }
             }, 0);
