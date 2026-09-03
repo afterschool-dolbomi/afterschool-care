@@ -6946,9 +6946,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                         cell.border = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}};
                     });
                 });
-                if (rows.length > 0) {
+                               if (rows.length > 0) {
                     let totalRow = ws.addRow(['합계','','','','','', rows.reduce((s,r)=>s+r.su,0), rows.reduce((s,r)=>s+r.gy,0), rows.reduce((s,r)=>s+r.j,0), rows.reduce((s,r)=>s+r.amount,0), '']);
                     ws.mergeCells(totalRow.number, 1, totalRow.number, 5);
+                    [7,8,9,10].forEach(c => totalRow.getCell(c).numFmt = '#,##0');
                         totalRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
                         cell.font = {name:'맑은 고딕', size: colNum <= 6 ? 14 : 12};
                         cell.alignment = {horizontal:'center', vertical:'middle'};
@@ -6961,7 +6962,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             }
             buildDetailSheet('수익자-반환', '수익자  반환', 'sk');
             buildDetailSheet(`${getG3Label()} 반환`, `${getG3Label()} 반환`, 'g3');
-            buildDetailSheet('지원금반환', '자유수강 반환', 'free');
+            buildDetailSheet('자유수강 반환', '자유수강 반환', 'free');
 
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -7210,7 +7211,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             refundCart = [];
             renderRefundCartTable();
         }
-                                    function renderRefundCartTable() {
+            function renderRefundCartTable() {
             let wrap = document.getElementById('refundCartTable');
             let countEl = document.getElementById('refundCartCount');
             if (refundCart.length === 0) {
@@ -8377,8 +8378,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     b: targetQs.map(qNum => {
                                         let qObj = r[`q${qNum}`] || {subs:[]};
                                         return qObj.subs.map(x => ({
-                                            su:x.burdenSu, gy:x.burdenGy, j:x.burdenJ,
+                                             su:x.burdenSu, gy:x.burdenGy, j:x.burdenJ,
                                             rG:x.rG||0, rS:x.rS||0, rSu:x.rSu||0, rGy:x.rGy||0, rJ:x.rJ||0,
+                                            refundLog: x.refundLog || [],
                                             isNew:x.isNew||null,
                                             // ✨ 수기 입력값 백업 보존
                                             mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
@@ -8746,8 +8748,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 let sIdx = currentStudent[`q${q}`].subs.length;
                                 
 								
-																let bSu, bGy, bJ;
+								let bSu, bGy, bJ;
                                 let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
+                                let refundLog = [];
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
                                 let sessionRatioEnabled, totalSessions, coveredSessions; // ✨ 차시 비율 적용 복원용 변수
@@ -8756,6 +8759,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     let bk = currentStudent._backupBurdens[q-1][sIdx];
                                     bSu = bk.su; bGy = bk.gy; bJ = bk.j;
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
+                                    refundLog = bk.refundLog || [];
                                     isNewTime = bk.isNew || uploadTime;
                                     
                                     // ✨ 수기입력 복원
@@ -8769,7 +8773,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     coveredSessions = bk.coveredSessions;
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions });
+                                                               currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
