@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V13.8</title>
+    <title>방과후 지원금 돌보미 V13.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -928,7 +928,7 @@
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:340px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
                            <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 차시 비율 적용</div>
             <div style="font-size:12.5px; color:#4b5563; line-height:1.6; margin-bottom:16px; background:#eff6ff; border-radius:8px; padding:10px;">
-                이번 분기에 이 과목이 실제로 진행되는 <b>총 수업 횟수(차시)</b>와, 그중 <b>지원 대상 기간에 해당하는 차시 수</b>를 입력하세요.<br><br>
+                <b>분기 중간에 지원자로 선정된 경우</b><br>이번 분기에 이 과목이 실제로 진행되는 <b>총 수업 횟수(차시)</b>와, 그중 <b>지원 대상 기간에 해당하는 차시 수</b>를 입력하세요.<br><br>
                 예) 이번 분기 총 12차시 중, 지원기간은 8차시만 해당된다면 → 총차시 12, 지원차시 8<br><br>
                 입력한 비율만큼만 자동으로 지원금이 적용되고, 나머지는 본인부담으로 처리됩니다.
             </div>
@@ -1067,7 +1067,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V13.8</span>
+                <span class="brand-version">V13.9</span>
             </div>
     </div>
     
@@ -6270,24 +6270,27 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 ? `<div style="font-size:12.5px; color:#9ca3af; padding:10px; background:#f9fafb; border-radius:6px; border:1px solid var(--border-color);">이 분기에 등록된 환불 내역이 없습니다.</div>`
                                                                 : `<div style="border:1px solid #e2e8f0; border-radius:8px; overflow-x:auto;">
                                                                        <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:640px;">
-                                        <colgroup>
-                                            <col style="width:14%;"><col style="width:8%;"><col style="width:10%;"><col style="width:10%;"><col style="width:10%;"><col style="width:10%;"><col style="width:10%;"><col style="width:20%;"><col style="width:8%;">
+                                                                               <colgroup>
+                                        <col style="width:13%;"><col style="width:7%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:18%;"><col style="width:7%;">
                                         </colgroup>
                                         <thead><tr style="background:#fef3c7;">
-                                            <th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">과목</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">몇차</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">강사료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">수용비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">교재비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">재료비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">합계</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">사유</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">삭제</th>
+                                            <th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">과목</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">몇차</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">강사료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">수용비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#0f766e;">수강료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">교재비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">재료비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">합계</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">사유</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">삭제</th>
                                         </tr></thead>
                                         <tbody>
-                                            ${refundHistoryItems.map(it => {
+                                                ${refundHistoryItems.map(it => {
                                                 let l = it.entry;
                                                 let eg = toNum(l.g), es = toNum(l.s), egy = toNum(l.gy), ej = toNum(l.j);
-                                                let eTotal = eg + es + egy + ej;
+                                                let eSu = toNum(l.amount);
+                                                let isUnsplitSu = (eg === 0 && es === 0 && eSu > 0);
+                                                let eTotal = eSu + egy + ej;
                                                 let srcBadge = l.source === 'cart' ? '<span title="환불 관리(카트)로 적용" style="font-size:10px;">🛒</span>' : '<span title="수기 입력" style="font-size:10px;">✏️</span>';
                                                                                                 let monthHtml = l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>';
                                                 return `<tr>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;">${it.subjectName}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
-                                                                                                        <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${eg ? formatMoney(eg) : '-'}</td>
+                                                    <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${eg ? formatMoney(eg) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${es ? formatMoney(es) : '-'}</td>
+                                                    <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; color:#0f766e; font-weight:700;">${isUnsplitSu ? formatMoney(eSu) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${egy ? formatMoney(egy) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${ej ? formatMoney(ej) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; font-weight:800; color:#b91c1c;">${formatMoney(eTotal)}</td>
@@ -6604,17 +6607,12 @@ document.getElementById('fTier').value = r.freeTier || "";
             }
             let r = db.find(x => x.id == id);
             let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
-            let g0 = s ? toNum(s.g) : 0, s0 = s ? toNum(s.s) : 0;
-            let addG, addS;
-            if (g0 > 0 || s0 > 0) {
-                let gRatio = g0 / (g0 + s0);
-                addG = Math.min(calc.amount, Math.ceil((calc.amount * gRatio) / 10) * 10);
-                addS = calc.amount - addG;
-            } else {
-                addG = 0; addS = calc.amount;
-            }
+            let split = s ? splitSuByRatio(calc.amount, getSubjectGSRatioSource(s, q)) : { g: 0, s: 0 };
+            let addG = split.g, addS = split.s;
             preview.style.color = '#1e3a5f';
-            preview.innerText = `${count}차시 → 강사료 ${formatMoney(addG)} + 수용비 ${formatMoney(addS)} = 총 ${formatMoney(calc.amount)}`;
+            preview.innerText = (addG === 0 && addS === 0 && calc.amount > 0)
+                ? `${count}차시 → 수강료 ${formatMoney(calc.amount)}`
+                : `${count}차시 → 강사료 ${formatMoney(addG)} + 수용비 ${formatMoney(addS)} = 총 ${formatMoney(calc.amount)}`;
         }
         function closeManualRefundModal() {
             document.getElementById('manualRefundModal').style.display = 'none';
@@ -6643,40 +6641,33 @@ document.getElementById('fTier').value = r.freeTier || "";
             if (suMethodCount > 1) return alert('수강료(강사료·수용비)는 한 가지 방법으로만 입력해주세요.');
             if (suMethodCount === 0 && gy <= 0 && j <= 0) return alert('환불 금액을 하나 이상 입력해주세요.');
 
-            let sessions;
-            if (hasAuto) {
+                        let sessions;
+            let suAmount = 0;
+            if (hasGS) {
+                suAmount = g + sVal;
+            } else if (hasAuto) {
                 let preview = computeSessionRefund(id, q, sIdx, sessionCount);
                 if (!preview || !preview.ok) return alert('이 과목은 총 차시 수가 설정되지 않아 자동계산할 수 없습니다. (과목 목록 관리에서 총 차시를 먼저 입력해주세요)');
-                let g0 = toNum(s.g), s0 = toNum(s.s);
-                if (g0 > 0 || s0 > 0) {
-                    let gRatio = g0 / (g0 + s0);
-                    g = Math.min(preview.amount, Math.ceil((preview.amount * gRatio) / 10) * 10);
-                    sVal = preview.amount - g;
-                } else {
-                    g = 0; sVal = preview.amount;
-                }
+                suAmount = preview.amount;
+                let split = splitSuByRatio(suAmount, getSubjectGSRatioSource(s, q));
+                g = split.g; sVal = split.s;
                 sessions = sessionCount;
             } else if (hasSuOnly) {
-                let g0 = toNum(s.g), s0 = toNum(s.s);
-                if (g0 > 0 || s0 > 0) {
-                    let gRatio = g0 / (g0 + s0);
-                    g = Math.min(suDirect, Math.ceil((suDirect * gRatio) / 10) * 10);
-                    sVal = suDirect - g;
-                } else {
-                    g = 0; sVal = suDirect;
-                }
+                suAmount = suDirect;
+                let split = splitSuByRatio(suAmount, getSubjectGSRatioSource(s, q));
+                g = split.g; sVal = split.s;
             }
 
             s.rG = toNum(s.rG) + g;
             s.rS = toNum(s.rS) + sVal;
-            s.rSu = toNum(s.rG) + toNum(s.rS);
+            s.rSu = toNum(s.rSu) + suAmount;
             s.rGy = toNum(s.rGy) + gy;
             s.rJ = toNum(s.rJ) + j;
 
             if (!s.refundLog) s.refundLog = [];
             let entry = {
                 date: new Date().toISOString().slice(0,10),
-                month, reason, g, s: sVal, gy, j, amount: g + sVal, source: 'manual'
+                month, reason, g, s: sVal, gy, j, amount: suAmount, source: 'manual'
             };
             if (sessions !== undefined) entry.sessions = sessions;
             s.refundLog.push(entry);
@@ -6985,8 +6976,28 @@ document.getElementById('fTier').value = r.freeTier || "";
             let totalSessions = toNum(s.totalSessions) || masterSessions;
             if (sessionCount > 0 && !totalSessions) return { ok:false };
             let perSessionSu = totalSessions ? Math.ceil((toNum(s.su) / totalSessions) / 10) * 10 : 0;
-            let amount = perSessionSu * sessionCount;
+                        let amount = perSessionSu * sessionCount;
             return { ok:true, amount, totalSessions, perSessionSu, hasSessionRatio: !!s.sessionRatioEnabled, existingRSu: toNum(s.rSu) };
+        }
+
+        // ✨ 강사료/수용비 분리 비율 소스 결정: 학생 자체에 강사료/수용비가 있으면 그대로, 없으면 과목목록관리의 같은 분기 단가가 이 학생 수강료와 정확히 같을 때만 그 비율을 사용. 둘 다 아니면 null(미분류 → 수강료로만 처리)
+        function getSubjectGSRatioSource(s, q) {
+            let g0 = toNum(s.g), s0 = toNum(s.s);
+            if (g0 > 0 || s0 > 0) return { g: g0, s: s0 };
+            let master = savedSubjects.find(x => x.name === s.name);
+            if (master && master.fees && master.fees[q] && toNum(master.fees[q].su) === toNum(s.su)) {
+                let mg = toNum(master.fees[q].g) || 0, ms = toNum(master.fees[q].s) || 0;
+                if (mg > 0 || ms > 0) return { g: mg, s: ms };
+            }
+            return null;
+        }
+        // ✨ 위 비율로 환불액을 강사료/수용비로 나눔 (강사료 10원단위 올림, 수용비는 나머지). 비율 소스가 없으면 나누지 않고 0/0 반환(수강료 미분류)
+        function splitSuByRatio(amount, ratioSrc) {
+            if (!ratioSrc || amount <= 0) return { g: 0, s: 0 };
+            let gRatio = ratioSrc.g / (ratioSrc.g + ratioSrc.s);
+            let g = Math.min(amount, Math.ceil((amount * gRatio) / 10) * 10);
+            let s = amount - g;
+            return { g, s };
         }
 
                function showRefundToast(count) {
@@ -7303,19 +7314,12 @@ document.getElementById('fTier').value = r.freeTier || "";
                     if (!ok) { skippedByUser++; return; }
                 }
 
-                 let g0 = toNum(s.g), s0 = toNum(s.s);
-                let addG = 0, addS = 0;
-                if (g0 > 0 || s0 > 0) {
-                    // ✨ 강사료/수용비가 나눠 등록된 과목이면, 환불금액도 같은 비율로 나눔 (강사료 10원단위 올림, 수용비는 나머지)
-                    let gRatio = g0 / (g0 + s0);
-                    addG = Math.min(preview.amount, Math.ceil((preview.amount * gRatio) / 10) * 10);
-                    addS = preview.amount - addG;
-                    s.rG = toNum(s.rG) + addG;
-                    s.rS = toNum(s.rS) + addS;
-                    s.rSu = toNum(s.rG) + toNum(s.rS);
-                } else {
-                    s.rSu = preview.existingRSu + preview.amount;
-                }
+                // ✨ 강사료/수용비가 나눠 등록된 과목이거나, 과목목록관리의 같은 분기 단가가 이 학생 수강료와 정확히 같으면 그 비율로 나누고, 아니면 나누지 않고 수강료로만 기록
+                let split = splitSuByRatio(preview.amount, getSubjectGSRatioSource(s, item.q));
+                let addG = split.g, addS = split.s;
+                s.rG = toNum(s.rG) + addG;
+                s.rS = toNum(s.rS) + addS;
+                s.rSu = toNum(s.rSu) + preview.amount;
                 let addGy = toNum(item.gy), addJ = toNum(item.j);
                 s.rGy = toNum(s.rGy) + addGy;
                 s.rJ = toNum(s.rJ) + addJ;
