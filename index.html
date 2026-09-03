@@ -871,7 +871,10 @@
                     </div>
                 </div>
 
-                <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">🧾 담은 환불 목록 <span id="refundCartCount" style="font-size:12px; color:#b91c1c; font-weight:800;"></span></div>
+                              <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🧾 담은 환불 목록 <span id="refundCartCount" style="font-size:12px; color:#b91c1c; font-weight:800;"></span></span>
+                    <button type="button" onclick="clearRefundCart()" style="padding:5px 10px; border-radius:6px; border:1px solid #cbd5e1; background:white; color:#64748b; font-weight:700; cursor:pointer; font-size:11.5px;">🧹 카트 비우기</button>
+                </div>
                 <div id="refundCartTable" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:16px; overflow-x:auto;">
                     <div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>
                 </div>
@@ -6475,16 +6478,20 @@ document.getElementById('fTier').value = r.freeTier || "";
             rqaState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, subject: '', month: null };
             riaState = { studentId: null, q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, month: null };
 
-            renderRqaQuarterBtns();
+                       renderRqaQuarterBtns();
             renderRqaMonthBtns();
             renderRqaSubjectOptions();
                         document.getElementById('rqaSessionCount').value = '';
+            document.getElementById('rqaGy').value = '';
+            document.getElementById('rqaJ').value = '';
             document.getElementById('rqaReason').value = '';
             document.getElementById('rqaStudentList').innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
 
             document.getElementById('riaStudentSearch').value = '';
             document.getElementById('riaStudentResults').style.display = 'none';
             document.getElementById('riaSessionCount').value = '';
+            document.getElementById('riaGy').value = '';
+            document.getElementById('riaJ').value = '';
             document.getElementById('riaReason').value = '';
             renderRiaQuarterBtns();
             renderRiaMonthBtns();
@@ -7196,7 +7203,13 @@ document.getElementById('fTier').value = r.freeTier || "";
             showRefundToast(1);
         }
 
-        // ===== 카트(담은 목록) =====
+              // ===== 카트(담은 목록) =====
+        function clearRefundCart() {
+            if (refundCart.length === 0) return;
+            if (!confirm('담은 환불 목록을 모두 비울까요?')) return;
+            refundCart = [];
+            renderRefundCartTable();
+        }
                                     function renderRefundCartTable() {
             let wrap = document.getElementById('refundCartTable');
             let countEl = document.getElementById('refundCartCount');
