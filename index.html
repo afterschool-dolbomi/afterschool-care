@@ -9075,6 +9075,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let currentExStudent = null;
             let skipCurrentStudent = false; 
             let processedKeys = new Set();
+			let currentRowSlot = 0;   // ✅ 추가: 학생별 6줄 중 지금 몇 번째 물리적 줄인지 (0~5)
             
             let uploadTime = Date.now();
             
@@ -9129,15 +9130,15 @@ document.getElementById('fTier').value = r.freeTier || "";
 
                             if (isBackupRestore) {
                                 // ✨ 백업 파일 복원: 과목명 중복 체크 없이, 파일에 적힌 자리(줄) 그대로 덮어씀 (같은 과목이 2번 있어도 정상 반영)
-                                let oldSub = currentExStudent[`q${q}`].subs[idx] || {g:0, s:0, su:0, gy:0, j:0};
+								let targetIdx = (newSub._slotIdx !== undefined) ? newSub._slotIdx : idx;
+                                let oldSub = currentExStudent[`q${q}`].subs[targetIdx] || {g:0, s:0, su:0, gy:0, j:0};
                                 currentExStudent[`q${q}`].g += (toNum(newSub.g) - toNum(oldSub.g));
                                 currentExStudent[`q${q}`].s += (toNum(newSub.s) - toNum(oldSub.s));
                                 currentExStudent[`q${q}`].su += (toNum(newSub.su) - toNum(oldSub.su));
                                 currentExStudent[`q${q}`].gy += (toNum(newSub.gy) - toNum(oldSub.gy));
                                 currentExStudent[`q${q}`].j += (toNum(newSub.j) - toNum(oldSub.j));
-                                // ✨ 버그 수정: newSub.isNew는 위에서 이미 정확히 계산된 값(만료=null 포함)이므로
-                                // 여기서 다시 || uploadTime으로 덮어쓰면 만료된 NEW가 복원 시각으로 재부활함
-                                currentExStudent[`q${q}`].subs[idx] = {...newSub, isNew: newSub.isNew};
+								delete newSub._slotIdx; // 저장용 데이터가 아니므로 제거
+                                currentExStudent[`q${q}`].subs[targetIdx] = {...newSub, isNew: newSub.isNew};
                                 mergedAny = true;
                                 if(!savedSubjects.some(subObj => subObj.name === newSub.name)) {
                                     savedSubjects.push({ name: newSub.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
@@ -9177,6 +9178,10 @@ document.getElementById('fTier').value = r.freeTier || "";
                         while(currentStudent[`q${q}`].subs.length < 6) currentStudent[`q${q}`].subs.push({name:'', g:0, s:0, su:0, gy:0, j:0});
                     }
                     delete currentStudent._backupBurdens;
+                     // ✅ 추가: 슬롯 매칭용 임시값이 저장 데이터에 남지 않도록 정리
+                     for(let q=1; q<=6; q++) {
+                     currentStudent[`q${q}`].subs.forEach(s => delete s._slotIdx);
+                     }
                     db.push(currentStudent); 
                     newCount++;
                 }
@@ -9330,6 +9335,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                             memo: backupData ? (backupData.memo || '') : '',
                             _backupBurdens: backupData ? backupData.b : null
                         };
+						currentRowSlot = 0;   // ✅ 추가: 새 학생 시작하면 슬롯 카운터 리셋
                     }
 
                     if(skipCurrentStudent) return; 
@@ -9346,7 +9352,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                             let gy = toNum(v(baseCol+4)), j = toNum(v(baseCol+5));
                             
                             if(name && currentStudent[`q${q}`].subs.length < 6) {
-                                let sIdx = currentStudent[`q${q}`].subs.length;
+                                let sIdx = currentRowSlot;   // ✅ 이름이 채워진 개수가 아니라 실제 물리적 줄 번호 사용
                                 
 								
 								let bSu, bGy, bJ;
@@ -9377,7 +9383,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     coveredSessions = bk.coveredSessions;
                                 }
 
-                                                               currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions });
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, _slotIdx: sIdx });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
@@ -9390,7 +9396,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                         }
                     }
 					
-					
+					currentRowSlot++;   // ✅ 추가: 다음 물리적 줄로 이동
 					} else {
                     // ✨ 구버전(가로형) 엑셀 양식 지원 종료 차단 및 알림
                     if (rowNumber === 2) {
