@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.2</title>
+    <title>방과후 지원금 돌보미 V14.3</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1068,7 +1068,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.2</span>
+                <span class="brand-version">V14.3</span>
             </div>
     </div>
     
@@ -2141,6 +2141,7 @@
             migrateRefundLogs(); // ✨ 카트 로그·수기 배분표를 하나의 '환불 내역' 구조로 통합 (1단계, 화면 변화 없음)
             reconcileRefundLogs(); // ✨ 그 이후에도 어긋난 금액이 생기면 매번 자동 보정
             repairRefundLogSplitDrift(); // ✨ "미지정" 항목이 중복 생성된 것을 실제 금액은 그대로 두고 한 줄로 정리 (딱 한 번만 실행)
+            repairRefundLogDecimalDrift(); // ✨ 과거에 소수점 원 단위로 저장된 환불 내역을 정수로 정리 (딱 한 번만 실행)
             validateAndFixCalculations();
             renderFormQuarters();
             updateGlobalStats();
@@ -2233,11 +2234,14 @@
                                     if (amt <= 0) return;
                                     allocSum += amt;
                                     let ratio = amt / manualTotal;
-                                    let suPortion = manualSu * ratio;
-                                    let addG = Math.min(suPortion, Math.ceil((suPortion * gRatio) / 10) * 10);
+                                    // ✨ 원 단위 미만 소수점이 그대로 저장되지 않도록 여기서 반올림
+                                    let suPortion = Math.round(manualSu * ratio);
+                                    let gyPortion = Math.round(manualGy * ratio);
+                                    let jPortion = Math.round(manualJ * ratio);
+                                    let addG = Math.min(suPortion, Math.ceil((suPortion * gRatio) / 10 - 1e-6) * 10);
                                     s.refundLog.push({
                                         date: todayStr, month: Number(mKey), reason: s.manualAlloc[mKey].reason || '',
-                                        g: addG, s: suPortion - addG, gy: manualGy * ratio, j: manualJ * ratio,
+                                        g: addG, s: suPortion - addG, gy: gyPortion, j: jPortion,
                                         amount: suPortion, source: 'manual'
                                     });
                                 });
@@ -2246,11 +2250,13 @@
                             let remainder = manualTotal - allocSum;
                             if (remainder > 0.5) {
                                 let ratio = remainder / manualTotal;
-                                let suPortion = manualSu * ratio;
-                                let addG = Math.min(suPortion, Math.ceil((suPortion * gRatio) / 10) * 10);
+                                let suPortion = Math.round(manualSu * ratio);
+                                let gyPortion = Math.round(manualGy * ratio);
+                                let jPortion = Math.round(manualJ * ratio);
+                                let addG = Math.min(suPortion, Math.ceil((suPortion * gRatio) / 10 - 1e-6) * 10);
                                 s.refundLog.push({
                                     date: todayStr, month: undefined, reason: '',
-                                    g: addG, s: suPortion - addG, gy: manualGy * ratio, j: manualJ * ratio,
+                                    g: addG, s: suPortion - addG, gy: gyPortion, j: jPortion,
                                     amount: suPortion, source: 'manual'
                                 });
                             }
@@ -2339,6 +2345,35 @@
                 }
             });
             localStorage.setItem('edusync_refundlog_split_repair_v1', '1');
+            if (didRepair) persistData();
+        }
+
+        // ✨ (신규) 과거 migrateRefundLogs()가 반올림 없이 저장해뒀던 소수점 원 단위 환불 내역을
+        //    화면/엑셀에 "1,675.556원"처럼 표시되지 않도록 딱 한 번 정리한다.
+        //    실제 총 환불액(rG/rS/rGy/rJ)은 건드리지 않고, 항목 안의 표시값만 정수로 반올림한다.
+        function repairRefundLogDecimalDrift() {
+            if (localStorage.getItem('edusync_refundlog_decimal_repair_v1')) return;
+            let didRepair = false;
+            db.forEach(student => {
+                for (let q = 1; q <= 6; q++) {
+                    let qd = student[`q${q}`];
+                    if (!qd || !qd.subs) continue;
+                    qd.subs.forEach(s => {
+                        if (!s.refundLog) return;
+                        s.refundLog.forEach(l => {
+                            let g = toNum(l.g), sVal = toNum(l.s), gy = toNum(l.gy), j = toNum(l.j), amt = toNum(l.amount);
+                            let hasDecimal = !Number.isInteger(g) || !Number.isInteger(sVal) || !Number.isInteger(gy) || !Number.isInteger(j) || !Number.isInteger(amt);
+                            if (!hasDecimal) return;
+                            let rG = Math.round(g);
+                            let rAmount = Math.round(amt);
+                            l.g = rG; l.s = rAmount - rG; // ✨ 강사료+수용비 합계 = 수강료 환불액을 그대로 유지
+                            l.gy = Math.round(gy); l.j = Math.round(j); l.amount = rAmount;
+                            didRepair = true;
+                        });
+                    });
+                }
+            });
+            localStorage.setItem('edusync_refundlog_decimal_repair_v1', '1');
             if (didRepair) persistData();
         }
 
@@ -2615,7 +2650,8 @@
         function splitSuByRatioTs(amount, g0, s0) {
             if ((g0 <= 0 && s0 <= 0) || amount <= 0) return { g: 0, s: 0 };
             let gRatio = g0 / (g0 + s0);
-            let g = Math.min(amount, Math.ceil((amount * gRatio) / 10) * 10);
+            // ✨ 부동소수점 오차 보정 (splitSuByRatio와 동일한 이유)
+            let g = Math.min(amount, Math.ceil((amount * gRatio) / 10 - 1e-6) * 10);
             return { g, s: amount - g };
         }
 
@@ -7346,6 +7382,20 @@ document.getElementById('fTier').value = r.freeTier || "";
             return { su, gy, j };
         }
 
+        // ✨ [su/gy/j 각각] 여러 카테고리(수익자/초3지원금/자유수강)에 같은 비율을 곱해 반올림할 때,
+        //    각자 따로 반올림하면 합계가 전체를 반올림한 값과 1원 정도 어긋날 수 있어서,
+        //    합계가 항상 정확히 맞도록 남는 오차를 가장 금액이 큰 카테고리 하나에 몰아준다.
+        function distributeRatioRounded(values, ratio) {
+            let rounded = values.map(v => Math.round(v * ratio));
+            let sumRaw = values.reduce((a, b) => a + b, 0);
+            let target = Math.round(sumRaw * ratio);
+            let diff = target - rounded.reduce((a, b) => a + b, 0);
+            if (diff !== 0) {
+                let idx = values.reduce((maxIdx, v, i, arr) => (v > arr[maxIdx] ? i : maxIdx), 0);
+                rounded[idx] += diff;
+            }
+            return rounded;
+        }
         // ✨ 조건(분기·차)에 맞는 환불 항목을 수익자/초3지원금/자유수강별로 나눠서 목록 생성
         function computeRefundRosterItems() {
             let q = refundRosterState.q, month = refundRosterState.month;
@@ -7397,10 +7447,12 @@ document.getElementById('fTier').value = r.freeTier || "";
                     }
                     let reasonText = reasonList.length > 0 ? reasonList.join(', ') : (monthSessions > 0 ? `${monthSessions}차시환불` : '');
 
-                    cats.forEach(cat => {
-                        let su = Math.round(cat.su * ratioSu);
-                        let gy = Math.round(cat.gy * ratioGy);
-                        let j = Math.round(cat.j * ratioJ);
+                    // ✨ su/gy/j 각각을 카테고리별로 합계가 정확히 맞도록 한 번에 배분(반올림)
+                    let suParts = distributeRatioRounded(cats.map(c => c.su), ratioSu);
+                    let gyParts = distributeRatioRounded(cats.map(c => c.gy), ratioGy);
+                    let jParts = distributeRatioRounded(cats.map(c => c.j), ratioJ);
+                    cats.forEach((cat, ci) => {
+                        let su = suParts[ci], gy = gyParts[ci], j = jParts[ci];
                         let amount = su + gy + j;
                         if (amount <= 0) return;
                         items.push({
@@ -7590,7 +7642,9 @@ document.getElementById('fTier').value = r.freeTier || "";
         function splitSuByRatio(amount, ratioSrc) {
             if (!ratioSrc || amount <= 0) return { g: 0, s: 0 };
             let gRatio = ratioSrc.g / (ratioSrc.g + ratioSrc.s);
-            let g = Math.min(amount, Math.ceil((amount * gRatio) / 10) * 10);
+            // ✨ 부동소수점 오차 보정: g0/(g0+s0) 나눗셈이 딱 안 떨어질 때 생기는 미세 오차가
+            //    /10 → ceil 단계에서 10원 단위로 부풀려지는 것을 막기 위해 아주 작은 값(1e-6)을 미리 빼준다.
+            let g = Math.min(amount, Math.ceil((amount * gRatio) / 10 - 1e-6) * 10);
             let s = amount - g;
             return { g, s };
         }
