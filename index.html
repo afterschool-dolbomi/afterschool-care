@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.1</title>
+    <title>방과후 지원금 돌보미 V14.2</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1068,7 +1068,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.1</span>
+                <span class="brand-version">V14.2</span>
             </div>
     </div>
     
@@ -9135,7 +9135,9 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 currentExStudent[`q${q}`].su += (toNum(newSub.su) - toNum(oldSub.su));
                                 currentExStudent[`q${q}`].gy += (toNum(newSub.gy) - toNum(oldSub.gy));
                                 currentExStudent[`q${q}`].j += (toNum(newSub.j) - toNum(oldSub.j));
-                                currentExStudent[`q${q}`].subs[idx] = {...newSub, isNew: newSub.isNew || uploadTime};
+                                // ✨ 버그 수정: newSub.isNew는 위에서 이미 정확히 계산된 값(만료=null 포함)이므로
+                                // 여기서 다시 || uploadTime으로 덮어쓰면 만료된 NEW가 복원 시각으로 재부활함
+                                currentExStudent[`q${q}`].subs[idx] = {...newSub, isNew: newSub.isNew};
                                 mergedAny = true;
                                 if(!savedSubjects.some(subObj => subObj.name === newSub.name)) {
                                     savedSubjects.push({ name: newSub.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
@@ -9359,8 +9361,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     bSu = bk.su; bGy = bk.gy; bJ = bk.j;
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
                                     refundLog = bk.refundLog || [];
-                                    isNewTime = bk.isNew || uploadTime;
-                                    
+                                    // ✨ 버그 수정: 백업에 isNew가 null(=이미 NEW 만료됨)로 저장된 과목까지
+                                    // 복원 시각(uploadTime)으로 되살아나 NEW가 계속 뜨던 문제 수정.
+                                    // 'isNew' 키 자체가 없는 구버전 백업일 때만 uploadTime으로 대체.
+                                    isNewTime = ('isNew' in bk) ? bk.isNew : uploadTime;
+
                                     // ✨ 수기입력 복원
                                     mG3Su = bk.mG3Su; mG3Gy = bk.mG3Gy; mG3J = bk.mG3J;
                                     mFreeSu = bk.mFreeSu; mFreeGy = bk.mFreeGy; mFreeJ = bk.mFreeJ;
