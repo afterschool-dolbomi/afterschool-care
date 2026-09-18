@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.5</title>
+    <title>방과후 지원금 돌보미 V14.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1068,7 +1068,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.5</span>
+                <span class="brand-version">V14.6</span>
             </div>
     </div>
     
@@ -2476,6 +2476,7 @@
             const qKey = `q${q}`;
 
             let newCount = 0, mergeCount = 0, freeDetected = 0, skipped = [];
+            let nameMismatches = []; // ✨ NEIS 명단과 학번은 같으나 이름이 다른 경우 기록
 
             // ✨ 1단계: 엑셀은 학생-과목 한 줄씩이라, 먼저 학생별로 묶어줌
             let studentGroups = {};
@@ -2521,7 +2522,17 @@
             });
 
             // ✨ 2단계: 묶인 학생 데이터를 실제 명단(db)에 반영
-            Object.values(studentGroups).forEach(sg => {
+                       Object.values(studentGroups).forEach(sg => {
+                // ✨ 코디마스터에 지원자로 표시되지 않았어도, NEIS 자유수강자 명단(neisList)과 학번이 일치하고
+                // 방과후 통보[O]/유지 상태(제외·통보X·특수반이 아님)이면 자동으로 자유수강 대상으로 인식
+                let neisMatch = neisList.find(s => s.grade === sg.grade && s.classNum === sg.classNum && s.studentNum === sg.studentNum);
+                if (neisMatch && neisMatch.status !== '제외' && neisMatch.status !== '통보X' && neisMatch.status !== '특수반') {
+                    if (!sg.isFree) sg.isFree = true;
+                    if (neisMatch.name.trim() !== sg.name.trim()) {
+                        nameMismatches.push(`${sg.grade}학년 ${sg.classNum}반 ${sg.studentNum}번 (코디마스터: "${sg.name}" / NEIS명단: "${neisMatch.name}")`);
+                    }
+                }
+
                 let ex = db.find(x => x.grade === sg.grade && x.classNum === sg.classNum && x.studentNum === sg.studentNum);
 
                 if (ex) {
@@ -2563,6 +2574,10 @@
             renderGrid();
 
             let msg = `${q}분기 코디마스터(강좌별) 업로드 완료\n총: ${newCount + mergeCount}명 (신규 ${newCount}명, 업데이트 ${mergeCount}명)\n자유수강 자동인식: ${freeDetected}명`;
+            if (nameMismatches.length > 0) {
+                msg += `\n\n[⚠️ 학번은 일치하지만 이름이 다른 학생 - NEIS 명단과 대조 필요]\n` + nameMismatches.slice(0, 15).join('\n');
+                if (nameMismatches.length > 15) msg += `\n... 외 ${nameMismatches.length - 15}건`;
+            }
             if (skipped.length > 0) {
                 msg += `\n\n[⚠️ 처리 못한 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
                 if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
