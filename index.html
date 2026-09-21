@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.6</title>
+    <title>방과후 지원금 돌보미 V14.7</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -606,11 +606,6 @@
 .qs-drag-row.qs-drag-over-top { box-shadow: inset 0 2px 0 0 #4338ca; }
 .qs-drag-row.qs-drag-over-bottom { box-shadow: inset 0 -2px 0 0 #4338ca; }
 		
-		
-		
-		
-
-</script>
     </style>
 	
 	
@@ -1068,7 +1063,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.6</span>
+                <span class="brand-version">V14.7</span>
             </div>
     </div>
     
@@ -4159,11 +4154,12 @@ function toggleStatusPanel() {
        function closeUpdateModal() {}
 
         function persistSubjects() {
+		 if(isTimeTravelMode) return;
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
         }
 
         function baseSubjectName(name) {
-            return String(name || '').replace(/\d+부$/, '').trim(); // ✨ "배드민턴1부" → "배드민턴" (필터 통합용)
+            return String(name || '').replace(/\s*\d+부(\([^)]*\))?$/, '').trim(); // ✨ "배드민턴1부" → "배드민턴" (필터 통합용)
         }
 
         function renderSubjectList() {
@@ -7329,7 +7325,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('manualRefundModal').style.display = 'none';
             manualRefundCtx = null;
         }
-                   function saveManualRefund() {
+            function saveManualRefund() {
             if (!manualRefundCtx) return;
             if (!manualRefundCtx.month) return alert('몇 차 환불인지 선택해주세요.');
             let { id, q, sIdx, month } = manualRefundCtx;
@@ -7367,6 +7363,16 @@ document.getElementById('fTier').value = r.freeTier || "";
                 suAmount = suDirect;
                 let split = splitSuByRatio(suAmount, getSubjectGSRatioSource(s, q));
                 g = split.g; sVal = split.s;
+            }
+
+            if (suAmount > 0 && (toNum(s.rSu) + suAmount) > toNum(s.su)) {
+                return alert('환불하려는 수강료(강사료·수용비) 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.su).toLocaleString() + '원, 기환불액: ' + toNum(s.rSu).toLocaleString() + '원)');
+            }
+            if (gy > 0 && (toNum(s.rGy) + gy) > toNum(s.gy)) {
+                return alert('환불하려는 급식비 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.gy).toLocaleString() + '원, 기환불액: ' + toNum(s.rGy).toLocaleString() + '원)');
+            }
+            if (j > 0 && (toNum(s.rJ) + j) > toNum(s.j)) {
+                return alert('환불하려는 재료비 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.j).toLocaleString() + '원, 기환불액: ' + toNum(s.rJ).toLocaleString() + '원)');
             }
 
             s.rG = toNum(s.rG) + g;
@@ -8046,10 +8052,14 @@ document.getElementById('fTier').value = r.freeTier || "";
                 // ✨ 강사료/수용비가 나눠 등록된 과목이거나, 과목목록관리의 같은 분기 단가가 이 학생 수강료와 정확히 같으면 그 비율로 나누고, 아니면 나누지 않고 수강료로만 기록
                 let split = splitSuByRatio(preview.amount, getSubjectGSRatioSource(s, item.q));
                 let addG = split.g, addS = split.s;
+                let addGy = toNum(item.gy), addJ = toNum(item.j);
+                if (preview.amount > 0 && (toNum(s.rSu) + preview.amount) > toNum(s.su)) { skippedByUser++; return; }
+                if (addGy > 0 && (toNum(s.rGy) + addGy) > toNum(s.gy)) { skippedByUser++; return; }
+                if (addJ > 0 && (toNum(s.rJ) + addJ) > toNum(s.j)) { skippedByUser++; return; }
+
                 s.rG = toNum(s.rG) + addG;
                 s.rS = toNum(s.rS) + addS;
                 s.rSu = toNum(s.rSu) + preview.amount;
-                let addGy = toNum(item.gy), addJ = toNum(item.j);
                 s.rGy = toNum(s.rGy) + addGy;
                 s.rJ = toNum(s.rJ) + addJ;
 
@@ -9590,6 +9600,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('specialModal').style.display = 'none';
         }
         function persistSpecialList() {
+		if(isTimeTravelMode) return;
             localStorage.setItem('edusync_special_list', JSON.stringify(specialList));
         }
 		
@@ -9721,9 +9732,6 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('neisModal').style.display = 'none';
         }
 
-        function persistNeisList() {
-            localStorage.setItem('edusync_neis_list', JSON.stringify(neisList));
-        }
 
         // ✨ [오류 해결] 검색어 변수 위치 수정 (렌더링 시에만 찾도록 분리)
         function renderNeisList() {
@@ -10152,7 +10160,6 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             let newCount = 0; let currentTime = Date.now();
 
-            db.forEach(st => delete st.createdAt);
 
             validList.forEach(st => {
                 let exists = db.some(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
