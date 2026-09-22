@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.7</title>
+    <title>방과후 지원금 돌보미 V14.8</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1063,7 +1063,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.7</span>
+                <span class="brand-version">V14.8</span>
             </div>
     </div>
     
@@ -2027,8 +2027,7 @@
         let currentSubjectViewData = []; 
 
         const defaultSubjects = [
-            "배드민턴", "컴퓨터", "피아노", "미술", "영어", "수학", "생명과학", "로봇과학", "요리", "방송댄스", "음악줄넘기", "바둑", "한자", "축구", "탁구", "바이올린",
-            "큐브", "독서신문논술", "바둑&체스", "미니어쳐&클레이", "토탈공예", "코딩", "주산암산", "미술회화"
+        "댄스1부", "댄스2부", "로봇과학1부", "로봇과학2부", "컴퓨터1부", "컴퓨터2부"
         ];
         let savedSubjects = [];
         let visibleRows = {1:3, 2:3, 3:3, 4:3, 5:3, 6:3}; 
@@ -2556,7 +2555,12 @@
                         memo: '', createdAt: Date.now()
                     };
                     for (let qi = 1; qi <= 6; qi++) newRec[`q${qi}`] = { subs: [{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0}] };
-                    sg.subs.forEach((ps, idx) => { if (idx < 6) newRec[qKey].subs[idx] = ps; });
+                                      sg.subs.forEach((ps, idx) => {
+                        if (idx < 6) newRec[qKey].subs[idx] = ps;
+                        if (!savedSubjects.some(sub => sub.name === ps.name)) {
+                            savedSubjects.push({ name: ps.name, fees: {1:{su:0,gy:0,j:0},2:{su:0,gy:0,j:0},3:{su:0,gy:0,j:0},4:{su:0,gy:0,j:0},5:{su:0,gy:0,j:0},6:{su:0,gy:0,j:0}} });
+                        }
+                    });
                     db.push(newRec);
                     if (sg.isFree) freeDetected++;
                     newCount++;
@@ -4240,6 +4244,7 @@ function toggleStatusPanel() {
             let html = '<button onclick="editSubjectForm(-1)" class="btn-tool" style="margin-bottom:16px; background:#1e3a5f; color:white; border:none; padding:9px 18px; font-weight:700;">+ 새 과목 및 기준단가 추가</button>';
             html += '<button onclick="openMergeSubjectForm()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#1e3a5f; border:1.5px solid #d4af37; padding:9px 18px; font-weight:700;">🔗 과목 통합</button>';
             html += '<button onclick="deleteAllSubjects()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#dc2626; border:1.5px solid #dc2626; padding:9px 18px; font-weight:700;">🗑️ 모든 과목 지우기</button>';
+            html += '<button onclick="sortSubjectsAlpha()" class="btn-tool" style="margin-bottom:16px; margin-left:8px; background:white; color:#1e3a5f; border:1.5px solid #1e3a5f; padding:9px 18px; font-weight:700;">🔤 부서명 가나다순 정렬</button>';
             html += '<div id="subjectEditArea"></div>';
             html += '<div id="subjectListArea">';
             
@@ -4309,6 +4314,18 @@ function toggleStatusPanel() {
             renderSubjectList();
             renderSubjectManagerList();
         }
+
+         // ✨ 부서명(과목명)을 가나다순으로 한번에 정렬 (부서가 많아 드래그로 일일히 정렬하기 힘들 때 사용)
+        function sortSubjectsAlpha() {
+            if (savedSubjects.length === 0) return alert('정렬할 과목이 없습니다.');
+            if (!confirm('과목을 가나다순으로 정렬하시겠습니까?\n\n⚠️ 지금까지 드래그로 정해둔 순서는 사라지고 이름순으로 다시 정렬됩니다.')) return;
+            savedSubjects.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            persistSubjects();
+            renderSubjectList();
+            renderSubjectManagerList();
+        }
+
+
 
         // ✨ 과목 목록 드래그 순서 변경
         let subjectDragSrcIdx = null;
