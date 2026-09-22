@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.8</title>
+    <title>방과후 지원금 돌보미 V14.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -834,10 +834,11 @@
                             <input type="number" id="rqaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                             <input type="number" id="rqaJ" placeholder="재료비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onRqaSessionCountInput()">
                             <input type="text" id="rqaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
+                        <div id="rqaAutoPreview" style="margin-bottom:8px; font-size:11px; color:#9ca3af; line-height:1.5;"></div>
                         <button type="button" onclick="addRqaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">전체 담기</button>
                     </div>
 
@@ -852,17 +853,18 @@
                         <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
                         <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
                         <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
-                        <select id="riaSubjectSelect" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
+                        <select id="riaSubjectSelect" onchange="onRiaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                             <option value="">학생과 분기를 먼저 선택하세요</option>
                         </select>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
                             <input type="number" id="riaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                             <input type="number" id="riaJ" placeholder="재료비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onRiaSessionCountInput()">
                             <input type="text" id="riaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
+                        <div id="riaAutoPreview" style="margin-bottom:8px; font-size:11px; color:#9ca3af; line-height:1.5;"></div>
                         <button type="button" onclick="addRiaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">한 명 담기</button>
                     </div>
                 </div>
@@ -1057,13 +1059,13 @@
         <button class="sidebar-expand-tab" onclick="toggleSidebar()" title="메뉴 펼치기" style="display:none; position:absolute; top:16px; right:8px; width:26px; height:26px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; align-items:center; justify-content:center; padding:0; z-index:30;">
             <span style="display:inline-flex; width:12px; height:10px; border:1.5px solid #d1d5db; border-radius:2px; overflow:hidden;">
                 <span style="width:4px; height:100%; background:#d1d5db; display:inline-block;"></span>
-                <span style="flex:1;"></span>
+                <span style="flex:1;"></span>+
             </span>
         </button>
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.8</span>
+                <span class="brand-version">V14.9</span>
             </div>
     </div>
     
@@ -2731,11 +2733,13 @@
             try { localStorage.setItem('edusync_ts_subject_order_v1', JSON.stringify(tsOrderList || [])); } catch (e) {}
         }
         function getTsBaseNames(q, month) {
-            // ✨ 이번 차에 수업이 있는 부서 목록을, 저장된 순서 → 없으면 과목 등록 순서로
+            // ✨ 이번 차(또는 수강전취소)에 해당하는 부서 목록을, 저장된 순서 → 없으면 과목 등록 순서로
             let seen = {}, natural = [];
             savedSubjects.forEach(sub => {
-                let sq = sub.sessions && sub.sessions[q];
-                if (!sq || toNum(sq[`m${month}`]) <= 0) return;
+                let hasSess = (month === 'pre')
+                    ? (getSubjectTotalSessions(sub, q) > 0)
+                    : !!(sub.sessions && sub.sessions[q] && toNum(sub.sessions[q][`m${month}`]) > 0);
+                if (!hasSess) return;
                 let base = getSubjectBaseName(sub.name);
                 if (!base || seen[base]) return;
                 seen[base] = 1; natural.push(base);
@@ -2846,10 +2850,10 @@
             renderTsMonthBtns();
             renderTsSubjectOrder();
         }
-        function renderTsMonthBtns() {
+                function renderTsMonthBtns() {
             let wrap = document.getElementById('tsMonthBtns');
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
             for (let m = 1; m <= months; m++) {
                 let isOn = (tsState.month === m);
@@ -2858,6 +2862,11 @@
                     : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
                 html += `<button type="button" style="${style}" onclick="selectTsMonth(${m})">${m}차</button>`;
             }
+            let preOn = (tsState.month === 'pre');
+            let preStyle = preOn
+                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
+                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectTsMonth('pre')">수강전취소</button>`;
             wrap.innerHTML = html;
         }
         function selectTsMonth(m) {
@@ -2876,8 +2885,9 @@
 
             let baseMap = {}, order = [];
             savedSubjects.forEach(sub => {
-                let sessQ = sub.sessions && sub.sessions[q];
-                let sessThisMonth = sessQ ? toNum(sessQ[`m${month}`]) : 0;
+                let sessThisMonth = (month === 'pre')
+                    ? getSubjectTotalSessions(sub, q) // ✨ 수강전취소: 특정 달이 아니라 이 분기 총 차시가 있으면 대상
+                    : ((sub.sessions && sub.sessions[q]) ? toNum(sub.sessions[q][`m${month}`]) : 0);
                 if (sessThisMonth <= 0) return;
                 let base = getSubjectBaseName(sub.name);
                 if (!baseMap[base]) { baseMap[base] = []; order.push(base); }
@@ -2891,9 +2901,13 @@
                 let doMerge = mergeParts && sameSess;
                 let rowGroups = [];
                 if (doMerge) {
-                    rowGroups.push({ displayName: `${base}${getTsWeeklyLabel(parts[0].sessThisMonth)}`, subjectNames: parts.map(p => p.name), masterRef: parts[0].sub });
+                    let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(parts[0].sessThisMonth);
+                    rowGroups.push({ displayName: `${base}${labelSuffix}`, subjectNames: parts.map(p => p.name), masterRef: parts[0].sub });
                 } else {
-                    parts.forEach(p => rowGroups.push({ displayName: `${p.name}${getTsWeeklyLabel(p.sessThisMonth)}`, subjectNames: [p.name], masterRef: p.sub }));
+                    parts.forEach(p => {
+                        let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(p.sessThisMonth);
+                        rowGroups.push({ displayName: `${p.name}${labelSuffix}`, subjectNames: [p.name], masterRef: p.sub });
+                    });
                 }
                 groups.push({ base, rowGroups });
             });
@@ -2912,7 +2926,7 @@
                 group.rowGroups.forEach(rg => {
                     rg.contributions = [];
                     let totalSessions = getSubjectTotalSessions(rg.masterRef, q);
-                    let sessThisMonth = (rg.masterRef.sessions && rg.masterRef.sessions[q]) ? toNum(rg.masterRef.sessions[q][`m${month}`]) : 0;
+                    let sessThisMonth = (month === 'pre') ? totalSessions : ((rg.masterRef.sessions && rg.masterRef.sessions[q]) ? toNum(rg.masterRef.sessions[q][`m${month}`]) : 0);
                     if (!totalSessions || !sessThisMonth) { rg.rows = []; return; }
                     // ✨ 이 부서(과목)의 강사료/수용비 분할 기준 (학생별 강사료 재분배에 사용)
                     let tfMasterFee = rg.masterRef.fees && rg.masterRef.fees[q];
@@ -2928,14 +2942,13 @@
                             if (!s.name || rg.subjectNames.indexOf(s.name) === -1) return;
                             let masterSub = savedSubjects.find(x => x.name === s.name);
                             let stTotalSessions = getSubjectTotalSessions(masterSub, q);
-                            let stSessThisMonth = (masterSub && masterSub.sessions && masterSub.sessions[q]) ? toNum(masterSub.sessions[q][`m${month}`]) : 0;
-                            if (!stTotalSessions || !stSessThisMonth) return;
+                            if (!stTotalSessions) return;
+                            if (month !== 'pre') {
+                                let stSessThisMonth = (masterSub && masterSub.sessions && masterSub.sessions[q]) ? toNum(masterSub.sessions[q][`m${month}`]) : 0;
+                                if (!stSessThisMonth) return;
+                            }
                             let su = toNum(s.su);
                             if (!su) return;
-                            let normals = getTsMonthlyNormals(masterSub, q, su);
-                            let monthlyBaseSu = toNum(normals[month]);
-                            if (monthlyBaseSu <= 0) return;
-                            let refundCount = (s.refundLog || []).filter(l => l.month === month).length;
 
                             if (!calc) calc = calcStudent(r);
                             let a = calc.allocs[`q${q}`] && calc.allocs[`q${q}`][sIdx];
@@ -2943,31 +2956,50 @@
                             let quarterNetSu = toNum(a.netSu);
                             if (quarterNetSu <= 0) return;
 
-                            // ✨ 1차부터 순서대로 청구액을 채워 나감
-                            //    - 그 차에 태그된 환불은 그 차에서 뺌 (결석 환불)
-                            //    - 그 차 금액보다 큰 환불(중도 취소)이면 남은 분기 예산만 청구되고 이후 차는 0원
-                            //    - 지원금(초3/자유수강)도 1차부터 순서대로 먼저 소진시키고 모자라면 수익자로 넘김
                             let isYukaTs = (r.freeTier === '육아기근로단축');
-                            let poolG3 = toNum(a.g3Su), poolFr = toNum(a.frSu);
-                            let budget = quarterNetSu;
                             let g3Amt = 0, frAmt = 0, skAmt = 0, thisCharge = 0;
-                            let monthsInQ = getMonthsPerQuarter();
-                            for (let m = 1; m <= monthsInQ; m++) {
-                                let mNormal = toNum(normals[m]);
-                                if (mNormal <= 0) continue;
-                                let mRefund = (s.refundLog || []).filter(l => l.month === m).reduce((sum, l) => sum + toNum(l.amount), 0);
-                                let cap = (mNormal - mRefund > 0) ? (mNormal - mRefund) : mNormal;
-                                let charge = Math.max(0, Math.min(cap, budget));
-                                budget -= charge;
-                                let remain = charge, useG3 = 0, useFr = 0;
+
+                            if (month === 'pre') {
+                                // ✨ 수강전 취소: 몇 차인지 나누지 않고, 이 과목에 남아있는 분기 전체 순수강료를 그대로 청구(환불)액으로 사용
+                                thisCharge = quarterNetSu;
+                                let poolG3 = toNum(a.g3Su), poolFr = toNum(a.frSu);
+                                let remain = thisCharge, useG3 = 0, useFr = 0;
                                 if (isYukaTs) {
-                                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
-                                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                                    useFr = Math.min(poolFr, remain); remain -= useFr;
+                                    useG3 = Math.min(poolG3, remain); remain -= useG3;
                                 } else {
-                                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
-                                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                                    useG3 = Math.min(poolG3, remain); remain -= useG3;
+                                    useFr = Math.min(poolFr, remain); remain -= useFr;
                                 }
-                                if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain; }
+                                g3Amt = useG3; frAmt = useFr; skAmt = remain;
+                            } else {
+                                let normals = getTsMonthlyNormals(masterSub, q, su);
+                                let monthlyBaseSu = toNum(normals[month]);
+                                if (monthlyBaseSu <= 0) return;
+                                // ✨ 1차부터 순서대로 청구액을 채워 나감
+                                //    - 그 차에 태그된 환불은 그 차에서 뺌 (결석 환불)
+                                //    - 그 차 금액보다 큰 환불(중도 취소)이면 남은 분기 예산만 청구되고 이후 차는 0원
+                                //    - 지원금(초3/자유수강)도 1차부터 순서대로 먼저 소진시키고 모자라면 수익자로 넘김
+                                let poolG3 = toNum(a.g3Su), poolFr = toNum(a.frSu);
+                                let budget = quarterNetSu;
+                                let monthsInQ = getMonthsPerQuarter();
+                                for (let m = 1; m <= monthsInQ; m++) {
+                                    let mNormal = toNum(normals[m]);
+                                    if (mNormal <= 0) continue;
+                                    let mRefund = (s.refundLog || []).filter(l => l.month === m).reduce((sum, l) => sum + toNum(l.amount), 0);
+                                    let cap = (mNormal - mRefund > 0) ? (mNormal - mRefund) : mNormal;
+                                    let charge = Math.max(0, Math.min(cap, budget));
+                                    budget -= charge;
+                                    let remain = charge, useG3 = 0, useFr = 0;
+                                    if (isYukaTs) {
+                                        useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                                        useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                                    } else {
+                                        useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                                        useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                                    }
+                                    if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain; }
+                                }
                             }
                             if (thisCharge <= 0) return;
                             let parts2 = [];
@@ -2977,13 +3009,13 @@
                             if (parts2.length === 0) return;
                             let isSplit = parts2.length > 1;
                             let studentLabel = `${r.grade}-${r.classNum}${r.name}`;
-                            // ✨ 강사료는 "이 학생이 이번 달 낸 전체 금액(thisCharge)" 기준으로 딱 한 번만 계산하고,
+                            // ✨ 강사료는 "이 학생이 이번에 내야(또는 돌려받아야) 할 전체 금액(thisCharge)" 기준으로 딱 한 번만 계산하고,
                             //    그 결과를 지원금/수익자 몫 비율대로 10원 단위로 정확히 나눠서
                             //    몫별로 따로 올림 계산했을 때 생기던 합계 불일치를 없앤다.
                             let tfFullSplit = computeTeacherFeeSplit(thisCharge, tfMasterG, tfMasterS, tfHasCustomGS);
                             let tfParts = splitAmountByWeightsIn10Won(tfFullSplit.g, parts2.map(p => p.amount));
                             parts2.forEach((p, pi) => {
-                                rg.contributions.push({ amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, refundCount, isSplit, monthlyBaseSu });
+                                rg.contributions.push({ amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, isSplit });
                             });
                         });
                     });
@@ -3006,8 +3038,12 @@
                     let masterSu = masterFee ? toNum(masterFee.su) : 0;
                     let baseAmt = null;
                     if (masterSu) {
-                        let baseNormals = getTsMonthlyNormals(rg.masterRef, q, masterSu);
-                        baseAmt = toNum(baseNormals[month]) || null;
+                        if (month === 'pre') {
+                            baseAmt = masterSu; // ✨ 수강전취소: 분기 표준 수강료 전체가 기준 금액이 됨
+                        } else {
+                            let baseNormals = getTsMonthlyNormals(rg.masterRef, q, masterSu);
+                            baseAmt = toNum(baseNormals[month]) || null;
+                        }
                     }
                     let ordered = [];
                     if (baseAmt !== null && buckets[baseAmt]) ordered.push(buckets[baseAmt]);
@@ -3026,7 +3062,7 @@
             if (groups.length === 0) return alert('선택한 분기·차에 해당하는 수강 내역이 없습니다. (과목 목록 관리에서 해당 달의 차시가 입력되어 있는지 확인해주세요)');
 
             const wb = new ExcelJS.Workbook();
-            let monthLabel = `${q}분기 ${month}차`;
+            let monthLabel = (month === 'pre') ? `${q}분기 수강전취소` : `${q}분기 ${month}차`;
             const ws = wb.addWorksheet(safeSheetName(`${monthLabel} 교육비`));
 
             const beige = 'FFFBE5D6', blueF = 'FFDBEEF3', greenF = 'FFD0F5BD', purpleF = 'FFE6E0ED', grayF = 'FFD9D9D9';
@@ -7008,7 +7044,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                                 let isUnsplitSu = (eg === 0 && es === 0 && eSu > 0);
                                                 let eTotal = eSu + egy + ej;
                                                 let srcBadge = l.source === 'cart' ? '<span title="환불 관리(카트)로 적용" style="font-size:10px;">🛒</span>' : '<span title="수기 입력" style="font-size:10px;">✏️</span>';
-                                                                                                let monthHtml = l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>';
+                                                let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>');
                                                 return `<tr>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;">${it.subjectName}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
@@ -7220,6 +7256,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('riaGy').value = '';
             document.getElementById('riaJ').value = '';
             document.getElementById('riaReason').value = '';
+            document.getElementById('riaAutoPreview').innerText = '';
             renderRiaQuarterBtns();
             renderRiaMonthBtns();
             renderRiaSubjectSelect();
@@ -7266,8 +7303,13 @@ document.getElementById('fTier').value = r.freeTier || "";
         function renderMrfMonthBtns() {
             let wrap = document.getElementById('mrfMonthBtns');
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
+            let preOn = manualRefundCtx && manualRefundCtx.month === 'pre';
+            let preStyle = preOn
+                ? 'padding:10px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11.5px;'
+                : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11.5px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectMrfMonth('pre')">수강전취소</button>`;
             for (let m = 1; m <= months; m++) {
                 let isOn = manualRefundCtx && manualRefundCtx.month === m;
                 let style = isOn
@@ -7281,6 +7323,21 @@ document.getElementById('fTier').value = r.freeTier || "";
             if (!manualRefundCtx) return;
             manualRefundCtx.month = m;
             renderMrfMonthBtns();
+            if (m === 'pre') autoFillMrfPreCancelSessions();
+        }
+        function autoFillMrfPreCancelSessions() {
+            if (!manualRefundCtx) return;
+            let { id, q, sIdx } = manualRefundCtx;
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s) return;
+            let sub = savedSubjects.find(x => x.name === s.name);
+            let total = sub ? getSubjectTotalSessions(sub, q) : 0;
+            if (total > 0) {
+                document.getElementById('mrfSessionCount').value = total;
+                onMrfSessionCountInput();
+            }
         }
         function onMrfGsInput() {
             let g = toNum(document.getElementById('mrfG').value);
@@ -7327,6 +7384,11 @@ document.getElementById('fTier').value = r.freeTier || "";
             if (!calc || !calc.ok) {
                 preview.style.color = '#dc2626';
                 preview.innerText = '이 과목은 총 차시 수가 설정되지 않아 자동계산할 수 없습니다. (과목 목록 관리에서 총 차시를 먼저 입력해주세요)';
+                return;
+            }
+            if (calc.totalSessions && count > calc.totalSessions) {
+                preview.style.color = '#dc2626';
+                preview.innerText = `⚠️ 차시를 잘못 입력 하였습니다. (이 과목의 분기 총 차시: ${calc.totalSessions}차시)`;
                 return;
             }
             let r = db.find(x => x.id == id);
@@ -7447,13 +7509,15 @@ document.getElementById('fTier').value = r.freeTier || "";
         function renderRefundRosterMonthBtns() {
             let wrap = document.getElementById('rrMonthBtns');
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 2}, 1fr)`;
             let allOn = (refundRosterState.month === 0);
             let html = `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${allOn ? '#d4af37' : '#cbd5e1'}; background:${allOn ? '#1e3a5f' : 'white'}; color:${allOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(0)">전체</button>`;
             for (let m = 1; m <= months; m++) {
                 let isOn = (refundRosterState.month === m);
                 html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${isOn ? '#2563eb' : '#cbd5e1'}; background:${isOn ? '#1e40af' : 'white'}; color:${isOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(${m})">${m}차</button>`;
             }
+            let preOn = (refundRosterState.month === 'pre');
+            html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${preOn ? '#b45309' : '#cbd5e1'}; background:${preOn ? '#92400e' : 'white'}; color:${preOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:11px;" onclick="selectRefundRosterMonth('pre')">수강전취소</button>`;
             wrap.innerHTML = html;
         }
         function selectRefundRosterMonth(m) {
@@ -7619,11 +7683,11 @@ document.getElementById('fTier').value = r.freeTier || "";
             let checked = refundRosterItems.filter(it => it.checked);
             if (checked.length === 0) return alert('명단에 포함할 항목이 없습니다.');
             let q = refundRosterState.q, month = refundRosterState.month;
-            let titleQM = month ? `${q}분기 ${month}차` : `${q}분기`;
+            let titleQM = month === 'pre' ? `${q}분기 수강전취소` : (month ? `${q}분기 ${month}차` : `${q}분기`);
 
             const wb = new ExcelJS.Workbook();
 
-                        let wsSum = wb.addWorksheet(safeSheetName(`합계${month ? ' -'+month : ''}`));
+        let wsSum = wb.addWorksheet(safeSheetName(`합계${month === 'pre' ? ' -수강전취소' : (month ? ' -'+month : '')}`));
                         wsSum.mergeCells(2,2,2,7);
             let sumTitleCell = wsSum.getCell(2,2);
             sumTitleCell.value = `${titleQM}  반환`;
@@ -7780,17 +7844,23 @@ document.getElementById('fTier').value = r.freeTier || "";
             }
             wrap.innerHTML = html;
         }
-               function selectRqaQuarter(q) {
+        function selectRqaQuarter(q) {
             rqaState.q = q;
             renderRqaQuarterBtns();
             renderRqaStudentList();
+            autoFillRqaPreCancelSessions();
         }
-        function renderRqaMonthBtns() {
+                function renderRqaMonthBtns() {
             let wrap = document.getElementById('rqaMonthBtns');
             if (!wrap) return;
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
+            let preOn = (rqaState.month === 'pre');
+            let preStyle = preOn
+                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
+                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectRqaMonth('pre')">수강전취소</button>`;
             for (let m = 1; m <= months; m++) {
                 let isOn = (rqaState.month === m);
                 let style = isOn
@@ -7803,6 +7873,14 @@ document.getElementById('fTier').value = r.freeTier || "";
         function selectRqaMonth(m) {
             rqaState.month = m;
             renderRqaMonthBtns();
+            autoFillRqaPreCancelSessions();
+        }
+        // ✨ '수강전 취소' 선택 시, 과목목록관리에 등록된 이 분기 총 차시를 환불 차시 수에 자동 입력
+        function autoFillRqaPreCancelSessions() {
+            if (rqaState.month !== 'pre' || !rqaState.subject) return;
+            let sub = savedSubjects.find(x => x.name === rqaState.subject);
+            let total = sub ? getSubjectTotalSessions(sub, rqaState.q) : 0;
+            if (total > 0) document.getElementById('rqaSessionCount').value = total;
         }
         function renderRqaSubjectOptions() {
             let sel = document.getElementById('rqaSubjectSelect');
@@ -7813,6 +7891,22 @@ document.getElementById('fTier').value = r.freeTier || "";
         function onRqaSubjectChange() {
             rqaState.subject = document.getElementById('rqaSubjectSelect').value;
             renderRqaStudentList();
+            autoFillRqaPreCancelSessions();
+            onRqaSessionCountInput();
+        }
+        function onRqaSessionCountInput() {
+            let preview = document.getElementById('rqaAutoPreview');
+            if (!preview) return;
+            let count = toNum(document.getElementById('rqaSessionCount').value);
+            if (!count || !rqaState.subject) { preview.innerText = ''; return; }
+            let sub = savedSubjects.find(x => x.name === rqaState.subject);
+            let total = sub ? getSubjectTotalSessions(sub, rqaState.q) : 0;
+            if (total && count > total) {
+                preview.style.color = '#dc2626';
+                preview.innerText = `⚠️ 차시를 잘못 입력 하였습니다. (이 과목의 분기 총 차시: ${total}차시)`;
+            } else {
+                preview.innerText = '';
+            }
         }
         function findRqaTargets() {
             let q = rqaState.q, subjectName = rqaState.subject;
@@ -7899,12 +7993,17 @@ document.getElementById('fTier').value = r.freeTier || "";
             renderRiaMonthBtns();
             renderRiaSubjectSelect();
         }
-        function renderRiaMonthBtns() {
+            function renderRiaMonthBtns() {
             let wrap = document.getElementById('riaMonthBtns');
             if (!wrap) return;
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
+            let preOn = (riaState.month === 'pre');
+            let preStyle = preOn
+                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
+                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectRiaMonth('pre')">수강전취소</button>`;
             for (let m = 1; m <= months; m++) {
                 let isOn = (riaState.month === m);
                 let style = isOn
@@ -7917,6 +8016,51 @@ document.getElementById('fTier').value = r.freeTier || "";
         function selectRiaMonth(m) {
             riaState.month = m;
             renderRiaMonthBtns();
+            onRiaSubjectChange();
+        }
+        // ✨ '수강전 취소' 선택(또는 이미 선택된 상태에서 과목 변경) 시, 과목목록관리의 이 분기 총 차시를 자동 입력
+            function onRiaSubjectChange() {
+            if (riaState.month === 'pre') {
+                let sIdxVal = document.getElementById('riaSubjectSelect').value;
+                if (sIdxVal !== '') {
+                    let r = db.find(x => x.id == riaState.studentId);
+                    let s = r && r[`q${riaState.q}`] && r[`q${riaState.q}`].subs[Number(sIdxVal)];
+                    if (s && s.name) {
+                        let sub = savedSubjects.find(x => x.name === s.name);
+                        let total = sub ? getSubjectTotalSessions(sub, riaState.q) : 0;
+                        if (total > 0) document.getElementById('riaSessionCount').value = total;
+                    }
+                }
+            }
+            onRiaSessionCountInput();
+        }
+        function onRiaSessionCountInput() {
+            let preview = document.getElementById('riaAutoPreview');
+            if (!riaState.studentId || !riaState.q) { preview.innerText = ''; return; }
+            let sIdxVal = document.getElementById('riaSubjectSelect').value;
+            if (sIdxVal === '') { preview.innerText = ''; return; }
+            let sIdx = Number(sIdxVal);
+            let count = toNum(document.getElementById('riaSessionCount').value);
+            if (!count) { preview.style.color = '#9ca3af'; preview.innerText = ''; return; }
+            let calc = computeSessionRefund(riaState.studentId, riaState.q, sIdx, count);
+            if (!calc || !calc.ok) {
+                preview.style.color = '#dc2626';
+                preview.innerText = '이 과목은 총 차시 수가 설정되지 않아 자동계산할 수 없습니다. (과목 목록 관리에서 총 차시를 먼저 입력해주세요)';
+                return;
+            }
+            if (calc.totalSessions && count > calc.totalSessions) {
+                preview.style.color = '#dc2626';
+                preview.innerText = `⚠️ 차시를 잘못 입력 하였습니다. (이 과목의 분기 총 차시: ${calc.totalSessions}차시)`;
+                return;
+            }
+            let r = db.find(x => x.id == riaState.studentId);
+            let s = r[`q${riaState.q}`] && r[`q${riaState.q}`].subs[sIdx];
+            let split = s ? splitSuByRatio(calc.amount, getSubjectGSRatioSource(s, riaState.q)) : { g: 0, s: 0 };
+            let addG = split.g, addS = split.s;
+            preview.style.color = '#1e3a5f';
+            preview.innerText = (addG === 0 && addS === 0 && calc.amount > 0)
+                ? `${count}차시 → 수강료 ${formatMoney(calc.amount)}`
+                : `${count}차시 → 강사료 ${formatMoney(addG)} + 수용비 ${formatMoney(addS)} = 총 ${formatMoney(calc.amount)}`;
         }
         function renderRiaQuarterBtns() {
             let wrap = document.getElementById('riaQuarterBtns');
@@ -7964,6 +8108,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             document.getElementById('riaGy').value = '';
             document.getElementById('riaJ').value = '';
             document.getElementById('riaReason').value = '';
+            document.getElementById('riaAutoPreview').innerText = '';
             showRefundToast(1);
         }
 
@@ -8009,7 +8154,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                             return `<tr style="border-bottom:1px solid #f1f5f9;">
                                 <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.studentLabel}</td>
                                 <td style="padding:6px; text-align:center;">${item.q}분기</td>
-                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month}차</td>
+                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month === 'pre' ? '수강전취소' : item.month + '차'}</td>
                                 <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.subjectName}${warn}</td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.gy || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartGy(${idx}, this.value)"></td>
@@ -8042,10 +8187,10 @@ document.getElementById('fTier').value = r.freeTier || "";
             refundCart.splice(idx, 1);
             renderRefundCartTable();
         }
-        function applyRefundCart() {
+               function applyRefundCart() {
             if (refundCart.length === 0) return alert('담은 환불 항목이 없습니다.');
             let today = new Date().toISOString().slice(0,10);
-            let appliedCount = 0, skippedNoSession = 0, skippedByUser = 0;
+            let appliedCount = 0, skippedNoSession = 0, skippedConfirmDeclined = 0, skippedSuOver = 0, skippedGyOver = 0, skippedJOver = 0;
 
             refundCart.forEach(item => {
                 let r = db.find(x => x.id == item.studentId);
@@ -8058,21 +8203,21 @@ document.getElementById('fTier').value = r.freeTier || "";
 
                 if (s.sessionRatioEnabled) {
                     let ok = confirm(`${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생은 '차시 비율 적용'이 되어있는 학생입니다.\n이 학생에게도 지금 입력한 환불(${item.subjectName}, ${item.sessionCount}차시, ${formatMoney(preview.amount)})을 적용할까요?`);
-                    if (!ok) { skippedByUser++; return; }
+                    if (!ok) { skippedConfirmDeclined++; return; }
                 }
 
                 if (preview.existingRSu > 0) {
                     let ok = confirm(`기존에 환불이 있는 ${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생입니다.\n이 학생도 현재 환불을 기존환불 금액(${formatMoney(preview.existingRSu)}) + 현재입력 환불 금액(${formatMoney(preview.amount)})으로 추가 적용할까요?`);
-                    if (!ok) { skippedByUser++; return; }
+                    if (!ok) { skippedConfirmDeclined++; return; }
                 }
 
                 // ✨ 강사료/수용비가 나눠 등록된 과목이거나, 과목목록관리의 같은 분기 단가가 이 학생 수강료와 정확히 같으면 그 비율로 나누고, 아니면 나누지 않고 수강료로만 기록
                 let split = splitSuByRatio(preview.amount, getSubjectGSRatioSource(s, item.q));
                 let addG = split.g, addS = split.s;
                 let addGy = toNum(item.gy), addJ = toNum(item.j);
-                if (preview.amount > 0 && (toNum(s.rSu) + preview.amount) > toNum(s.su)) { skippedByUser++; return; }
-                if (addGy > 0 && (toNum(s.rGy) + addGy) > toNum(s.gy)) { skippedByUser++; return; }
-                if (addJ > 0 && (toNum(s.rJ) + addJ) > toNum(s.j)) { skippedByUser++; return; }
+                if (preview.amount > 0 && (toNum(s.rSu) + preview.amount) > toNum(s.su)) { skippedSuOver++; return; }
+                if (addGy > 0 && (toNum(s.rGy) + addGy) > toNum(s.gy)) { skippedGyOver++; return; }
+                if (addJ > 0 && (toNum(s.rJ) + addJ) > toNum(s.j)) { skippedJOver++; return; }
 
                 s.rG = toNum(s.rG) + addG;
                 s.rS = toNum(s.rS) + addS;
@@ -8092,8 +8237,11 @@ document.getElementById('fTier').value = r.freeTier || "";
             renderRefundCartTable();
 
             let msg = `환불 일괄 적용 완료\n적용: ${appliedCount}건`;
-            if (skippedNoSession > 0) msg += `\n총차시 미설정으로 건너뜀: ${skippedNoSession}건`;
-            if (skippedByUser > 0) msg += `\n사용자가 건너뜀: ${skippedByUser}건`;
+            if (skippedNoSession > 0) msg += `\n총차시 미설정으로 적용 안 됨: ${skippedNoSession}건`;
+            if (skippedSuOver > 0) msg += `\n환불 금액(수강료)이 결제 금액을 초과하여 적용 안 됨: ${skippedSuOver}건`;
+            if (skippedGyOver > 0) msg += `\n교재비 환불 금액이 결제 금액을 초과하여 적용 안 됨: ${skippedGyOver}건`;
+            if (skippedJOver > 0) msg += `\n재료비 환불 금액이 결제 금액을 초과하여 적용 안 됨: ${skippedJOver}건`;
+            if (skippedConfirmDeclined > 0) msg += `\n확인창에서 취소하여 적용 안 됨: ${skippedConfirmDeclined}건`;
             alert(msg);
         }
 
@@ -8105,7 +8253,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let entry = s.refundLog[logIdx];
             let entryTotal = toNum(entry.amount) + toNum(entry.gy) + toNum(entry.j);
             let sessLabel = entry.sessions ? `${entry.sessions}차시 ` : '';
-            let monthLabel = entry.month ? `${entry.month}차 ` : '';
+            let monthLabel = entry.month === 'pre' ? '수강전취소 ' : (entry.month ? `${entry.month}차 ` : '');
             if (!confirm(`${monthLabel}${sessLabel}${formatMoney(entryTotal)} 환불 기록을 삭제할까요?\n강사료/수용비/교재비/재료비에서 이 기록에 기록된 금액만큼 정확히 되돌립니다.`)) return;
 
             // ✨ 삭제 시점에 비율을 다시 계산하지 않고, 이 기록에 저장된 실제 금액을 그대로 되돌림 (반올림 오차 방지)
@@ -8131,7 +8279,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             renderRlmMonthBtns();
             document.getElementById('refundLogMonthModal').style.display = 'flex';
         }
-        function renderRlmMonthBtns() {
+                function renderRlmMonthBtns() {
             if (!refundLogMonthCtx) return;
             let { id, q, sIdx, li } = refundLogMonthCtx;
             let r = db.find(x => x.id == id);
@@ -8140,7 +8288,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             if (!entry) return;
             let wrap = document.getElementById('rlmMonthBtns');
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
             for (let m = 1; m <= months; m++) {
                 let isOn = entry.month === m;
@@ -8149,6 +8297,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                     : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
                 html += `<button type="button" style="${style}" onclick="selectRlmMonth(${m})">${m}차</button>`;
             }
+            let preOn = entry.month === 'pre';
+            let preStyle = preOn
+                ? 'padding:10px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:12px;'
+                : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectRlmMonth('pre')">수강전취소</button>`;
             wrap.innerHTML = html;
         }
         function selectRlmMonth(m) {
