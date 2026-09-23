@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V14.9</title>
+    <title>방과후 지원금 돌보미 V15.0</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -124,6 +124,13 @@
         .btn-tool:hover { background: rgba(59, 130, 246, 0.1); color: var(--sidebar-accent); }
         .btn-tool:active { background: rgba(59, 130, 246, 0.18); }
         .btn-tool:active { transform: translateY(2px); box-shadow: none; }
+        /* ✨ 수강료 보기 / 강사료 보기 슬라이드 토글 스위치 */
+        .fee-toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; -webkit-user-select:none; user-select:none; }
+        .fee-toggle-label { font-size:14px; font-weight:800; }
+        .fee-toggle-track { position:relative; width:44px; height:24px; border-radius:12px; background:#cbd5e1; transition:background 0.2s ease; flex-shrink:0; }
+        .fee-toggle-track.on { background:#0ea5e9; }
+        .fee-toggle-knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:white; box-shadow:0 1px 3px rgba(0,0,0,0.3); transition:left 0.2s ease; }
+        .fee-toggle-track.on .fee-toggle-knob { left:22px; }
         
 
         .filters { display: flex; gap: 8px; align-items: center; }
@@ -1065,7 +1072,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V14.9</span>
+                <span class="brand-version">V15.0</span>
             </div>
     </div>
     
@@ -1999,6 +2006,7 @@
         let snapshots = []; // ✨ 타임머신 과거 기록 보관소
         let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
         let isSuikViewOn = true; // ✨ 수익자 관리 프로그램이라 항상 켜진 상태로 고정
+        let isFeeViewOn = false; // ✨ 과목별 보기 - false: 수강료 보기, true: 강사료 보기(강사료·수용비로 분할)
 
         let isRefundViewOn = false;
         let isG3RefundOn = false, isFreeRefundOn = false, isSkRefundOn = false; // ✨ 과목별 보기 - 지원금별 환불보기 토글
@@ -3964,7 +3972,7 @@ function toggleStatusPanel() {
 		
 		
 		
-		  function toggleViewMode() {
+		function toggleViewMode() {
             document.getElementById('loading-overlay').style.display = 'flex';
             
             setTimeout(() => {
@@ -3991,6 +3999,11 @@ function toggleStatusPanel() {
                 
                 document.getElementById('loading-overlay').style.display = 'none';
             }, 50);
+        }
+        // ✨ 과목별 보기 - 수강료 보기 / 강사료 보기 토글 (제목 줄의 슬라이드 스위치에서 호출)
+        function toggleFeeView() {
+            isFeeViewOn = !isFeeViewOn;
+            renderGrid();
         }
 		
 		
@@ -5496,6 +5509,18 @@ viewData.forEach(({r, c}) => {
                                 let skRefundGy = alloc.refSkGy || 0;
                                 let skRefundJ  = alloc.refSkJ || 0;
 
+                                // ✨ 강사료 보기용 - 이 과목의 강사료/수용비 비율로 각 몫의 수강료(su)를 분할
+                                let feeSub = savedSubjects.find(x => x.name === subName);
+                                let feeMaster = feeSub && feeSub.fees && feeSub.fees[qIdx + 1];
+                                let feeMasterG = feeMaster ? toNum(feeMaster.g) : 0;
+                                let feeMasterS = feeMaster ? toNum(feeMaster.s) : 0;
+                                let feeHasCustomGS = (feeMasterG > 0 || feeMasterS > 0);
+                                let g3FeeSplit = computeTeacherFeeSplit(g3Su, feeMasterG, feeMasterS, feeHasCustomGS);
+                                let freeFeeSplit = computeTeacherFeeSplit(freeSu, feeMasterG, feeMasterS, feeHasCustomGS);
+                                let skFeeSplit = computeTeacherFeeSplit(skSu, feeMasterG, feeMasterS, feeHasCustomGS);
+                                let netFeeG = g3FeeSplit.g + freeFeeSplit.g, netFeeS = g3FeeSplit.s + freeFeeSplit.s;
+                                let realFeeG = netFeeG + skFeeSplit.g, realFeeS = netFeeS + skFeeSplit.s;
+
                                 subjectRows.push({
                                     r, c, qStr: q, qNum: qIdx + 1, sName: subName, isNew: s.isNew,
                                     alloc, // ✨ 뱃지 표시용 원본 연결
@@ -5505,7 +5530,12 @@ viewData.forEach(({r, c}) => {
                                     skSu, skGy, skJ, skTot, realSu, realGy, realJ, realTot, // ✨ 수익자/총합 상세 전달
                                     g3RefundSu, g3RefundGy, g3RefundJ, g3RefundTot: g3RefundSu+g3RefundGy+g3RefundJ,
                                     freeRefundSu, freeRefundGy, freeRefundJ, freeRefundTot: freeRefundSu+freeRefundGy+freeRefundJ,
-                                    skRefundSu, skRefundGy, skRefundJ, skRefundTot: skRefundSu+skRefundGy+skRefundJ
+                                    skRefundSu, skRefundGy, skRefundJ, skRefundTot: skRefundSu+skRefundGy+skRefundJ,
+                                    g3FeeG: g3FeeSplit.g, g3FeeS: g3FeeSplit.s,
+                                    freeFeeG: freeFeeSplit.g, freeFeeS: freeFeeSplit.s,
+                                    netFeeG, netFeeS,
+                                    skFeeG: skFeeSplit.g, skFeeS: skFeeSplit.s,
+                                    realFeeG, realFeeS
                                 });
                             });
                         }
@@ -5550,7 +5580,10 @@ viewData.forEach(({r, c}) => {
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                     
+                          <div class="fee-toggle-wrap no-print" onclick="toggleFeeView()" title="수강료 / 강사료 전환">
+                            <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#0ea5e9' : '#1e3a5f'};">${isFeeViewOn ? '강사료 보기' : '수강료 보기'}</span>
+                            <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
+                        </div>
                     </div>
                 `;
 
@@ -5561,43 +5594,51 @@ viewData.forEach(({r, c}) => {
 				
 				let br = 'border-right:1px solid var(--border-color);';
                 
-               // ✨ 수익자 아코디언 토글 시 생성되는 열(Column) 공간 (4칸 + 4칸)
+               // ✨ 강사료 보기일 땐 '수강료' 1칸이 '강사료+수용비' 2칸으로 늘어남 (4칸→5칸)
+                let feeColsFor = (lastWidth) => isFeeViewOn
+                    ? `<col style="width: 65px;"> <col style="width: 65px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: ${lastWidth}px;">`
+                    : `<col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: ${lastWidth}px;">`;
+               // ✨ 수익자 아코디언 토글 시 생성되는 열(Column) 공간 (4칸 + 4칸, 강사료 보기일 땐 5칸 + 5칸)
                 let suikCols = isSuikViewOn ? `
-                    <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 80px;">
-                    <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 85px;">
+                    ${feeColsFor(80)}
+                    ${feeColsFor(85)}
                 ` : '';
 
                 colGroup.innerHTML = `
                     <col style="width: 40px;">
                     ${currentTab === 'all' ? '<col style="width: 55px;">' : ''}
                     <col style="width: 55px;" id="col-id"> <col style="width: 65px;"> <col style="width: 100px;"> <col style="width: 100px;">
-                    <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 80px;">
-                    <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 80px;">
-                    <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 75px;"> <col style="width: 85px;">
+                    ${feeColsFor(80)}
+                    ${feeColsFor(80)}
+                    ${feeColsFor(85)}
                     ${suikCols}
                     <col style="width: 85px;" class="no-print">
                 `;
 
                 // ✨ 수익자 아코디언 토글 시 생성되는 헤더 2줄 (4칸 + 4칸)
                 let suikH1 = isSuikViewOn ? `
-                    <th colspan="4" class="text-center" style="${br} color:#b91c1c; font-size:14px; background:#fef2f2;">수익자 부담금 <button onclick="toggleSkRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid #b91c1c; background:white; color:#b91c1c; cursor:pointer; margin-left:4px; vertical-align:middle;">${isSkRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                    <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:#b91c1c; font-size:14px; background:#fef2f2;">수익자 부담금 <button onclick="toggleSkRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid #b91c1c; background:white; color:#b91c1c; cursor:pointer; margin-left:4px; vertical-align:middle;">${isSkRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                     ${isSkRefundOn ? `<th colspan="4" class="text-center" style="${br} color:#991b1b; font-size:14px; background:#fecaca;">수익자 환불내역</th>` : ''}
-                    <th colspan="4" class="text-center" style="${br} color:#111827; font-size:14px; background:#f3f4f6;">총 수강 금액(지원금+수익자)</th>
+                    <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:#111827; font-size:14px; background:#f3f4f6;">총 수강 금액(지원금+수익자)</th>
                 ` : '';
                 
-                let suikH2 = isSuikViewOn ? `
-                    <th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">수강료</th>
+                    let suikH2 = isSuikViewOn ? `
+                    ${isFeeViewOn
+                        ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">강사료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">수용비</th>`
+                        : `<th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">수강료</th>`}
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">교재비</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#fff5f5; color:#b91c1c;">재료비</th>
                     <th class="text-center" style="${br} top:39px; font-weight:800; background:#fef2f2; color:#b91c1c;">합계</th>
                     ${isSkRefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">교재비</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fecaca; color:#991b1b;">재료비</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fca5a5; color:#7f1d1d;">합계</th>` : ''}
-                    <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">수강료</th>
+                    ${isFeeViewOn
+                        ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">강사료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">수용비</th>`
+                        : `<th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">수강료</th>`}
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">교재비</th>
                     <th class="text-center" style="top:39px; padding:10px 4px; background:#f3f4f6; color:#111827;">재료비</th>
                     <th class="text-center" style="${br} top:39px; font-weight:800; background:#f3f4f6; color:#111827;">총합계</th>
                 ` : '';
 
-                tHead.innerHTML = `
+                    tHead.innerHTML = `
                     <tr>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
                         ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
@@ -5605,27 +5646,27 @@ viewData.forEach(({r, c}) => {
                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 205 : 150}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; border-right:2px solid var(--border-color);" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
-                       <th colspan="4" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                       <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                         ${isG3RefundOn ? `<th colspan="4" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">${getG3LabelShort()} 환불내역</th>` : ''}
-                        <th colspan="4" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강 <button onclick="toggleFreeRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-free); background:white; color:var(--color-free); cursor:pointer; margin-left:4px; vertical-align:middle;">${isFreeRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
+                        <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강 <button onclick="toggleFreeRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-free); background:white; color:var(--color-free); cursor:pointer; margin-left:4px; vertical-align:middle;">${isFreeRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                         ${isFreeRefundOn ? `<th colspan="4" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">자유수강 환불내역</th>` : ''}
-                        <th colspan="4" class="text-center" style="${br} color:#10b981; font-size:14px;">총 지원금</th>
+                        <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:#10b981; font-size:14px;">총 지원금</th>
                         ${suikH1}
                         <th rowspan="2" class="text-center no-print" style="vertical-align:middle;" id="th-manage">관리</th>
                     </tr>
                     <tr>
-                        <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
+                        ${isFeeViewOn ? `<th class="text-center" style="top:39px; padding:10px 4px;">강사료</th><th class="text-center" style="top:39px; padding:10px 4px;">수용비</th>` : `<th class="text-center" style="top:39px; padding:10px 4px;">수강료</th>`}<th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
                         ${isG3RefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">교재</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fde8e8; color:#dc2626;">합계</th>` : ''}
-                        <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
+                        ${isFeeViewOn ? `<th class="text-center" style="top:39px; padding:10px 4px;">강사료</th><th class="text-center" style="top:39px; padding:10px 4px;">수용비</th>` : `<th class="text-center" style="top:39px; padding:10px 4px;">수강료</th>`}<th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">합계</th>
                         ${isFreeRefundOn ? `<th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">교재</th><th class="text-center" style="top:39px; padding:10px 4px; background:#fef2f2; color:#dc2626;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800; background:#fde8e8; color:#dc2626;">합계</th>` : ''}
-                        <th class="text-center" style="top:39px; padding:10px 4px;">수강료</th><th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">총합계</th>
+                        ${isFeeViewOn ? `<th class="text-center" style="top:39px; padding:10px 4px;">강사료</th><th class="text-center" style="top:39px; padding:10px 4px;">수용비</th>` : `<th class="text-center" style="top:39px; padding:10px 4px;">수강료</th>`}<th class="text-center" style="top:39px; padding:10px 4px;">교재</th><th class="text-center" style="top:39px; padding:10px 4px;">재료</th><th class="text-center" style="${br} top:39px; font-weight:800;">총합계</th>
                         ${suikH2}
                     </tr>
                 `;
 
                 tBody.innerHTML = '';
                 
-               let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
+                let sum_g3Su=0, sum_g3Gy=0, sum_g3J=0, sum_g3Tot=0;
                 let sum_frSu=0, sum_frGy=0, sum_frJ=0, sum_frTot=0;
                 let sum_nSu=0, sum_nGy=0, sum_nJ=0, sum_nTot=0;
                  let sum_skSu=0, sum_skGy=0, sum_skJ=0, sum_skTot=0;
@@ -5633,6 +5674,7 @@ viewData.forEach(({r, c}) => {
                 let sum_g3RSu=0, sum_g3RGy=0, sum_g3RJ=0, sum_g3RTot=0;
                 let sum_frRSu=0, sum_frRGy=0, sum_frRJ=0, sum_frRTot=0;
                 let sum_skRSu=0, sum_skRGy=0, sum_skRJ=0, sum_skRTot=0;
+                let sum_g3FeeG=0, sum_g3FeeS=0, sum_frFeeG=0, sum_frFeeS=0, sum_nFeeG=0, sum_nFeeS=0, sum_skFeeG=0, sum_skFeeS=0, sum_realFeeG=0, sum_realFeeS=0; // ✨ 강사료 보기용 합계
 
                 subjectRows.forEach((row, index) => {
                     sum_g3Su+=row.g3Su; sum_g3Gy+=row.g3Gy; sum_g3J+=row.g3J; sum_g3Tot+=row.g3Tot;
@@ -5643,6 +5685,7 @@ viewData.forEach(({r, c}) => {
                     sum_g3RSu+=row.g3RefundSu; sum_g3RGy+=row.g3RefundGy; sum_g3RJ+=row.g3RefundJ; sum_g3RTot+=row.g3RefundTot;
                     sum_frRSu+=row.freeRefundSu; sum_frRGy+=row.freeRefundGy; sum_frRJ+=row.freeRefundJ; sum_frRTot+=row.freeRefundTot;
                     sum_skRSu+=row.skRefundSu; sum_skRGy+=row.skRefundGy; sum_skRJ+=row.skRefundJ; sum_skRTot+=row.skRefundTot;
+                    sum_g3FeeG+=row.g3FeeG; sum_g3FeeS+=row.g3FeeS; sum_frFeeG+=row.freeFeeG; sum_frFeeS+=row.freeFeeS; sum_nFeeG+=row.netFeeG; sum_nFeeS+=row.netFeeS; sum_skFeeG+=row.skFeeG; sum_skFeeS+=row.skFeeS; sum_realFeeG+=row.realFeeG; sum_realFeeS+=row.realFeeS;
 
                     let badge = '';
                     if(row.r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
@@ -5655,12 +5698,16 @@ viewData.forEach(({r, c}) => {
 
                    // ✨ 수익자 및 총 수강금액 아코디언 데이터 생성
                     let suikTds = isSuikViewOn ? `
-                        <td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skSu)}${row.alloc.mskSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                        ${isFeeViewOn
+                            ? `<td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skFeeG)}${row.alloc.mskSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skFeeS)}</td>`
+                            : `<td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skSu)}${row.alloc.mskSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>`}
                         <td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skGy)}${row.alloc.mskGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                         <td class="text-right" style="color:#b91c1c; opacity:0.8; padding:8px 4px; background:#fff5f5; vertical-align:middle;">${formatMoney(row.skJ)}${row.alloc.mskJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                         <td class="text-right" style="${br} color:#b91c1c; font-weight:800; background:#fef2f2; padding:8px 6px; vertical-align:middle;">${formatMoney(row.skTot)}</td>
                         ${isSkRefundOn ? `<td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundSu > 0 ? formatMoney(row.skRefundSu) : '-'}</td><td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundGy > 0 ? formatMoney(row.skRefundGy) : '-'}</td><td class="text-right" style="color:#991b1b; padding:8px 6px; background:#fecaca; vertical-align:middle;">${row.skRefundJ > 0 ? formatMoney(row.skRefundJ) : '-'}</td><td class="text-right" style="${br} color:#7f1d1d; font-weight:800; background:#fca5a5; padding:8px 6px; vertical-align:middle;">${row.skRefundTot > 0 ? formatMoney(row.skRefundTot) : '-'}</td>` : ''}
-                        <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realSu)}</td>
+                        ${isFeeViewOn
+                            ? `<td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realFeeG)}</td><td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realFeeS)}</td>`
+                            : `<td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realSu)}</td>`}
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realGy)}</td>
                         <td class="text-right" style="color:#111827; opacity:0.8; padding:8px 4px; background:#f3f4f6; vertical-align:middle;">${formatMoney(row.realJ)}</td>
                         <td class="text-right" style="${br} color:#111827; font-weight:800; background:#f3f4f6; padding:8px 6px; vertical-align:middle;">${formatMoney(row.realTot)}</td>
@@ -5681,18 +5728,24 @@ viewData.forEach(({r, c}) => {
                            <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}</td>
                            <td style="${br}">${badge}</td>
                             
-                           <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                            ${isFeeViewOn
+                                ? `<td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3FeeG)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3FeeS)}</td>`
+                                : `<td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Su)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>`}
                                 <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3Gy)}${row.alloc.mg3Gy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3J)}${row.alloc.mg3J ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="${br} color:var(--color-g3); font-weight:800;">${formatMoney(row.g3Tot)}</td>
                                 ${isG3RefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundSu > 0 ? formatMoney(row.g3RefundSu) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundGy > 0 ? formatMoney(row.g3RefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundJ > 0 ? formatMoney(row.g3RefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.g3RefundTot > 0 ? formatMoney(row.g3RefundTot) : '-'}</td>` : ''}
-                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeSu)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                ${isFeeViewOn
+                                ? `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeG)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeS)}</td>`
+                                : `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeSu)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>`}
                                 <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeGy)}${row.alloc.mFreeGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeJ)}${row.alloc.mFreeJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="${br} color:var(--color-free); font-weight:800;">${formatMoney(row.freeTot)}</td>
                                 ${isFreeRefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundSu > 0 ? formatMoney(row.freeRefundSu) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundGy > 0 ? formatMoney(row.freeRefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundJ > 0 ? formatMoney(row.freeRefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.freeRefundTot > 0 ? formatMoney(row.freeRefundTot) : '-'}</td>` : ''}
 
-                            <td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netSu)}</td>
+                            ${isFeeViewOn
+                                ? `<td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netFeeG)}</td><td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netFeeS)}</td>`
+                                : `<td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netSu)}</td>`}
                             <td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netGy)}</td>
                             <td class="text-right" style="color:#10b981; opacity:0.8; padding:8px 4px;">${formatMoney(row.netJ)}</td>
                             <td class="text-right" style="${br} color:#10b981; font-weight:800; background:rgba(16,185,129,0.05); padding:8px 6px;">${formatMoney(row.netTot)}</td>
@@ -5711,12 +5764,16 @@ viewData.forEach(({r, c}) => {
 
                 if(subjectRows.length > 0) {
                     let suikTotTds = isSuikViewOn ? `
-                        <td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skSu)}</td>
+                        ${isFeeViewOn
+                            ? `<td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skFeeG)}</td><td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skFeeS)}</td>`
+                            : `<td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skSu)}</td>`}
                         <td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skGy)}</td>
                         <td class="text-right" style="color:#b91c1c; padding:8px 4px; background:#fff5f5;">${formatMoney(sum_skJ)}</td>
                         <td class="text-right" style="${br} color:#b91c1c; padding:8px 6px; background:#fef2f2;">${formatMoney(sum_skTot)}</td>
                         ${isSkRefundOn ? `<td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRSu)}</td><td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRGy)}</td><td class="text-right" style="color:#991b1b; padding:8px 4px; background:#fecaca;">${formatMoney(sum_skRJ)}</td><td class="text-right" style="${br} color:#7f1d1d; font-weight:800; padding:8px 6px; background:#fca5a5;">${formatMoney(sum_skRTot)}</td>` : ''}
-                        <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realSu)}</td>
+                        ${isFeeViewOn
+                            ? `<td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realFeeG)}</td><td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realFeeS)}</td>`
+                            : `<td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realSu)}</td>`}
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realGy)}</td>
                         <td class="text-right" style="color:#111827; padding:8px 4px; background:#f3f4f6;">${formatMoney(sum_realJ)}</td>
                         <td class="text-right" style="${br} color:#111827; padding:8px 6px; background:#f3f4f6;">${formatMoney(sum_realTot)}</td>
@@ -5730,17 +5787,23 @@ viewData.forEach(({r, c}) => {
                             <td style="border-right: none;"></td>
                             <td style="text-align:center; font-weight:bold;">총합</td>
                             <td style="${br}"></td>
-                            <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3Su)}</td>
+                            ${isFeeViewOn
+                                ? `<td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3FeeG)}</td><td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3FeeS)}</td>`
+                                : `<td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3Su)}</td>`}
                             <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3Gy)}</td>
                             <td class="text-right" style="color:var(--color-g3); padding:8px 4px;">${formatMoney(sum_g3J)}</td>
                             <td class="text-right" style="${br} color:var(--color-g3); padding:8px 6px;">${formatMoney(sum_g3Tot)}</td>
                             ${isG3RefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RSu)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RGy)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_g3RJ)}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; padding:8px 6px; background:#fde8e8;">${formatMoney(sum_g3RTot)}</td>` : ''}
-                            <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frSu)}</td>
+                            ${isFeeViewOn
+                                ? `<td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frFeeG)}</td><td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frFeeS)}</td>`
+                                : `<td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frSu)}</td>`}
                             <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frGy)}</td>
                             <td class="text-right" style="color:var(--color-free); padding:8px 4px;">${formatMoney(sum_frJ)}</td>
                             <td class="text-right" style="${br} color:var(--color-free); padding:8px 6px;">${formatMoney(sum_frTot)}</td>
                             ${isFreeRefundOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRSu)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRGy)}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${formatMoney(sum_frRJ)}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; padding:8px 6px; background:#fde8e8;">${formatMoney(sum_frRTot)}</td>` : ''}
-                            <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nSu)}</td>
+                            ${isFeeViewOn
+                                ? `<td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nFeeG)}</td><td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nFeeS)}</td>`
+                                : `<td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nSu)}</td>`}
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nGy)}</td>
                             <td class="text-right" style="color:#10b981; padding:8px 4px;">${formatMoney(sum_nJ)}</td>
                             <td class="text-right" style="${br} color:#10b981; padding:8px 6px;">${formatMoney(sum_nTot)}</td>
@@ -5751,7 +5814,7 @@ viewData.forEach(({r, c}) => {
                 }
 
                 if(subjectRows.length === 0) {
-                    let colCount = (currentTab==='all'?18:17) + (isSuikViewOn ? 8 : 0);
+                     let colCount = (currentTab==='all'?18:17) + (isSuikViewOn ? 8 : 0) + (isFeeViewOn ? 5 : 0);
                     tBody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:40px; color:#9ca3af;">조건에 맞는 데이터가 없습니다.</td></tr>`;
                 }
 				
