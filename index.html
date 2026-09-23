@@ -938,6 +938,10 @@
                 입력한 비율만큼만 자동으로 지원금이 적용되고, 나머지는 본인부담으로 처리됩니다.
             </div>
             <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:700; color:#166534; display:block; margin-bottom:4px;">📅 자유수강 지원 개시일 (기록용)</label>
+                <input type="date" id="sr_freeApplyDate" style="width:100%; padding:8px; border:1px solid #86efac; border-radius:6px; font-size:14px; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:10px;">
                 <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">이번 분기 총 차시</label>
                 <input type="number" min="0" id="sr_total" placeholder="예: 12" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
             </div>
@@ -1511,26 +1515,22 @@
                         <input type="checkbox" id="fG3"> <span style="color:var(--color-g3);" id="g3Label">초3지원금</span>
                     </label>
                     <span class="desc-text" id="g3Desc">연 50만원 (3학년 전용). 상반기/하반기 각 25만원 한도 분할</span>
-                    
-                    <label class="checkbox-label" style="margin-top:16px;">
-                        <input type="checkbox" id="fFree" onchange="toggleTier()"> <span style="color:var(--color-free);">자유수강권</span>
-                    </label>
-                                        <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
 
-                    <div id="freeAutoStartGroup" style="display:none; margin-top:8px; background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:8px;">
-                                                <label style="font-size:12px; color:#166534; font-weight:700; display:block; margin-bottom:4px;">📅 자유수강권 지원 개시일 (학기 중간에 선정된 경우만, NEIS 신청일자)</label>
-                        <input type="date" id="fFreeAutoStartDate" style="padding:5px; border:1px solid #86efac; border-radius:4px; font-size:13px;">
-                        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">기록용 날짜예요. 실제 지원금액은 자동 계산되지 않으니, 아래 과목의 "🍼 차시 비율 적용" 버튼으로 정확한 차시를 입력해주세요.</div>
-                    </div>
-
-                   <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
-                        <select id="fTier" onchange="toggleTier()" style="border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px;">
+                        <label class="checkbox-label" style="margin-top:0;">
+                            <input type="checkbox" id="fFree" onchange="toggleTier()"> <span style="color:var(--color-free);">자유수강권</span>
+                        </label>
+                        <select id="fTier" onchange="toggleTier()" style="display:none; border:2px solid #f97316; box-shadow:0 0 0 2px rgba(249,115,22,0.15); font-weight:600;">
                             <option value="">계층 선택 (필수)</option>
                             <option value="기초생활수급자">기초생활수급자</option><option value="한부모가족">한부모가족</option>
                             <option value="법적차상위">법적차상위</option><option value="중위소득90%이하">중위소득90%이하</option>
                             <option value="학교장추천">학교장추천</option><option value="난민인정자">난민인정자</option>
                             <option value="육아기근로단축">육아기근로단축</option>
                         </select>
+                    </div>
+                    <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
+
+                   <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
                         <div id="yukaDateGroup" style="display:none; margin-top:10px; background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
                             <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
@@ -1545,6 +1545,38 @@
                             <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
                             <input type="text" id="fFreeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
                             <div style="font-size:11px; color:#9ca3af; margin-top:2px;">타 학교에서 이미 사용한 금액이 있다면, 남은 금액만큼으로 줄여서 입력하세요.</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:16px; padding-top:12px; border-top:1px dashed #d1d5db;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="fTransferIn" onchange="toggleTransferIn()"> <span style="color:#0891b2;">🚏 전입</span>
+                        </label>
+                        <div id="transferInGroup" style="display:none; margin-left:24px; margin-top:8px; background:#ecfeff; border:1px solid #67e8f9; border-radius:6px; padding:8px;">
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                                <label style="font-size:12px; color:#0e7490; font-weight:700;">전입 분기</label>
+                                <select id="fTransferInQuarter" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
+                                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                                </select>
+                                <label style="font-size:12px; color:#0e7490; font-weight:700; margin-left:8px;">전입일 (기록용)</label>
+                                <input type="date" id="fTransferInDate" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
+                            </div>
+                            <div style="font-size:11px; color:#9ca3af;">다른 학교에서 자유수강권을 이미 썼다면, 위 "자유수강권 총 한도" 칸을 남은 금액으로 줄여서 입력하세요.</div>
+                        </div>
+
+                        <label class="checkbox-label" style="margin-top:12px;">
+                            <input type="checkbox" id="fTransferOut" onchange="toggleTransferOut()"> <span style="color:#b91c1c;">🚌 전출</span>
+                        </label>
+                        <div id="transferOutGroup" style="display:none; margin-left:24px; margin-top:8px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:8px;">
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                                <label style="font-size:12px; color:#991b1b; font-weight:700;">전출 분기</label>
+                                <select id="fTransferOutQuarter" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
+                                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                                </select>
+                                <label style="font-size:12px; color:#991b1b; font-weight:700; margin-left:8px;">전출일 (기록용)</label>
+                                <input type="date" id="fTransferOutDate" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
+                            </div>
+                            <div style="font-size:11px; color:#9ca3af;">전출 후 남은 금액은 사용할 수 없으니, 위 "자유수강권 총 한도" 칸을 지금까지 사용한 금액으로 줄여서 입력하세요.</div>
                         </div>
                     </div>
                 </div>
@@ -5730,6 +5762,8 @@ viewData.forEach(({r, c}) => {
                                ${row.r.grade}-${row.r.classNum}-${row.r.studentNum}<br>
                                ${getYukaDdayBadge(row.r)}
                                ${row.r.createdAt && (Date.now() - row.r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
+                               ${row.r.transferIn && Number(row.r.transferInQuarter || 1) <= row.qNum ? '<div style="font-size:10px; color:#2563eb; font-weight:bold; margin-top:2px; line-height:1;">🚌전입</div>' : ''}
+                               ${row.r.transferOut && Number(row.r.transferOutQuarter || 1) <= row.qNum ? '<div style="font-size:10px; color:#ea580c; font-weight:bold; margin-top:2px; line-height:1;">🚌전출</div>' : ''}
                             </td>
                                                         <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg);">
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
@@ -5907,10 +5941,12 @@ viewData.forEach(({r, c}) => {
                             let qOverLabel = c[`q${i}`].status === '일부 수익자' ? '수익자부담' : '초과';
                             let qOverHtml = (!isBeneficiary && c[`q${i}`].over > 0 && (c[`q${i}`].usedG3 + c[`q${i}`].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; line-height:1; margin-top:3px;">${qOverLabel}: ${formatMoney(c[`q${i}`].over)}</div>` : '';
                             
+                            let hasRatioQ = ((r[`q${i}`] && r[`q${i}`].subs) || []).some(s => s.sessionRatioEnabled);
                             expTds += `<td class="text-right" style="vertical-align:middle;">
                                 <div style="line-height: 1.0; ${isBeneficiary ? 'color:#0369a1;' : ''}">${formatMoney(c[`q${i}`].exp)}</div>
                                 ${mBadge}
                                 ${qOverHtml}
+                                ${hasRatioQ ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">차시비율적용</div>` : ''}
                             </td>`;
                         }
 
@@ -5936,6 +5972,8 @@ viewData.forEach(({r, c}) => {
                                    ${r.grade}-${r.classNum}-${r.studentNum}<br>
                                    ${getYukaDdayBadge(r)}
                                    ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
+                                   ${r.transferIn ? '<div style="font-size:10px; color:#2563eb; font-weight:bold; margin-top:2px; line-height:1;">🚌전입</div>' : ''}
+                                   ${r.transferOut ? '<div style="font-size:10px; color:#ea580c; font-weight:bold; margin-top:2px; line-height:1;">🚌전출</div>' : ''}
                                 </td>
                                 <td style="position:sticky; left:105px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
@@ -6142,10 +6180,12 @@ viewData.forEach(({r, c}) => {
                         tBody.insertAdjacentHTML('beforeend', `
                             <tr>
                                <td class="text-center" style="font-weight: 700; color: #9ca3af; position:sticky; left:0; z-index:1; background:var(--card-bg);">${index + 1}</td>
-                                <td class="text-center" style="font-weight:600; position:sticky; left:45px; z-index:1; background:var(--card-bg);">
+                                  <td class="text-center" style="font-weight:600; position:sticky; left:45px; z-index:1; background:var(--card-bg);">
                                   ${r.grade}-${r.classNum}-${r.studentNum}<br>
                                   ${getYukaDdayBadge(r)}
                                   ${r.createdAt && (Date.now() - r.createdAt < 24 * 60 * 60 * 1000) ? '<div style="font-size:10px; color:#ef4444; font-weight:bold; margin-top:2px; line-height:1;">🆕신규</div>' : ''}
+                                  ${r.transferIn && Number(r.transferInQuarter || 1) <= Number(q.replace('q','')) ? '<div style="font-size:10px; color:#2563eb; font-weight:bold; margin-top:2px; line-height:1;">🚌전입</div>' : ''}
+                                  ${r.transferOut && Number(r.transferOutQuarter || 1) <= Number(q.replace('q','')) ? '<div style="font-size:10px; color:#ea580c; font-weight:bold; margin-top:2px; line-height:1;">🚌전출</div>' : ''}
                                 </td>
                                 <td style="position:sticky; left:95px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">
                                    <a class="student-name" onclick="showDetailModal('${r.id}')" title="상세 내역 보기">${r.name}</a>
@@ -6383,11 +6423,17 @@ viewData.forEach(({r, c}) => {
         }
 
        function toggleTier() {
-            document.getElementById('tierGroup').style.display = document.getElementById('fFree').checked ? 'block' : 'none';
+            let isFree = document.getElementById('fFree').checked;
+            document.getElementById('fTier').style.display = isFree ? 'inline-block' : 'none';
+            document.getElementById('tierGroup').style.display = isFree ? 'block' : 'none';
             let tier = document.getElementById('fTier').value;
             document.getElementById('yukaDateGroup').style.display = (tier === '육아기근로단축') ? 'block' : 'none';
-            let showAutoStart = document.getElementById('fFree').checked && tier !== '육아기근로단축';
-            document.getElementById('freeAutoStartGroup').style.display = showAutoStart ? 'block' : 'none';
+        }
+        function toggleTransferIn() {
+            document.getElementById('transferInGroup').style.display = document.getElementById('fTransferIn').checked ? 'block' : 'none';
+        }
+        function toggleTransferOut() {
+            document.getElementById('transferOutGroup').style.display = document.getElementById('fTransferOut').checked ? 'block' : 'none';
         }
 
        function checkFundLogic(event) {
@@ -6433,13 +6479,12 @@ function openPanel(mode, id = null) {
                 updateQuarterTotal(q);
             }
             
-           if(mode === 'add') {
+                 if(mode === 'add') {
                 document.getElementById('panelTitle').innerText = "신규 학생 상세 입력";
                 document.getElementById('editId').value = "";
                 document.getElementById('fFreeLimit').value = "600,000";
                 document.getElementById('fFreeStartDate').value = "";
                 document.getElementById('fFreeEndDate').value = "";
-                document.getElementById('fFreeAutoStartDate').value = "";
                 
                 for(let q=1; q<=maxQuarter; q++) {
                     visibleRows[q] = 3;
@@ -6459,12 +6504,19 @@ function openPanel(mode, id = null) {
                 document.getElementById('fNum').value = r.studentNum; document.getElementById('fName').value = r.name;
                 document.getElementById('fG3').checked = r.hasG3;
                 document.getElementById('fFree').checked = r.hasFree;
-document.getElementById('fTier').value = r.freeTier || "";
+                document.getElementById('fTier').value = r.freeTier || "";
                 document.getElementById('fFreeLimit').value = (r.freeLimit || getFreeAllowanceDefault()).toLocaleString();
                 document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
                 document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
-                document.getElementById('fFreeAutoStartDate').value = r.freeAutoStartDate || "";
                 toggleTier();
+                document.getElementById('fTransferIn').checked = !!r.transferIn;
+                document.getElementById('fTransferInQuarter').value = r.transferInQuarter || "1";
+                document.getElementById('fTransferInDate').value = r.transferInDate || "";
+                document.getElementById('fTransferOut').checked = !!r.transferOut;
+                document.getElementById('fTransferOutQuarter').value = r.transferOutQuarter || "1";
+                document.getElementById('fTransferOutDate').value = r.transferOutDate || "";
+                toggleTransferIn();
+                toggleTransferOut();
 
                 for(let q=1; q<=maxQuarter; q++) {
                     let subs = r[`q${q}`] ? r[`q${q}`].subs || [] : [];
@@ -6555,7 +6607,12 @@ document.getElementById('fTier').value = r.freeTier || "";
 		 
           let freeStartDate = document.getElementById('fFreeStartDate').value;
           let freeEndDate = document.getElementById('fFreeEndDate').value;
-          let freeAutoStartDate = document.getElementById('fFreeAutoStartDate').value;
+          let transferIn = document.getElementById('fTransferIn').checked;
+          let transferInQuarter = document.getElementById('fTransferInQuarter').value;
+          let transferInDate = document.getElementById('fTransferInDate').value;
+          let transferOut = document.getElementById('fTransferOut').checked;
+          let transferOutQuarter = document.getElementById('fTransferOutQuarter').value;
+          let transferOutDate = document.getElementById('fTransferOutDate').value;
 
           if(hasFree && freeTier === '육아기근로단축' && (!freeStartDate || !freeEndDate)) {
               alert("육아기근로단축은 지원 시작일과 마감일을 모두 입력해야 합니다.");
@@ -6574,10 +6631,14 @@ document.getElementById('fTier').value = r.freeTier || "";
             let neisMatch = neisList.find(s => String(s.grade)===String(grade) && String(s.classNum)===String(classNum) && String(s.studentNum)===String(studentNum) && s.name === studentNameForCheck);
 
             if (hasFree && !wasFreeBefore && !neisMatch) {
-                if (!confirm(`⚠️ 'NEIS 자유수강자 명단 관리'에 없는 학생입니다.\n\n${grade}학년 ${classNum}반 ${studentNum}번 ${studentNameForCheck}\n\n그래도 자유수강권 대상자로 저장할까요?`)) return;
-            }
-            if (hasFree && neisMatch && freeAutoStartDate && neisMatch.reqDate && freeAutoStartDate !== neisMatch.reqDate) {
-                alert(`⚠️ NEIS 명단의 신청일자(${neisMatch.reqDate})와 입력하신 지원 개시일(${freeAutoStartDate})이 다릅니다. 다시 한 번 확인해주세요.`);
+                neisList.unshift({
+                    grade, classNum, studentNum, name: studentNameForCheck,
+                    afterSchool: '개별입력연동[O]',
+                    familyTier: freeTier, reqDate: freeStartDate, confirmDate: freeEndDate,
+                    status: '신규'
+                });
+                persistNeisList();
+                alert(`✅ 'NEIS 자유수강자 명단 관리'에 없는 학생이라 자동으로 추가했습니다.\n\n${grade}학년 ${classNum}반 ${studentNum}번 ${studentNameForCheck}`);
             }
 
             let isAnyNewSubject = false;
@@ -6607,7 +6668,7 @@ document.getElementById('fTier').value = r.freeTier || "";
 
             let saveTime = Date.now();
             let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, freeAutoStartDate, memo, createdAt };
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, freeAutoStartDate: oldR ? (oldR.freeAutoStartDate || '') : '', memo, createdAt, transferIn, transferInQuarter, transferInDate, transferOut, transferOutQuarter, transferOutDate };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -6630,6 +6691,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                             let burdenSu, burdenGy, burdenJ;
                             let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
                             let isNewTime = null;
+                            let sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate;
 
                             let oldSub = null;
                             if(oldR && oldR[`q${q}`] && oldR[`q${q}`].subs) {
@@ -6640,11 +6702,12 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 burdenSu = oldSub.burdenSu; burdenGy = oldSub.burdenGy; burdenJ = oldSub.burdenJ;
                                 rG = oldSub.rG||0; rS = oldSub.rS||0; rSu = oldSub.rSu||0; rGy = oldSub.rGy||0; rJ = oldSub.rJ||0;
                                 isNewTime = oldSub.isNew;
+                                sessionRatioEnabled = oldSub.sessionRatioEnabled; totalSessions = oldSub.totalSessions; coveredSessions = oldSub.coveredSessions; freeApplyDate = oldSub.freeApplyDate;
                             } else if (name) {
                                 isNewTime = saveTime; 
                             }
 
-                            subs.push({ name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime });
+                            subs.push({ name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate });
                             sumG += g; sumS += acc; sumSu += su; sumGy += gy; sumJ += j;
 
                             if(name && !savedSubjects.some(subObj => subObj.name === name)) {
@@ -6719,7 +6782,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let c = calcStudent(r);
             
             document.getElementById('detailTitle').innerText = `[${r.grade}학년 ${r.classNum}반 ${r.name}] 학생 상세 수강 내역`;
-            document.getElementById('detailHeaderAction').innerHTML = `<button class="btn-tool no-print" style="background: #f8fafc; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 8px 18px; font-size: 14px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'" onclick="closeModal('detail'); openPanel('edit','${r.id}')">✏️ 전체 데이터 개별 수정창</button>`;
+            document.getElementById('detailHeaderAction').innerHTML = `<button class="btn-tool no-print" style="background: #f8fafc; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 8px 18px; font-size: 14px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'" onclick="closeModal('detail'); openPanel('edit','${r.id}')">✏️ 전체 데이터 개별 수정창</button>${r.transferIn ? `<span style="margin-left:12px; font-size:17px; font-weight:900; color:#38bdf8;">🚌전입일: ${r.transferInDate || '미입력'}</span>` : ''}${r.transferOut ? `<span style="margin-left:12px; font-size:17px; font-weight:900; color:#f472b6;">🚌전출일: ${r.transferOutDate || '미입력'}</span>` : ''}`;
             
             let html = ``;
             
@@ -6844,6 +6907,7 @@ document.getElementById('fTier').value = r.freeTier || "";
 
 
                   let allocColCount = 3 + (r.hasG3 ? 3 : 0) + (r.hasFree ? 3 : 0); // ✨ 지원유형에 따라 표시할 칸 수 계산
+                    let ratioNotes = [];
                     let rows = validSubs.map((s, dummyIdx) => {
                         let sIdx = subs.indexOf(s); 
                         let stdSub = savedSubjects.find(subj => subj.name === s.name);
@@ -6903,6 +6967,14 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     <button type="button" class="no-print" title="분기 중간에 자유수강자로 선정된 경우 일부만 지원금액 자동 계산" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})" style="margin-top:6px; font-size:11px; padding:4px 8px; border-radius:5px; border:none; background:${s.sessionRatioEnabled ? '#2563eb' : '#1e3a8a'}; color:white; cursor:pointer; font-weight:700; white-space:nowrap;">
                                         🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 적용중` : '차시 비율 적용'}
                                     </button>
+                                    ${(() => {
+                                        if (s.sessionRatioEnabled && s.freeApplyDate) {
+                                            let fd = s.freeApplyDate.split('-');
+                                            let fdLabel = fd.length >= 3 ? `${fd[0]}년 ${Number(fd[1])}월 ${Number(fd[2])}일` : s.freeApplyDate;
+                                            ratioNotes.push(`${s.name || '(과목명 미상)'} : ${fdLabel} 자유수강자로 추가되어, 총 ${s.totalSessions}차시중 ${s.coveredSessions}차시가 지원금으로 적용됨`);
+                                        }
+                                        return '';
+                                    })()}
                                     ` : ''}
                                  </td>
                                 
@@ -7096,6 +7168,11 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 수익자 합계: ${formatMoney(suikTotal)}
                             </span>
                         </div>
+                        ${ratioNotes.length ? `
+                        <div style="margin-top:14px; padding:12px 16px; background:#fffbeb; border:2px solid #d4af37; border-radius:10px;">
+                            ${ratioNotes.map(note => `<div style="font-size:14px; font-weight:700; color:#92400e; line-height:1.6;">🍼 ${note}</div>`).join('')}
+                        </div>
+                        ` : ''}
                         <div class="no-print" style="margin-top:14px;">
                             <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:8px;">🧾 ${q}분기 환불 내역 목록 ${refundHistoryItems.length ? `<span style="color:#b91c1c;">(${refundHistoryItems.length}건)</span>` : ''}</div>
                             ${refundHistoryItems.length === 0
@@ -8407,6 +8484,7 @@ document.getElementById('fTier').value = r.freeTier || "";
             let s = r[`q${q}`].subs[sIdx];
             
             sessionRatioTarget = { id, q, sIdx };
+            document.getElementById('sr_freeApplyDate').value = s.freeApplyDate || '';
             document.getElementById('sr_total').value = s.totalSessions || '';
             document.getElementById('sr_covered').value = s.coveredSessions || '';
             document.getElementById('sessionRatioModal').style.display = 'flex';
@@ -8487,16 +8565,19 @@ document.getElementById('fTier').value = r.freeTier || "";
             
             let total = toNum(document.getElementById('sr_total').value);
             let covered = toNum(document.getElementById('sr_covered').value);
+            let freeApplyDate = document.getElementById('sr_freeApplyDate').value;
             
             if (total <= 0) {
                 s.sessionRatioEnabled = false;
                 s.totalSessions = undefined;
                 s.coveredSessions = undefined;
+                s.freeApplyDate = undefined;
             } else {
                 if (covered < 0 || covered > total) { alert('지원 대상 차시는 0 이상, 총 차시 이하여야 합니다.'); return; }
                 s.sessionRatioEnabled = true;
                 s.totalSessions = total;
                 s.coveredSessions = covered;
+                s.freeApplyDate = freeApplyDate || undefined;
             }
             
             persistData();
@@ -9354,12 +9435,18 @@ document.getElementById('fTier').value = r.freeTier || "";
 
 
 							   
-                                    let backupData = {
+                                     let backupData = {
                                     memo: r.memo || '',
                                     freeAutoStartDate: r.freeAutoStartDate || '',
                                     freeStartDate: r.freeStartDate || '',
                                     freeEndDate: r.freeEndDate || '',
                                     freeLimit: r.freeLimit || '',
+                                    transferIn: r.transferIn || false,
+                                    transferInQuarter: r.transferInQuarter || '',
+                                    transferInDate: r.transferInDate || '',
+                                    transferOut: r.transferOut || false,
+                                    transferOutQuarter: r.transferOutQuarter || '',
+                                    transferOutDate: r.transferOutDate || '',
                                     b: targetQs.map(qNum => {
                                         let qObj = r[`q${qNum}`] || {subs:[]};
                                         return qObj.subs.map(x => ({
@@ -9374,7 +9461,8 @@ document.getElementById('fTier').value = r.freeTier || "";
                                             // ✨ 차시 비율(자유수강 중간선정) 적용 정보 백업 보존
                                             sessionRatioEnabled: x.sessionRatioEnabled || false,
                                             totalSessions: x.totalSessions,
-                                            coveredSessions: x.coveredSessions
+                                            coveredSessions: x.coveredSessions,
+                                            freeApplyDate: x.freeApplyDate || ''
                                         }));
                                     })
                                 };
@@ -9707,11 +9795,17 @@ document.getElementById('fTier').value = r.freeTier || "";
                             id: Date.now() + Math.random().toString(36).substr(2, 5) + rowNumber,
                             createdAt: currentExStudent && currentExStudent.createdAt ? currentExStudent.createdAt : Date.now(), // ✨ 신규 생성 시간
                             grade, classNum, studentNum, name: sName,
-                            hasG3: (v(5)==='O' || v(5)==='o'), hasFree: (v(6)==='O' || v(6)==='o'), freeTier: String(v(7)).trim(),
+                             hasG3: (v(5)==='O' || v(5)==='o'), hasFree: (v(6)==='O' || v(6)==='o'), freeTier: String(v(7)).trim(),
                             freeAutoStartDate: backupData ? (backupData.freeAutoStartDate || '') : '',
                             freeStartDate: backupData ? (backupData.freeStartDate || '') : '',
                             freeEndDate: backupData ? (backupData.freeEndDate || '') : '',
                             freeLimit: backupData && backupData.freeLimit ? backupData.freeLimit : undefined,
+                            transferIn: backupData ? !!backupData.transferIn : false,
+                            transferInQuarter: backupData ? (backupData.transferInQuarter || '') : '',
+                            transferInDate: backupData ? (backupData.transferInDate || '') : '',
+                            transferOut: backupData ? !!backupData.transferOut : false,
+                            transferOutQuarter: backupData ? (backupData.transferOutQuarter || '') : '',
+                            transferOutDate: backupData ? (backupData.transferOutDate || '') : '',
                             q1: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
                             q2: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
                             q3: { subs:[], g:0, s:0, su:0, gy:0, j:0 },
@@ -9746,7 +9840,7 @@ document.getElementById('fTier').value = r.freeTier || "";
                                 let refundLog = [];
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
-                                let sessionRatioEnabled, totalSessions, coveredSessions; // ✨ 차시 비율 적용 복원용 변수
+                                let sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate; // ✨ 차시 비율 적용 복원용 변수
 
                                 if(currentStudent._backupBurdens && currentStudent._backupBurdens[q-1] && currentStudent._backupBurdens[q-1][sIdx]) {
                                     let bk = currentStudent._backupBurdens[q-1][sIdx];
@@ -9763,13 +9857,14 @@ document.getElementById('fTier').value = r.freeTier || "";
                                     mFreeSu = bk.mFreeSu; mFreeGy = bk.mFreeGy; mFreeJ = bk.mFreeJ;
                                     mSuikSu = bk.mSuikSu; mSuikGy = bk.mSuikGy; mSuikJ = bk.mSuikJ;
 
-                                    // ✨ 차시 비율(자유수강 중간선정) 적용 복원
+                                      // ✨ 차시 비율(자유수강 중간선정) 적용 복원
                                     sessionRatioEnabled = bk.sessionRatioEnabled || false;
                                     totalSessions = bk.totalSessions;
                                     coveredSessions = bk.coveredSessions;
+                                    freeApplyDate = bk.freeApplyDate || '';
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, _slotIdx: sIdx });
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate, _slotIdx: sIdx });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
