@@ -11646,6 +11646,7 @@ function openPanel(mode, id = null) {
                     if(!exists) combined.push({ isExisting: false, grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name, tier: st.familyTier });
                 });
                 if(isSort) combined.sort((a,b) => a.grade - b.grade || a.classNum - b.classNum || a.studentNum - b.studentNum);
+                maxRow = Math.max(maxRow, startRow + combined.length - 1);
 
                function ensureColStyle(cBase) {
     let _subHdr = String(ws.getRow(eduHeaderRow + 1).getCell(cBase).value || '').trim();
@@ -11662,7 +11663,7 @@ function openPanel(mode, id = null) {
                     let srcCell = ws.getRow(r).getCell(refColNum);
                     let dstCell = ws.getRow(r).getCell(newColNum);
                     if(srcCell.style) dstCell.style = JSON.parse(JSON.stringify(srcCell.style));
-                    if (r === eduHeaderRow+3) {
+                    if (r === eduHeaderRow+3 && i < 3) {
                         let newLetter = ws.getColumn(newColNum).letter;
                         dstCell.value = { formula: `SUM(${newLetter}${startRow}:${newLetter}${maxRow})` };
                     } else if (r >= eduHeaderRow+1 && r <= eduHeaderRow+2) {
@@ -11682,7 +11683,7 @@ function openPanel(mode, id = null) {
             for (let i = 0; i < 4; i++) {
                 try { ws.mergeCells(eduHeaderRow + 1, cBase + i, eduHeaderRow + (i === 3 ? 3 : 2), cBase + i); } catch(e2) {}
             }
-        } catch(e) {}
+        }    catch(e) { console.error(e); alert('⚠️ 오른쪽 열 확장 중 오류: ' + e.message); }
     }
 }
 
@@ -11950,6 +11951,62 @@ function openPanel(mode, id = null) {
                     }
                 }
 
+                // ★★ [패치] 행/열이 서식보다 많을 때 서식·수식·합계범위 확장 ★★
+{
+    const lastNeeded = startRow + combined.length - 1;
+
+    // 1) 서식이 원래 잡고 있던 마지막 데이터 행 (요약행 SUM(F10:F79)에서 79를 읽음)
+    let tplLast = lastNeeded;
+    const mm = String(ws.getRow(startRow - 1).getCell(6).formula || '').match(/:\$?[A-Z]+\$?(\d+)/);
+    if (mm) tplLast = parseInt(mm[1], 10);
+
+    // 2) 마지막 세트 위치 (세부헤더의 '사용액' 기준으로 끝까지 탐색)
+    let lastSetBase = 16;
+    for (let c = 16; c <= 400; c += 4) {
+        if (String(ws.getRow(eduHeaderRow + 1).getCell(c).value || '').includes('사용액')) lastSetBase = c;
+        else break;
+    }
+
+    // 3) 넘친 행: 마지막 서식 행의 스타일 복사 + 요약행/상단 COUNT/조건부서식 범위 확장
+    if (lastNeeded > tplLast) {
+        const lastCol = lastSetBase + 3;
+        const srcRow = ws.getRow(tplLast);
+        for (let r = tplLast + 1; r <= lastNeeded; r++) {
+            const row = ws.getRow(r);
+            if (srcRow.height) row.height = srcRow.height;
+            for (let c = 1; c <= lastCol; c++) {
+                const sc = srcRow.getCell(c);
+                if (sc.style) row.getCell(c).style = JSON.parse(JSON.stringify(sc.style));
+            }
+        }
+        const re = new RegExp('(\\$?[A-Z]{1,3}\\$?)' + tplLast + '(?![0-9])', 'g');
+        for (let r = 1; r < startRow; r++) {
+            ws.getRow(r).eachCell({ includeEmpty: false }, (cell) => {
+                const f = cell.formula;
+                if (f && typeof f === 'string') {
+                    const nf = f.replace(re, (m, p) => p + lastNeeded);
+                    if (nf !== f) cell.value = { formula: nf };
+                }
+            });
+        }
+        (ws.conditionalFormattings || []).forEach(cf => {
+            cf.ref = String(cf.ref).replace(new RegExp('([A-Z]+)' + tplLast + '(?![0-9])', 'g'), (m, p) => p + lastNeeded);
+        });
+    }
+
+    // 4) 모든 학생행: 세트별 (사용액-환불액) 수식 + N열 합계를 마지막 세트까지 다시 작성
+    for (let r = startRow; r <= lastNeeded; r++) {
+        const row = ws.getRow(r);
+        const parts = [];
+        for (let c = 16; c <= lastSetBase; c += 4) {
+            const L1 = ws.getColumn(c).letter, L2 = ws.getColumn(c + 1).letter, L3 = ws.getColumn(c + 2).letter;
+            if (r > tplLast) row.getCell(c + 2).value = { formula: `${L1}${r}-${L2}${r}` };
+            parts.push(L3 + r);
+        }
+        row.getCell(14).value = { formula: `SUM(${parts.join('+')})` };
+    }
+}
+				
                 const buffer = await wb.xlsx.writeBuffer();
                 saveAs(new Blob([buffer]), `교육청제출용_자유수강완성본_${new Date().toISOString().slice(0,10)}.xlsx`);
                 
