@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.3</title>
+    <title>방과후 지원금 돌보미 V15.4</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -639,7 +639,7 @@
             <div id="ntfName" style="font-size:13px; color:#6b7280; margin-bottom:14px;"></div>
 
             <label style="display:flex; align-items:center; gap:6px; font-weight:700; color:#0891b2; margin-bottom:6px;">
-                <input type="checkbox" id="ntf_in" onchange="toggleNtfInGroup()"> 🚏 전입
+                <input type="checkbox" id="ntf_in" onchange="toggleNtfInGroup(); resetNtfFreeLimitIfNone();"> 🚏 전입
             </label>
             <div id="ntfInGroup" style="display:none; margin-left:12px; margin-bottom:12px; background:#ecfeff; border:1px solid #67e8f9; border-radius:6px; padding:8px;">
                 <label style="font-size:12px; color:#0e7490; font-weight:700; display:block; margin-bottom:4px;">전입 분기</label>
@@ -651,7 +651,7 @@
             </div>
 
             <label style="display:flex; align-items:center; gap:6px; font-weight:700; color:#b91c1c; margin-bottom:6px;">
-                <input type="checkbox" id="ntf_out" onchange="toggleNtfOutGroup()"> 🚌 전출
+                <input type="checkbox" id="ntf_out" onchange="toggleNtfOutGroup(); resetNtfFreeLimitIfNone();"> 🚌 전출
             </label>
             <div id="ntfOutGroup" style="display:none; margin-left:12px; margin-bottom:16px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:8px;">
                 <label style="font-size:12px; color:#991b1b; font-weight:700; display:block; margin-bottom:4px;">전출 분기</label>
@@ -661,6 +661,13 @@
                 <label style="font-size:12px; color:#991b1b; font-weight:700; display:block; margin-bottom:4px;">전출일 (기록용)</label>
                 <input type="date" id="ntf_outDate" style="width:100%; padding:6px; border:1px solid #fca5a5; border-radius:4px; font-size:13px; box-sizing:border-box;">
             </div>
+
+            <div id="ntfFreeLimitGroup" style="margin-bottom:16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:8px;">
+                <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
+                <input type="text" id="ntf_freeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
+                <div style="font-size:11px; color:#9ca3af; margin-top:2px;">타 학교에서 이미 사용한 금액이 있다면, 남은 금액만큼으로 줄여서 입력하세요. 이 금액은 프로그램 전체 계산에 바로 반영됩니다.</div>
+            </div>
+            <div id="ntfResetToast" style="display:none; margin-bottom:12px; padding:8px 12px; background:#334155; color:#fff; font-size:12px; font-weight:600; border-radius:6px; opacity:0; transition:opacity 0.3s;"></div>
 
             <div style="display:flex; gap:8px;">
                 <button onclick="closeNeisTransferModal()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db; background:white; color:#374151; font-weight:700; cursor:pointer;">취소</button>
@@ -985,26 +992,7 @@
     </div>
 
 
-  <div id="noticePopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        
-        <div style="background:#ffffff; border-radius:12px; overflow:hidden; width:95%; max-width:1000px; height:92vh; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); display:flex; flex-direction:column; animation: popIn 0.3s ease-out forwards;">
-            
-          <div style="width:100%; flex-grow:1; overflow:auto; background:#f3f4f6; text-align:center; padding: 0;">
-                
-                <img src="https://i.ibb.co/4ZSptsRG/image.png" alt="공지사항" style="width:100%; height:auto; display:block; margin:0 auto;" decoding="async" fetchpriority="high">
-                
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; flex-shrink: 0;">
-                <div style="display:flex; gap:12px;">
-                    <button onclick="closeNoticePopup(1)" style="background:#f1f5f9; color:#64748b; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">📅 오늘 하루 보지 않기</button>
-                    <button onclick="closeNoticePopup(7)" style="background:#e2e8f0; color:#475569; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🕖 7일간 보지 않기</button>
-                    <button onclick="closeNoticePopup('forever')" style="background:#fee2e2; color:#ef4444; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:700;">🚫 평생 보지 않기</button>
-                </div>
-                <button onclick="closeNoticePopup(0)" style="background:#3b82f6; color:white; border:none; padding:10px 30px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:800;">닫기 ✖</button>
-            </div>
-        </div>
-    </div>
+
     
     <style>
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
@@ -1057,8 +1045,6 @@
                     closeUpdateModal();
                 } else if (document.getElementById('printExportOverlay') && document.getElementById('printExportOverlay').classList.contains('active')) {
                     closePrintExportModal();
-                } else if (document.getElementById('subjectStatusOverlay') && document.getElementById('subjectStatusOverlay').classList.contains('active')) {
-                    closeSubjectStatusModal();
                 } else if (document.getElementById('subManageOverlay') && document.getElementById('subManageOverlay').classList.contains('active')) {
                     closeModal('subManageModal');
                 } else if (document.getElementById('subjectOverlay') && document.getElementById('subjectOverlay').classList.contains('active')) {
@@ -1101,7 +1087,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.3</span>
+                <span class="brand-version">V15.4</span>
             </div>
     </div>
     
@@ -1190,8 +1176,8 @@
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
-                <div class="header-tools">
-           <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
+            <div class="header-tools">
+            <button class="btn-tool" onclick="toggleFilterPanel()" id="btnFilterView" title="상세 필터"><i data-lucide="filter"></i> 필터</button>
             <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
             <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 업무,저장,인쇄</button>
             <button class="btn-tool" id="btn-refund-manage" onclick="openRefundManagerModal()" title="환불 관리"><i data-lucide="rotate-ccw"></i> 환불관리</button>
@@ -1204,7 +1190,49 @@
         </div>
     </div>
 </header>
-        
+
+    <div id="featureUpdatePopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.55); z-index:99997; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+        <div style="background:#fffaf3; border-radius:20px; overflow:hidden; width:92%; max-width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 25px 60px -12px rgba(0,0,0,0.35); animation: popIn 0.3s ease-out forwards;">
+
+            <div style="background:linear-gradient(135deg, #e0c3fc, #8ec5fc); padding:28px 26px; text-align:center;">
+                <div style="font-size:12.5px; font-weight:800; color:#4c1d95; letter-spacing:1.5px; margin-bottom:6px;">✨ NEW UPDATE</div>
+                <h2 style="margin:0; font-size:21px; font-weight:900; color:#3b0764;">🚌 전입・전출 기능이 새로워졌어요</h2>
+            </div>
+
+            <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
+
+                <div style="background:#fffdf5; border:2px solid #d4af37; border-radius:14px; padding:16px; box-shadow:0 2px 8px rgba(212,175,55,0.2);">
+                    <div style="font-size:18px; font-weight:900; color:#92400e; margin-bottom:8px; line-height:1.3;">💰 전입・전출 시 지원금 한도,<br>이제 직접 조절하세요</div>
+                    <div style="font-size:13.5px; color:#57534e; line-height:1.65;">
+                        '자유수강자 명단 관리(NEIS)'나 '상세 데이터 수정' 창에서 전입・전출을 체크하면, <b style="color:#b45309;">지원금 총 한도</b>를 학생 상황에 맞게 바로 수정할 수 있어요.<br>
+                        입력한 금액은 <b style="color:#b45309;">프로그램 전체 계산에 자동으로 반영</b>되어, 따로 손댈 곳이 없습니다.
+                    </div>
+                    <img src="https://i.ibb.co/Cp89Y93H/image.png" alt="전입/전출 한도 설정 화면" style="width:100%; height:auto; border-radius:10px; margin-top:12px; border:1px solid #fde68a; display:block;">
+                </div>
+
+                <div style="background:#eff6ff; border-radius:14px; padding:16px; border:1px solid #bfdbfe;">
+                    <div style="font-size:15px; font-weight:800; color:#1e3a8a; margin-bottom:6px;">🏷️ 메인 목록에서 한눈에 확인</div>
+                    <div style="font-size:13.5px; color:#334155; line-height:1.65;">
+                        전입・전출 학생은 이름 옆 학번 아래에 <span style="background:#dbeafe; color:#1d4ed8; font-weight:800; padding:1px 6px; border-radius:6px; font-size:12px;">🚌전입</span> 또는 <span style="background:#ffedd5; color:#c2410c; font-weight:800; padding:1px 6px; border-radius:6px; font-size:12px;">🚌전출</span> 뱃지로 바로 표시돼요.
+                    </div>
+                </div>
+
+                <div style="background:#fdf4ff; border-radius:14px; padding:16px; border:1px solid #f5d0fe;">
+                    <div style="font-size:15px; font-weight:800; color:#701a75; margin-bottom:6px;">📅 상세창에서도 날짜까지 바로 확인</div>
+                    <div style="font-size:13.5px; color:#334155; line-height:1.65;">
+                        학생 이름을 눌러 여는 상세창 맨 위 제목줄에도 <b style="color:#a21caf;">전입일 / 전출일</b>이 함께 표시되어, 언제 오고 나갔는지 바로 확인할 수 있어요.
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="padding:18px 26px 26px; text-align:center;">
+                <button onclick="closeFeatureUpdatePopup()" style="background:linear-gradient(135deg, #a78bfa, #60a5fa); color:white; border:none; padding:12px 36px; border-radius:30px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 8px 16px rgba(96,165,250,0.35);">확인했어요 👍</button>
+            </div>
+
+        </div>
+    </div>
+
     <div id="yearSettingsPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:white; padding:0; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto;">
         <div style="background:#111827; padding:24px; position:relative;">
             <button onclick="toggleYearSettingsPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
@@ -1466,57 +1494,7 @@
     </main>
 	
 	
-	
-	
-	
-	
-	
-	
-	<!-- ✨ 수익자 관리 기능 안내 팝업 -->
-    <div id="beneficiaryNoticePopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(3px);">
-        <div style="background:#ffffff; border-radius:16px; overflow:hidden; width:90%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out forwards; display:flex; flex-direction:column;">
-            
-            <!-- 상단 타이틀 영역 (그라데이션 배경) -->
-            <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 30px 20px; text-align: center; color: white;">
-                               <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">🎉 대규모 업데이트 V12.0</h2>
-                <p style="margin: 8px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9;">프로그램이 더욱 강력해졌습니다.</p>
-            </div>
-            
-            <!-- 본문 안내 영역 -->
-            <div style="padding: 24px 24px 20px;">
-                <div style="font-size: 14.5px; color: #374151; line-height: 1.7; font-weight: 600; text-align: left; margin-bottom: 4px; display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">1.</span> <span><span style="color:#ef4444; font-weight:800;">수익자</span> 관리 가능 (수익자 관리가 편해 졌습니다.)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">2.</span> <span><b>과목 목록 관리</b> (과목 금액 복사 가능)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start;"><span style="color:#3b82f6; font-weight:900;">3.</span> <span>각 과목별 <b>부서로 관리</b> 가능! (댄스 1부, 댄스 2부)</span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">4.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏫 코디마스터 엑셀 업로드 가능! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(코디마스터-수강료(강좌별)-오른쪽마우스-엑셀내보내기 하세요)</span></span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">5.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🏛️ 행정실 CMS 수납자 명단 자동 생성! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">(프로그램 상단 '업무,저장,인쇄' 버튼을 눌러보세요)</span></span></div>
-                    <div style="display:flex; gap:8px; align-items:flex-start; background:linear-gradient(135deg, #fef3c7, #fde68a); border:2px solid #d4af37; border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(212,175,55,0.3);"><span style="color:#b45309; font-weight:900; font-size:16px;">6.</span> <span style="color:#78350f; font-weight:800; font-size:15px;">🍼 자유수강자, 분기 중간에 들어와도 걱정 마세요! <span style="background:#dc2626; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:4px; vertical-align:middle;">NEW</span><br><span style="font-weight:600; font-size:11.5px; color:#92400e;">과목 옆 "🍼 차시 비율 적용" 버튼을 누르고 총차시/지원차시만 입력하면 금액이 자동으로 계산돼요.</span></span></div>
-			   </div>
-            </div>
-          
-            
-            <!-- 하단 닫기 및 체크박스 영역 -->
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0;">
-                <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#64748b; cursor:pointer; font-weight:700;">
-                    <input type="checkbox" id="hideBeneficiaryCheckbox" style="width:16px; height:16px; accent-color:#3b82f6; cursor:pointer;">
-                    다음부터 이 창 보지 않기
-                </label>
-                <button onclick="closeBeneficiaryPopup()" style="background:#3b82f6; color:white; border:none; padding:10px 24px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:800; box-shadow:0 4px 6px rgba(59,130,246,0.3); transition: transform 0.1s;">
-                    확인
-                </button>
-            </div>
-        </div>
-    </div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 
     <div class="slide-panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
     <aside class="slide-panel" id="slidePanel">
@@ -1525,23 +1503,69 @@
             <button class="close-btn" onclick="closePanel()">&times;</button>
         </div>
         
-        <div class="panel-body">
-            <form id="studentForm">
-                <input type="hidden" id="editId">
-                <div class="form-row">
-                    <div class="form-group"><label>학년</label><input type="number" id="fGrade" min="1" max="6" oninput="checkFundLogic(event)" required></div>
-                    <div class="form-group"><label>반</label><input type="number" id="fClass" min="1" max="20" required></div>
-                    <div class="form-group"><label>번호</label><input type="number" id="fNum" min="1" max="99" required></div>
-                    <div class="form-group"><label>성명</label><input type="text" id="fName" required></div>
+		
+		
+		
+		
+		
+		
+		
+		
+      <div class="panel-body">
+    <form id="studentForm">
+        <input type="hidden" id="editId">
+        <div class="form-row">
+            <div class="form-group"><label>학년</label><input type="number" id="fGrade" min="1" max="6" oninput="checkFundLogic(event)" required></div>
+            <div class="form-group"><label>반</label><input type="number" id="fClass" min="1" max="20" required></div>
+            <div class="form-group"><label>번호</label><input type="number" id="fNum" min="1" max="99" required></div>
+            <div class="form-group"><label>성명</label><input type="text" id="fName" required></div>
+        </div>
+
+
+
+
+         <div class="benefit-box">
+            <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+                <div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="fG3" onchange="toggleG3Limit()"> <span style="color:var(--color-g3);" id="g3Label">초3지원금</span>
+                    </label>
+                    <span class="desc-text" id="g3Desc">연 50만원 (3학년 전용).<br>상반기/하반기 각 25만원 한도 분할</span>
                 </div>
 
-<div class="benefit-box">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="fG3"> <span style="color:var(--color-g3);" id="g3Label">초3지원금</span>
-                    </label>
-                    <span class="desc-text" id="g3Desc">연 50만원 (3학년 전용). 상반기/하반기 각 25만원 한도 분할</span>
+                <!-- ============================================================ -->
+                <!-- [신규 추가] 초3지원금 학기별 한도 입력 박스 (fG3 + 전입/전출 체크 시에만 표시) -->
+                <!-- ============================================================ -->
+                <div class="form-group" id="g3LimitGroup" style="display:none; flex:1; min-width:280px; margin:0;">
+                    <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
+                        <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:6px;">
+                            🎒 초3지원금 학기별 한도 (전입·전출 등 예외 시에만 수정)
+                        </label>
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                            <span style="font-size:12px; color:#374151;">1학기</span>
+                            <input type="text" id="fG3Limit1" value="250,000"
+                                   oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,','); updateG3LimitTotal();"
+                                   style="width:110px; padding:6px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;"> 원
 
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px;">
+                            <span style="font-size:12px; color:#374151; margin-left:8px;">2학기</span>
+                            <input type="text" id="fG3Limit2" value="250,000"
+                                   oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,','); updateG3LimitTotal();"
+                                   style="width:110px; padding:6px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;"> 원
+                        </div>
+                        <div style="font-size:12px; font-weight:700; color:#1e40af;">
+                            총 연간 지원금: <span id="fG3LimitTotal">500,000</span> 원
+                        </div>
+                        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">
+                            타 학교에서 이미 사용한 금액이 있거나 전출로 잔여 사용이 불가한 경우, 위 1·2학기 금액을 실제 사용(또는 사용 가능)한 금액으로 줄여서 입력하세요.
+                        </div>
+                    </div>
+                </div>
+                <!-- [신규 추가 끝] -->
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-top:16px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                         <label class="checkbox-label" style="margin-top:0;">
                             <input type="checkbox" id="fFree" onchange="toggleTier()"> <span style="color:var(--color-free);">자유수강권</span>
                         </label>
@@ -1554,69 +1578,82 @@
                         </select>
                     </div>
                     <span class="desc-text" id="freeDesc">연 60만원. 3학년의 경우 초3지원금 소진 후 적용됨.</span>
-
-                   <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
-                        <div id="yukaDateGroup" style="display:none; margin-top:10px; background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
-                            <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
-                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                <span style="font-size:12px; color:#6b7280;">시작일</span>
-                                <input type="date" id="fFreeStartDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
-                                <span style="font-size:12px; color:#6b7280;">~ 마감일</span>
-                                <input type="date" id="fFreeEndDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
-                            </div>
-                            <div style="font-size:11px; color:#9ca3af; margin-top:4px;">이 기간에만 자유수강권 지원금을 사용할 수 있습니다.</div>
-                        </div>
-                        <div style="margin-top:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:8px;">
-                            <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
-                            <input type="text" id="fFreeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
-                            <div style="font-size:11px; color:#9ca3af; margin-top:2px;">타 학교에서 이미 사용한 금액이 있다면, 남은 금액만큼으로 줄여서 입력하세요.</div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:16px; padding-top:12px; border-top:1px dashed #d1d5db;">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="fTransferIn" onchange="toggleTransferIn()"> <span style="color:#0891b2;">🚏 전입</span>
-                        </label>
-                        <div id="transferInGroup" style="display:none; margin-left:24px; margin-top:8px; background:#ecfeff; border:1px solid #67e8f9; border-radius:6px; padding:8px;">
-                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-                                <label style="font-size:12px; color:#0e7490; font-weight:700;">전입 분기</label>
-                                <select id="fTransferInQuarter" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
-                                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
-                                </select>
-                                <label style="font-size:12px; color:#0e7490; font-weight:700; margin-left:8px;">전입일 (기록용)</label>
-                                <input type="date" id="fTransferInDate" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
-                            </div>
-                            <div style="font-size:11px; color:#9ca3af;">다른 학교에서 자유수강권을 이미 썼다면, 위 "자유수강권 총 한도" 칸을 남은 금액으로 줄여서 입력하세요.</div>
-                        </div>
-
-                        <label class="checkbox-label" style="margin-top:12px;">
-                            <input type="checkbox" id="fTransferOut" onchange="toggleTransferOut()"> <span style="color:#b91c1c;">🚌 전출</span>
-                        </label>
-                        <div id="transferOutGroup" style="display:none; margin-left:24px; margin-top:8px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:8px;">
-                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-                                <label style="font-size:12px; color:#991b1b; font-weight:700;">전출 분기</label>
-                                <select id="fTransferOutQuarter" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
-                                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
-                                </select>
-                                <label style="font-size:12px; color:#991b1b; font-weight:700; margin-left:8px;">전출일 (기록용)</label>
-                                <input type="date" id="fTransferOutDate" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
-                            </div>
-                            <div style="font-size:11px; color:#9ca3af;">전출 후 남은 금액은 사용할 수 없으니, 위 "자유수강권 총 한도" 칸을 지금까지 사용한 금액으로 줄여서 입력하세요.</div>
-                        </div>
-                    </div>
                 </div>
 
-                <div style="font-size: 13px; color: var(--sidebar-accent); font-weight: 600; margin-bottom: 8px; background: #e0f2fe; padding: 10px; border-radius: 6px; border: 1px solid #bae6fd;">
-                    ※ 강사료, 수용비를 꼭 입력하지 않아도, 수강료를 직접 입력해도 됩니다.
+                <!-- [신규 추가] 자유수강권 총 한도 입력 박스 (fFree + 전입/전출 체크 시에만 표시) -->
+                <div class="form-group" id="freeLimitGroup" style="display:none; flex:1; min-width:280px; margin:0;">
+                    <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:8px;">
+                        <label style="font-size:12px; color:#9a3412; font-weight:700; display:block; margin-bottom:4px;">🚌 자유수강권 총 한도 (전학생 등 예외 시에만 수정)</label>
+                        <input type="text" id="fFreeLimit" value="600,000" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:140px; padding:6px; border:1px solid #f97316; border-radius:4px; font-size:13px;"> 원
+                        <div style="font-size:11px; color:#9ca3af; margin-top:2px;">타 학교에서 이미 사용한 금액이 있다면, 남은 금액만큼으로 줄여서 입력하세요.</div>
+                    </div>
                 </div>
-                
-                <div id="qInputs"></div>
-            </form>
+            </div>
+
+           <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
+                <div id="yukaDateGroup" style="display:none; margin-top:10px; background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
+                    <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span style="font-size:12px; color:#6b7280;">시작일</span>
+                        <input type="date" id="fFreeStartDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+                        <span style="font-size:12px; color:#6b7280;">~ 마감일</span>
+                        <input type="date" id="fFreeEndDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div style="font-size:11px; color:#9ca3af; margin-top:4px;">이 기간에만 자유수강권 지원금을 사용할 수 있습니다.</div>
+                </div>
+            </div>
+
+            <div style="margin-top:16px; padding-top:12px; border-top:1px dashed #d1d5db;">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="fTransferIn" onchange="toggleTransferIn(); resetTransferLimitsIfNone();"> <span style="color:#0891b2;">🚏 전입</span>
+                </label>
+                <div id="transferInGroup" style="display:none; margin-left:24px; margin-top:8px; background:#ecfeff; border:1px solid #67e8f9; border-radius:6px; padding:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                        <label style="font-size:12px; color:#0e7490; font-weight:700;">전입 분기</label>
+                        <select id="fTransferInQuarter" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
+                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                        </select>
+                        <label style="font-size:12px; color:#0e7490; font-weight:700; margin-left:8px;">전입일 (기록용)</label>
+                        <input type="date" id="fTransferInDate" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
+                    </div>
+                    <!-- [수정] 기존 문구에 초3지원금 안내 문구 추가 -->
+                    <div style="font-size:11px; color:#9ca3af;">다른 학교에서 초3지원금 또는 자유수강권을 이미 썼다면, 위 "초3지원금 학기별 한도" 또는 "자유수강권 총 한도" 칸을 남은 금액으로 줄여서 입력하세요.</div>
+                </div>
+
+                <label class="checkbox-label" style="margin-top:12px;">
+                    <input type="checkbox" id="fTransferOut" onchange="toggleTransferOut(); resetTransferLimitsIfNone();"> <span style="color:#b91c1c;">🚌 전출</span>
+                </label>
+                <div id="transferOutGroup" style="display:none; margin-left:24px; margin-top:8px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                        <label style="font-size:12px; color:#991b1b; font-weight:700;">전출 분기</label>
+                        <select id="fTransferOutQuarter" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
+                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                        </select>
+                        <label style="font-size:12px; color:#991b1b; font-weight:700; margin-left:8px;">전출일 (기록용)</label>
+                        <input type="date" id="fTransferOutDate" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
+                    </div>
+                    <!-- [수정] 기존 문구에 초3지원금 안내 문구 추가 -->
+                    <div style="font-size:11px; color:#9ca3af;">전출 후 남은 금액은 사용할 수 없으니, 위 "초3지원금 학기별 한도" 또는 "자유수강권 총 한도" 칸을 지금까지 사용한 금액으로 줄여서 입력하세요.</div>
+                </div>
+                <div id="transferResetToast" style="display:none; margin-top:8px; padding:8px 12px; background:#334155; color:#fff; font-size:12px; font-weight:600; border-radius:6px; opacity:0; transition:opacity 0.3s;"></div>
+            </div>
         </div>
-        <div class="panel-footer">
-            <button class="btn-3d btn-tool" onclick="closePanel()">취소</button>
-            <button class="btn-3d btn-save" onclick="saveRecord()">저장하기</button>
+
+        <div style="font-size: 13px; color: var(--sidebar-accent); font-weight: 600; margin-bottom: 8px; background: #e0f2fe; padding: 10px; border-radius: 6px; border: 1px solid #bae6fd;">
+            ※ 강사료, 수용비를 꼭 입력하지 않아도, 수강료를 직접 입력해도 됩니다.
         </div>
+
+        <div id="qInputs"></div>
+    </form>
+</div>
+<div class="panel-footer">
+    <button class="btn-3d btn-tool" onclick="closePanel()">취소</button>
+    <button class="btn-3d btn-save" onclick="saveRecord()">저장하기</button>
+</div>
+		
+		
+		
+		
     </aside>
 
     <div class="slide-panel-overlay" id="detailOverlay" onclick="closeModal('detail')"></div>
@@ -1647,14 +1684,7 @@
         </div>
     </div>
 
-    <div class="slide-panel-overlay" id="subjectStatusOverlay" onclick="closeSubjectStatusModal()"></div>
-    <div class="detail-modal subject" id="subjectStatusModal" style="width: 460px; max-height: 80vh;">
-        <div class="detail-header">
-            <h3 id="subjectStatusTitle" style="font-size:16px; font-weight:700;">분기별 과목 수강 현황</h3>
-            <button class="close-btn" onclick="closeSubjectStatusModal()">&times;</button>
-        </div>
-        <div class="detail-body" id="subjectStatusBody"></div>
-    </div>
+
 
 
 
@@ -1795,9 +1825,9 @@
                 <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_g" placeholder="학년" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_c" placeholder="반" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
                 <input type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" id="sp_n" placeholder="번호" style="width:60px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <input type="text" id="sp_name" placeholder="이름" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px;">
-                <button id="btn_sp_save" class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:6px 14px; font-weight:bold;" onclick="saveSpecialStudent()">추가</button>
-                <button id="btn_sp_cancel" class="btn-tool" style="display:none; background:white; color:#f59e0b; border:1px solid #f59e0b; border-radius:4px; padding:6px 10px; font-weight:bold;" onclick="cancelEditSpecial()">취소</button>
+                <input type="text" id="sp_name" placeholder="이름" style="flex:1; min-width:0; max-width:150px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                <button id="btn_sp_save" class="btn-save" style="background:#f59e0b; border:none; border-radius:4px; padding:0 14px; height:36px; font-weight:bold; flex-shrink:0; white-space:nowrap;" onclick="saveSpecialStudent()">추가</button>
+                <button id="btn_sp_cancel" class="btn-tool" style="display:none; background:white; color:#f59e0b; border:1px solid #f59e0b; border-radius:4px; padding:0 12px; height:36px; font-weight:bold; flex-shrink:0; white-space:nowrap;" onclick="cancelEditSpecial()">취소</button>
             </div>
             <div style="overflow-y:auto; max-height:350px; border:1px solid var(--border-color); border-radius:6px;">
                
@@ -4932,9 +4962,9 @@ function toggleStatusPanel() {
             return max <= 3 ? '초3지원금' : `초3~${max}지원금`;
         }
 
-                function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3지원" / "초3~4지원")
+            function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3" / "초3~4") - 메인홈 폭 절약을 위해 축약
             let max = getG3MaxGrade();
-            return max <= 3 ? '초3지원' : `초3~${max}지원`;
+            return max <= 3 ? '초3' : `초3~${max}`;
         }
 
         // ✨ 분기당 "차"(월) 개수: 4분기제=1분기 3달(1~3차), 6분기제=1분기 2달(1~2차)
@@ -4958,7 +4988,7 @@ function toggleStatusPanel() {
 
 
 
-       function getG3Allowance() {
+             function getG3Allowance() {
             return getYearSetting(getCurrentAcademicYear()).g3;
         }
 
@@ -4966,12 +4996,24 @@ function toggleStatusPanel() {
             return getYearSetting(getCurrentAcademicYear()).free;
         }
 
+        // ✨ 초3지원금 학생별 커스텀 한도 (전입·전출 등 예외 시 학생 편집창에서 입력한 값) - 입력 안 했으면 기본값 사용
+        function getG3AllowanceFor(r) {
+            let custom = toNum(r.g3Limit1) + toNum(r.g3Limit2);
+            return custom > 0 ? custom : getG3Allowance();
+        }
+        function getG3H1LimitFor(r) {
+            return toNum(r.g3Limit1) || 250000;
+        }
+        function getG3H2LimitFor(r) {
+            return toNum(r.g3Limit2) || 250000;
+        }
+
 
 
     function calcStudent(r) {
-            let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+            let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
             let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
-            let remG3_H1 = r.hasG3 ? 250000 : 0; 
+            let remG3_H1 = r.hasG3 ? getG3H1LimitFor(r) : 0; 
             let remG3_Total = allowanceG3;
             let remFree = allowanceFree;
 
@@ -5159,13 +5201,6 @@ function toggleStatusPanel() {
                         a.netJ = a.g3J + a.frJ + a.skJ;
                     });
                 
-
-
-
-
-
-
-
 
                 } else {
                     if (r[q]) {
@@ -5421,7 +5456,7 @@ function toggleStatusPanel() {
                     if (!matchesAny) return false;
                 }
 
-if(fFund === 'free' && !r.hasFree) return false;
+              if(fFund === 'free' && !r.hasFree) return false;
                 if(fFund === 'g3' && !r.hasG3) return false;
                 if(fFund === 'dual' && !(r.hasG3 && r.hasFree)) return false;
                 if(fFund === 'beneficiary' && (r.hasG3 || r.hasFree)) return false;
@@ -5443,10 +5478,10 @@ if(fFund === 'free' && !r.hasFree) return false;
             if (viewMode === 'subject') {
                 let subjectRows = [];
 
-viewData.forEach(({r, c}) => {
-                    let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
-                    let remG3_H1 = r.hasG3 ? 250000 : 0;
-                   let remG3_Total = allowanceG3;
+                    viewData.forEach(({r, c}) => {
+                    let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
+                    let remG3_H1 = r.hasG3 ? getG3H1LimitFor(r) : 0;
+                    let remG3_Total = allowanceG3;
                     let remFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
 
 
@@ -5591,14 +5626,18 @@ viewData.forEach(({r, c}) => {
                 currentSubjectViewData = subjectRows;
 
                document.getElementById('tabBanner').innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
+                    <div style="position:relative; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
+                        ${currentTab === 'all' ? `<button onclick="openFeatureUpdatePopup()" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg, #f5d0fe, #bae6fd); border:1px solid #d4af37; color:#581c87; font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${currentTab !== 'all' ? `<button onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #f5d0fe, #bae6fd); border:1px solid #d4af37; color:#581c87; font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
                           <div class="fee-toggle-wrap no-print" onclick="toggleFeeView()" title="수강료 / 강사료 전환">
                             <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#0ea5e9' : '#1e3a5f'};">${isFeeViewOn ? '강사료 보기' : '수강료 보기'}</span>
                             <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
+                        </div>
                         </div>
                     </div>
                 `;
@@ -5661,7 +5700,7 @@ viewData.forEach(({r, c}) => {
                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 205 : 150}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; border-right:2px solid var(--border-color);" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle;">지원유형</th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; width:52px; max-width:52px;">지원유형</th>
                        <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                         ${isG3RefundOn ? `<th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">${getG3LabelShort()} 환불내역</th>` : ''}
                         <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:var(--color-free); font-size:14px;">자유수강 <button onclick="toggleFreeRefund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-free); background:white; color:var(--color-free); cursor:pointer; margin-left:4px; vertical-align:middle;">${isFreeRefundOn ? '◀닫기' : '환불보기▶'}</button></th>
@@ -5707,7 +5746,7 @@ viewData.forEach(({r, c}) => {
 
                     let badge = '';
                     if(row.r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
-                    if(row.r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${row.r.freeTier}</span>`;
+                    if(row.r.hasFree) badge += `<span class="badge bg-free">자유</span><span class="tier-text">${row.r.freeTier}</span>`;
 
                     let isNewValid = (row.isNew && (Date.now() - row.isNew < 7 * 24 * 60 * 60 * 1000));
                     let newBadge = isNewValid ? ' <span style="font-size:10px; background:#fecdd3; color:#ef4444; padding:2px 4px; border-radius:4px; font-weight:bold; vertical-align:top; display:inline-block; margin-left:4px;">NEW✨</span>' : '';
@@ -5746,7 +5785,7 @@ viewData.forEach(({r, c}) => {
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                             </td>
                            <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}</td>
-                           <td style="${br}">${badge}</td>
+                           <td style="${br} width:52px; max-width:52px; padding:6px 2px;">${badge}</td>
                             
                             ${isFeeViewOn
                                 ? `<td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3FeeG)}${row.alloc.mg3Su ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:var(--color-g3); opacity:0.8; padding:8px 4px;">${formatMoney(row.g3FeeS)}</td>`
@@ -5854,8 +5893,13 @@ viewData.forEach(({r, c}) => {
 
                 if(currentTab === 'all') {
                     document.getElementById('tabBanner').innerHTML = `
-                        <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
-                        <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
+                        <div style="position:relative; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
+                                <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
+                            </div>
+                            <button onclick="openFeatureUpdatePopup()" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg, #f5d0fe, #bae6fd); border:1px solid #d4af37; color:#581c87; font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
+                        </div>
                     `;
                     
 					
@@ -5865,8 +5909,8 @@ viewData.forEach(({r, c}) => {
 					
 					
                    let colHtml = `
-                        <col style="width: 50px;"> <col style="width: 55px;" id="col-id"> <col style="width: 65px;" id="col-name"> <col style="width: 120px;">
-                        <col style="width: 75px;">`;
+                        <col style="width: 50px;"> <col style="width: 55px;" id="col-id"> <col style="width: 65px;" id="col-name"> <col style="width: 46px;">
+                        <col style="width: 54px;">`;
                     for(let i=1; i<=maxQuarter; i++) colHtml += ` <col style="width: 95px;">`;
                     colHtml += ` <col style="width: 105px;">
                         <col style="width: 100px;">
@@ -5935,7 +5979,7 @@ viewData.forEach(({r, c}) => {
 
                         let badge = '';
                         if(r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
-                        if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
+                        if(r.hasFree) badge += `<span class="badge bg-free">자유</span><span class="tier-text">${r.freeTier}</span>`;
                         
                         let stClass = c.status==='수익자'?'st-beneficiary' : c.status==='지원금 미사용'?'st-none' : c.status==='지원금 사용중'?'st-use' : c.status==='지원금 소진'?'st-done' : c.status==='일부 수익자'?'st-partial':'st-over';
                         
@@ -6042,8 +6086,8 @@ viewData.forEach(({r, c}) => {
                     ` : '';
 
                     colGroup.innerHTML = `
-                        <col style="width: 45px;"> <col style="width: 50px;" id="col-id"> <col style="width: 58px;" id="col-name"> <col style="width: 95px;">
-                        <col style="width: 62px;"> <col style="width: 68px;"> <col style="width: 68px;">
+                        <col style="width: 45px;"> <col style="width: 50px;" id="col-id"> <col style="width: 58px;" id="col-name"> <col style="width: 46px;">
+                        <col style="width: 48px;"> <col style="width: 68px;"> <col style="width: 68px;">
                         <col style="width: 72px;"> <col style="width: 68px;"> <col style="width: 68px;">
                         <col style="width: 88px;">
                         <col style="width: 82px;">
@@ -6116,11 +6160,11 @@ viewData.forEach(({r, c}) => {
                         }
 
                         sumQ_g += netG; sumQ_s += netS; sumQ_su += netSu; sumQ_gy += netGy; sumQ_j += netJ;
-                        sumQ_rG += refG; sumQ_rS += refS; sumQ_rSu += refSu; sumQ_rGy += refGy; sumQ_rJ += refJ; sumQ_rTot += refTot;
+                         sumQ_rG += refG; sumQ_rS += refS; sumQ_rSu += refSu; sumQ_rGy += refGy; sumQ_rJ += refJ; sumQ_rTot += refTot;
 
                         let badge = '';
                         if(r.hasG3) badge += `<span class="badge bg-g3">${getG3LabelShort()}</span>`;
-                        if(r.hasFree) badge += `<span class="badge bg-free">자유수강</span><span class="tier-text">${r.freeTier}</span>`;
+                        if(r.hasFree) badge += `<span class="badge bg-free">자유</span><span class="tier-text">${r.freeTier}</span>`;
 
                         let qStClass = c[q].status==='수익자'?'st-beneficiary' : c[q].status==='지원금 미사용'?'st-none' : c[q].status==='지원금 사용중'?'st-use' : c[q].status==='지원금 소진'?'st-done' : c[q].status==='일부 수익자'?'st-partial':'st-over';
 
@@ -6131,7 +6175,7 @@ viewData.forEach(({r, c}) => {
                             accUsedFree += c[`q${i}`].usedFree;
                         }
                         
-                         let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+                         let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
                          let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
                         
                         let remG3_until_Q = allowanceG3 - accUsedG3;
@@ -6178,6 +6222,7 @@ viewData.forEach(({r, c}) => {
 								<td class="text-right" style="font-weight: 800; color: ${(!r.hasG3 && !r.hasFree) ? '#0369a1' : '#111827'};">
                                     <div style="line-height: 1.0;">${formatMoney(c[q].exp)}</div>
                                     ${((r.hasG3 || r.hasFree) && c[q].over > 0 && (c[q].usedG3 + c[q].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">${c[q].status === '일부 수익자' ? '수익자부담' : '초과'}: ${formatMoney(c[q].over)}</div>` : ''}
+                                    ${((r[q] && r[q].subs) || []).some(s => s.sessionRatioEnabled) ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">차시비율적용</div>` : ''}
                                 </td>
                                 
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
@@ -6222,12 +6267,11 @@ viewData.forEach(({r, c}) => {
                                 
                             </div>
                             <div style="display:flex; gap:8px;">
+                                <button onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #f5d0fe, #bae6fd); border:1px solid #d4af37; color:#581c87; font-weight:800; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
                                 <button class="btn-tool no-print" style="background: ${isRefundViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px;" onclick="toggleRefundView()">
                                     ${isRefundViewOn ? '◀ 환불금액 닫기' : '▶ 환불금액 보기'}
                                 </button>
-                                <button class="btn-tool no-print" style="background: var(--sidebar-accent); color: white; border-color: var(--sidebar-accent); padding: 6px 14px; font-size: 13px;" onclick="showSubjectStatusModal('${currentTab}')">
-                                    📊 과목수강현황 보기
-                                </button>
+
                             </div>
                         </div>
                         <div style="font-size:13px; color:#ef4444; font-weight:700; display: inline-block; padding: 4px 8px; background: #fee2e2; border-radius: 4px;">
@@ -6405,15 +6449,45 @@ viewData.forEach(({r, c}) => {
             document.getElementById('tierGroup').style.display = isFree ? 'block' : 'none';
             let tier = document.getElementById('fTier').value;
             document.getElementById('yukaDateGroup').style.display = (tier === '육아기근로단축') ? 'block' : 'none';
+            // ✨ 자유수강권 총 한도 입력칸은 자유수강권 체크 + 전입/전출 중 하나라도 체크되어 있을 때만 보이게
+            let isTransfer = document.getElementById('fTransferIn').checked || document.getElementById('fTransferOut').checked;
+            document.getElementById('freeLimitGroup').style.display = (isFree && isTransfer) ? 'block' : 'none';
         }
         function toggleTransferIn() {
             document.getElementById('transferInGroup').style.display = document.getElementById('fTransferIn').checked ? 'block' : 'none';
+            toggleG3Limit(); // ✨ 전입 체크 여부가 바뀌면 초3/자유수강권 한도 박스 표시 여부도 다시 계산
+            toggleTier();
         }
         function toggleTransferOut() {
             document.getElementById('transferOutGroup').style.display = document.getElementById('fTransferOut').checked ? 'block' : 'none';
+            toggleG3Limit();
+            toggleTier();
         }
+        // ✨ 전입/전출이 둘 다 해제됐을 때, 예전에 입력해뒀던 예외 한도 숫자가 남아있지 않도록 기준 금액으로 초기화
+        let transferResetToastTimer = null;
+        function resetTransferLimitsIfNone() {
+            let isTransfer = document.getElementById('fTransferIn').checked || document.getElementById('fTransferOut').checked;
+            if (isTransfer) return;
+            document.getElementById('fG3Limit1').value = '250,000';
+            document.getElementById('fG3Limit2').value = '250,000';
+            updateG3LimitTotal();
+            let freeDefault = getFreeAllowanceDefault();
+            document.getElementById('fFreeLimit').value = freeDefault.toLocaleString();
 
-       function checkFundLogic(event) {
+            // ✨ 전입/전출 해제 시 기준 금액으로 바뀌었다는 안내를 1.5초간 표시
+            let toast = document.getElementById('transferResetToast');
+            toast.innerText = `전입/전출을 해제하여 총 한도가 기준 금액(초3지원금 ${getG3Allowance().toLocaleString()}원 / 자유수강권 ${freeDefault.toLocaleString()}원)으로 바뀝니다`;
+            toast.style.display = 'block';
+            requestAnimationFrame(() => { toast.style.opacity = '1'; });
+             clearTimeout(transferResetToastTimer);
+            transferResetToastTimer = setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 2500);
+        }
+        
+
+    function checkFundLogic(event) {
     let grade = toNum(document.getElementById('fGrade').value);
     let g3Box = document.getElementById('fG3');
     let fFreeBox = document.getElementById('fFree');
@@ -6430,12 +6504,14 @@ viewData.forEach(({r, c}) => {
     } else {
         g3Box.disabled = false;
         desc.style.color = "var(--sidebar-accent)";
-        desc.innerText = `연 ${Math.round(getG3Allowance()/10000)}만원 (${getG3MaxGrade() <= 3 ? '3학년' : '3~' + getG3MaxGrade() + '학년'} 전용). 상반기/하반기 각 ${Math.round(getG3Allowance()/2/10000)}만원 한도 분할`;
+        desc.innerHTML = `연 ${Math.round(getG3Allowance()/10000)}만원 (${getG3MaxGrade() <= 3 ? '3학년' : '3~' + getG3MaxGrade() + '학년'} 전용).<br>상반기/하반기 각 ${Math.round(getG3Allowance()/2/10000)}만원 한도 분할`;
                 
                if(grade >= 3 && grade <= getG3MaxGrade() && event && event.type === 'input') {
                     g3Box.checked = true;
                 }
             }
+            toggleG3Limit(); // ✨ 체크 상태가 바뀔 때마다(편집창을 열 때 포함) 한도 입력칸도 함께 보이게/숨기게 동기화
+            updateG3LimitTotal(); // ✨ 편집창을 열 때 불러온 1·2학기 값으로 총 연간 지원금 표시도 같이 갱신
         }
 
 
@@ -6460,6 +6536,8 @@ function openPanel(mode, id = null) {
                 document.getElementById('panelTitle').innerText = "신규 학생 상세 입력";
                 document.getElementById('editId').value = "";
                 document.getElementById('fFreeLimit').value = "600,000";
+				document.getElementById('fG3Limit1').value = "250,000";
+                document.getElementById('fG3Limit2').value = "250,000";
                 document.getElementById('fFreeStartDate').value = "";
                 document.getElementById('fFreeEndDate').value = "";
                 
@@ -6483,6 +6561,8 @@ function openPanel(mode, id = null) {
                 document.getElementById('fFree').checked = r.hasFree;
                 document.getElementById('fTier').value = r.freeTier || "";
                 document.getElementById('fFreeLimit').value = (r.freeLimit || getFreeAllowanceDefault()).toLocaleString();
+				document.getElementById('fG3Limit1').value = (r.g3Limit1 || 250000).toLocaleString();
+                document.getElementById('fG3Limit2').value = (r.g3Limit2 || 250000).toLocaleString();
                 document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
                 document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
                 toggleTier();
@@ -6532,6 +6612,20 @@ function openPanel(mode, id = null) {
         }
        
 
+           // [신규 추가] 초3지원금 체크 시 학기별 한도 입력 박스 표시/숨김
+function toggleG3Limit() {
+    const box = document.getElementById('g3LimitGroup');
+    let isG3 = document.getElementById('fG3').checked;
+    let isTransfer = document.getElementById('fTransferIn').checked || document.getElementById('fTransferOut').checked;
+    box.style.display = (isG3 && isTransfer) ? 'block' : 'none';
+}
+
+// [신규 추가] 1학기 + 2학기 입력값을 더해서 총 연간 지원금을 자동 계산
+function updateG3LimitTotal() {
+    const v1 = parseInt(document.getElementById('fG3Limit1').value.replace(/[^0-9]/g, '')) || 0;
+    const v2 = parseInt(document.getElementById('fG3Limit2').value.replace(/[^0-9]/g, '')) || 0;
+    document.getElementById('fG3LimitTotal').innerText = (v1 + v2).toLocaleString();
+}
 
 
 
@@ -6580,16 +6674,19 @@ function openPanel(mode, id = null) {
                 }
             }
          let freeTier = document.getElementById('fTier').value;
-          let freeLimit = toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault();
-		 
-          let freeStartDate = document.getElementById('fFreeStartDate').value;
-          let freeEndDate = document.getElementById('fFreeEndDate').value;
           let transferIn = document.getElementById('fTransferIn').checked;
           let transferInQuarter = document.getElementById('fTransferInQuarter').value;
           let transferInDate = document.getElementById('fTransferInDate').value;
           let transferOut = document.getElementById('fTransferOut').checked;
           let transferOutQuarter = document.getElementById('fTransferOutQuarter').value;
           let transferOutDate = document.getElementById('fTransferOutDate').value;
+          let isTransferChecked = transferIn || transferOut; // ✨ 전입/전출이 체크 안 된 상태면 예외 한도 입력값 자체를 무시
+          let freeLimit = isTransferChecked ? (toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
+		  let g3Limit1 = isTransferChecked ? (toNum(document.getElementById('fG3Limit1').value.replace(/,/g, '')) || 250000) : 250000;
+          let g3Limit2 = isTransferChecked ? (toNum(document.getElementById('fG3Limit2').value.replace(/,/g, '')) || 250000) : 250000;
+          let g3Limit  = g3Limit1 + g3Limit2;
+          let freeStartDate = document.getElementById('fFreeStartDate').value;
+          let freeEndDate = document.getElementById('fFreeEndDate').value;
 
           if(hasFree && freeTier === '육아기근로단축' && (!freeStartDate || !freeEndDate)) {
               alert("육아기근로단축은 지원 시작일과 마감일을 모두 입력해야 합니다.");
@@ -6618,7 +6715,7 @@ function openPanel(mode, id = null) {
                 alert(`✅ 'NEIS 자유수강자 명단 관리'에 없는 학생이라 자동으로 추가했습니다.\n\n${grade}학년 ${classNum}반 ${studentNum}번 ${studentNameForCheck}`);
             }
 
-            // ✨ 전입/전출 정보를 'NEIS 자유수강자 명단 관리'에도 동기화 (학번 기준으로 대조)
+            // ✨ 전입/전출 정보와 자유수강권 한도를 'NEIS 자유수강자 명단 관리'에도 동기화 (학번 기준으로 대조)
             let neisTransferSyncTarget = neisList.find(s => String(s.grade)===String(grade) && String(s.classNum)===String(classNum) && String(s.studentNum)===String(studentNum));
             if (neisTransferSyncTarget) {
                 neisTransferSyncTarget.transferIn = transferIn;
@@ -6627,6 +6724,7 @@ function openPanel(mode, id = null) {
                 neisTransferSyncTarget.transferOut = transferOut;
                 neisTransferSyncTarget.transferOutQuarter = transferOutQuarter;
                 neisTransferSyncTarget.transferOutDate = transferOutDate;
+                neisTransferSyncTarget.freeLimit = freeLimit;
                 persistNeisList();
             }
 
@@ -6657,7 +6755,7 @@ function openPanel(mode, id = null) {
 
             let saveTime = Date.now();
             let createdAt = oldR && oldR.createdAt ? oldR.createdAt : Date.now(); // ✨ 신규 아동 시간 기록 유지
-            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, freeStartDate, freeEndDate, freeAutoStartDate: oldR ? (oldR.freeAutoStartDate || '') : '', memo, createdAt, transferIn, transferInQuarter, transferInDate, transferOut, transferOutQuarter, transferOutDate };
+            let rec = { id, grade, classNum, studentNum, name: document.getElementById('fName').value.trim(), hasG3, hasFree, freeTier, freeLimit, g3Limit1, g3Limit2, freeStartDate, freeEndDate, freeAutoStartDate: oldR ? (oldR.freeAutoStartDate || '') : '', memo, createdAt, transferIn, transferInQuarter, transferInDate, transferOut, transferOutQuarter, transferOutDate };
             let subjectsUpdated = false;
 
             for(let q=1; q<=6; q++) { // ✨ 6분기 데이터 뼈대는 항상 생성해두어 튕김 방지
@@ -6776,7 +6874,7 @@ function openPanel(mode, id = null) {
             let html = ``;
             
               // ✨ 학생별 지원금 종합 현황판 전광판 렌더링
-          let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+          let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
                          let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
 
             // ✨ 초3지원금 상반기/하반기 분할 내역 계산
@@ -6787,7 +6885,7 @@ function openPanel(mode, id = null) {
                 if(i <= h1Cut) usedG3_H1 += u;
                 else usedG3_H2 += u;
             }
-            let remG3_H1_disp = r.hasG3 ? Math.max(0, 250000 - usedG3_H1) : 0;
+            let remG3_H1_disp = r.hasG3 ? Math.max(0, getG3H1LimitFor(r) - usedG3_H1) : 0;
             let h1Str = maxQuarter === 6 ? "1~3분기" : "1~2분기";
             let h2Str = maxQuarter === 6 ? "4~6분기" : "3~4분기";
             
@@ -7251,7 +7349,7 @@ function openPanel(mode, id = null) {
             let r = db.find(x => x.id == rId);
             if (!r) return '';
             let c = calcStudent(r);
-            let allowanceG3 = r.hasG3 ? getG3Allowance() : 0;
+            let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
             let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
 
             if (q === 1) {
@@ -7269,8 +7367,8 @@ function openPanel(mode, id = null) {
                                 // ✨ 초3지원금은 상반기(1~2분기)/하반기(3~4분기)가 각각 25만원씩 별도라서,
                 // 상반기 안에서는 하반기 몫이 아직 안 풀린 돈이므로 그걸 잔액에 섞어 보여주면 안 됨
                 let h1Cut = maxQuarter === 6 ? 3 : 2;
-                let g3Remain = (q <= h1Cut) ? Math.max(0, 250000 - usedG3) : Math.max(0, allowanceG3 - usedG3);
-                let g3ResetNote = (q <= h1Cut) ? ` (${h1Cut + 1}분기에 ${getG3Label()} ${formatMoney(250000)}을 다시 사용 가능합니다.)` : '';
+                let g3Remain = (q <= h1Cut) ? Math.max(0, getG3H1LimitFor(r) - usedG3) : Math.max(0, allowanceG3 - usedG3);
+                let g3ResetNote = (q <= h1Cut) ? ` (${h1Cut + 1}분기에 ${getG3Label()} ${formatMoney(getG3H2LimitFor(r))}을 다시 사용 가능합니다.)` : '';
                 let lines = [];
                 if (r.hasG3) lines.push(`${getG3Label()} ${formatMoney(usedG3)} 사용되었고, 잔액은 ${formatMoney(g3Remain)} 입니다.${g3ResetNote}`);
                 if (r.hasFree) lines.push(`자유수강 지원금 ${formatMoney(usedFree)} 사용되었고, 잔액은 ${formatMoney(Math.max(0, allowanceFree - usedFree))} 입니다.`);
@@ -8633,6 +8731,13 @@ function openPanel(mode, id = null) {
             }
         }
 
+        function openFeatureUpdatePopup() {
+            document.getElementById('featureUpdatePopupOverlay').style.display = 'flex';
+        }
+        function closeFeatureUpdatePopup() {
+            document.getElementById('featureUpdatePopupOverlay').style.display = 'none';
+        }
+
       function toggleFundPopup() {
             const pop = document.getElementById('fundPopup');
             document.getElementById('tierPopup').style.display = 'none';
@@ -8649,90 +8754,7 @@ function openPanel(mode, id = null) {
             pop.style.display = 'block';
         }
 
-        function showSubjectStatusModal(q) {
-            if (q === 'all') return;
-            
-            const qNames = { 'q1': '1분기', 'q2': '2분기', 'q3': '3분기', 'q4': '4분기' };
-            const qText = qNames[q] || '';
-            let subjectCounts = {};
-            
-            db.forEach(student => {
-                if (student[q] && student[q].subs) {
-                    student[q].subs.forEach(sub => {
-                        if (sub.name && sub.name.trim() !== '') {
-                            let sName = sub.name.trim();
-                            if (!subjectCounts[sName]) {
-                                subjectCounts[sName] = { total: 0, fees: {} };
-                            }
-                            subjectCounts[sName].total++;
-                            
-                            let feeStr = formatMoney(sub.su);
-                            if(!subjectCounts[sName].fees[feeStr]) {
-                                subjectCounts[sName].fees[feeStr] = 0;
-                            }
-                            subjectCounts[sName].fees[feeStr]++;
-                        }
-                    });
-                }
-            });
-            
-            let sortedSubjects = Object.keys(subjectCounts).sort((a, b) => subjectCounts[b].total - subjectCounts[a].total);
-            document.getElementById('subjectStatusTitle').innerText = `📊 ${qText} 과목별 수강 신청 현황`;
-            
-            let bodyEl = document.getElementById('subjectStatusBody');
-            if (sortedSubjects.length === 0) {
-                bodyEl.innerHTML = '<div style="text-align:center; color:#9ca3af; padding:30px; font-size:13px;">이 분기에 등록된 과목 수강 신청 내역이 없습니다.</div>';
-            } else {
-                let html = `
-                    <div style="font-size:12px; color:var(--text-gray); margin-bottom:12px; line-height:1.5;">
-                        ※ 과목별 총 인원과 실제 입력된 <b>수강료 분포</b>입니다.<br>과목명을 클릭하면 금액별 인원을 상세히 볼 수 있습니다.
-                    </div>
-                    <div style="border-top:1px solid var(--border-color);">
-                `;
-                
-                sortedSubjects.forEach(subName => {
-                    let data = subjectCounts[subName];
-                    let feeBreakdown = '';
-                    
-                    let sortedFees = Object.keys(data.fees).sort((a, b) => {
-                        let numA = Number(a.replace(/[^0-9]/g, ''));
-                        let numB = Number(b.replace(/[^0-9]/g, ''));
-                        return numB - numA;
-                    });
 
-                    sortedFees.forEach(fee => {
-                        feeBreakdown += `
-                            <div style="display:flex; justify-content:space-between; padding:6px 12px; border-bottom:1px dashed #e5e7eb; background:#f9fafb;">
-                                <span style="font-size:12px; color:#4b5563;">└ 입력 수강료: <b>${fee}</b></span>
-                                <span style="font-size:12px; font-weight:700; color:var(--text-dark);">${data.fees[fee]}명</span>
-                            </div>
-                        `;
-                    });
-
-                    html += `
-                        <details style="border-bottom:1px solid var(--border-color); background:white;">
-                            <summary style="padding:12px; cursor:pointer; color:var(--text-dark); display:flex; justify-content:space-between; align-items:center; outline:none;">
-                                <span style="font-weight:600;">${subName}</span>
-                                <span style="color:var(--sidebar-accent); font-weight:700;">총 ${data.total}명 <span style="font-size:10px; color:#9ca3af; margin-left:4px;">▼</span></span>
-                            </summary>
-                            <div style="padding-bottom:8px;">
-                                ${feeBreakdown}
-                            </div>
-                        </details>
-                    `;
-                });
-                html += `</div>`;
-                bodyEl.innerHTML = html;
-            }
-            
-            document.getElementById('subjectStatusOverlay').classList.add('active');
-            document.getElementById('subjectStatusModal').style.display = 'flex';
-        }
-
-        function closeSubjectStatusModal() {
-            document.getElementById('subjectStatusOverlay').classList.remove('active');
-            document.getElementById('subjectStatusModal').style.display = 'none';
-        }
 
         
 
@@ -8994,7 +9016,7 @@ function openPanel(mode, id = null) {
                         let qNum = parseInt(q.replace('q', ''));
                         let accUsedG3 = 0, accUsedFree = 0;
                         for (let i = 1; i <= qNum; i++) { accUsedG3 += c[`q${i}`].usedG3; accUsedFree += c[`q${i}`].usedFree; }
-                      let allowanceG3 = r.hasG3 ? getG3Allowance() : 0; let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+                      let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0; let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
                         let remG3_until_Q = allowanceG3 - accUsedG3; let remFree_until_Q = allowanceFree - accUsedFree; let remTotal_until_Q = remG3_until_Q + remFree_until_Q;
 
                         rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].over, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
@@ -10172,6 +10194,12 @@ function openPanel(mode, id = null) {
             document.getElementById('ntf_out').checked = !!st.transferOut;
             document.getElementById('ntf_outQ').value = st.transferOutQuarter || '1';
             document.getElementById('ntf_outDate').value = st.transferOutDate || '';
+
+            // ✨ 자유수강권 한도 - 프로그램(db)에 등록된 값을 우선으로 불러옴
+            let rForLimit = db.find(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
+            let curFreeLimit = (rForLimit && rForLimit.freeLimit) || st.freeLimit || getFreeAllowanceDefault();
+            document.getElementById('ntf_freeLimit').value = Number(curFreeLimit).toLocaleString();
+
             toggleNtfInGroup();
             toggleNtfOutGroup();
             document.getElementById('neisTransferModal').style.display = 'flex';
@@ -10182,12 +10210,31 @@ function openPanel(mode, id = null) {
             neisTransferEditIdx = null;
         }
 
-        function toggleNtfInGroup() {
+         function toggleNtfInGroup() {
             document.getElementById('ntfInGroup').style.display = document.getElementById('ntf_in').checked ? 'block' : 'none';
         }
 
         function toggleNtfOutGroup() {
             document.getElementById('ntfOutGroup').style.display = document.getElementById('ntf_out').checked ? 'block' : 'none';
+        }
+
+        // ✨ 전입/전출이 둘 다 해제됐을 때 기준 금액으로 되돌리고 2.5초간 안내
+        let ntfResetToastTimer = null;
+        function resetNtfFreeLimitIfNone() {
+            let isTransfer = document.getElementById('ntf_in').checked || document.getElementById('ntf_out').checked;
+            if (isTransfer) return;
+            let freeDefault = getFreeAllowanceDefault();
+            document.getElementById('ntf_freeLimit').value = freeDefault.toLocaleString();
+
+            let toast = document.getElementById('ntfResetToast');
+            toast.innerText = `전입/전출을 해제하여 총 한도가 기준 금액(자유수강권 ${freeDefault.toLocaleString()}원)으로 바뀝니다`;
+            toast.style.display = 'block';
+            requestAnimationFrame(() => { toast.style.opacity = '1'; });
+            clearTimeout(ntfResetToastTimer);
+            ntfResetToastTimer = setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 2500);
         }
 
         function saveNeisTransfer() {
@@ -10202,11 +10249,17 @@ function openPanel(mode, id = null) {
             st.transferOutQuarter = document.getElementById('ntf_outQ').value;
             st.transferOutDate = document.getElementById('ntf_outDate').value;
 
-            // ✨ 이미 프로그램(db)에 등록된 학생이면 전입/전출 정보도 함께 동기화
+            // ✨ 자유수강권 총 한도 - 전입/전출 중 하나라도 체크된 경우에만 입력값을 반영, 아니면 기본값으로
+            let isTransferChecked = st.transferIn || st.transferOut;
+            let freeLimitVal = isTransferChecked ? (toNum(document.getElementById('ntf_freeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
+            st.freeLimit = freeLimitVal;
+
+            // ✨ 이미 프로그램(db)에 등록된 학생이면 전입/전출 정보와 자유수강권 한도도 함께 동기화
             let r = db.find(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
             if (r) {
                 r.transferIn = st.transferIn; r.transferInQuarter = st.transferInQuarter; r.transferInDate = st.transferInDate;
                 r.transferOut = st.transferOut; r.transferOutQuarter = st.transferOutQuarter; r.transferOutDate = st.transferOutDate;
+                r.freeLimit = freeLimitVal;
                 persistData();
                 renderGrid();
             }
@@ -12024,38 +12077,11 @@ function openPanel(mode, id = null) {
 		 
 		 
 		 
-		 
-		  
-		  // ==========================================
-        // ✨ 공지 팝업창 제어 로직 (7일 / 평생 보지 않기)
-        // ==========================================
-        function checkNoticePopup() {
-            let hideUntil = localStorage.getItem('hide_notice_popup_v75');
-            
-            if (hideUntil === 'forever') return; // 평생 보지 않기 체크됨
-            if (hideUntil && Date.now() < parseInt(hideUntil)) return; // 7일이 아직 안 지남
-
-            // 위 조건에 안 걸리면 팝업창을 보여줍니다.
-            let popup = document.getElementById('noticePopupOverlay');
-            if(popup) popup.style.display = 'flex';
-        }
-
-        function closeNoticePopup(days) {
-            if (days === 'forever') {
-                localStorage.setItem('hide_notice_popup_v75', 'forever');
-            } else if (days > 0) {
-                // 현재 시간 + (7일 * 24시간 * 60분 * 60초 * 1000밀리초)
-                let expireTime = Date.now() + (days * 24 * 60 * 60 * 1000);
-                localStorage.setItem('hide_notice_popup_v75', expireTime.toString());
-            }
-            // 창 닫기 (days가 0이면 그냥 닫기만 함)
-            document.getElementById('noticePopupOverlay').style.display = 'none';
-        }
-
-        // 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
-     checkNoticePopup();
+		// 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
        checkYukaExpiry();
-       checkYukaMissingNeis();
+       checkYukaMissingNeis(); 
+		  
+	
     </script>
 
 
@@ -12211,44 +12237,6 @@ document.addEventListener('keydown', function(e) {
         if (filterPanel) filterPanel.classList.remove('open');
     }
 });
-
-
-
-
-
-
-
-
-      // ✨ 수익자 관리 업데이트 팝업 로직
-    document.addEventListener("DOMContentLoaded", function() {
-        // 브라우저 로컬 저장소에서 팝업 숨김 설정(true)이 있는지 확인합니다.
-       const hidePopup = localStorage.getItem('hideBeneficiaryPopup_v12_0');
-        
-        // 숨김 설정이 없다면 팝업을 화면에 띄웁니다 (flex로 변경하여 중앙 정렬 활성화)
-        if (!hidePopup) {
-            document.getElementById('beneficiaryNoticePopup').style.display = 'flex';
-        }
-    });
-
-    // 팝업 닫기 버튼을 눌렀을 때 실행되는 함수
-    function closeBeneficiaryPopup() {
-        // 체크박스에 체크가 되어 있는지 확인
-        const isChecked = document.getElementById('hideBeneficiaryCheckbox').checked;
-        
-        if (isChecked) {
-            // 체크되어 있다면 브라우저 로컬 저장소에 기록을 남겨 다음부터 안 뜨게 함
-            // 식별자를 'hideBeneficiaryPopup_v10'으로 주어 나중에 또 업데이트 시 이름을 바꿔 다시 띄울 수 있게 구성함
-            localStorage.setItem('hideBeneficiaryPopup_v12_0', 'true');
-        }
-        
-        // 팝업창 숨기기
-        document.getElementById('beneficiaryNoticePopup').style.display = 'none';
-    }
-		
-
-
-
-
 
 
 
