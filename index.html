@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.4</title>
+    <title>방과후 지원금 돌보미 V15.5</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1087,7 +1087,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.4</span>
+                <span class="brand-version">V15.5</span>
             </div>
     </div>
     
@@ -2902,25 +2902,20 @@
             renderTsMonthBtns();
             renderTsSubjectOrder();
         }
-                function renderTsMonthBtns() {
-            let wrap = document.getElementById('tsMonthBtns');
-            let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
-            let html = '';
-            for (let m = 1; m <= months; m++) {
-                let isOn = (tsState.month === m);
-                let style = isOn
-                    ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
-                    : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
-                html += `<button type="button" style="${style}" onclick="selectTsMonth(${m})">${m}차</button>`;
-            }
-            let preOn = (tsState.month === 'pre');
-            let preStyle = preOn
-                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
-                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
-            html += `<button type="button" style="${preStyle}" onclick="selectTsMonth('pre')">수강전취소</button>`;
-            wrap.innerHTML = html;
-        }
+          function renderTsMonthBtns() {
+    let wrap = document.getElementById('tsMonthBtns');
+    let months = getMonthsPerQuarter();
+    wrap.style.gridTemplateColumns = `repeat(${months}, 1fr)`;
+    let html = '';
+    for (let m = 1; m <= months; m++) {
+        let isOn = (tsState.month === m);
+        let style = isOn
+            ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
+            : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
+        html += `<button type="button" style="${style}" onclick="selectTsMonth(${m})">${m}차</button>`;
+    }
+    wrap.innerHTML = html;
+}
         function selectTsMonth(m) {
             tsState.month = m;
             renderTsMonthBtns();
@@ -3038,7 +3033,7 @@
                                 for (let m = 1; m <= monthsInQ; m++) {
                                     let mNormal = toNum(normals[m]);
                                     if (mNormal <= 0) continue;
-                                    let mRefund = (s.refundLog || []).filter(l => l.month === m).reduce((sum, l) => sum + toNum(l.amount), 0);
+                                    let mRefund = (s.refundLog || []).filter(l => l.month === m || (m === 1 && l.month === 'pre')).reduce((sum, l) => sum + toNum(l.amount), 0);
                                     let cap = (mNormal - mRefund > 0) ? (mNormal - mRefund) : mNormal;
                                     let charge = Math.max(0, Math.min(cap, budget));
                                     budget -= charge;
@@ -7742,20 +7737,20 @@ function updateG3LimitTotal() {
             renderRefundRosterMonthBtns();
             renderRefundRosterList();
         }
-        function renderRefundRosterMonthBtns() {
-            let wrap = document.getElementById('rrMonthBtns');
-            let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 2}, 1fr)`;
-            let allOn = (refundRosterState.month === 0);
-            let html = `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${allOn ? '#d4af37' : '#cbd5e1'}; background:${allOn ? '#1e3a5f' : 'white'}; color:${allOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(0)">전체</button>`;
-            for (let m = 1; m <= months; m++) {
-                let isOn = (refundRosterState.month === m);
-                html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${isOn ? '#2563eb' : '#cbd5e1'}; background:${isOn ? '#1e40af' : 'white'}; color:${isOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(${m})">${m}차</button>`;
-            }
-            let preOn = (refundRosterState.month === 'pre');
-            html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${preOn ? '#b45309' : '#cbd5e1'}; background:${preOn ? '#92400e' : 'white'}; color:${preOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:11px;" onclick="selectRefundRosterMonth('pre')">수강전취소</button>`;
-            wrap.innerHTML = html;
-        }
+      function renderRefundRosterMonthBtns() {
+        let wrap = document.getElementById('rrMonthBtns');
+        let months = getMonthsPerQuarter();
+        wrap.style.gridTemplateColumns = `repeat(${months + 2}, 1fr)`;
+        let allOn = (refundRosterState.month === 0);
+        let html = `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${allOn ? '#d4af37' : '#cbd5e1'}; background:${allOn ? '#1e3a5f' : 'white'}; color:${allOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(0)">전체</button>`;
+        let preOn = (refundRosterState.month === 'pre');
+        html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${preOn ? '#b45309' : '#cbd5e1'}; background:${preOn ? '#92400e' : 'white'}; color:${preOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:11px;" onclick="selectRefundRosterMonth('pre')">수강전취소</button>`;
+        for (let m = 1; m <= months; m++) {
+        let isOn = (refundRosterState.month === m);
+        html += `<button type="button" style="padding:9px 0; border-radius:8px; border:2px solid ${isOn ? '#2563eb' : '#cbd5e1'}; background:${isOn ? '#1e40af' : 'white'}; color:${isOn ? 'white' : '#334155'}; font-weight:800; cursor:pointer; font-size:12.5px;" onclick="selectRefundRosterMonth(${m})">${m}차</button>`;
+    }
+    wrap.innerHTML = html;
+}
         function selectRefundRosterMonth(m) {
             refundRosterState.month = m;
             renderRefundRosterMonthBtns();
