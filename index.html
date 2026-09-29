@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.5</title>
+    <title>방과후 지원금 돌보미 V15.6</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -720,14 +720,14 @@
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
                 <div style="width:46px; height:46px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">🏛️</div>
                 <div style="color:white; font-size:17px; font-weight:800;">행정실 CMS 엑셀 수납 명단 저장</div>
-                <div style="color:#94a3b8; font-size:12px; margin-top:4px;">수익자·초3지원·자유수강 명단을 한번에 생성합니다</div>
+               <div style="color:#94a3b8; font-size:12px; margin-top:4px;">수익자·<span id="arHelpG3Label1">초3지원</span>·자유수강 명단을 한번에 생성합니다</div>
             </div>
             <div style="padding:24px;">
                 <div style="font-size:12.5px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #d4af37; border-radius:8px; padding:14px; margin-bottom:20px; line-height:1.7;">
                     <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📋 이렇게 만들어져요</div>
-                    · <b>강좌별 전체 수익자/초3지원금/자유수강자 명단</b> 시트 3개<br>
+                    · <b>강좌별 전체 수익자/<span id="arHelpG3Label2">초3지원금</span>/자유수강자 명단</b> 시트 3개<br>
                     · 지원금이 부족해 수익자로 넘어간 학생은 <b>해당 지원금 시트 + 수익자 시트 양쪽에 모두</b> 표시<br>
-                    · 초3→자유수강, 자유수강→수익자로 넘어간 내역은 각 행 끝에 <b>비고</b>로 표시<br>
+                    · <span id="arHelpG3Label3">초3</span>→자유수강, 자유수강→수익자로 넘어간 내역은 각 행 끝에 <b>비고</b>로 표시<br>
                     · 과목마다 <b>수익자 몫만 따로 뽑은 상세 시트</b>(교육비 + 교재비 또는 재료비)가 자동 생성돼요
                 </div>
                 <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
@@ -1087,21 +1087,14 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.5</span>
+                <span class="brand-version">V15.6</span>
             </div>
     </div>
     
-    <div>
+       <div>
         <div class="action-menu">
-          <!-- ⚙️ 분기 설정 & 메뉴 접기 버튼 통합 영역 -->
-            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
-                <div style="flex-grow: 1; min-width:0; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                    <label style="font-size: 11px; color: #9ca3af; font-weight: bold; margin-bottom: 6px; display: block;">⚙️ 학교 운영 방식 (분기 설정)</label>
-                    <select id="quarterSetting" onchange="changeQuarterSystem()" style="width: 100%; background: #374151; color: white; border: 1px solid #4b5563; padding: 6px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;">
-                        <option value="4">4분기제</option>
-                        <option value="6">6분기제</option>
-                    </select>
-                </div>
+          <!-- ⚙️ 메뉴 접기 버튼 (분기 설정은 '학년도 지원금, 분기제 설정'으로 이동했습니다) -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
                 <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="메뉴 접기/펼치기" style="flex-shrink:0; width:34px; height:34px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition: 0.2s;">
                     <span style="display:inline-flex; width:16px; height:12px; border:2px solid #d1d5db; border-radius:2px; overflow:hidden;">
                         <span style="width:5px; height:100%; background:#d1d5db; display:inline-block;"></span>
@@ -1122,7 +1115,7 @@
                 <button class="btn-3d btn-side" id="btn-snapshot-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSnapshotModal()">⏳ 8.날짜별 과거 기록(백업) 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
-                <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금 설정</button>
+                <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금, 분기제 설정</button>
                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
                 <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
@@ -1236,24 +1229,46 @@
     <div id="yearSettingsPanelWrap" style="position:fixed; top:0; right:0; height:100%; width:320px; background:white; padding:0; z-index:500; box-shadow:-10px 0 25px rgba(0,0,0,0.25); transform:translateX(100%); opacity:0; pointer-events:none; transition:transform 0.35s ease, opacity 0.35s ease; overflow-y:auto;">
         <div style="background:#111827; padding:24px; position:relative;">
             <button onclick="toggleYearSettingsPanel()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
-            <div style="font-weight:800; font-size:16px; color:white;">⚙️ 학년도 지원금 설정</div>
+                        <div style="font-weight:800; font-size:16px; color:white;">⚙️ 학년도 지원금, 분기제 설정</div>
         </div>
         <div style="padding:24px;">
             <div style="margin-bottom:16px;">
                 <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:6px;">학년도 선택</label>
                 <select id="ys_year" onchange="loadYearSetting()" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;"></select>
             </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:6px;">⚙️ 학교 운영 방식 (분기 설정)</label>
+                <select id="ys_quarterSystem" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                    <option value="4">4분기제</option>
+                    <option value="6">6분기제</option>
+                </select>
+                <div style="font-size:11px; color:#9ca3af; margin-top:4px;">1년에 한 번 정해지는 학교 운영 방식입니다. 현재 학년도 값을 바꾸면 화면에 바로 적용됩니다.</div>
+            </div>
             <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:14px; margin-bottom:12px;">
                 <div style="margin-bottom:12px;">
                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">초3지원금 (연간)</label>
                     <input type="text" id="ys_g3" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box; margin-bottom:12px;">
-                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">지원 대상 최고 학년</label>
-                    <select id="ys_g3max" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
-                        <option value="3">3학년까지 (초3지원금)</option>
-                        <option value="4">4학년까지 (초3~4지원금)</option>
-                        <option value="5">5학년까지 (초3~5지원금)</option>
-                        <option value="6">6학년까지 (초3~6지원금)</option>
-                    </select>
+                    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">지원 대상 학년 (시작 ~ 끝)</label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select id="ys_g3min" onchange="if(toNum(document.getElementById('ys_g3min').value) > toNum(document.getElementById('ys_g3max').value)) document.getElementById('ys_g3max').value = document.getElementById('ys_g3min').value;" style="flex:1; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3" selected>3학년</option>
+                            <option value="4">4학년</option>
+                            <option value="5">5학년</option>
+                            <option value="6">6학년</option>
+                        </select>
+                        <span style="color:#9ca3af; font-weight:700;">~</span>
+                        <select id="ys_g3max" onchange="if(toNum(document.getElementById('ys_g3max').value) < toNum(document.getElementById('ys_g3min').value)) document.getElementById('ys_g3min').value = document.getElementById('ys_g3max').value;" style="flex:1; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3" selected>3학년</option>
+                            <option value="4">4학년</option>
+                            <option value="5">5학년</option>
+                            <option value="6">6학년</option>
+                        </select>
+                    </div>
+                    <div style="font-size:11px; color:#9ca3af; margin-top:4px;">교육청 정책이 바뀌어 지원 대상 학년 범위(예: 1~4학년)가 달라져도 여기서 바로 바꿀 수 있습니다.</div>
                 </div>
                 <div>
                     <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">자유수강권 (연간)</label>
@@ -2179,9 +2194,11 @@
 
             
             
-            let storedMq = localStorage.getItem('edusync_maxQuarter');
-            if(storedMq) maxQuarter = parseInt(storedMq);
-            if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
+            // ✨ 분기제는 이제 '학년도 지원금, 분기제 설정'에서 학년도별로 관리됩니다.
+            //    현재 학년도에 저장된 값이 있으면 그 값을, 없으면 예전 방식(localStorage 전역값 또는 기본 4분기제)을 사용합니다.
+            let curYearSetting = getYearSetting(getCurrentAcademicYear());
+            let initMq = curYearSetting.quarterSystem || parseInt(localStorage.getItem('edusync_maxQuarter')) || 4;
+            maxQuarter = initMq;
             if(maxQuarter === 6) {
                 if(document.getElementById('tabQ5')) document.getElementById('tabQ5').style.display = 'inline-block';
                 if(document.getElementById('tabQ6')) document.getElementById('tabQ6').style.display = 'inline-block';
@@ -2210,17 +2227,16 @@
             }
         };
 
-        function changeQuarterSystem() {
-            let val = document.getElementById('quarterSetting').value;
-            maxQuarter = parseInt(val);
-            localStorage.setItem('edusync_maxQuarter', maxQuarter);
-            
+        // ✨ 분기제 값을 실제로 화면에 적용하는 공용 함수 (초기 로딩·학년도 설정 저장·시간여행 복귀 등에서 공통으로 사용)
+        function applyQuarterSystem(mq) {
+            maxQuarter = mq;
+            localStorage.setItem('edusync_maxQuarter', maxQuarter); // ✨ 예전 버전과의 호환을 위해 계속 보관
             if (maxQuarter === 6) {
-                document.getElementById('tabQ5').style.display = 'inline-block';
-                document.getElementById('tabQ6').style.display = 'inline-block';
+                if (document.getElementById('tabQ5')) document.getElementById('tabQ5').style.display = 'inline-block';
+                if (document.getElementById('tabQ6')) document.getElementById('tabQ6').style.display = 'inline-block';
             } else {
-                document.getElementById('tabQ5').style.display = 'none';
-                document.getElementById('tabQ6').style.display = 'none';
+                if (document.getElementById('tabQ5')) document.getElementById('tabQ5').style.display = 'none';
+                if (document.getElementById('tabQ6')) document.getElementById('tabQ6').style.display = 'none';
                 if(currentTab === 'q5' || currentTab === 'q6') switchTab('all');
             }
             renderFormQuarters();
@@ -2604,7 +2620,7 @@
                     let newRec = {
                         id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
                         grade: sg.grade, classNum: sg.classNum, studentNum: sg.studentNum, name: sg.name,
-                        hasG3: (sg.grade >= 3 && sg.grade <= getG3MaxGrade()), // ✨ 구분란과 무관하게 학년 기준으로 무조건 체크
+                         hasG3: (sg.grade >= getG3MinGrade() && sg.grade <= getG3MaxGrade()), // ✨ 구분란과 무관하게 학년 기준으로 무조건 체크
                         hasFree: sg.isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
                         memo: '', createdAt: Date.now()
                     };
@@ -2642,8 +2658,11 @@
   
      let adminRosterSelectedQ = null;
 
-        function openAdminRosterModal() {
+         function openAdminRosterModal() {
             adminRosterSelectedQ = null;
+            document.getElementById('arHelpG3Label1').innerText = getG3LabelShort() + '지원';
+            document.getElementById('arHelpG3Label2').innerText = getG3Label();
+            document.getElementById('arHelpG3Label3').innerText = getG3LabelShort();
             let btnsHtml = '';
             for (let q = 1; q <= maxQuarter; q++) {
                 btnsHtml += `<button type="button" id="arQBtn${q}" onclick="selectAdminRosterQuarter(${q})" style="padding:14px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:800; font-size:14px; cursor:pointer;">${q}분기</button>`;
@@ -3137,8 +3156,7 @@
             ws.getCell('C7').value = '부서명';
             ws.getCell('D7').value = '1인당';
             ws.getCell('G7').value = '수익자 부담';
-            let g3max = (typeof getG3MaxGrade === 'function') ? getG3MaxGrade() : 3;
-            ws.getCell('K7').value = g3max <= 3 ? '초3 지원금' : `초3~${g3max} 지원금`;
+            ws.getCell('K7').value = (typeof getG3Label === 'function') ? getG3Label() : '초3지원금';
             ws.getCell('O7').value = '자유수강 지원';
             ws.getCell('S7').value = '합 계';
             ws.getCell('W7').value = '비고';
@@ -3326,7 +3344,7 @@
                     }
                     if (hasFreeAmt) {
                         let notes = [];
-                        if (hasG3Amt) notes.push('초3에서 넘어옴');
+                        if (hasG3Amt) notes.push(`${getG3LabelShort()}에서 넘어옴`);
                         if (hasSkAmt) notes.push('수익자로 넘어감');
                         freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, gy: frGy, j: frJ, note: notes.join(', ') });
                     }
@@ -3406,7 +3424,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             ws.getCell(2, startCol).alignment = { horizontal: 'center' };
 
             let hRow = ws.getRow(4);
-            let headers = ['강좌명','수익자','자유수강','초3지원금','인원 합계'];
+            let headers = ['강좌명','수익자','자유수강',getG3Label(),'인원 합계'];
             headers.forEach((h, i) => {
                 let cell = hRow.getCell(startCol+i);
                 cell.value = h;
@@ -3462,9 +3480,9 @@ function addRosterDataRows(ws, rows, themeColor) {
             addRosterDataRows(wsSk, skRows, 'FFFECACA');
             addCourseCountTable(wsSk, courseCounts);
 
-            // 2. 3학년지원대상자 명단 (하늘색 계열)
-            let wsG3 = wb.addWorksheet('강좌별 전체 3학년지원대상자 명단');
-            addRosterHeaderRow(wsG3, `${q}분기 (3학년지원금대상자) 목록`, 'FFBAE6FD');
+         // 2. 지원대상자 명단 (하늘색 계열)
+            let wsG3 = wb.addWorksheet(safeSheetName(`강좌별 전체 ${getG3LabelShort()}대상자 명단`));
+            addRosterHeaderRow(wsG3, `${q}분기 (${getG3Label()}대상자) 목록`, 'FFBAE6FD');
             addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
 
             // 3. 자유수강자 명단 (보라색 계열)
@@ -3720,7 +3738,7 @@ function toggleStatusPanel() {
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">강좌명</th>
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">수익자</th>
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">자유수강</th>
-                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">초3</th>
+                            <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827;">${getG3LabelShort()}</th>
                             <th style="padding:5px 4px; text-align:center; font-size:13px; font-weight:800; color:#111827; border-left:2px solid ${cardBorderColor};">합계</th>
                         </tr>
                     </thead>
@@ -3748,7 +3766,7 @@ function toggleStatusPanel() {
                     <div style="font-weight:800; color:#92400e; margin-bottom:6px;">📌 [중복 표시 표] 강좌별 인원 집계 기준 (한 학생이 여러 칸에 동시에 포함될 수 있어요)</div>
                     · 지원금으로 순수하게 다 결제되면 → <b style="color:#d4af37;">해당 지원금 칸</b>에 1명<br>
                     · 지원금이 <b style="color:#d4af37;">부족해서 일부만 수익자로 넘어가면</b> → 지원금 칸 1명 + <b style="color:#d4af37;">수익자 칸에도 1명</b> 같이 표시<br>
-                    · 초3·자유수강권을 둘 다 가진 학생이 초3이 부족해 자유수강으로 넘어가면 → 초3 칸 1명 + <b style="color:#d4af37;">자유수강 칸에도 1명</b><br>
+                    · ${getG3LabelShort()}·자유수강권을 둘 다 가진 학생이 ${getG3LabelShort()}이 부족해 자유수강으로 넘어가면 → ${getG3LabelShort()} 칸 1명 + <b style="color:#d4af37;">자유수강 칸에도 1명</b><br>
                     · 지원금 잔액이 아예 없어 전액 수익자로 결제되면 → <b style="color:#d4af37;">수익자 칸에만</b> 1명
                 </div>
                 <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">`;
@@ -3762,10 +3780,10 @@ function toggleStatusPanel() {
             html += `
                 <div style="background:#F0F9FF; border:1px solid #bae6fd; border-left:4px solid #0284c7; border-radius:8px; padding:14px 18px; margin:20px 0 16px 0; font-size:14px; color:#374151; line-height:1.8; max-width:900px;">
                     <div style="font-weight:800; color:#075985; margin-bottom:6px;">📌 [중복안함 표] 강좌별 인원 집계 기준 (학생 1명은 딱 한 칸에만 표시돼요)</div>
-                    · 원래 초3이나 자유수강 대상 학생이면, 일부 금액이 수익자로 넘어가 있어도 <b style="color:#0284c7;">원래 지원유형(초3/자유수강) 칸</b>에 1명<br>
-                    · 초3지원금을 다 써서 100% 자유수강으로 넘어간 학생은 <b style="color:#0284c7;">자유수강 칸</b>에 1명<br>
+                    · 원래 ${getG3LabelShort()}이나 자유수강 대상 학생이면, 일부 금액이 수익자로 넘어가 있어도 <b style="color:#0284c7;">원래 지원유형(${getG3LabelShort()}/자유수강) 칸</b>에 1명<br>
+                    · ${getG3Label()}을 다 써서 100% 자유수강으로 넘어간 학생은 <b style="color:#0284c7;">자유수강 칸</b>에 1명<br>
                     · 자유수강권까지 다 써서 100% 수익자로 넘어간 학생만 <b style="color:#0284c7;">수익자 칸</b>에 1명<br>
-                    · 우선순위: 초3 → 자유수강 → 수익자 (한 학생-과목당 딱 1칸에만 집계)
+                    · 우선순위: ${getG3LabelShort()} → 자유수강 → 수익자 (한 학생-과목당 딱 1칸에만 집계)
                 </div>
                 <div style="display:flex; flex-wrap:nowrap; gap:20px; overflow-x:auto; padding-bottom:12px;">`;
             for (let q = 1; q <= maxQuarter; q++) {
@@ -3937,7 +3955,7 @@ function toggleStatusPanel() {
                 ws.getCell(1, 1).alignment = { horizontal: 'center', vertical: 'middle' };
                 ws.getRow(1).height = 24;
 
-                let headerRow = ws.addRow(['No.', '강좌명', '수익자', '자유수강', '초3', '합계']);
+                let headerRow = ws.addRow(['No.', '강좌명', '수익자', '자유수강', getG3LabelShort(), '합계']);
                 headerRow.eachCell(cell => {
                     cell.font = { bold: true };
                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } };
@@ -4937,7 +4955,7 @@ function toggleStatusPanel() {
 		
 
        function getYearSetting(year) {
-            return yearlySettings[year] || { g3: 500000, free: 600000, g3MaxGrade: 3 }; // ✨ 기본값(인천 기준) - 설정 안 하면 지금까지처럼 작동
+            return yearlySettings[year] || { g3: 500000, free: 600000, g3MinGrade: 3, g3MaxGrade: 3, quarterSystem: 4 }; // ✨ 기본값(인천 기준) - 설정 안 하면 지금까지처럼 작동
         }
 
         function getCurrentAcademicYear() { // ✨ 학년도 계산: 3월~다음해 2월을 같은 학년도로 취급
@@ -4952,14 +4970,20 @@ function toggleStatusPanel() {
             return s.g3MaxGrade || 3;
         }
 
-        function getG3Label() { // ✨ "초3지원금" 또는 "초3~4지원금" 등 동적 명칭
-            let max = getG3MaxGrade();
-            return max <= 3 ? '초3지원금' : `초3~${max}지원금`;
+        // ✨ 지원 대상 시작 학년 (교육청 정책이 바뀌어도 대응 가능하도록 최저 학년도 자유롭게 설정)
+        function getG3MinGrade() {
+            let s = getYearSetting(getCurrentAcademicYear());
+            return s.g3MinGrade || 3;
         }
 
-            function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3" / "초3~4") - 메인홈 폭 절약을 위해 축약
-            let max = getG3MaxGrade();
-            return max <= 3 ? '초3' : `초3~${max}`;
+        function getG3Label() { // ✨ "초3지원금" 또는 "초1~4지원금" 등 동적 명칭
+            let min = getG3MinGrade(), max = getG3MaxGrade();
+            return min === max ? `초${min}지원금` : `초${min}~${max}지원금`;
+        }
+
+            function getG3LabelShort() { // ✨ 배지용 짧은 버전 ("초3" / "초1~4") - 메인홈 폭 절약을 위해 축약
+            let min = getG3MinGrade(), max = getG3MaxGrade();
+            return min === max ? `초${min}` : `초${min}~${max}`;
         }
 
         // ✨ 분기당 "차"(월) 개수: 4분기제=1분기 3달(1~3차), 6분기제=1분기 2달(1~2차)
@@ -4996,11 +5020,11 @@ function toggleStatusPanel() {
             let custom = toNum(r.g3Limit1) + toNum(r.g3Limit2);
             return custom > 0 ? custom : getG3Allowance();
         }
-        function getG3H1LimitFor(r) {
-            return toNum(r.g3Limit1) || 250000;
+         function getG3H1LimitFor(r) {
+            return toNum(r.g3Limit1) || Math.round(getG3Allowance() / 2);
         }
         function getG3H2LimitFor(r) {
-            return toNum(r.g3Limit2) || 250000;
+            return toNum(r.g3Limit2) || Math.round(getG3Allowance() / 2);
         }
 
 
@@ -6488,20 +6512,20 @@ function toggleStatusPanel() {
     let fFreeBox = document.getElementById('fFree');
     let desc = document.getElementById('g3Desc');
     
- document.getElementById('g3Label').innerText = getG3Label();
-    let g3MaxG = getG3MaxGrade();
-    document.getElementById('freeDesc').innerText = `연 ${Math.round(getFreeAllowanceDefault()/10000)}만원. ${g3MaxG <= 3 ? '3학년' : '3~' + g3MaxG + '학년'}의 경우 ${getG3Label()} 소진 후 적용됨.`;
-    if(grade > 0 && (grade < 3 || grade > getG3MaxGrade())) {
+    document.getElementById('g3Label').innerText = getG3Label();
+    let g3MinG = getG3MinGrade(), g3MaxG = getG3MaxGrade();
+    document.getElementById('freeDesc').innerText = `연 ${Math.round(getFreeAllowanceDefault()/10000)}만원. ${g3MinG === g3MaxG ? g3MinG + '학년' : g3MinG + '~' + g3MaxG + '학년'}의 경우 ${getG3Label()} 소진 후 적용됨.`;
+    if(grade > 0 && (grade < getG3MinGrade() || grade > getG3MaxGrade())) {
         g3Box.checked = false;
         g3Box.disabled = true;
         desc.style.color = "#ef4444";
-        desc.innerText = `※ 지원 대상 학년(3~${getG3MaxGrade()}학년)이 아니므로 ${getG3Label()}을 선택할 수 없습니다.`;
+        desc.innerText = `※ 지원 대상 학년(${getG3MinGrade()}~${getG3MaxGrade()}학년)이 아니므로 ${getG3Label()}을 선택할 수 없습니다.`;
     } else {
         g3Box.disabled = false;
         desc.style.color = "var(--sidebar-accent)";
-        desc.innerHTML = `연 ${Math.round(getG3Allowance()/10000)}만원 (${getG3MaxGrade() <= 3 ? '3학년' : '3~' + getG3MaxGrade() + '학년'} 전용).<br>상반기/하반기 각 ${Math.round(getG3Allowance()/2/10000)}만원 한도 분할`;
+        desc.innerHTML = `연 ${Math.round(getG3Allowance()/10000)}만원 (${getG3MinGrade() === getG3MaxGrade() ? getG3MinGrade() + '학년' : getG3MinGrade() + '~' + getG3MaxGrade() + '학년'} 전용).<br>상반기/하반기 각 ${Math.round(getG3Allowance()/2/10000)}만원 한도 분할`;
                 
-               if(grade >= 3 && grade <= getG3MaxGrade() && event && event.type === 'input') {
+               if(grade >= getG3MinGrade() && grade <= getG3MaxGrade() && event && event.type === 'input') {
                     g3Box.checked = true;
                 }
             }
@@ -9189,7 +9213,7 @@ function updateG3LimitTotal() {
                     let rowData = [];
                     
                     if(r === 0) {
-                        let g3Formula = { formula: `IF(A${startRow}="","",IF(AND(A${startRow}>=3,A${startRow}<=${getG3MaxGrade()}),"O","X"))` };
+                          let g3Formula = { formula: `IF(A${startRow}="","",IF(AND(A${startRow}>=${getG3MinGrade()},A${startRow}<=${getG3MaxGrade()}),"O","X"))` };
                        if(s === 0) rowData = [3, 1, 10, '서강준', g3Formula, 'O', '기초생활수급자'];
                         else if(s === 1) rowData = [3, 2, 15, '차은우', g3Formula, 'X', ''];
                         else rowData = ['', '', '', '', g3Formula, '', ''];
@@ -10558,7 +10582,7 @@ function updateG3LimitTotal() {
                         id: currentTime++ + Math.random().toString(36).substr(2, 5),
                         createdAt: Date.now(), 
                         grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
-                        hasG3: (st.grade >= 3 && st.grade <= getG3MaxGrade()), hasFree: true,
+                        hasG3: (st.grade >= getG3MinGrade() && st.grade <= getG3MaxGrade()), hasFree: true,
                         freeTier: translateFreeTier(st.familyTier), 
                         freeAutoStartDate: st.reqDate || '', // ✨ NEIS 신청일자를 지원 개시일로 자동 연동
                         memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
@@ -10592,7 +10616,7 @@ function updateG3LimitTotal() {
                 id: Date.now() + Math.random().toString(36).substr(2, 5),
                 createdAt: Date.now(),
                 grade: st.grade, classNum: st.classNum, studentNum: st.studentNum, name: st.name,
-                               hasG3: (st.grade >= 3 && st.grade <= getG3MaxGrade()), hasFree: true,
+                               hasG3: (st.grade >= getG3MinGrade() && st.grade <= getG3MaxGrade()), hasFree: true,
                 freeTier: translateFreeTier(st.familyTier),
                 freeAutoStartDate: st.reqDate || '', // ✨ NEIS 신청일자를 지원 개시일로 자동 연동
                 memo: `[NEIS 자유수강 자동연동] 신청일:${st.reqDate||'미상'} / 심사:${st.confirmDate||'미상'}`
@@ -10826,14 +10850,7 @@ function updateG3LimitTotal() {
 
             closeSnapshotModal();
             
-            if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
-            if(maxQuarter === 6) {
-                document.getElementById('tabQ5').style.display = 'inline-block';
-                document.getElementById('tabQ6').style.display = 'inline-block';
-            } else {
-                document.getElementById('tabQ5').style.display = 'none';
-                document.getElementById('tabQ6').style.display = 'none';
-            }
+            applyQuarterSystem(maxQuarter);
             
             renderSubjectList();
             updateGlobalStats();
@@ -10857,14 +10874,7 @@ function updateG3LimitTotal() {
             isTimeTravelMode = false;
             document.getElementById('timeTravelBanner').style.display = 'none';
 
-            if(document.getElementById('quarterSetting')) document.getElementById('quarterSetting').value = maxQuarter;
-            if(maxQuarter === 6) {
-                document.getElementById('tabQ5').style.display = 'inline-block';
-                document.getElementById('tabQ6').style.display = 'inline-block';
-            } else {
-                document.getElementById('tabQ5').style.display = 'none';
-                document.getElementById('tabQ6').style.display = 'none';
-            }
+            applyQuarterSystem(maxQuarter);
             
             renderSubjectList();
             updateGlobalStats();
@@ -12157,7 +12167,9 @@ function updateG3LimitTotal() {
             let setting = getYearSetting(year);
             document.getElementById('ys_g3').value = setting.g3.toLocaleString();
             document.getElementById('ys_free').value = setting.free.toLocaleString();
+            document.getElementById('ys_g3min').value = setting.g3MinGrade || 3;
             document.getElementById('ys_g3max').value = setting.g3MaxGrade || 3;
+            document.getElementById('ys_quarterSystem').value = setting.quarterSystem || 4;
             
            let curYear = getCurrentAcademicYear();
             let notice = document.getElementById('ys_currentNotice');
@@ -12174,15 +12186,24 @@ function updateG3LimitTotal() {
             let year = document.getElementById('ys_year').value;
             let g3 = toNum(document.getElementById('ys_g3').value.replace(/,/g, ''));
             let free = toNum(document.getElementById('ys_free').value.replace(/,/g, ''));
+            let g3MinGrade = toNum(document.getElementById('ys_g3min').value);
             let g3MaxGrade = toNum(document.getElementById('ys_g3max').value);
+            let quarterSystem = toNum(document.getElementById('ys_quarterSystem').value);
             
             if (g3 <= 0 || free <= 0) { alert('금액은 0보다 커야 합니다.'); return; }
+            if (g3MinGrade > g3MaxGrade) { alert('지원 대상 학년의 시작 학년이 끝 학년보다 클 수 없습니다.'); return; }
             
-            yearlySettings[year] = { g3, free, g3MaxGrade };
+            yearlySettings[year] = { g3, free, g3MinGrade, g3MaxGrade, quarterSystem };
             persistYearlySettings();
+            
+            // ✨ 지금 실제 계산에 쓰이는 학년도(현재 학년도)를 저장했다면, 분기제를 화면에도 바로 적용
+            if (Number(year) === getCurrentAcademicYear()) {
+                applyQuarterSystem(quarterSystem);
+            }
+            
             renderGrid();
             updateGlobalStats();
-            alert(`${year}학년도 지원금이 저장되었습니다.`);
+            alert(`${year}학년도 지원금, 분기제가 저장되었습니다.`);
         }
 
         
