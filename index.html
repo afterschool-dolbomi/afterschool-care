@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.6</title>
+    <title>방과후 지원금 돌보미 V15.7</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -617,13 +617,30 @@
 <div id="neisDateEditModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:320px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
             <div style="font-weight:800; font-size:16px; margin-bottom:6px; color:var(--text-dark);">📅 날짜 수정</div>
-            <div id="neisDateEditName" style="font-size:13px; color:#6b7280; margin-bottom:14px;"></div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+    <div style="flex:1;">
+        <label style="font-size:11px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">학년</label>
+        <input type="text" id="neisEditGrade" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box; text-align:center;">
+    </div>
+    <div style="flex:1;">
+        <label style="font-size:11px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">반</label>
+        <input type="text" id="neisEditClassNum" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box; text-align:center;">
+    </div>
+    <div style="flex:1;">
+        <label style="font-size:11px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">번호</label>
+        <input type="text" id="neisEditStudentNum" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box; text-align:center;">
+    </div>
+</div>
+<div style="margin-bottom:10px;">
+    <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">이름</label>
+    <input type="text" id="neisEditName" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
+</div>
             <div style="margin-bottom:10px;">
-                <label id="neisDateEditLabel1" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">신청일자</label>
+                <label id="neisDateEditLabel1" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">신청일자 (육아기 시작일)</label>
                 <input type="date" id="neisDateEdit1" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
             </div>
             <div style="margin-bottom:16px;">
-                <label id="neisDateEditLabel2" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">심사완료일자</label>
+                <label id="neisDateEditLabel2" style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">심사완료일자 (육아기 종료일)</label>
                 <input type="date" id="neisDateEdit2" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
             </div>
             <div style="display:flex; gap:8px;">
@@ -1087,14 +1104,15 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.6</span>
+                <span class="brand-version">V15.7</span>
             </div>
     </div>
     
        <div>
         <div class="action-menu">
-          <!-- ⚙️ 메뉴 접기 버튼 (분기 설정은 '학년도 지원금, 분기제 설정'으로 이동했습니다) -->
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+          <!-- ⚙️ 학생 개별 입력(폭 줄임) + 메뉴 접기 버튼, 한 줄에 배치 (분기 설정이 빠지면서 비었던 자리) -->
+            <div style="display: flex; align-items:center; gap: 8px; margin-bottom: 12px;">
+                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')" style="flex:1; min-width:0; height:34px; padding:0 10px; display:flex; align-items:center; justify-content:center; font-size:13px; white-space:nowrap; text-align:center;">✏️ 학생 개별 추가</button>
                 <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="메뉴 접기/펼치기" style="flex-shrink:0; width:34px; height:34px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition: 0.2s;">
                     <span style="display:inline-flex; width:16px; height:12px; border:2px solid #d1d5db; border-radius:2px; overflow:hidden;">
                         <span style="width:5px; height:100%; background:#d1d5db; display:inline-block;"></span>
@@ -1110,18 +1128,17 @@
             <!-- 기존 8개의 메뉴 버튼들은 그대로 유지 (생략) -->
                 
 				<!-- ✨ 버튼 순서 재배치 + gap으로 간격 통일 -->
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')">✏️ 학생 개별 입력</button>
+                 <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="btn-3d btn-side" id="btn-snapshot-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSnapshotModal()">⏳ 8.날짜별 과거 기록(백업) 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
-                <button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️학년도 지원금, 분기제 설정</button>
-               <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
+                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
+			    <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 4.입력 엑셀 다운로드</button>
                 <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
-                <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 4.자유수강자 명단 관리 (NEIS)</button>
-                <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 3.특수학급 명단 관리</button>
-                <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 2.입력 엑셀 다운로드</button>
-                <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444;" onclick="openResetModal()">🚨 1.데이터 초기화 관리</button>
+                <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 3.자유수강자 명단 관리 (NEIS)</button>
+                <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 2.특수학급 명단 관리</button>
+				<button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️1.학년도 지원금, 분기제 설정</button>
+                <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444;" onclick="openResetModal()">🚨데이터 초기화 관리</button>
                 <div style="display: flex; gap: 8px;">
                    <button class="btn-3d btn-side" style="width: 100%; background:#0ea5e9; color:white; border:none; font-size: 13px; font-weight: bold; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항 & 🖥️실습 유튜브 영상️</button>
                 </div>
@@ -1607,15 +1624,15 @@
 
            <div class="form-group" id="tierGroup" style="display:none; margin-left:24px; margin-top:8px;">
                 <div id="yukaDateGroup" style="display:none; margin-top:10px; background:#eff6ff; border:1px solid #93c5fd; border-radius:6px; padding:8px;">
-                    <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span style="font-size:12px; color:#6b7280;">시작일</span>
-                        <input type="date" id="fFreeStartDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
-                        <span style="font-size:12px; color:#6b7280;">~ 마감일</span>
-                        <input type="date" id="fFreeEndDate" style="padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
-                    </div>
-                    <div style="font-size:11px; color:#9ca3af; margin-top:4px;">이 기간에만 자유수강권 지원금을 사용할 수 있습니다.</div>
-                </div>
+                <label style="font-size:12px; color:#1e40af; font-weight:700; display:block; margin-bottom:4px;">📅 육아기근로단축 지원 기간 (수기 입력 필수)</label>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span style="font-size:12px; color:#6b7280;">시작일</span>
+                <input type="date" id="fFreeStartDate" style="width:130px; padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+                <span style="font-size:12px; color:#6b7280;">~ 마감일</span>
+                <input type="date" id="fFreeEndDate" style="width:130px; padding:5px; border:1px solid #93c5fd; border-radius:4px; font-size:13px;">
+          </div>
+          <div style="font-size:11px; color:#9ca3af; margin-top:4px;">이 기간에만 자유수강권 지원금을 사용할 수 있습니다.</div>
+          </div>
             </div>
 
             <div style="margin-top:16px; padding-top:12px; border-top:1px dashed #d1d5db;">
@@ -6468,9 +6485,9 @@ function toggleStatusPanel() {
             document.getElementById('tierGroup').style.display = isFree ? 'block' : 'none';
             let tier = document.getElementById('fTier').value;
             document.getElementById('yukaDateGroup').style.display = (tier === '육아기근로단축') ? 'block' : 'none';
-            // ✨ 자유수강권 총 한도 입력칸은 자유수강권 체크 + 전입/전출 중 하나라도 체크되어 있을 때만 보이게
+            // ✨ 자유수강권 총 한도 입력칸은 전입/전출 체크 시, 또는 육아기근로단축 학생일 때 보이게
             let isTransfer = document.getElementById('fTransferIn').checked || document.getElementById('fTransferOut').checked;
-            document.getElementById('freeLimitGroup').style.display = (isFree && isTransfer) ? 'block' : 'none';
+            document.getElementById('freeLimitGroup').style.display = (isFree && (isTransfer || tier === '육아기근로단축')) ? 'block' : 'none';
         }
         function toggleTransferIn() {
             document.getElementById('transferInGroup').style.display = document.getElementById('fTransferIn').checked ? 'block' : 'none';
@@ -6490,6 +6507,8 @@ function toggleStatusPanel() {
             document.getElementById('fG3Limit1').value = '250,000';
             document.getElementById('fG3Limit2').value = '250,000';
             updateG3LimitTotal();
+            // ✨ 육아기근로단축 학생은 전입/전출과 무관하게 자유수강권 한도를 직접 관리하므로 초기화하지 않음
+            if (document.getElementById('fTier').value === '육아기근로단축') return;
             let freeDefault = getFreeAllowanceDefault();
             document.getElementById('fFreeLimit').value = freeDefault.toLocaleString();
 
@@ -6700,7 +6719,8 @@ function updateG3LimitTotal() {
           let transferOutQuarter = document.getElementById('fTransferOutQuarter').value;
           let transferOutDate = document.getElementById('fTransferOutDate').value;
           let isTransferChecked = transferIn || transferOut; // ✨ 전입/전출이 체크 안 된 상태면 예외 한도 입력값 자체를 무시
-          let freeLimit = isTransferChecked ? (toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
+          let allowCustomFreeLimit = isTransferChecked || freeTier === '육아기근로단축'; // ✨ 육아기단축 학생은 전입/전출 없이도 한도를 직접 관리 가능
+          let freeLimit = allowCustomFreeLimit ? (toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
 		  let g3Limit1 = isTransferChecked ? (toNum(document.getElementById('fG3Limit1').value.replace(/,/g, '')) || 250000) : 250000;
           let g3Limit2 = isTransferChecked ? (toNum(document.getElementById('fG3Limit2').value.replace(/,/g, '')) || 250000) : 250000;
           let g3Limit  = g3Limit1 + g3Limit2;
@@ -8640,12 +8660,12 @@ function updateG3LimitTotal() {
             
             let html = '';
             if (expiredList.length > 0) {
-                html += `<div style="font-weight:800; color:#b91c1c; margin-bottom:6px;">🔴 지원기간 만료 (${expiredList.length}명)</div>`;
-                html += expiredList.map(r => `<div style="margin-bottom:4px;">- ${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name} (마감일: ${r.freeEndDate})</div>`).join('');
+                html += `<div style="font-weight:800; color:#b91c1c; margin-bottom:6px;">🔴 지원기간 만료 (${expiredList.length}명) — 자유수강권 총 한도를 지금까지 사용한 금액으로 줄여주세요</div>`;
+                html += expiredList.map(r => `<div style="margin-bottom:4px; cursor:pointer; text-decoration:underline;" onclick="closeYukaExpiryPopup(); openPanel('edit','${r.id}');">- ${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name} (마감일: ${r.freeEndDate})</div>`).join('');
             }
             if (soonList.length > 0) {
-                html += `<div style="font-weight:800; color:#c2410c; margin-top:10px; margin-bottom:6px;">🟠 만료 임박 (${soonList.length}명)</div>`;
-                html += soonList.map(o => `<div style="margin-bottom:4px;">- ${o.r.grade}학년 ${o.r.classNum}반 ${o.r.studentNum}번 ${o.r.name} (D-${o.diffDays}, 마감일: ${o.r.freeEndDate})</div>`).join('');
+                html += `<div style="font-weight:800; color:#c2410c; margin-top:10px; margin-bottom:6px;">🟠 만료 임박 (${soonList.length}명) — 곧 지원기간이 끝나니 한도 조정을 준비해주세요</div>`;
+                html += soonList.map(o => `<div style="margin-bottom:4px; cursor:pointer; text-decoration:underline;" onclick="closeYukaExpiryPopup(); openPanel('edit','${o.r.id}');">- ${o.r.grade}학년 ${o.r.classNum}반 ${o.r.studentNum}번 ${o.r.name} (D-${o.diffDays}, 마감일: ${o.r.freeEndDate})</div>`).join('');
             }
             
             document.getElementById('yukaExpiryList').innerHTML = html;
@@ -10153,18 +10173,18 @@ function updateG3LimitTotal() {
         let neisDateEditIdx = null;
 
         function editNeisDate(idx) {
-            let st = neisList[idx];
-            if (!st) return;
-            neisDateEditIdx = idx;
-            
-            let isYuka = (st.familyTier === '육아기근로시간단축활용가정');
-            document.getElementById('neisDateEditLabel1').innerText = isYuka ? '시작일' : '신청일자';
-            document.getElementById('neisDateEditLabel2').innerText = isYuka ? '마감일' : '심사완료일자';
-            document.getElementById('neisDateEditName').innerText = `${st.grade}학년 ${st.classNum}반 ${st.studentNum}번 ${st.name}`;
-            document.getElementById('neisDateEdit1').value = st.reqDate || '';
-            document.getElementById('neisDateEdit2').value = st.confirmDate || '';
-            document.getElementById('neisDateEditModal').style.display = 'flex';
-        }
+    let st = neisList[idx];
+    if (!st) return;
+    neisDateEditIdx = idx;
+    
+    document.getElementById('neisEditGrade').value = st.grade || '';
+    document.getElementById('neisEditClassNum').value = st.classNum || '';
+    document.getElementById('neisEditStudentNum').value = st.studentNum || '';
+    document.getElementById('neisEditName').value = st.name || '';
+    document.getElementById('neisDateEdit1').value = st.reqDate || '';
+    document.getElementById('neisDateEdit2').value = st.confirmDate || '';
+    document.getElementById('neisDateEditModal').style.display = 'flex';
+}
 
         function closeNeisDateEditModal() {
             document.getElementById('neisDateEditModal').style.display = 'none';
@@ -10172,17 +10192,24 @@ function updateG3LimitTotal() {
         }
 
         function confirmNeisDateEdit() {
-            if (neisDateEditIdx === null) return;
-            let st = neisList[neisDateEditIdx];
-            if (!st) return;
-            
-            st.reqDate = document.getElementById('neisDateEdit1').value;
-            st.confirmDate = document.getElementById('neisDateEdit2').value;
-            
-            persistNeisList();
-            renderNeisList();
-            closeNeisDateEditModal();
-        }
+    if (neisDateEditIdx === null) return;
+    let st = neisList[neisDateEditIdx];
+    if (!st) return;
+    
+    let newName = document.getElementById('neisEditName').value.trim();
+    if (!newName) return alert('이름을 입력해주세요.');
+    
+    st.grade = document.getElementById('neisEditGrade').value.trim();
+    st.classNum = document.getElementById('neisEditClassNum').value.trim();
+    st.studentNum = document.getElementById('neisEditStudentNum').value.trim();
+    st.name = newName;
+    st.reqDate = document.getElementById('neisDateEdit1').value;
+    st.confirmDate = document.getElementById('neisDateEdit2').value;
+    
+    persistNeisList();
+    renderNeisList();
+    closeNeisDateEditModal();
+}
 
         function toggleNeisManualAdd() {
             let f = document.getElementById('neisManualAddForm');
