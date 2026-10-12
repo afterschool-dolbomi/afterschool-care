@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.7</title>
+    <title>방과후 지원금 돌보미 V15.8</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -793,9 +793,20 @@
             </div>
             <div style="padding:20px 24px; overflow-y:auto;">
                 <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수)</span></div>
-                <div id="mrfMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:14px;"></div>
+				
+				
+				
+               <div id="mrfMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="margin-bottom:10px;">
+                            <button type="button" id="mrfMonthFirstBtn" onclick="toggleMonthFirst('mrf')" style="width:100%; padding:7px 8px; border-radius:6px; border:2px solid #cbd5e1; background:white; color:#475569; font-weight:800; cursor:pointer; font-size:12px;">⬜ 선택한 차에서 우선 환불 (꺼짐: 중도환불 적용)</button>
+                            <div style="font-size:10.5px; color:#92400e; line-height:1.55; margin-top:5px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 8px;">
+                                <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
+                                <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
+                                <span style="color:#78716c;">예) 차당 수강료 30,000원, 2차에서 35,000원 환불 -> 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불</span>
+                            </div>
+                        </div>
 
-                <div style="font-size:14px; color:#dc2626; font-weight:800; margin-bottom:10px;">⚠️ 수강료(강사료·수용비)는 아래 두 방법 중 한 가지로만 입력해주세요.</div>
+                <div style="font-size:14px; color:#dc2626; font-weight:800; margin-bottom:14px;">⚠️ 수강료(강사료·수용비)는 아래 두 방법 중 한 가지로만 입력해주세요.</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
                         <div style="border:2px solid #d4af37; border-radius:8px; padding:10px;">
                         <div style="font-size:11.5px; font-weight:800; color:#1e3a5f; margin-bottom:8px;">✏️ 수강료 직접 입력</div>
@@ -874,6 +885,14 @@
                         <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
                         <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
                         <div id="rqaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="margin-bottom:10px;">
+                            <button type="button" id="rqaMonthFirstBtn" onclick="toggleMonthFirst('rqa')" style="width:100%; padding:7px 8px; border-radius:6px; border:2px solid #cbd5e1; background:white; color:#475569; font-weight:800; cursor:pointer; font-size:12px;">⬜ 선택한 차에서 우선 환불,(꺼짐:중도환불 적용)</button>
+                            <div style="font-size:10.5px; color:#92400e; line-height:1.55; margin-top:5px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 8px;">
+                                <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
+                                <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
+                                <span style="color:#78716c;">예) 차당 수강료 30,000원, 2차에서 35,000원 환불 → 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불</span>
+                            </div>
+                        </div>
                         <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">과목 선택</div>
                         <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                             <option value="">과목을 선택하세요</option>
@@ -911,6 +930,14 @@
                         <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
                         <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
                         <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+                        <div style="margin-bottom:10px;">
+                            <button type="button" id="riaMonthFirstBtn" onclick="toggleMonthFirst('ria')" style="width:100%; padding:7px 8px; border-radius:6px; border:2px solid #cbd5e1; background:white; color:#475569; font-weight:800; cursor:pointer; font-size:12px;">⬜ 선택한 차에서 우선 환불 (꺼짐)</button>
+                            <div style="font-size:10.5px; color:#92400e; line-height:1.55; margin-top:5px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 8px;">
+                                <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
+                                <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
+                                <span style="color:#78716c;">예) 차당 수강료 30,000원, 2차에서 35,000원 환불 -> 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불</span>
+                            </div>
+                        </div>
                         <select id="riaSubjectSelect" onchange="onRiaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
                             <option value="">학생과 분기를 먼저 선택하세요</option>
                         </select>
@@ -1104,7 +1131,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.7</span>
+                <span class="brand-version">V15.8</span>
             </div>
     </div>
     
@@ -3059,20 +3086,49 @@
                                 let normals = getTsMonthlyNormals(masterSub, q, su);
                                 let monthlyBaseSu = toNum(normals[month]);
                                 if (monthlyBaseSu <= 0) return;
-                                // ✨ 1차부터 순서대로 청구액을 채워 나감
-                                //    - 그 차에 태그된 환불은 그 차에서 뺌 (결석 환불)
-                                //    - 그 차 금액보다 큰 환불(중도 취소)이면 남은 분기 예산만 청구되고 이후 차는 0원
-                                //    - 지원금(초3/자유수강)도 1차부터 순서대로 먼저 소진시키고 모자라면 수익자로 넘김
+                                // ✨ 1) 차별 정상 청구액에서 출발해서, 환불을 '태그된 차'부터 아래 규칙대로 차감
+                                //    - 환불이 그 차 금액 이하이면 그 차에서만 차감 (결석 환불 등)
+                                //    - 그 차 금액을 넘지만 뒤 차를 다 덮지는 못하면 → 그 차는 0원, 넘친 금액은 다음 차에서 이어서 차감
+                                //    - 뒤 차 전체 + 그 차 일부까지 덮는 금액이면(중도 취소) → 뒤 차는 전부 0원, 그 차는 '다닌 만큼'만 청구
+                                //    - 태그된 차보다 앞 차는 건드리지 않음 / 차별 청구 합계는 항상 분기 순수강료와 일치
+                                //    - 2) 지원금(초3/자유수강)은 1차부터 순서대로 먼저 소진시키고 모자라면 수익자로 넘김
                                 let poolG3 = toNum(a.g3Su), poolFr = toNum(a.frSu);
-                                let budget = quarterNetSu;
                                 let monthsInQ = getMonthsPerQuarter();
+                                let chargeArr = [];
+                                for (let m = 1; m <= monthsInQ; m++) chargeArr[m] = toNum(normals[m]);
+                                let refundEntries = (s.refundLog || [])
+                                    .map(l => ({ k: (l.month === 'pre') ? 1 : Number(l.month), amount: toNum(l.amount), first: !!l.monthFirst }))
+                                    .filter(e => e.amount > 0 && e.k >= 1 && e.k <= monthsInQ)
+                                    .sort((x, y) => x.k - y.k);
+                                refundEntries.forEach(e => {
+                                    let rem = e.amount, k = e.k;
+                                    if (e.first) {
+                                        // ✨ '선택한 차에서 우선 환불': 그 차부터 먼저 환불 → 남으면 다음 차 → 그래도 남으면 앞 차 (중도환불 규칙을 쓰지 않음)
+                                        let cK = Math.min(chargeArr[k], rem); chargeArr[k] -= cK; rem -= cK;
+                                        for (let j = k + 1; j <= monthsInQ && rem > 0; j++) { let c = Math.min(chargeArr[j], rem); chargeArr[j] -= c; rem -= c; }
+                                        for (let j = k - 1; j >= 1 && rem > 0; j--) { let c2 = Math.min(chargeArr[j], rem); chargeArr[j] -= c2; rem -= c2; }
+                                        return;
+                                    }
+                                    if (rem <= chargeArr[k]) { chargeArr[k] -= rem; return; }
+                                    let laterSum = 0;
+                                    for (let j = k + 1; j <= monthsInQ; j++) laterSum += chargeArr[j];
+                                    if (rem < laterSum) {
+                                        rem -= chargeArr[k]; chargeArr[k] = 0;
+                                        for (let j = k + 1; j <= monthsInQ && rem > 0; j++) { let c = Math.min(chargeArr[j], rem); chargeArr[j] -= c; rem -= c; }
+                                    } else {
+                                        for (let j = k + 1; j <= monthsInQ; j++) chargeArr[j] = 0;
+                                        rem -= laterSum;
+                                        let cK = Math.min(chargeArr[k], rem); chargeArr[k] -= cK; rem -= cK;
+                                        for (let j = k - 1; j >= 1 && rem > 0; j--) { let c2 = Math.min(chargeArr[j], rem); chargeArr[j] -= c2; rem -= c2; }
+                                    }
+                                });
+                                // ✨ 차 태그가 없는 환불 등으로 합계가 순수강료보다 크면 마지막 차부터 차감 (합계 일치 보장)
+                                let chargeTotal = 0;
+                                for (let m = 1; m <= monthsInQ; m++) chargeTotal += chargeArr[m];
+                                let chargeExcess = chargeTotal - quarterNetSu;
+                                for (let j = monthsInQ; j >= 1 && chargeExcess > 0; j--) { let c = Math.min(chargeArr[j], chargeExcess); chargeArr[j] -= c; chargeExcess -= c; }
                                 for (let m = 1; m <= monthsInQ; m++) {
-                                    let mNormal = toNum(normals[m]);
-                                    if (mNormal <= 0) continue;
-                                    let mRefund = (s.refundLog || []).filter(l => l.month === m || (m === 1 && l.month === 'pre')).reduce((sum, l) => sum + toNum(l.amount), 0);
-                                    let cap = (mNormal - mRefund > 0) ? (mNormal - mRefund) : mNormal;
-                                    let charge = Math.max(0, Math.min(cap, budget));
-                                    budget -= charge;
+                                    let charge = chargeArr[m] || 0;
                                     let remain = charge, useG3 = 0, useFr = 0;
                                     if (isYukaTs) {
                                         useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
@@ -5217,8 +5273,13 @@ function toggleStatusPanel() {
                                     if (remainRefund > 0) {
                                         let g3frBase = a[g3Key] + a[frKey];
                                         if (g3frBase > 0) {
+                                            if (true) { 
+                                            refFr = Math.min(remainRefund, a[frKey]);
+                                            refG3 = remainRefund - refFr;
+                                            } else {
                                             refG3 = Math.round(remainRefund * (a[g3Key] / g3frBase));
                                             refFr = remainRefund - refG3;
+                                            }
                                         }
                                     }
 
@@ -7304,12 +7365,12 @@ function updateG3LimitTotal() {
                             ${refundHistoryItems.length === 0
                                 ? `<div style="font-size:12.5px; color:#9ca3af; padding:10px; background:#f9fafb; border-radius:6px; border:1px solid var(--border-color);">이 분기에 등록된 환불 내역이 없습니다.</div>`
                                                                 : `<div style="border:1px solid #e2e8f0; border-radius:8px; overflow-x:auto;">
-                                                                       <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:640px;">
+                                                                       <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:780px;">
                                                                                <colgroup>
-                                        <col style="width:13%;"><col style="width:7%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:18%;"><col style="width:7%;">
+                                        <col style="width:11%;"><col style="width:7%;"><col style="width:7%;"><col style="width:7%;"><col style="width:7%;"><col style="width:7%;"><col style="width:7%;"><col style="width:8%;"><col style="width:14%;"><col style="width:18%;"><col style="width:7%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:9%;"><col style="width:18%;"><col style="width:7%;">
                                         </colgroup>
                                         <thead><tr style="background:#fef3c7;">
-                                            <th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">과목</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">몇차</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">강사료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">수용비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#0f766e;">수강료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">교재비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">재료비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">합계</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">사유</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">삭제</th>
+                                            <th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">과목</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">몇차</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">강사료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">수용비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#0f766e;">수강료</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">교재비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">재료비</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">합계</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">환불지원금 구분</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">사유</th><th style="padding:6px; border:1px solid #e5e7eb; text-align:center;">삭제</th>
                                         </tr></thead>
                                         <tbody>
                                                 ${refundHistoryItems.map(it => {
@@ -7329,6 +7390,7 @@ function updateG3LimitTotal() {
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${egy ? formatMoney(egy) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${ej ? formatMoney(ej) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; font-weight:800; color:#b91c1c;">${formatMoney(eTotal)}</td>
+													<td style="padding:6px; border:1px solid #e5e7eb; text-align:left;">${getRefundSourceHtml(subs[it.sIdx], c.allocs && c.allocs['q' + q] ? c.allocs['q' + q][it.sIdx] : null, l)}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;"><input type="text" value="${l.reason || ''}" placeholder="사유 입력" style="width:100%; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px; box-sizing:border-box;" onchange="updateRefundLogReason('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)"></td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center;"><button type="button" onclick="deleteRefundLogEntry('${r.id}', ${q}, ${it.sIdx}, ${it.li})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">🗑️</button></td>
                                                 </tr>`;
@@ -7573,6 +7635,7 @@ function updateG3LimitTotal() {
             document.getElementById('mrfAutoPreview').innerText = '차시 수를 입력하면 강사료·수용비가 자동으로 계산됩니다.';
             document.getElementById('mrfReason').value = '';
             renderMrfMonthBtns();
+            resetMonthFirst('mrf');
             document.getElementById('manualRefundModal').style.display = 'flex';
         }
         function renderMrfMonthBtns() {
@@ -7738,7 +7801,7 @@ function updateG3LimitTotal() {
             if (!s.refundLog) s.refundLog = [];
             let entry = {
                 date: new Date().toISOString().slice(0,10),
-                month, reason, g, s: sVal, gy, j, amount: suAmount, source: 'manual'
+                month, reason, g, s: sVal, gy, j, amount: suAmount, source: 'manual', monthFirst: monthFirstState.mrf
             };
             if (sessions !== undefined) entry.sessions = sessions;
             s.refundLog.push(entry);
@@ -7838,6 +7901,30 @@ function updateG3LimitTotal() {
             }
             return rounded;
         }
+		
+		
+		function getRefundSourceHtml(s, alloc, l) {
+    alloc = alloc || {};
+    let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
+    let cats = [
+        { label: '수익자', color: '#b91c1c', su: toNum(alloc.refSkSu), gy: toNum(alloc.refSkGy), j: toNum(alloc.refSkJ) },
+        { label: getG3Label(), color: '#0284c7', su: toNum(alloc.refG3Su), gy: toNum(alloc.refG3Gy), j: toNum(alloc.refG3J) },
+        { label: '자유수강', color: '#9333ea', su: toNum(alloc.refFrSu), gy: toNum(alloc.refFrGy), j: toNum(alloc.refFrJ) }
+    ];
+    let rs = rSu > 0 ? toNum(l.amount) / rSu : 0;
+    let rg = rGy > 0 ? toNum(l.gy) / rGy : 0;
+    let rj = rJ > 0 ? toNum(l.j) / rJ : 0;
+    let suP = distributeRatioRounded(cats.map(c => c.su), rs);
+    let gyP = distributeRatioRounded(cats.map(c => c.gy), rg);
+    let jP = distributeRatioRounded(cats.map(c => c.j), rj);
+    let out = cats.map((c, i) => {
+        let amt = suP[i] + gyP[i] + jP[i];
+        return amt > 0 ? '<div style="color:' + c.color + '; font-weight:700; white-space:nowrap;">' + c.label + ' ' + formatMoney(amt) + '</div>' : '';
+    }).join('');
+    return out || '<span style="color:#9ca3af;">-</span>';
+}
+		
+		
         // ✨ 조건(분기·차)에 맞는 환불 항목을 수익자/초3지원금/자유수강별로 나눠서 목록 생성
         function computeRefundRosterItems() {
             let q = refundRosterState.q, month = refundRosterState.month;
@@ -8225,6 +8312,20 @@ function updateG3LimitTotal() {
             document.querySelectorAll('.rqa-student-chk').forEach(el => el.checked = checked);
             updateRqaCheckedCount();
         }
+              // ✨ '선택한 차에서 우선 환불' 토글 상태 (꺼짐 = 기본 중도환불 / 켜짐 = 그 차부터 먼저 환불하고 남으면 다음 차)
+            let monthFirstState = { rqa: false, ria: false, mrf: false };
+            function renderMonthFirstBtn(key) {
+                let btn = document.getElementById(key + 'MonthFirstBtn');
+                if (!btn) return;
+                let on = !!monthFirstState[key];
+                btn.innerHTML = on ? '✅ 선택한 차에서 우선 환불 (켜짐)' : '⬜ 선택한 차에서 우선 환불 (꺼짐)';
+                btn.style.background = on ? '#92400e' : 'white';
+                btn.style.color = on ? 'white' : '#475569';
+                btn.style.borderColor = on ? '#b45309' : '#cbd5e1';
+            }
+            function toggleMonthFirst(key) { monthFirstState[key] = !monthFirstState[key]; renderMonthFirstBtn(key); }
+            function resetMonthFirst(key) { monthFirstState[key] = false; renderMonthFirstBtn(key); }
+
             function addRqaToCart() {
             if (!rqaState.q) return alert('분기를 선택해주세요.');
             if (!rqaState.month) return alert('몇 차 환불인지 선택해주세요. (정산서 작성에 필요합니다)');
@@ -8241,10 +8342,11 @@ function updateG3LimitTotal() {
                 let sIdx = Number(sIdxStr);
                 let r = db.find(x => x.id == rid);
                 if (!r) return;
-                              refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount, gy, j, reason });
+            refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount, gy, j, reason, monthFirst: monthFirstState.rqa });
             });
             renderRefundCartTable();
             showRefundToast(checked.length);
+            resetMonthFirst('rqa');
         }
 
         // ===== 개별 담기 (학생 1명씩) =====
@@ -8377,7 +8479,7 @@ function updateG3LimitTotal() {
                        let r = db.find(x => x.id == riaState.studentId);
             let s = r[`q${riaState.q}`].subs[sIdx];
             let reason = (document.getElementById('riaReason').value || '').trim();
-                        refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount, gy, j, reason });
+            refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount, gy, j, reason, monthFirst: monthFirstState.ria });
             renderRefundCartTable();
             document.getElementById('riaSessionCount').value = '';
             document.getElementById('riaGy').value = '';
@@ -8385,6 +8487,7 @@ function updateG3LimitTotal() {
             document.getElementById('riaReason').value = '';
             document.getElementById('riaAutoPreview').innerText = '';
             showRefundToast(1);
+            resetMonthFirst('ria');
         }
 
               // ===== 카트(담은 목록) =====
@@ -8429,7 +8532,7 @@ function updateG3LimitTotal() {
                             return `<tr style="border-bottom:1px solid #f1f5f9;">
                                 <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.studentLabel}</td>
                                 <td style="padding:6px; text-align:center;">${item.q}분기</td>
-                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month === 'pre' ? '수강전취소' : item.month + '차'}</td>
+                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month === 'pre' ? '수강전취소' : item.month + '차'}${item.monthFirst ? '<div style="font-size:10px; color:#92400e; font-weight:800;">차 우선환불</div>' : ''}</td>
                                 <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.subjectName}${warn}</td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.gy || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartGy(${idx}, this.value)"></td>
@@ -8501,7 +8604,7 @@ function updateG3LimitTotal() {
                 s.rJ = toNum(s.rJ) + addJ;
 
                  if (!s.refundLog) s.refundLog = [];
-                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '', g: addG, s: addS, gy: addGy, j: addJ, source: 'cart' });
+                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '', g: addG, s: addS, gy: addGy, j: addJ, source: 'cart', monthFirst: !!item.monthFirst });
 
                 appliedCount++;
             });
@@ -8565,6 +8668,12 @@ function updateG3LimitTotal() {
             let months = getMonthsPerQuarter();
             wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
             let html = '';
+            // ✨ 수강전취소는 항상 1차보다 앞(맨 왼쪽)
+            let preOn = entry.month === 'pre';
+            let preStyle = preOn
+                ? 'padding:10px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:12px;'
+                : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12px;';
+            html += `<button type="button" style="${preStyle}" onclick="selectRlmMonth('pre')">수강전취소</button>`;
             for (let m = 1; m <= months; m++) {
                 let isOn = entry.month === m;
                 let style = isOn
@@ -8572,11 +8681,6 @@ function updateG3LimitTotal() {
                     : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:13px;';
                 html += `<button type="button" style="${style}" onclick="selectRlmMonth(${m})">${m}차</button>`;
             }
-            let preOn = entry.month === 'pre';
-            let preStyle = preOn
-                ? 'padding:10px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:12px;'
-                : 'padding:10px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12px;';
-            html += `<button type="button" style="${preStyle}" onclick="selectRlmMonth('pre')">수강전취소</button>`;
             wrap.innerHTML = html;
         }
         function selectRlmMonth(m) {
