@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.8</title>
+    <title>방과후 지원금 돌보미 V15.9</title>
 	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -96,14 +96,6 @@
         
         .header-tools { display: flex; gap: 8px; align-items: center; }
 		
-		.toolbar-divider{
-    width:2px;
-    height:34px;
-    background:rgba(255,255,255,.25);
-    margin:0 12px;
-    align-self:center;
-    flex-shrink:0;
-}
 
 
 
@@ -661,7 +653,7 @@
             <div id="ntfInGroup" style="display:none; margin-left:12px; margin-bottom:12px; background:#ecfeff; border:1px solid #67e8f9; border-radius:6px; padding:8px;">
                 <label style="font-size:12px; color:#0e7490; font-weight:700; display:block; margin-bottom:4px;">전입 분기</label>
                 <select id="ntf_inQ" style="width:100%; padding:6px; border:1px solid #67e8f9; border-radius:4px; font-size:13px; margin-bottom:6px;">
-                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option><option value="5" class="q56opt">5분기</option><option value="6" class="q56opt">6분기</option>
                 </select>
                 <label style="font-size:12px; color:#0e7490; font-weight:700; display:block; margin-bottom:4px;">전입일 (기록용)</label>
                 <input type="date" id="ntf_inDate" style="width:100%; padding:6px; border:1px solid #67e8f9; border-radius:4px; font-size:13px; box-sizing:border-box;">
@@ -673,7 +665,7 @@
             <div id="ntfOutGroup" style="display:none; margin-left:12px; margin-bottom:16px; background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:8px;">
                 <label style="font-size:12px; color:#991b1b; font-weight:700; display:block; margin-bottom:4px;">전출 분기</label>
                 <select id="ntf_outQ" style="width:100%; padding:6px; border:1px solid #fca5a5; border-radius:4px; font-size:13px; margin-bottom:6px;">
-                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                    <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option><option value="5" class="q56opt">5분기</option><option value="6" class="q56opt">6분기</option>
                 </select>
                 <label style="font-size:12px; color:#991b1b; font-weight:700; display:block; margin-bottom:4px;">전출일 (기록용)</label>
                 <input type="date" id="ntf_outDate" style="width:100%; padding:6px; border:1px solid #fca5a5; border-radius:4px; font-size:13px; box-sizing:border-box;">
@@ -703,6 +695,17 @@
             <button onclick="closeYukaMissingPopup()" style="margin-top:16px; width:100%; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">확인</button>
         </div>
     </div>
+
+        <div id="freeTierMissingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:420px; max-height:70vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+            <div style="font-weight:800; font-size:16px; margin-bottom:8px; color:#7c3aed;">⚠️ 자유수강 계층 미등록 학생</div>
+            <div style="font-size:12.5px; color:#6b7280; margin-bottom:12px; background:#f5f3ff; border-radius:8px; padding:10px;">아래 학생은 자유수강권 대상인데 계층(기초생활수급자 등)이 비어 있어요. 이름을 누르면 수정창이 열립니다.</div>
+            <div id="freeTierMissingList" style="font-size:13px; line-height:1.6;"></div>
+            <button onclick="document.getElementById('freeTierMissingOverlay').style.display='none'" style="margin-top:16px; width:100%; padding:10px; border-radius:8px; border:none; background:#7c3aed; color:white; font-weight:700; cursor:pointer;">확인</button>
+        </div>
+    </div> 
+
+
 
     <div id="yukaExpiryPopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:420px; max-height:70vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
@@ -1044,7 +1047,7 @@
     
 
   
-   <! 크기 조절 방법 요약, 위 코드 안에 주석(``)으로 달아둔 부분을 보시면 됩니다.
+   <!-- 크기 조절 방법 요약, 위 코드 안에 주석(``)으로 달아둔 부분을 보시면 됩니다.
 1. **팝업의 가로 길이를 바꾸고 싶을 때:** `max-width: 1100px;`의 숫자를 바꿉니다. (예: `800px`)
 2. **팝업의 세로 길이를 바꾸고 싶을 때:** `max-height: 85vh;`의 숫자를 바꿉니다. (예: `70vh`)
 3. **그림 크기를 내 마음대로 강제 지정하고 싶을 때:** `<img ... style="width: auto;` 부분의 `auto`를 지우고 `600px` 처럼 직접 입력합니다. (단, 원본보다 크게 적으면 또 깨질 수 있습니다!)
@@ -1052,7 +1055,7 @@
 선생님을 위한 마지막 팁 (직접 더 조절하고 싶을 때)
 창을 더 넓게 키우고 싶을 때: max-width: 1400px; 숫자를 더 키워보세요 (예: 1800px).
 창을 위아래로 더 키우고 싶을 때: height: 90vh; 숫자를 더 키워보세요 (예: 95vh).
-이미지가 너무 커서 창 안에서 한눈에 보고 싶을 때: 이미지 스타일의 max-width: none;을 max-width: 100%;로 바꾸시면, 이미지가 창 크기에 맞춰 쏙 들어오게 됩니다. !>
+이미지가 너무 커서 창 안에서 한눈에 보고 싶을 때: 이미지 스타일의 max-width: none;을 max-width: 100%;로 바꾸시면, 이미지가 창 크기에 맞춰 쏙 들어오게 됩니다. -->
 
 
 
@@ -1131,7 +1134,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.8</span>
+                <span class="brand-version">V15.9</span>
             </div>
     </div>
     
@@ -1670,7 +1673,7 @@
                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
                         <label style="font-size:12px; color:#0e7490; font-weight:700;">전입 분기</label>
                         <select id="fTransferInQuarter" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
-                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option><option value="5" class="q56opt">5분기</option><option value="6" class="q56opt">6분기</option>
                         </select>
                         <label style="font-size:12px; color:#0e7490; font-weight:700; margin-left:8px;">전입일 (기록용)</label>
                         <input type="date" id="fTransferInDate" style="padding:5px; border:1px solid #67e8f9; border-radius:4px; font-size:13px;">
@@ -1686,7 +1689,7 @@
                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
                         <label style="font-size:12px; color:#991b1b; font-weight:700;">전출 분기</label>
                         <select id="fTransferOutQuarter" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
-                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                            <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option><option value="5" class="q56opt">5분기</option><option value="6" class="q56opt">6분기</option>
                         </select>
                         <label style="font-size:12px; color:#991b1b; font-weight:700; margin-left:8px;">전출일 (기록용)</label>
                         <input type="date" id="fTransferOutDate" style="padding:5px; border:1px solid #fca5a5; border-radius:4px; font-size:13px;">
@@ -2263,6 +2266,9 @@
             updateGlobalStats();
             renderGrid(); 
 
+            checkYukaExpiry(); checkYukaMissingNeis(); checkMissingFreeTier();
+
+
             if (!localStorage.getItem('edusync_tutorial_done')) {
                 document.getElementById('tutorialWelcomeOverlay').classList.add('active');
                 document.getElementById('tutorialWelcomeModal').style.display = 'flex';
@@ -2309,7 +2315,7 @@
 
         // ✨ 카트 로그(refundLog)와 수기 배분표(manualAlloc)를 하나의 '환불 내역' 구조로 통합 (과목마다 한 번만 실행)
         function migrateRefundLogs() {
-            let todayStr = new Date().toISOString().slice(0,10);
+            let todayStr = todayLocal();
             let didMigrate = false;
             db.forEach(student => {
                 for (let q = 1; q <= 6; q++) {
@@ -2407,7 +2413,7 @@
                             let addG = Math.max(0, Math.min(untrackedSu, rG - loggedG));
                             let addS = untrackedSu - addG;
                             s.refundLog.push({
-                                date: new Date().toISOString().slice(0,10), month: undefined, reason: '',
+                                date: todayLocal(), month: undefined, reason: '',
                                 g: addG, s: addS, gy: untrackedGy, j: untrackedJ,
                                 amount: untrackedSu, source: 'manual'
                             });
@@ -2448,7 +2454,7 @@
                         }
                         let reasons = untagged.map(l => (l.reason||'').trim()).filter(Boolean);
                         let mergedEntry = {
-                            date: untagged[0].date || new Date().toISOString().slice(0,10),
+                            date: untagged[0].date || todayLocal(),
                             month: undefined,
                             reason: reasons.length ? [...new Set(reasons)].join(', ') : '',
                             g: mergedG, s: mergedS, gy: mergedGy, j: mergedJ,
@@ -2636,6 +2642,7 @@
                 let neisMatch = neisList.find(s => s.grade === sg.grade && s.classNum === sg.classNum && s.studentNum === sg.studentNum);
                 if (neisMatch && neisMatch.status !== '제외' && neisMatch.status !== '통보X' && neisMatch.status !== '특수반') {
                     if (!sg.isFree) sg.isFree = true;
+                    sg.neisTier = translateFreeTier(neisMatch.familyTier);
                     if (neisMatch.name.trim() !== sg.name.trim()) {
                         nameMismatches.push(`${sg.grade}학년 ${sg.classNum}반 ${sg.studentNum}번 (코디마스터: "${sg.name}" / NEIS명단: "${neisMatch.name}")`);
                     }
@@ -2665,7 +2672,7 @@
                         id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
                         grade: sg.grade, classNum: sg.classNum, studentNum: sg.studentNum, name: sg.name,
                          hasG3: (sg.grade >= getG3MinGrade() && sg.grade <= getG3MaxGrade()), // ✨ 구분란과 무관하게 학년 기준으로 무조건 체크
-                        hasFree: sg.isFree, freeTier: '', freeLimit: getFreeAllowanceDefault(),
+                        hasFree: sg.isFree, freeTier: sg.neisTier || '', freeLimit: getFreeAllowanceDefault(),
                         memo: '', createdAt: Date.now()
                     };
                     for (let qi = 1; qi <= 6; qi++) newRec[`q${qi}`] = { subs: [{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0},{name:'',g:0,s:0,su:0,gy:0,j:0}] };
@@ -2696,7 +2703,7 @@
                 if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
             }
             alert(msg);
-            codimasterPendingWb = null;
+            codimasterPendingWb = null; checkMissingFreeTier();
         }
 
   
@@ -3365,7 +3372,7 @@
             ws.views = [{ state: 'frozen', ySplit: 8 }];
 
             const buffer = await wb.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `${monthLabel}_교육비청구서_${new Date().toISOString().slice(0,10)}.xlsx`);
+            saveAs(new Blob([buffer]), `${monthLabel}_교육비청구서_${todayLocal()}.xlsx`);
         }
 
          // ✨ HTML 속성(data-course 등)에 안전하게 넣기 위한 이스케이프
@@ -3649,7 +3656,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${q}분기_행정실_수납명단_${new Date().toISOString().slice(0,10)}.xlsx`;
+            link.download = `${q}분기_행정실_수납명단_${todayLocal()}.xlsx`;
             link.click();
         }
 
@@ -4067,7 +4074,7 @@ function toggleStatusPanel() {
             });
 
             const buffer = await wb.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `강좌별인원_${typeLabel}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            saveAs(new Blob([buffer]), `강좌별인원_${typeLabel}_${todayLocal()}.xlsx`);
             closeQuarterTableExportModal();
         }
   
@@ -5013,6 +5020,10 @@ function toggleStatusPanel() {
 
        
         const toNum = v => Number(v) || 0;
+        function todayLocal() {
+            let d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
         const formatMoney = v => v.toLocaleString() + '원';
         
 
@@ -5089,15 +5100,18 @@ function toggleStatusPanel() {
         }
 
         // ✨ 초3지원금 학생별 커스텀 한도 (전입·전출 등 예외 시 학생 편집창에서 입력한 값) - 입력 안 했으면 기본값 사용
-        function getG3AllowanceFor(r) {
-            let custom = toNum(r.g3Limit1) + toNum(r.g3Limit2);
+            function getG3AllowanceFor(r) {
+            let isT = r.transferIn || r.transferOut;
+            let custom = isT ? toNum(r.g3Limit1) + toNum(r.g3Limit2) : 0;
             return custom > 0 ? custom : getG3Allowance();
         }
          function getG3H1LimitFor(r) {
-            return toNum(r.g3Limit1) || Math.round(getG3Allowance() / 2);
+            let isT = r.transferIn || r.transferOut;
+            return (isT && toNum(r.g3Limit1)) || Math.round(getG3Allowance() / 2);
         }
         function getG3H2LimitFor(r) {
-            return toNum(r.g3Limit2) || Math.round(getG3Allowance() / 2);
+            let isT = r.transferIn || r.transferOut;
+            return (isT && toNum(r.g3Limit2)) || Math.round(getG3Allowance() / 2);
         }
 
 
@@ -5892,10 +5906,10 @@ function toggleStatusPanel() {
                                 <td class="text-right" style="${br} color:var(--color-g3); font-weight:800;">${formatMoney(row.g3Tot)}</td>
                                 ${isG3RefundOn ? `${isFeeViewOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundFeeG > 0 ? formatMoney(row.g3RefundFeeG) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundFeeS > 0 ? formatMoney(row.g3RefundFeeS) : '-'}</td>` : `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundSu > 0 ? formatMoney(row.g3RefundSu) : '-'}</td>`}<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundGy > 0 ? formatMoney(row.g3RefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.g3RefundJ > 0 ? formatMoney(row.g3RefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.g3RefundTot > 0 ? formatMoney(row.g3RefundTot) : '-'}</td>` : ''}
                                 ${isFeeViewOn
-                                ? `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeG)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeS)}</td>`
-                                : `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeSu)}${row.alloc.mFreeSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>`}
-                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeGy)}${row.alloc.mFreeGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
-                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeJ)}${row.alloc.mFreeJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                ? `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeG)}${row.alloc.mfrSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td><td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeFeeS)}</td>`
+                                : `<td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeSu)}${row.alloc.mfrSu ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>`}
+                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeGy)}${row.alloc.mfrGy ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
+                                <td class="text-right" style="color:var(--color-free); opacity:0.8; padding:8px 4px;">${formatMoney(row.freeJ)}${row.alloc.mfrJ ? '<br><span class="no-print" style="font-size:10px; color:#ef4444; font-weight:bold; letter-spacing:-0.5px;">✏️수기적용</span>' : ''}</td>
                                 <td class="text-right" style="${br} color:var(--color-free); font-weight:800;">${formatMoney(row.freeTot)}</td>
                                 ${isFreeRefundOn ? `${isFeeViewOn ? `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundFeeG > 0 ? formatMoney(row.freeRefundFeeG) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundFeeS > 0 ? formatMoney(row.freeRefundFeeS) : '-'}</td>` : `<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundSu > 0 ? formatMoney(row.freeRefundSu) : '-'}</td>`}<td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundGy > 0 ? formatMoney(row.freeRefundGy) : '-'}</td><td class="text-right" style="color:#dc2626; padding:8px 4px; background:#fef2f2;">${row.freeRefundJ > 0 ? formatMoney(row.freeRefundJ) : '-'}</td><td class="text-right" style="${br} color:#dc2626; font-weight:800; background:#fde8e8;">${row.freeRefundTot > 0 ? formatMoney(row.freeRefundTot) : '-'}</td>` : ''}
 
@@ -5970,7 +5984,8 @@ function toggleStatusPanel() {
                 }
 
                 if(subjectRows.length === 0) {
-                     let colCount = (currentTab==='all'?18:17) + (isSuikViewOn ? 8 : 0) + (isFeeViewOn ? 5 : 0);
+                     let fc = isFeeViewOn ? 5 : 4;
+                     let colCount = (currentTab==='all'?6:5) + fc*3 + (isG3RefundOn?fc:0) + (isFreeRefundOn?fc:0) + (isSuikViewOn ? fc*2 + (isSkRefundOn?fc:0) : 0) + 1;
                     tBody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:40px; color:#9ca3af;">조건에 맞는 데이터가 없습니다.</td></tr>`;
                 }
 				
@@ -6406,7 +6421,7 @@ function toggleStatusPanel() {
                 }
 
                 if(count === 0) {
-                    tBody.innerHTML = `<tr><td colspan="${isRefundViewOn ? 20 : 14}" style="text-align:center; padding:40px; color:#9ca3af;">검색 조건에 맞는 데이터가 없습니다.</td></tr>`;
+                    tBody.innerHTML = `<tr><td colspan="${currentTab === 'all' ? (11 + maxQuarter) : (isRefundViewOn ? 22 : 16)}" style="text-align:center; padding:40px; color:#9ca3af;">검색 조건에 맞는 데이터가 없습니다.</td></tr>`;
                 }
             }
         }
@@ -6448,6 +6463,7 @@ function toggleStatusPanel() {
 
 
    function renderFormQuarters() {
+            document.querySelectorAll('option.q56opt').forEach(o => { o.hidden = (maxQuarter !== 6); o.disabled = (maxQuarter !== 6); });
             const wrap = document.getElementById('qInputs');
             wrap.innerHTML = '';
             for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 유연하게 변경
@@ -7460,8 +7476,8 @@ function updateG3LimitTotal() {
                 let joined = parts.join(', ');
                 return `${r.name} 학생의 연간 방과후 지원금 (${joined})이 지원되오니 방과후에 많은 관심 바랍니다.`;
             } else {
-                                let usedG3 = 0, usedFree = 0;
-                for (let i = 1; i <= q; i++) {
+                     let usedG3 = 0, usedFree = 0;
+                for (let i = 1; i < q; i++) {
                     usedG3 += c[`q${i}`] ? c[`q${i}`].usedG3 : 0;
                     usedFree += c[`q${i}`] ? c[`q${i}`].usedFree : 0;
                 }
@@ -7786,7 +7802,7 @@ function updateG3LimitTotal() {
                 return alert('환불하려는 수강료(강사료·수용비) 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.su).toLocaleString() + '원, 기환불액: ' + toNum(s.rSu).toLocaleString() + '원)');
             }
             if (gy > 0 && (toNum(s.rGy) + gy) > toNum(s.gy)) {
-                return alert('환불하려는 급식비 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.gy).toLocaleString() + '원, 기환불액: ' + toNum(s.rGy).toLocaleString() + '원)');
+                return alert('환불하려는 교재비 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.gy).toLocaleString() + '원, 기환불액: ' + toNum(s.rGy).toLocaleString() + '원)');
             }
             if (j > 0 && (toNum(s.rJ) + j) > toNum(s.j)) {
                 return alert('환불하려는 재료비 금액이 실제 결제 금액을 초과합니다.\n(결제액: ' + toNum(s.j).toLocaleString() + '원, 기환불액: ' + toNum(s.rJ).toLocaleString() + '원)');
@@ -7800,7 +7816,7 @@ function updateG3LimitTotal() {
 
             if (!s.refundLog) s.refundLog = [];
             let entry = {
-                date: new Date().toISOString().slice(0,10),
+                date: todayLocal(),
                 month, reason, g, s: sVal, gy, j, amount: suAmount, source: 'manual', monthFirst: monthFirstState.mrf
             };
             if (sessions !== undefined) entry.sessions = sessions;
@@ -8135,7 +8151,7 @@ function updateG3LimitTotal() {
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${titleQM}_환불명단_${new Date().toISOString().slice(0,10)}.xlsx`;
+            link.download = `${titleQM}_환불명단_${todayLocal()}.xlsx`;
             link.click();
 
             closeRefundRosterModal();
@@ -8567,7 +8583,7 @@ function updateG3LimitTotal() {
         }
                function applyRefundCart() {
             if (refundCart.length === 0) return alert('담은 환불 항목이 없습니다.');
-            let today = new Date().toISOString().slice(0,10);
+            let today = todayLocal();
             let appliedCount = 0, skippedNoSession = 0, skippedConfirmDeclined = 0, skippedSuOver = 0, skippedGyOver = 0, skippedJOver = 0;
 
             refundCart.forEach(item => {
@@ -8722,7 +8738,7 @@ function updateG3LimitTotal() {
 
     function checkYukaMissingNeis() {
         let today = new Date(); today.setHours(0,0,0,0);
-        let todayStr = today.toISOString().slice(0,10);
+        let todayStr = todayLocal();
         
         if (localStorage.getItem('yuka_missing_neis_popup_shown_date') === todayStr) return;
         
@@ -8740,13 +8756,23 @@ function updateG3LimitTotal() {
         localStorage.setItem('yuka_missing_neis_popup_shown_date', todayStr);
     }
 
+
+    function checkMissingFreeTier() {
+        let list = db.filter(r => r.hasFree && !String(r.freeTier || '').trim());
+        if (list.length === 0) return;
+        document.getElementById('freeTierMissingList').innerHTML = list.map(r =>
+            `<div style="margin-bottom:4px; cursor:pointer; text-decoration:underline;" onclick="document.getElementById('freeTierMissingOverlay').style.display='none'; openPanel('edit','${r.id}');">- ${r.grade}학년 ${r.classNum}반 ${r.studentNum}번 ${r.name}</div>`
+        ).join('');
+        document.getElementById('freeTierMissingOverlay').style.display = 'flex';
+    }
+
     function closeYukaMissingPopup() {
         document.getElementById('yukaMissingPopupOverlay').style.display = 'none';
     }
 
     function checkYukaExpiry() {
             let today = new Date(); today.setHours(0,0,0,0);
-            let todayStr = today.toISOString().slice(0,10);
+            let todayStr = todayLocal();
             
             if (localStorage.getItem('yuka_expiry_popup_shown_date') === todayStr) return;
             
@@ -9254,7 +9280,7 @@ function updateG3LimitTotal() {
             });
 
             const buffer = await wb.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `방과후정산_${viewMode==='subject'?'과목별':'전체'}_${currentTab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            saveAs(new Blob([buffer]), `방과후정산_${viewMode==='subject'?'과목별':'전체'}_${currentTab}_${todayLocal()}.xlsx`);
         }
 
 
@@ -9544,6 +9570,8 @@ function updateG3LimitTotal() {
                                     freeStartDate: r.freeStartDate || '',
                                     freeEndDate: r.freeEndDate || '',
                                     freeLimit: r.freeLimit || '',
+                                    g3Limit1: r.g3Limit1 || '',
+                                    g3Limit2: r.g3Limit2 || '',
                                     transferIn: r.transferIn || false,
                                     transferInQuarter: r.transferInQuarter || '',
                                     transferInDate: r.transferInDate || '',
@@ -9604,7 +9632,7 @@ function updateG3LimitTotal() {
                     }
 
                     const buffer = await wb.xlsx.writeBuffer();
-                    saveAs(new Blob([buffer]), `방과후세로형정산백업_${new Date().toISOString().slice(0,10)}.xlsx`);
+                    saveAs(new Blob([buffer]), `방과후세로형정산백업_${todayLocal()}.xlsx`);
                     
                     btn.innerText = "📤 전체 명단 백업(엑셀 저장)";
                 } catch (err) {
@@ -9698,6 +9726,14 @@ function updateG3LimitTotal() {
                         if (currentStudent.freeStartDate) currentExStudent.freeStartDate = currentStudent.freeStartDate;
                         if (currentStudent.freeEndDate) currentExStudent.freeEndDate = currentStudent.freeEndDate;
                         if (currentStudent.freeLimit) currentExStudent.freeLimit = currentStudent.freeLimit;
+                        if (currentStudent.g3Limit1) currentExStudent.g3Limit1 = currentStudent.g3Limit1;
+                        if (currentStudent.g3Limit2) currentExStudent.g3Limit2 = currentStudent.g3Limit2;
+                        currentExStudent.transferIn = currentStudent.transferIn;
+                        currentExStudent.transferInQuarter = currentStudent.transferInQuarter;
+                        currentExStudent.transferInDate = currentStudent.transferInDate;
+                        currentExStudent.transferOut = currentStudent.transferOut;
+                        currentExStudent.transferOutQuarter = currentStudent.transferOutQuarter;
+                        currentExStudent.transferOutDate = currentStudent.transferOutDate;
                     }
 
                     for(let q=1; q<=maxQuarter; q++) { // ✨ 4에서 maxQuarter로 동적 연동
@@ -9901,6 +9937,8 @@ function updateG3LimitTotal() {
                             freeStartDate: backupData ? (backupData.freeStartDate || '') : '',
                             freeEndDate: backupData ? (backupData.freeEndDate || '') : '',
                             freeLimit: backupData && backupData.freeLimit ? backupData.freeLimit : undefined,
+                            g3Limit1: backupData && backupData.g3Limit1 ? backupData.g3Limit1 : undefined,
+                            g3Limit2: backupData && backupData.g3Limit2 ? backupData.g3Limit2 : undefined,
                             transferIn: backupData ? !!backupData.transferIn : false,
                             transferInQuarter: backupData ? (backupData.transferInQuarter || '') : '',
                             transferInDate: backupData ? (backupData.transferInDate || '') : '',
@@ -10838,7 +10876,7 @@ function updateG3LimitTotal() {
                 alert('현재 과거 기록을 보는 중입니다. 최신 상태로 돌아간 후 이용해주세요.');
                 return;
             }
-            let today = new Date().toISOString().split('T')[0];
+            let today = todayLocal();
             document.getElementById('snap_date').value = today;
             document.getElementById('snap_memo').value = '';
             renderSnapshotList();
@@ -10957,7 +10995,7 @@ function updateG3LimitTotal() {
             let snap = snapshots.find(x => x.id === id);
             if(!snap) return;
 
-            let today = new Date().toISOString().split('T')[0];
+            let today = todayLocal();
             let liveData = {
                 db: JSON.parse(JSON.stringify(db)),
                 savedSubjects: JSON.parse(JSON.stringify(savedSubjects)),
@@ -11793,7 +11831,7 @@ function updateG3LimitTotal() {
                     let lastSnap = selectedSnaps[selectedSnaps.length - 1];
                     let isDifferentFromLast = !lastSnap || JSON.stringify(lastSnap.data.db) !== JSON.stringify(db);
                     if (isDifferentFromLast) {
-                        let todayStr = new Date().toISOString().split('T')[0];
+                        let todayStr = todayLocal();
                         selectedSnaps.push({
                             date: todayStr,
                             memo: '현재 최신 데이터',
@@ -12197,7 +12235,7 @@ function updateG3LimitTotal() {
 }
 				
                 const buffer = await wb.xlsx.writeBuffer();
-                saveAs(new Blob([buffer]), `교육청제출용_자유수강완성본_${new Date().toISOString().slice(0,10)}.xlsx`);
+                saveAs(new Blob([buffer]), `교육청제출용_자유수강완성본_${todayLocal()}.xlsx`);
                 
                 closeEduWizard();
                 let skipMsg = eduSkippedSnaps.length > 0 ? `\n\n※ 추가할 내용이 없어 열을 만들지 않은 시점:\n- ${eduSkippedSnaps.join('\n- ')}` : '';
@@ -12213,9 +12251,6 @@ function updateG3LimitTotal() {
 		 
 		 
 		 
-		// 프로그램 켜지자마자 팝업 띄울지 말지 검사 실행!
-       checkYukaExpiry();
-       checkYukaMissingNeis(); 
 		  
 	
     </script>
