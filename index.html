@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V15.9</title>
-	<link rel="preload" as="image" href="https://i.ibb.co/5hNZpQjf/image.jpg" fetchpriority="high">
+    <title>방과후 지원금 돌보미 V16.0</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -28,8 +27,6 @@
         
         body { display: flex; height: 100vh; overflow: hidden; background-color: var(--main-bg); color: var(--text-dark); transition: background-color 0.3s, color 0.3s; }
 
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
 
         /* --- 좌측 사이드바 --- */
        .sidebar { width: 280px; flex-shrink: 0; background-color: var(--sidebar-bg); padding: 24px 14px; display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 10; transition: background-color 0.3s, width 0.3s ease, padding 0.3s ease; }
@@ -125,9 +122,7 @@
         .fee-toggle-track.on .fee-toggle-knob { left:22px; }
         
 
-        .filters { display: flex; gap: 8px; align-items: center; }
-        .filters select, .filters input { height: 36px; padding: 0 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; transition: 0.3s; }
-        .filters select:focus, .filters input:focus { border-color: var(--sidebar-accent); }
+      
 
         .table-container { flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
         #tabBanner { flex-shrink: 0; }
@@ -217,7 +212,6 @@
               .detail-modal.subject { width: 96vw; max-width: 1100px; max-height: 85vh; }
         
         .detail-header { background: var(--sidebar-bg); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .detail-header.critical { background: #ef4444; } 
 
         .detail-body { padding: 24px; overflow-y: auto; flex-grow: 1; background: #f9fafb; transition: 0.3s; }
         
@@ -228,9 +222,6 @@
         .detail-inner-table th { border: 1px solid var(--border-color); padding: 8px; font-size: 12px; text-align: center; position: static; box-shadow: none; background: #f9fafb; }
         .detail-inner-table td { border: 1px solid var(--border-color); padding: 8px; font-size: 12px; text-align: right; background: #ffffff; }
 
-        /* ✨ 즉시 입력/수정용 인풋 텍스트 박스 스타일 */
-        .refund-input { width:70px; text-align:right; padding:4px 6px; border:1px solid #fca5a5; border-radius:4px; font-size:12px; outline:none; transition:0.2s; background:white; }
-        .refund-input:focus { border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,0.2); }
 
         .apply-input { width:65px; text-align:right; padding:4px 6px; border:1px solid #9ca3af; border-radius:4px; font-size:12px; outline:none; transition:0.2s; background:white; color:var(--text-dark); }
         .apply-input:focus { border-color:var(--sidebar-accent); box-shadow:0 0 0 2px rgba(59,130,246,0.2); }
@@ -323,8 +314,6 @@
         body.dark-mode .st-done { background: #713f12; color: #fde047; }
         
         /* ✨ 다크모드: 수강료(파란 테두리), 환불(빨간 테두리) 눈에 띄게 강조 */
-        body.dark-mode .refund-input { background: #111827 !important; border: 1px solid #f87171 !important; color: #fca5a5 !important; }
-        body.dark-mode .refund-input:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,0.4) !important; }
         body.dark-mode .apply-input { background: #111827 !important; border: 1px solid #60a5fa !important; color: #ffffff !important; font-weight: bold; }
         body.dark-mode .apply-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 2px rgba(59,130,246,0.4) !important; }
 
@@ -429,9 +418,7 @@
         .dash-title-val { font-size: 18px; font-weight: 900; }
         
         .dash-divider { margin: 10px 0; border-top: 1px dashed; opacity: 0.4; }
-        
-        .dash-sub-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .dash-sub-row:last-child { margin-bottom: 0; }
+
         .dash-sub-text { font-size: 13px; font-weight: 700; }
         .dash-sub-val { font-size: 14px; font-weight: 800; }
 
@@ -448,39 +435,6 @@
         .dash-free .dash-sub-val { color: #6b21a8; }
 		
 		
-		
-		
-		/* ✨ 신설된 결제 출처 입력창 및 상태 스타일 */
-        .input-print-source {
-            width: 75px !important;
-            padding: 3px 5px !important;
-            font-size: 11px !important;
-            text-align: right !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: 4px !important;
-            display: inline-block !important;
-        }
-        body.dark-mode .input-print-source {
-            background-color: #1f2937 !important;
-            color: #ffffff !important;
-            border-color: #4b5563 !important;
-        }
-        .text-suik {
-            color: #ef4444 !important;
-            font-weight: bold !important;
-            text-align: right !important;
-            font-size: 12px !important;
-        }
-        .text-not-applied {
-            color: #9ca3af !important;
-            font-size: 10px !important;
-            text-align: right !important;
-            font-style: italic !important;
-            margin-top: 2px;
-        }
-		
-		
-	
 		
 		
 		/* ✨ 9칸 상세 영수증 텍스트박스 전용 스타일 */
@@ -544,13 +498,7 @@
                 size: landscape; /* 가로 인쇄 기본 설정 */
                 margin: 5mm; /* 종이의 상하좌우 여백을 0.5cm로 최소화하여 공간 확보 */
             }
-            .grid-table th, .grid-table td {
-                padding: 3px 2px !important; /* 칸 안쪽 여백(패딩)을 극단적으로 축소 */
-                font-size: 10px !important; /* 인쇄 시 글자 크기를 살짝 줄여 공간 확보 */
-            }
-            .grid-table th {
-                font-size: 11px !important; /* 헤더 글자 크기 조정 */
-            }
+           
             .dashboard-card {
                 padding: 10px !important; /* 전광판(대시보드) 안쪽 여백 축소 */
             }
@@ -1044,22 +992,6 @@
     <style>
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
     </style>
-    
-
-  
-   <!-- 크기 조절 방법 요약, 위 코드 안에 주석(``)으로 달아둔 부분을 보시면 됩니다.
-1. **팝업의 가로 길이를 바꾸고 싶을 때:** `max-width: 1100px;`의 숫자를 바꿉니다. (예: `800px`)
-2. **팝업의 세로 길이를 바꾸고 싶을 때:** `max-height: 85vh;`의 숫자를 바꿉니다. (예: `70vh`)
-3. **그림 크기를 내 마음대로 강제 지정하고 싶을 때:** `<img ... style="width: auto;` 부분의 `auto`를 지우고 `600px` 처럼 직접 입력합니다. (단, 원본보다 크게 적으면 또 깨질 수 있습니다!)
-
-선생님을 위한 마지막 팁 (직접 더 조절하고 싶을 때)
-창을 더 넓게 키우고 싶을 때: max-width: 1400px; 숫자를 더 키워보세요 (예: 1800px).
-창을 위아래로 더 키우고 싶을 때: height: 90vh; 숫자를 더 키워보세요 (예: 95vh).
-이미지가 너무 커서 창 안에서 한눈에 보고 싶을 때: 이미지 스타일의 max-width: none;을 max-width: 100%;로 바꾸시면, 이미지가 창 크기에 맞춰 쏙 들어오게 됩니다. -->
-
-
-
-
 
 
 
@@ -1134,7 +1066,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V15.9</span>
+                <span class="brand-version">V16.0</span>
             </div>
     </div>
     
@@ -2589,7 +2521,7 @@
             const ws = wb.worksheets[0];
             const qKey = `q${q}`;
 
-            let newCount = 0, mergeCount = 0, freeDetected = 0, skipped = [];
+            let newCount = 0, mergeCount = 0, freeDetected = 0;
             let nameMismatches = []; // ✨ NEIS 명단과 학번은 같으나 이름이 다른 경우 기록
 
             // ✨ 1단계: 엑셀은 학생-과목 한 줄씩이라, 먼저 학생별로 묶어줌
@@ -2698,12 +2630,9 @@
                 msg += `\n\n[⚠️ 학번은 일치하지만 이름이 다른 학생 - NEIS 명단과 대조 필요]\n` + nameMismatches.slice(0, 15).join('\n');
                 if (nameMismatches.length > 15) msg += `\n... 외 ${nameMismatches.length - 15}건`;
             }
-            if (skipped.length > 0) {
-                msg += `\n\n[⚠️ 처리 못한 항목]\n` + skipped.slice(0, 15).map(s => `- ${s}`).join('\n');
-                if (skipped.length > 15) msg += `\n... 외 ${skipped.length - 15}건`;
-            }
+          
             alert(msg);
-            codimasterPendingWb = null; checkMissingFreeTier();
+            checkMissingFreeTier();
         }
 
   
@@ -2998,8 +2927,6 @@
             let mergeParts = document.getElementById('tsMergeParts').checked;
             closeTuitionStatementModal();
 
-            let round10 = n => Math.round(n / 10) * 10;
-
             let baseMap = {}, order = [];
             savedSubjects.forEach(sub => {
                 let sessThisMonth = (month === 'pre')
@@ -3195,10 +3122,6 @@
                     if (baseAmt !== null && buckets[baseAmt]) ordered.push(buckets[baseAmt]);
                     bucketOrder.forEach(k => { if (Number(k) !== baseAmt) ordered.push(buckets[k]); });
                     rg.rows = ordered;
-
-                    rg.masterG = masterFee ? toNum(masterFee.g) : 0;
-                    rg.masterS = masterFee ? toNum(masterFee.s) : 0;
-                    rg.hasCustomGS = (rg.masterG > 0 || rg.masterS > 0);
                 });
             });
 
@@ -4355,7 +4278,6 @@ function toggleStatusPanel() {
             let currentFilter = filterSelect ? filterSelect.value : '';
             if(filterSelect) filterSelect.innerHTML = '<option value="">모든 과목</option>';
             
-            let addedBaseNames = new Set();
             
                        let addedFilterNames = new Set(); // ✨ 필터는 N부 통합해서 중복 없이
             savedSubjects.forEach(s => {
@@ -5282,18 +5204,13 @@ function toggleStatusPanel() {
                                     let refSk = Math.min(applyRefund, a[skKey]);
                                     let remainRefund = applyRefund - refSk;
 
-                                    // ✨ 그래도 남으면, 초3/자유 지원금 쓴 비율대로 나머지를 뺀다
+                                    // ✨ 그래도 남으면 자유수강에서 먼저, 그다음 초3에서 뺀다
                                     let refG3 = 0, refFr = 0;
                                     if (remainRefund > 0) {
                                         let g3frBase = a[g3Key] + a[frKey];
                                         if (g3frBase > 0) {
-                                            if (true) { 
                                             refFr = Math.min(remainRefund, a[frKey]);
                                             refG3 = remainRefund - refFr;
-                                            } else {
-                                            refG3 = Math.round(remainRefund * (a[g3Key] / g3frBase));
-                                            refFr = remainRefund - refG3;
-                                            }
                                         }
                                     }
 
@@ -5465,33 +5382,7 @@ function toggleStatusPanel() {
                 });
             }
             
-            const statusSelect = document.getElementById('filterStatus');
-            if (statusSelect) {
-                let currentVal = statusSelect.value;
-                
-                if (tab === 'all') {
-                    statusSelect.innerHTML = `
-                        <option value="">모든 상태</option>
-                        <option value="미사용">미사용</option>
-                        <option value="사용중">사용중</option>
-                        <option value="소진">소진</option>
-                        <option value="초과">초과</option>
-                        <option value="환불발생">환불발생</option>
-                    `;
-                } else {
-                    let qText = tab.replace('q','') + '분기'; 
-                    statusSelect.innerHTML = `
-                        <option value="">${qText} 모든상태</option>
-                        <option value="사용중">${qText} 사용중</option>
-                        <option value="소진">${qText} 소진</option>
-                        <option value="초과">${qText} 초과</option>
-                        <option value="환불발생">${qText} 환불발생</option>
-                    `;
-                    if(currentVal === '미사용') currentVal = ''; 
-                }
-                
-               statusSelect.value = currentVal;
-            }
+        
             
            // ✨ 학생 수가 많으면(=시간 걸릴 것 같으면) 로딩화면 살짝 보여주고 렌더링
             let isHeavyLoad = (db.length > 80);
@@ -8298,7 +8189,7 @@ function updateG3LimitTotal() {
         }
         function renderRqaStudentList() {
             let wrap = document.getElementById('rqaStudentList');
-                        if (!rqaState.q || !rqaState.subject) {
+                if (!rqaState.q || !rqaState.subject) {
                 wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
                 updateRqaCheckedCount();
                 return;
