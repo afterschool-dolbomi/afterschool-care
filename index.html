@@ -8530,7 +8530,7 @@ function updateG3LimitTotal() {
                         wrap.innerHTML = `
                                                             <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:820px; table-layout:fixed;">
                     <colgroup>
-                        <col style="width:12%;"><col style="width:6%;"><col style="width:6%;"><col style="width:12%;"><col style="width:6%;"><col style="width:7%;"><col style="width:7%;"><col style="width:22%;"><col style="width:12%;"><col style="width:6%;">
+                        <col style="width:12%;"><col style="width:6%;"><col style="width:10%;"><col style="width:14%;"><col style="width:6%;"><col style="width:9%;"><col style="width:9%;"><col style="width:18%;"><col style="width:12%;"><col style="width:4%;">
                     </colgroup>
                     <thead><tr style="background:#f3f4f6;">
                         <th style="padding:6px;">학생</th><th style="padding:6px;">분기</th><th style="padding:6px;">몇차</th><th style="padding:6px;">과목</th><th style="padding:6px;">차시</th><th style="padding:6px;">교재비</th><th style="padding:6px;">재료비</th><th style="padding:6px;">사유</th><th style="padding:6px;">예상 환불금액</th><th style="padding:6px;"></th>
@@ -8548,8 +8548,8 @@ function updateG3LimitTotal() {
                             return `<tr style="border-bottom:1px solid #f1f5f9;">
                                 <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.studentLabel}</td>
                                 <td style="padding:6px; text-align:center;">${item.q}분기</td>
-                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700;">${item.month === 'pre' ? '수강전취소' : item.month + '차'}${item.monthFirst ? '<div style="font-size:10px; color:#92400e; font-weight:800;">차 우선환불</div>' : ''}</td>
-                                <td style="padding:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.subjectName}${warn}</td>
+                                <td style="padding:6px; text-align:center; color:#1e40af; font-weight:700; white-space:nowrap;">${item.month === 'pre' ? '수강전취소' : item.month + '차'}${item.monthFirst ? '<div style="font-size:10px; color:#92400e; font-weight:800;">차 우선환불</div>' : ''}</td>
+                                <td style="padding:6px 6px 6px 14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.subjectName}${warn}</td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.sessionCount}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartSessionCount(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.gy || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartGy(${idx}, this.value)"></td>
                                 <td style="padding:6px; text-align:center;"><input type="number" value="${item.j || ''}" style="width:100%; text-align:center; padding:3px; border:1px solid #cbd5e1; border-radius:4px; box-sizing:border-box;" onchange="updateRefundCartJ(${idx}, this.value)"></td>
@@ -8731,7 +8731,8 @@ function updateG3LimitTotal() {
             
             sessionRatioTarget = { id, q, sIdx };
             document.getElementById('sr_freeApplyDate').value = s.freeApplyDate || '';
-            document.getElementById('sr_total').value = s.totalSessions || '';
+            let srMaster = savedSubjects.find(x => x.name === s.name);
+            document.getElementById('sr_total').value = s.totalSessions || (srMaster ? getSubjectTotalSessions(srMaster, q) : '') || '';
             document.getElementById('sr_covered').value = s.coveredSessions || '';
             document.getElementById('sessionRatioModal').style.display = 'flex';
         }
