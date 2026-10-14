@@ -3063,7 +3063,10 @@
                                 for (let j = monthsInQ; j >= 1 && chargeExcess > 0; j--) { let c = Math.min(chargeArr[j], chargeExcess); chargeArr[j] -= c; chargeExcess -= c; }
                                 for (let m = 1; m <= monthsInQ; m++) {
                                     let charge = chargeArr[m] || 0;
-                                    let remain = charge, useG3 = 0, useFr = 0;
+                                    if (m === 1) { var poolPreSk = s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), toNum(a.skSu)) : 0; }
+                                    let usePreSk = Math.min(poolPreSk, charge); poolPreSk -= usePreSk;
+                                    let remain = charge - usePreSk, useG3 = 0, useFr = 0;
+									
                                     if (isYukaTs) {
                                         useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
                                         useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
@@ -3071,7 +3074,7 @@
                                         useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
                                         useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
                                     }
-                                    if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain; }
+                                    if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain + usePreSk; }
                                 }
                             }
                             if (thisCharge <= 0) return;
@@ -8059,7 +8062,7 @@ function updateG3LimitTotal() {
             let totalSessions = toNum(s.totalSessions) || masterSessions;
             if (sessionCount > 0 && !totalSessions) return { ok:false };
             let perSessionSu = totalSessions ? Math.ceil((toNum(s.su) / totalSessions) / 10) * 10 : 0;
-                        let amount = perSessionSu * sessionCount;
+            let amount = Math.min(perSessionSu * sessionCount, Math.max(0, toNum(s.su) - toNum(s.rSu)));
             return { ok:true, amount, totalSessions, perSessionSu, hasSessionRatio: !!s.sessionRatioEnabled, existingRSu: toNum(s.rSu) };
         }
 
