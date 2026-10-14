@@ -2687,8 +2687,9 @@
             if (m && m[1]) return m[1].trim();
             return name;
         }
-        function getTsWeeklyLabel(sessCount) {
-            let n = Math.max(1, Math.round(toNum(sessCount) / 4));
+        function getTsWeeklyLabel(sessCount, sub, q) {
+            let std = (sub && sub.fees && sub.fees[q]) ? toNum(sub.fees[q].stdSessions) : 0;
+            let n = Math.max(1, Math.round(toNum(std || sessCount) / 4));
             return `(주${n}회)`;
         }
         function getTsMonthlyNormals(sub, q, su) {
@@ -2941,15 +2942,17 @@
             let groups = [];
             order.forEach(base => {
                 let parts = baseMap[base];
-                let sameSess = parts.every(p => p.sessThisMonth === parts[0].sessThisMonth);
+                let activeParts = parts.filter(p => db.some(r => r[`q${q}`] && r[`q${q}`].subs && r[`q${q}`].subs.some(s => s.name === p.name && toNum(s.su) > 0)));
+                if (activeParts.length === 0) activeParts = parts;
+                let sameSess = activeParts.every(p => p.sessThisMonth === activeParts[0].sessThisMonth);
                 let doMerge = mergeParts && sameSess;
                 let rowGroups = [];
                 if (doMerge) {
-                    let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(parts[0].sessThisMonth);
+                    let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(activeParts[0].sessThisMonth, activeParts[0].sub, q);
                     rowGroups.push({ displayName: `${base}${labelSuffix}`, subjectNames: parts.map(p => p.name), masterRef: parts[0].sub });
                 } else {
                     parts.forEach(p => {
-                        let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(p.sessThisMonth);
+                        let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(p.sessThisMonth, p.sub, q);
                         rowGroups.push({ displayName: `${p.name}${labelSuffix}`, subjectNames: [p.name], masterRef: p.sub });
                     });
                 }
