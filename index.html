@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V16.5</title>
+    <title>방과후 지원금 돌보미 V16.6</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1082,7 +1082,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V16.5</span>
+                <span class="brand-version">V16.6</span>
             </div>
     </div>
     
@@ -3692,11 +3692,12 @@ function addRosterDataRows(ws, rows, themeColor) {
                     let mG = feeMaster ? toNum(feeMaster.g) : 0, mS = feeMaster ? toNum(feeMaster.s) : 0;
                     let hasCustom = (mG > 0 || mS > 0);
 
+                    let isSplitSub = [hasG3, hasFr, hasSk].filter(Boolean).length >= 2; // ✨ 지원금 부족으로 다른 명단에 나뉘어 들어간 과목
                     ['g3', 'fr', 'sk'].forEach(k => {
                         if (!has(k)) return;
                         let p = part[k];
                         let split = computeTeacherFeeSplit(p.su, mG, mS, hasCustom);
-                        buckets[k].push({ name: subName, su: p.su, gy: p.gy, j: p.j, g: split.g, s: split.s });
+                        buckets[k].push({ name: subName, su: p.su, gy: p.gy, j: p.j, g: split.g, s: split.s, isSplit: isSplitSub });
                     });
 
                     // 비고 (과목별 명단과 같은 문구)
@@ -3717,7 +3718,13 @@ function addRosterDataRows(ws, rows, themeColor) {
                     let su = 0, g = 0, s = 0, gy = 0, j = 0;
                     list.forEach(x => { su += x.su; g += x.g; s += x.s; gy += x.gy; j += x.j; });
                     let courses = list.map(x => ` ${x.name}(${x.su}/${x.gy}/${x.j}/${x.s}) `).join(',');
-                    return { ...base, amount: su + gy + j, su, g, s, gy, j, count: list.length, note: [...notes[k]].join(', '), courses };
+                    // ✨ 엑셀 표시용: 나뉜 과목은 과목명+금액을 빨간 글씨로
+                    let courseParts = [];
+                    list.forEach((x, i) => {
+                        if (i > 0) courseParts.push({ text: ',', red: false });
+                        courseParts.push({ text: ` ${x.name}(${x.su}/${x.gy}/${x.j}/${x.s}) `, red: !!x.isSplit });
+                    });
+                    return { ...base, amount: su + gy + j, su, g, s, gy, j, count: list.length, note: [...notes[k]].join(', '), courses, courseParts };
                 };
                 if (buckets.g3.length) g3Rows.push(build('g3'));
                 if (buckets.fr.length) freeRows.push(build('fr'));
@@ -3764,6 +3771,15 @@ function addRosterDataRows(ws, rows, themeColor) {
                     cell.font = { name: FONT, size: 11 };
                     if (i !== 12) cell.alignment = { vertical: 'middle' };
                 });
+                // ✨ 강좌명 칸: 지원금 부족으로 나뉜 과목은 빨간 글씨
+                if (r.courseParts && r.courseParts.some(p => p.red)) {
+                    row.getCell(14).value = {
+                        richText: r.courseParts.map(p => ({
+                            text: p.text,
+                            font: p.red ? { name: FONT, size: 11, bold: true, color: { argb: 'FFDC2626' } } : { name: FONT, size: 11 }
+                        }))
+                    };
+                }
             });
 
             // 합계 행 (SUM 수식)
