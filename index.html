@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V16.3</title>
+    <title>방과후 지원금 돌보미 V16.44</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -711,7 +711,8 @@
                     · <b>학생별 전체 수익자/<span id="arHelpG3Label4">초3지원금</span>/자유수강자 명단</b> 시트 3개<br>
                     · 한 학생이 듣는 과목을 <b>한 줄로 합쳐서</b> 대상금액·수강료(강사료/수용비)·교재비·재료비·강좌수 표시<br>
                     · 맨 끝 칸에 <b>과목별 금액</b>(수강료/교재비/재료비/수용비)을 함께 표시<br>
-                    · <span id="arHelpG3Label5">초3</span>→자유수강, 자유수강→수익자로 넘어간 내역은 <b>비고</b>로 표시
+                    · <span id="arHelpG3Label5">초3</span>→자유수강, 자유수강→수익자로 넘어간 내역은 <b>비고</b>로 표시<br>
+                    · 수익자 탭 맨 아래에 <b>강좌별 인원</b> 표, 그 뒤로 과목마다 <b>수익자 상세 시트</b>(교육비 + 교재비 또는 재료비)
                 </div>
                 <div style="font-size:12.5px; color:#475569; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
                     <span style="background:#1e3a5f; color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">2</span>
@@ -1081,7 +1082,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V16.3</span>
+                <span class="brand-version">V16.4</span>
             </div>
     </div>
     
@@ -3480,14 +3481,17 @@ function addRosterDataRows(ws, rows, themeColor) {
             });
         }
 
-        function addCourseCountTable(ws, courseCounts) {
-            let startCol = 14; // N열부터
-            ws.mergeCells(2, startCol, 2, startCol+4);
-            ws.getCell(2, startCol).value = '강좌별 인원';
-            ws.getCell(2, startCol).font = { bold: true, size: 12 };
-            ws.getCell(2, startCol).alignment = { horizontal: 'center' };
+        function addCourseCountTable(ws, courseCounts, opts) {
+            opts = opts || {};
+            let startCol = opts.startCol || 14; // 기본: N열부터 (과목별 명단)
+            let titleRow = opts.titleRow || 2;
+            let headerRow = opts.headerRow || 4;
+            ws.mergeCells(titleRow, startCol, titleRow, startCol+4);
+            ws.getCell(titleRow, startCol).value = '강좌별 인원';
+            ws.getCell(titleRow, startCol).font = { bold: true, size: 12 };
+            ws.getCell(titleRow, startCol).alignment = { horizontal: 'center' };
 
-            let hRow = ws.getRow(4);
+            let hRow = ws.getRow(headerRow);
             let headers = ['강좌명','수익자','자유수강',getG3Label(),'인원 합계'];
             headers.forEach((h, i) => {
                 let cell = hRow.getCell(startCol+i);
@@ -3498,7 +3502,7 @@ function addRosterDataRows(ws, rows, themeColor) {
                 cell.alignment = { horizontal: 'center' };
             });
 
-                                  let rIdx = 5;
+            let rIdx = headerRow + 1;
             let totSk=0, totFree=0, totG3=0;
             let displayIdx = 0; // ✨ 표시되는 행 기준으로 지그재그 배경색
             let shownCourseNames = new Set(); // ✨ 배드민턴 1부/2부가 중복으로 표시/집계되지 않게
@@ -3532,28 +3536,11 @@ function addRosterDataRows(ws, rows, themeColor) {
                 cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
                 cell.alignment = { horizontal: i===0 ? 'left' : 'center' };
             });
+            return rIdx; // 표의 마지막(총합계) 행 번호
         }
 
-        async function generateAdminRoster(q) {
-            const wb = new ExcelJS.Workbook();
-            let { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail } = computeAdminRosterData(q);
-
-            // 1. 수익자 명단 (붉은 계열)
-            let wsSk = wb.addWorksheet('강좌별 전체 수익자 명단');
-            addRosterHeaderRow(wsSk, `${q}분기 (수익자) 목록`, 'FFFECACA');
-            addRosterDataRows(wsSk, skRows, 'FFFECACA');
-            addCourseCountTable(wsSk, courseCounts);
-
-         // 2. 지원대상자 명단 (하늘색 계열)
-            let wsG3 = wb.addWorksheet(safeSheetName(`강좌별 전체 ${getG3LabelShort()}대상자 명단`));
-            addRosterHeaderRow(wsG3, `${q}분기 (${getG3Label()}대상자) 목록`, 'FFBAE6FD');
-            addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
-
-            // 3. 자유수강자 명단 (보라색 계열)
-            let wsFree = wb.addWorksheet('강좌별 전체 자유수강자 명단');
-            addRosterHeaderRow(wsFree, `${q}분기 (자유수강대상자) 목록`, 'FFE9D5FF');
-            addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
-
+        // ✨ 과목별 수익자 상세 시트 (과목별·학생별 CMS 명단 공통)
+        function addSubjectDetailSheets(wb, subjectSkDetail, q) {
            // ✨ 과목별 수익자 상세 시트 공통 생성 함수 (캡처해주신 디자인 그대로)
             function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q) {
                 let ws = wb.addWorksheet(safeSheetName(`${subName}-${feeLabel}`));
@@ -3635,6 +3622,30 @@ function addRosterDataRows(ws, rows, themeColor) {
                     buildSubjectDetailSheet(wb, subName, feeLabel, feeRows, q);
                 }
             });
+        }
+
+        async function generateAdminRoster(q) {
+            const wb = new ExcelJS.Workbook();
+            let { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail } = computeAdminRosterData(q);
+
+            // 1. 수익자 명단 (붉은 계열)
+            let wsSk = wb.addWorksheet('강좌별 전체 수익자 명단');
+            addRosterHeaderRow(wsSk, `${q}분기 (수익자) 목록`, 'FFFECACA');
+            addRosterDataRows(wsSk, skRows, 'FFFECACA');
+            addCourseCountTable(wsSk, courseCounts);
+
+         // 2. 지원대상자 명단 (하늘색 계열)
+            let wsG3 = wb.addWorksheet(safeSheetName(`강좌별 전체 ${getG3LabelShort()}대상자 명단`));
+            addRosterHeaderRow(wsG3, `${q}분기 (${getG3Label()}대상자) 목록`, 'FFBAE6FD');
+            addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
+
+            // 3. 자유수강자 명단 (보라색 계열)
+            let wsFree = wb.addWorksheet('강좌별 전체 자유수강자 명단');
+            addRosterHeaderRow(wsFree, `${q}분기 (자유수강대상자) 목록`, 'FFE9D5FF');
+            addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
+
+            // 4. 과목별 수익자 상세 시트 (수강료/교재비/재료비)
+            addSubjectDetailSheets(wb, subjectSkDetail, q);
 
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -3648,6 +3659,7 @@ function addRosterDataRows(ws, rows, themeColor) {
         function computeAdminRosterByStudent(q) {
             let qKey = `q${q}`;
             let g3Rows = [], freeRows = [], skRows = [];
+            let courseCounts = {}; // ✨ 강좌별 인원 (수익자 탭 아래 표)
             const g3Short = getG3LabelShort();
 
             db.forEach(r => {
@@ -3671,6 +3683,12 @@ function addRosterDataRows(ws, rows, themeColor) {
                     };
                     let has = k => part[k].su > 0 || part[k].gy > 0 || part[k].j > 0;
                     let hasG3 = has('g3'), hasFr = has('fr'), hasSk = has('sk');
+
+                    let courseKey = baseSubjectName(subName); // ✨ N부는 합쳐서 인원 집계
+                    if (!courseCounts[courseKey]) courseCounts[courseKey] = { sk: 0, free: 0, g3: 0 };
+                    if (hasG3) courseCounts[courseKey].g3++;
+                    if (hasFr) courseCounts[courseKey].free++;
+                    if (hasSk) courseCounts[courseKey].sk++;
 
                     // 강사료/수용비 분할 (과목별 보기 '강사료 보기'와 같은 기준)
                     let feeSub = savedSubjects.find(x => x.name === subName);
@@ -3710,7 +3728,7 @@ function addRosterDataRows(ws, rows, themeColor) {
                 if (buckets.sk.length) skRows.push(build('sk'));
             });
 
-            return { g3Rows, freeRows, skRows };
+            return { g3Rows, freeRows, skRows, courseCounts };
         }
 
         function buildStudentRosterSheet(wb, sheetName, title, rows, themeColor) {
@@ -3791,19 +3809,32 @@ function addRosterDataRows(ws, rows, themeColor) {
                 }
                 ws.getColumn(col).width = Math.max(baseWidths[col], maxLen + 2);
             });
+            ws._totalRowIdx = rIdx; // 총 합계 행 번호
             return ws;
         }
 
         async function generateAdminRosterByStudent(q) {
             const wb = new ExcelJS.Workbook();
-            let { g3Rows, freeRows, skRows } = computeAdminRosterByStudent(q);
+            let { g3Rows, freeRows, skRows, courseCounts } = computeAdminRosterByStudent(q);
 
-            // 1. 수익자 (붉은 계열)
-            buildStudentRosterSheet(wb, '학생별 전체 수익자 명단', `${q}분기 (수익자) 목록`, skRows, 'FFFECACA');
+            // 1. 수익자 (붉은 계열) + 맨 아래 강좌별 인원 표
+            let wsSk = buildStudentRosterSheet(wb, '학생별 전체 수익자 명단', `${q}분기 (수익자) 목록`, skRows, 'FFFECACA');
+            let tblTitleRow = wsSk._totalRowIdx + 2;
+            addCourseCountTable(wsSk, courseCounts, { startCol: 10, titleRow: tblTitleRow, headerRow: tblTitleRow + 2 }); // J~N열
+            // 강좌명(J열)이 잘리지 않게 너비 보정
+            let longestCourse = Object.keys(courseCounts).reduce((m, k) => {
+                let len = 0; for (let ch of k) len += /[ㄱ-힝]/.test(ch) ? 2 : 1;
+                return Math.max(m, len);
+            }, 0);
+            wsSk.getColumn('J').width = Math.max(wsSk.getColumn('J').width || 10.625, longestCourse + 2);
+            ['K', 'L', 'M', 'N'].forEach(col => { wsSk.getColumn(col).width = Math.max(wsSk.getColumn(col).width || 9, 11); });
             // 2. 지원대상자 (하늘색 계열)
             buildStudentRosterSheet(wb, `학생별 전체 ${getG3LabelShort()}대상자 명단`, `${q}분기 (${getG3Label()} 대상자) 목록`, g3Rows, 'FFBAE6FD');
             // 3. 자유수강자 (보라색 계열)
             buildStudentRosterSheet(wb, '학생별 전체 자유수강자 명단', `${q}분기 (자유수강) 목록`, freeRows, 'FFE8D1FF');
+
+            // 4. 과목별 수익자 상세 시트 (과목별 명단과 똑같이: 수강료, 교재비 또는 재료비)
+            addSubjectDetailSheets(wb, computeAdminRosterData(q).subjectSkDetail, q);
 
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
