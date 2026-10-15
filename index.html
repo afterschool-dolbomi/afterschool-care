@@ -544,6 +544,12 @@
 .qs-drag-row.qs-drag-over-top { box-shadow: inset 0 2px 0 0 #4338ca; }
 .qs-drag-row.qs-drag-over-bottom { box-shadow: inset 0 -2px 0 0 #4338ca; }
 		
+            /* ✨ 업데이트 보기 버튼: 넓은 화면에선 가운데, 좁은 화면에선 제목줄 흐름에 맞춰 자연스럽게 배치 */
+        .upd-btn-float { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+        @media (max-width: 1800px) {
+            .upd-btn-float { position:static; transform:none; margin-left:auto; }
+        }
+
     </style>
 	
 	
@@ -5958,12 +5964,13 @@ function toggleStatusPanel() {
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                        ${currentTab === 'all' ? `<button onclick="openFeatureUpdatePopup()" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
+                        ${currentTab === 'all' ? `<button class="upd-btn-float" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
                         <div style="display:flex; align-items:center; gap:10px;">
                             ${currentTab !== 'all' ? `<button onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
                           <div class="fee-toggle-wrap no-print" onclick="toggleFeeView()" title="수강료 / 강사료 전환">
-                            <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#0ea5e9' : '#1e3a5f'};">${isFeeViewOn ? '강사료 보기' : '수강료 보기'}</span>
+                            <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#94a3b8' : '#1e3a5f'};">수강료 보기</span>
                             <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
+                            <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#0ea5e9' : '#94a3b8'};">강사료 보기</span>
                         </div>
                         </div>
                     </div>
@@ -6226,7 +6233,7 @@ function toggleStatusPanel() {
                                 <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
                                 <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
                             </div>
-                            <button onclick="openFeatureUpdatePopup()" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
+                            <button class="upd-btn-float" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
                         </div>
                     `;
                     
@@ -6571,7 +6578,7 @@ function toggleStatusPanel() {
 
                     // ✨ 상단 배너에 환불 금액 보기 토글 버튼 추가
                   document.getElementById('tabBanner').innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 2px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px 16px; width: 100%; margin-bottom: 2px;">
                             <div style="display: flex; flex-direction: column; gap:3px;">
                                 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                                     <span style="color:var(--text-dark); font-weight:700; font-size:16px;">${qText} 상세 현황</span>
@@ -6594,16 +6601,13 @@ function toggleStatusPanel() {
                                 </div>
                                 
                             </div>
-                            <div style="display:flex; gap:8px;">
+                            <div style="display:flex; gap:8px; flex-shrink:0; align-items:center; margin-left:auto;">
                                 <button onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #d9f99d, #4ade80); border:1px solid #16a34a; color:#14532d; box-shadow:0 2px 6px rgba(22,163,74,0.25); font-weight:800; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
-                                <button class="btn-tool no-print" style="background: ${isRefundViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px;" onclick="toggleRefundView()">
+                                <button class="btn-tool no-print" style="background: ${isRefundViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px; white-space:nowrap;" onclick="toggleRefundView()">
                                     ${isRefundViewOn ? '◀ 환불금액 닫기' : '▶ 환불금액 보기'}
                                 </button>
 
                             </div>
-                        </div>
-                        <div style="font-size:13px; color:#ef4444; font-weight:700; display: inline-block; padding: 4px 8px; background: #fee2e2; border-radius: 4px;">
-                            💡 안내: [${qText} 사용액]은 해당 분기에만 쓴 금액이며, [${qText}까지 잔액]은 1분기부터 해당 분기까지 누적으로 쓴 금액을 차감한 실제 남은 잔액입니다.
                         </div>
                     `;
 
