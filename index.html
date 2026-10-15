@@ -546,8 +546,10 @@
 		
             /* ✨ 업데이트 보기 버튼: 넓은 화면에선 가운데, 좁은 화면에선 제목줄 흐름에 맞춰 자연스럽게 배치 */
         .upd-btn-float { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+        .upd-btn-float:active { transform:translate(-50%,-50%) scale(0.97); } /* ✨ 눌림 효과가 위치를 흐트러뜨리지 않게 */
         @media (max-width: 1800px) {
             .upd-btn-float { position:static; transform:none; margin-left:auto; }
+            .upd-btn-float:active { transform:scale(0.97); }
         }
 
     </style>
@@ -3428,19 +3430,28 @@
 
                     let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
 
+                    // ✨ 강사료/수용비 분할 (학생별 명단·과목별 보기 '강사료 보기'와 같은 기준)
+                    let feeSub = savedSubjects.find(x => x.name === subName);
+                    let feeMaster = feeSub && feeSub.fees && feeSub.fees[q];
+                    let fmG = feeMaster ? toNum(feeMaster.g) : 0, fmS = feeMaster ? toNum(feeMaster.s) : 0;
+                    let fSplit = (amt) => computeTeacherFeeSplit(amt, fmG, fmS, (fmG > 0 || fmS > 0));
+
                    if (hasG3Amt) {
                         let note = hasFreeAmt ? '자유로 넘어감' : (hasSkAmt ? '수익자로 넘어감' : '');
-                        g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, gy: g3Gy, j: g3J, note });
+                        let sp = fSplit(g3Su);
+                        g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, g: sp.g, s: sp.s, gy: g3Gy, j: g3J, note });
                     }
                     if (hasFreeAmt) {
                         let notes = [];
                         if (hasG3Amt) notes.push(`${getG3LabelShort()}에서 넘어옴`);
                         if (hasSkAmt) notes.push('수익자로 넘어감');
-                        freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, gy: frGy, j: frJ, note: notes.join(', ') });
+                        let sp = fSplit(frSu);
+                        freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, g: sp.g, s: sp.s, gy: frGy, j: frJ, note: notes.join(', ') });
                     }
                     if (hasSkAmt) {
                         let note = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
-                        skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, gy: skGy, j: skJ, note });
+                        let sp = fSplit(skSu);
+                        skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, g: sp.g, s: sp.s, gy: skGy, j: skJ, note });
 
                         let detailNote = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
                         let detailKey = baseSubjectName(subName); // ✨ N부는 같은 시트로 합침
@@ -3456,20 +3467,20 @@
         }
 
        function addRosterHeaderRow(ws, title, themeColor) {
-            ws.mergeCells('A1:K1');
+            ws.mergeCells('A1:M1');
             ws.getCell('A1').value = title;
             ws.getCell('A1').font = { bold: true, size: 14 };
             ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
             ws.getRow(1).height = 24;
             ws.addRow([]);
-            let headerRow = ws.addRow(['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '수강료', '교재비', '재료비', '강좌', '비고']);
+            let headerRow = ws.addRow(['*주야', '*학년', '*반', '*번호', '*성명', '*대상금액', '수강료', '강사료', '수용비', '교재비', '재료비', '강좌', '비고']);
             headerRow.eachCell(cell => {
                 cell.font = { bold: true };
                 cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: themeColor } };
                 cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
             });
-            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
+            ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
         }
 
 function addRosterDataRows(ws, rows, themeColor) {
@@ -3482,7 +3493,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             let dividerColor = dividerColorMap[themeColor] || 'FF6B7280';
 
             rows.forEach((r, i) => {
-                let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.gy, r.j, r.subject, r.note]);
+                let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.g || 0, r.s || 0, r.gy, r.j, r.subject, r.note]);
                               let isSubjectEnd = (i === rows.length - 1) || (baseSubjectName(rows[i+1].subject) !== baseSubjectName(r.subject)); // ✨ N부끼리는 구분선 없이, 진짜 과목이 바뀔 때만 구분선
                 row.eachCell(cell => {
                     cell.border = {
@@ -3498,7 +3509,9 @@ function addRosterDataRows(ws, rows, themeColor) {
             let totalSu = rows.reduce((a,b)=>a+b.su,0);
             let totalGy = rows.reduce((a,b)=>a+b.gy,0);
             let totalJ = rows.reduce((a,b)=>a+b.j,0);
-            let totalRow = ws.addRow(['', '', '', '', '총 합계', totalAmount, totalSu, totalGy, totalJ, '', '']);
+            let totalG = rows.reduce((a,b)=>a+(b.g||0),0);
+            let totalS = rows.reduce((a,b)=>a+(b.s||0),0);
+            let totalRow = ws.addRow(['', '', '', '', '총 합계', totalAmount, totalSu, totalG, totalS, totalGy, totalJ, '', '']);
             totalRow.eachCell(cell => {
                 cell.font = { bold: true };
                 cell.fill = { type:'pattern', pattern:'solid', fgColor: { argb: themeColor } };
@@ -3508,7 +3521,7 @@ function addRosterDataRows(ws, rows, themeColor) {
 
         function addCourseCountTable(ws, courseCounts, opts) {
             opts = opts || {};
-            let startCol = opts.startCol || 14; // 기본: N열부터 (과목별 명단)
+            let startCol = opts.startCol || 15; // 기본: O열부터 (과목별 명단, M열 비고 다음 한 칸 띄움)
             let titleRow = opts.titleRow || 2;
             let headerRow = opts.headerRow || 4;
             ws.mergeCells(titleRow, startCol, titleRow, startCol+4);
@@ -3676,7 +3689,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${q}분기_행정실_수납명단_${todayLocal()}.xlsx`;
+            link.download = `${q}분기_행정실_수납명단(강좌별)_${todayLocal()}.xlsx`;
             link.click();
         }
 
@@ -5328,10 +5341,23 @@ function toggleStatusPanel() {
         // ✨ 초3지원금 학생별 커스텀 한도 (전입·전출 등 예외 시 학생 편집창에서 입력한 값) - 입력 안 했으면 기본값 사용
             function getG3AllowanceFor(r) {
             let isT = r.transferIn || r.transferOut;
-            let custom = isT ? toNum(r.g3Limit1) + toNum(r.g3Limit2) : 0;
+            let custom = isT ? getG3H1LimitFor(r) + getG3H2LimitFor(r) : 0;
+            if (isT) return custom; // ✨ 전입·전출은 0원 학기도 그대로 인정 (예: 2학기 전출 → 하반기 0원)
             return custom > 0 ? custom : getG3Allowance();
         }
         // ✨ [v16.7] 초3지원금 상반기 금액 (학년도 설정에서 입력, 없으면 연간의 절반) / 하반기 = 연간 - 상반기
+        // ✨ [v16.9 수정] 한도 값: 비어있을 때만 기본값, 0원은 0원 그대로 인정
+        function limitVal(v, def) {
+            if (v === undefined || v === null || v === '') return def;
+            return toNum(String(v).replace(/,/g, ''));
+        }
+        function readLimitInput(id, def) {
+            let el = document.getElementById(id);
+            let raw = el ? String(el.value).replace(/,/g, '').trim() : '';
+            return raw === '' ? def : toNum(raw);
+        }
+        function getFreeLimitFor(r) { return limitVal(r.freeLimit, getFreeAllowanceDefault()); }
+
         function getG3H1Default() {
             let st = getYearSetting(getCurrentAcademicYear());
             let total = toNum(st.g3);
@@ -5358,18 +5384,18 @@ function toggleStatusPanel() {
 
          function getG3H1LimitFor(r) {
             let isT = r.transferIn || r.transferOut;
-            return (isT && toNum(r.g3Limit1)) || getG3H1Default();
+            return isT ? limitVal(r.g3Limit1, getG3H1Default()) : getG3H1Default();
         }
         function getG3H2LimitFor(r) {
             let isT = r.transferIn || r.transferOut;
-            return (isT && toNum(r.g3Limit2)) || getG3H2Default();
+            return isT ? limitVal(r.g3Limit2, getG3H2Default()) : getG3H2Default();
         }
 
 
 
     function calcStudent(r) {
             let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
-            let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+            let allowanceFree = r.hasFree ? getFreeLimitFor(r) : 0;
             let remG3_H1 = r.hasG3 ? getG3H1LimitFor(r) : 0; 
             let remG3_Total = allowanceG3;
             let remFree = allowanceFree;
@@ -5821,7 +5847,7 @@ function toggleStatusPanel() {
                     let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
                     let remG3_H1 = r.hasG3 ? getG3H1LimitFor(r) : 0;
                     let remG3_Total = allowanceG3;
-                    let remFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+                    let remFree = r.hasFree ? getFreeLimitFor(r) : 0;
 
 
 
@@ -6517,7 +6543,7 @@ function toggleStatusPanel() {
                         }
                         
                          let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
-                         let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+                         let allowanceFree = r.hasFree ? getFreeLimitFor(r) : 0;
                         
                         let remG3_until_Q = getG3RemainUntilQ(r, c, qNum, allowanceG3 - accUsedG3);
                         let remFree_until_Q = allowanceFree - accUsedFree;
@@ -6901,9 +6927,9 @@ function openPanel(mode, id = null) {
                 document.getElementById('fG3').checked = r.hasG3;
                 document.getElementById('fFree').checked = r.hasFree;
                 document.getElementById('fTier').value = r.freeTier || "";
-                document.getElementById('fFreeLimit').value = (r.freeLimit || getFreeAllowanceDefault()).toLocaleString();
-				document.getElementById('fG3Limit1').value = (r.g3Limit1 || getG3H1Default()).toLocaleString();
-                document.getElementById('fG3Limit2').value = (r.g3Limit2 || getG3H2Default()).toLocaleString();
+                document.getElementById('fFreeLimit').value = getFreeLimitFor(r).toLocaleString();
+				document.getElementById('fG3Limit1').value = limitVal(r.g3Limit1, getG3H1Default()).toLocaleString();
+                document.getElementById('fG3Limit2').value = limitVal(r.g3Limit2, getG3H2Default()).toLocaleString();
                 document.getElementById('fFreeStartDate').value = r.freeStartDate || "";
                 document.getElementById('fFreeEndDate').value = r.freeEndDate || "";
                 toggleTier();
@@ -7023,9 +7049,9 @@ function updateG3LimitTotal() {
           let transferOutDate = document.getElementById('fTransferOutDate').value;
           let isTransferChecked = transferIn || transferOut; // ✨ 전입/전출이 체크 안 된 상태면 예외 한도 입력값 자체를 무시
           let allowCustomFreeLimit = isTransferChecked || freeTier === '육아기근로단축'; // ✨ 육아기단축 학생은 전입/전출 없이도 한도를 직접 관리 가능
-          let freeLimit = allowCustomFreeLimit ? (toNum(document.getElementById('fFreeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
-		  let g3Limit1 = isTransferChecked ? (toNum(document.getElementById('fG3Limit1').value.replace(/,/g, '')) || getG3H1Default()) : getG3H1Default();
-          let g3Limit2 = isTransferChecked ? (toNum(document.getElementById('fG3Limit2').value.replace(/,/g, '')) || getG3H2Default()) : getG3H2Default();
+          let freeLimit = allowCustomFreeLimit ? readLimitInput('fFreeLimit', getFreeAllowanceDefault()) : getFreeAllowanceDefault();
+		  let g3Limit1 = isTransferChecked ? readLimitInput('fG3Limit1', getG3H1Default()) : getG3H1Default();
+          let g3Limit2 = isTransferChecked ? readLimitInput('fG3Limit2', getG3H2Default()) : getG3H2Default();
           let g3Limit  = g3Limit1 + g3Limit2;
           let freeStartDate = document.getElementById('fFreeStartDate').value;
           let freeEndDate = document.getElementById('fFreeEndDate').value;
@@ -7217,7 +7243,7 @@ function updateG3LimitTotal() {
             
               // ✨ 학생별 지원금 종합 현황판 전광판 렌더링
           let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
-                         let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+                         let allowanceFree = r.hasFree ? getFreeLimitFor(r) : 0;
 
             // ✨ 초3지원금 상반기/하반기 분할 내역 계산
             let h1Cut = maxQuarter === 6 ? 3 : 2;
@@ -7693,7 +7719,7 @@ function updateG3LimitTotal() {
             if (!r) return '';
             let c = calcStudent(r);
             let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0;
-            let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+            let allowanceFree = r.hasFree ? getFreeLimitFor(r) : 0;
 
             if (q === 1) {
                 let parts = [];
@@ -9417,7 +9443,7 @@ function updateG3LimitTotal() {
                         let qNum = parseInt(q.replace('q', ''));
                         let accUsedG3 = 0, accUsedFree = 0;
                         for (let i = 1; i <= qNum; i++) { accUsedG3 += c[`q${i}`].usedG3; accUsedFree += c[`q${i}`].usedFree; }
-                      let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0; let allowanceFree = r.hasFree ? (r.freeLimit || getFreeAllowanceDefault()) : 0;
+                      let allowanceG3 = r.hasG3 ? getG3AllowanceFor(r) : 0; let allowanceFree = r.hasFree ? getFreeLimitFor(r) : 0;
                         let remG3_until_Q = getG3RemainUntilQ(r, c, qNum, allowanceG3 - accUsedG3); let remFree_until_Q = allowanceFree - accUsedFree; let remTotal_until_Q = remG3_until_Q + remFree_until_Q;
 
                         rowData.push(c[q].status, netG, netS, netSu, netGy, netJ, c[q].exp, c[q].over, c[q].usedG3, remG3_until_Q, c[q].usedFree, remFree_until_Q, (c[q].usedG3 + c[q].usedFree), remTotal_until_Q);
@@ -9801,9 +9827,9 @@ function updateG3LimitTotal() {
                                     freeAutoStartDate: r.freeAutoStartDate || '',
                                     freeStartDate: r.freeStartDate || '',
                                     freeEndDate: r.freeEndDate || '',
-                                    freeLimit: r.freeLimit || '',
-                                    g3Limit1: r.g3Limit1 || '',
-                                    g3Limit2: r.g3Limit2 || '',
+                                    freeLimit: (r.freeLimit === 0 ? 0 : (r.freeLimit || '')),
+                                    g3Limit1: (r.g3Limit1 === 0 ? 0 : (r.g3Limit1 || '')),
+                                    g3Limit2: (r.g3Limit2 === 0 ? 0 : (r.g3Limit2 || '')),
                                     transferIn: r.transferIn || false,
                                     transferInQuarter: r.transferInQuarter || '',
                                     transferInDate: r.transferInDate || '',
@@ -9957,9 +9983,9 @@ function updateG3LimitTotal() {
                         if (currentStudent.freeAutoStartDate) currentExStudent.freeAutoStartDate = currentStudent.freeAutoStartDate;
                         if (currentStudent.freeStartDate) currentExStudent.freeStartDate = currentStudent.freeStartDate;
                         if (currentStudent.freeEndDate) currentExStudent.freeEndDate = currentStudent.freeEndDate;
-                        if (currentStudent.freeLimit) currentExStudent.freeLimit = currentStudent.freeLimit;
-                        if (currentStudent.g3Limit1) currentExStudent.g3Limit1 = currentStudent.g3Limit1;
-                        if (currentStudent.g3Limit2) currentExStudent.g3Limit2 = currentStudent.g3Limit2;
+                        if (currentStudent.freeLimit !== undefined && currentStudent.freeLimit !== '') currentExStudent.freeLimit = currentStudent.freeLimit;
+                        if (currentStudent.g3Limit1 !== undefined && currentStudent.g3Limit1 !== '') currentExStudent.g3Limit1 = currentStudent.g3Limit1;
+                        if (currentStudent.g3Limit2 !== undefined && currentStudent.g3Limit2 !== '') currentExStudent.g3Limit2 = currentStudent.g3Limit2;
                         currentExStudent.transferIn = currentStudent.transferIn;
                         currentExStudent.transferInQuarter = currentStudent.transferInQuarter;
                         currentExStudent.transferInDate = currentStudent.transferInDate;
@@ -10168,9 +10194,9 @@ function updateG3LimitTotal() {
                             freeAutoStartDate: backupData ? (backupData.freeAutoStartDate || '') : '',
                             freeStartDate: backupData ? (backupData.freeStartDate || '') : '',
                             freeEndDate: backupData ? (backupData.freeEndDate || '') : '',
-                            freeLimit: backupData && backupData.freeLimit ? backupData.freeLimit : undefined,
-                            g3Limit1: backupData && backupData.g3Limit1 ? backupData.g3Limit1 : undefined,
-                            g3Limit2: backupData && backupData.g3Limit2 ? backupData.g3Limit2 : undefined,
+                            freeLimit: backupData && backupData.freeLimit !== undefined && backupData.freeLimit !== '' ? backupData.freeLimit : undefined,
+                            g3Limit1: backupData && backupData.g3Limit1 !== undefined && backupData.g3Limit1 !== '' ? backupData.g3Limit1 : undefined,
+                            g3Limit2: backupData && backupData.g3Limit2 !== undefined && backupData.g3Limit2 !== '' ? backupData.g3Limit2 : undefined,
                             transferIn: backupData ? !!backupData.transferIn : false,
                             transferInQuarter: backupData ? (backupData.transferInQuarter || '') : '',
                             transferInDate: backupData ? (backupData.transferInDate || '') : '',
@@ -10617,7 +10643,7 @@ function updateG3LimitTotal() {
 
             // ✨ 자유수강권 한도 - 프로그램(db)에 등록된 값을 우선으로 불러옴
             let rForLimit = db.find(x => String(x.grade) === String(st.grade) && String(x.classNum) === String(st.classNum) && String(x.studentNum) === String(st.studentNum));
-            let curFreeLimit = (rForLimit && rForLimit.freeLimit) || st.freeLimit || getFreeAllowanceDefault();
+            let curFreeLimit = (rForLimit && rForLimit.freeLimit !== undefined && rForLimit.freeLimit !== '') ? toNum(rForLimit.freeLimit) : (st.freeLimit || getFreeAllowanceDefault());
             document.getElementById('ntf_freeLimit').value = Number(curFreeLimit).toLocaleString();
 
             toggleNtfInGroup();
@@ -10671,7 +10697,7 @@ function updateG3LimitTotal() {
 
             // ✨ 자유수강권 총 한도 - 전입/전출 중 하나라도 체크된 경우에만 입력값을 반영, 아니면 기본값으로
             let isTransferChecked = st.transferIn || st.transferOut;
-            let freeLimitVal = isTransferChecked ? (toNum(document.getElementById('ntf_freeLimit').value.replace(/,/g, '')) || getFreeAllowanceDefault()) : getFreeAllowanceDefault();
+            let freeLimitVal = isTransferChecked ? readLimitInput('ntf_freeLimit', getFreeAllowanceDefault()) : getFreeAllowanceDefault();
             st.freeLimit = freeLimitVal;
 
             // ✨ 이미 프로그램(db)에 등록된 학생이면 전입/전출 정보와 자유수강권 한도도 함께 동기화
@@ -12389,7 +12415,7 @@ function updateG3LimitTotal() {
 
                     targetRow.getCell(15).value = null;
                     let dbStudent = db.find(x => x.grade === data.grade && x.classNum === data.classNum && x.studentNum === data.studentNum && x.name === data.name);
-                    let stFreeLimit = (dbStudent && dbStudent.freeLimit) || getFreeAllowanceDefault();
+                    let stFreeLimit = dbStudent ? getFreeLimitFor(dbStudent) : getFreeAllowanceDefault();
                    targetRow.getCell(15).value = { formula: `IF(E${rIdx}<>"",IF(${stFreeLimit}-N${rIdx}>=0,${stFreeLimit}-N${rIdx},"지원금 초과사용"),"")` };
 
                     targetRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
