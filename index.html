@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V16.7</title>
+    <title>방과후 지원금 돌보미 V16.9</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1088,7 +1088,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V16.7</span>
+                <span class="brand-version">V16.9</span>
             </div>
     </div>
     
@@ -5406,6 +5406,12 @@ function toggleStatusPanel() {
                             // ✨ 교재비/재료비는 차시별로 쪼갤 수 없는 일시불 성격이라, 이미 수업 초반에 전액 지급 완료된 것으로 보고 통째로 본인부담(수익자) 처리
                             exclGy = grossGy;
                             exclJ = grossJ;
+                            // ✨ [v16.7 예외] 차시비율적용 과목은 '항목별 결제 출처 영수증'에서 교재비/재료비를 초3·자유수강 칸에 직접 입력하면
+                            //    그 금액만큼은 지원금으로 인정 (나머지만 수익자). 학교마다 교재/재료비도 차시비율로 쪼개 지원하는 경우 대응
+                            let manSupGy = (s.mG3Gy !== undefined ? toNum(s.mG3Gy) : 0) + (s.mFreeGy !== undefined ? toNum(s.mFreeGy) : 0);
+                            let manSupJ  = (s.mG3J  !== undefined ? toNum(s.mG3J)  : 0) + (s.mFreeJ  !== undefined ? toNum(s.mFreeJ)  : 0);
+                            if (manSupGy > 0) exclGy = Math.max(0, grossGy - manSupGy);
+                            if (manSupJ  > 0) exclJ  = Math.max(0, grossJ  - manSupJ);
                         }
                         // ✨ 배분 계산의 기준 금액 = 환불 반영 전(gross) - 차시제외분. 이후 5단계에서 환불을 실사용 비율대로 되돌림
                         let allocBaseSu = Math.max(0, grossSu - exclSu);
