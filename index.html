@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V17.4</title>
+    <title>방과후 지원금 돌보미 V17.5</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1120,7 +1120,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V17.4</span>
+                <span class="brand-version">V17.5</span>
             </div>
     </div>
     
@@ -13085,7 +13085,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 title: saState.title, chief: saState.chief, staff: saState.staff, fontName: saState.fontName,
                 chiefStamp: saState.chiefStamp, staffStamp: saState.staffStamp,
                 teachers: Object.assign({}, prev.teachers || {}, saState.teachers),
-                sameTeacher: Object.assign({}, prev.sameTeacher || {}, saState.sameTeacher || {})
+                sameTeacher: Object.assign({}, prev.sameTeacher || {}, saState.sameTeacher || {}),
+                groupMap: Object.assign({}, saState.groupMap || {})
             };
             saSaveAll(SA_STORE_KEY, all);
         }
@@ -13161,7 +13162,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 step: 1, quarter: null, cha: null,
                 title: mem.title || '', period: '', chief: mem.chief || '', staff: mem.staff || '', fontName: mem.fontName || '맑은 고딕', localFonts: null,
                 chiefStamp: mem.chiefStamp || null, staffStamp: mem.staffStamp || null,
-                teachers: Object.assign({}, mem.teachers || {}), sameTeacher: Object.assign({}, mem.sameTeacher || {}), subjects: [], result: null
+                teachers: Object.assign({}, mem.teachers || {}), sameTeacher: Object.assign({}, mem.sameTeacher || {}), groupMap: Object.assign({}, mem.groupMap || {}), subjects: [], result: null
             };
             document.getElementById('smartAttModal').style.display = 'flex';
             saRender();
@@ -13180,7 +13181,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             document.querySelectorAll('[data-sa-teacher]').forEach(el => { saState.teachers[el.getAttribute('data-sa-teacher')] = el.value.trim(); });
             document.querySelectorAll('[data-sa-group]').forEach(el => {
                 let base = el.getAttribute('data-sa-group'), v = el.value.trim();
-                (saState.subjects || []).forEach(s => { if ((baseSubjectName(s.name) || s.name) === base) saState.teachers[s.name] = v; });
+                (saState.subjects || []).forEach(s => { if (saGroupKeyOf(s.name) === base) saState.teachers[s.name] = v; });
             });
         }
 
@@ -13188,11 +13189,49 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             return s.tpl ? `<span style="font-size:10.5px; font-weight:800; padding:2px 6px; border-radius:10px; ${s.tpl === '8' ? 'background:#ede9fe; color:#6d28d9;' : 'background:#e0f2fe; color:#0369a1;'}">${s.tpl === '8' ? '주2회·8차시' : '주1회·4차시'}</span>`
                          : `<span style="font-size:10.5px; font-weight:800; padding:2px 6px; border-radius:10px; background:#fee2e2; color:#b91c1c;">표준차시 없음</span>`;
         }
-        // 1부·2부 등 같은 과목끼리 묶기 (과목 순서 유지)
+        // ✨ 같은 부서 자동 판단: '로봇과학1부(금)', '로봇과학 A', '로봇과학B반', '컴퓨터(컴기초)' → '로봇과학' / '컴퓨터'
+        const SA_DAY_PAREN = /\s*\((?:[월화수목금토일](?:\s*[.,·\/~\-]?\s*[월화수목금토일])*)\)/g;
+        function saAutoGroup(name) {
+            let n = String(name || '').trim(), prev;
+            do {
+                prev = n;
+                n = n.replace(/\s*\([^()]*\)\s*$/, '');                       // 끝 괄호: (금), (컴기초)
+                n = n.replace(/\s*\d+\s*[부반]$/, '');                          // 1부, 2반
+                n = n.replace(/(^|[^A-Za-z])\s*[A-Za-z]\s*[부반]?$/, '$1');        // A, B반 (영어 단어 끝 글자는 그대로)
+                n = n.replace(/\s+[가나다라마바사]\s*[부반]?$/, '');               // ' 가반', ' 나'
+                n = n.replace(/\s*[-_]?\s*\d+$/, '');                           // -1, 2
+                n = n.replace(/[\s\-_]+$/, '').trim();
+            } while (n && n !== prev);
+            return n || String(name || '').trim();
+        }
+        // 묶음 이름: 사용자가 직접 정한 게 있으면 그걸, 없으면 자동 판단
+        function saGroupKeyOf(name) {
+            let m = (saState && saState.groupMap) || {};
+            return (m[name] && m[name].trim()) ? m[name].trim() : saAutoGroup(name);
+        }
+        // 같은 강좌인지 비교용 (요일 괄호만 뺌: 로봇과학1부(금) = 로봇과학1부(화), 컴퓨터(컴기초) ≠ 컴퓨터(컴꾸러기))
+        function saVariantKey(name) { return String(name || '').replace(SA_DAY_PAREN, '').replace(/\s+/g, '').trim(); }
+        // 합친 출석부 비고에 적을 구분 이름 (예: 1부, A, 컴기초)
+        function saVariantLabel(name, key) {
+            let v = String(name || '').replace(SA_DAY_PAREN, '').trim();
+            let rest = v.startsWith(key) ? v.slice(key.length) : v;
+            rest = rest.replace(/^[\s\-_]+/, '').replace(/^\((.*)\)$/, '$1').trim();
+            return rest || v;
+        }
+        function saSetGroup(name, val) {
+            saCaptureInputs();
+            if (!saState.groupMap) saState.groupMap = {};
+            let v = String(val || '').trim();
+            if (!v || v === saAutoGroup(name)) delete saState.groupMap[name]; else saState.groupMap[name] = v;
+            saPersist(); saRender();
+        }
+        function saToggleGroupEdit() { saCaptureInputs(); saState.showGroupEdit = !saState.showGroupEdit; saRender(); }
+
+        // 같은 부서끼리 묶기 (과목 순서 유지)
         function saGroupSubjects(subjects) {
             let groups = [], idx = {};
             subjects.forEach(s => {
-                let base = baseSubjectName(s.name) || s.name;
+                let base = saGroupKeyOf(s.name);
                 if (idx[base] === undefined) { idx[base] = groups.length; groups.push({ base, items: [] }); }
                 groups[idx[base]].items.push(s);
             });
@@ -13206,10 +13245,10 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
         function saTeacherFor(name) {
             let t = saState.teachers || {};
             if (t[name]) return t[name];
-            let base = baseSubjectName(name), bu = (name.match(/(\d+)부/) || [])[1];
-            let keys = Object.keys(t).filter(k => t[k] && baseSubjectName(k) === base);
-            let sameBu = keys.find(k => ((k.match(/(\d+)부/) || [])[1]) === bu);
-            if (sameBu) return t[sameBu];
+            let base = saGroupKeyOf(name), variant = saVariantKey(name);
+            let sameVariant = Object.keys(t).find(k => t[k] && saVariantKey(k) === variant); // 요일만 바뀐 같은 강좌
+            if (sameVariant) return t[sameVariant];
+            let keys = Object.keys(t).filter(k => t[k] && saGroupKeyOf(k) === base);
             if (saIsSameTeacher(base) && keys.length) return t[keys[keys.length - 1]];
             return '';
         }
@@ -13217,7 +13256,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             saCaptureInputs();
             if (!saState.sameTeacher) saState.sameTeacher = {};
             if (on) { // 켜면: 이미 적힌 이름 하나를 모든 부에 맞춤
-                let members = saState.subjects.filter(s => (baseSubjectName(s.name) || s.name) === base);
+                let members = saState.subjects.filter(s => saGroupKeyOf(s.name) === base);
                 let val = members.map(s => saTeacherFor(s.name)).find(v => v) || '';
                 members.forEach(s => saState.teachers[s.name] = val);
             }
@@ -13392,7 +13431,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 } else {
                     body += `<div style="font-size:11.5px; color:#475569; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:8px 10px; margin-bottom:8px; line-height:1.6;">
                         💡 한 번 적은 강사명은 <b>학년도가 바뀌기 전까지 기억</b>돼요. 다음 차·다음 분기에도 같은 강좌면 <b>자동으로 채워지니</b> 다시 적지 않아도 돼요. (바뀐 강사만 고치면 돼요)<br>
-                        👥 1부·2부처럼 나뉜 강좌는 <b>'부별 강사 같음'</b>을 켜면 이름 한 번만 적어도 모든 부에 들어가요. 부마다 강사가 다르면 끄고 따로 적으세요.</div>`;
+                        👥 같은 부서로 묶인 강좌(1부·2부, A·B, 컴퓨터(컴기초)·컴퓨터(컴꾸러기) 등)는 <b>'모두 같은 강사'</b>를 켜면 이름 한 번만 적어도 모두 들어가요. 강사가 다르면 끄고 따로 적으세요.<br>
+                        🔗 묶음이 잘못되었으면 아래 <b>'같은 부서 묶기 설정'</b>에서 고칠 수 있어요.</div>`;
                     let groups = saGroupSubjects(saState.subjects);
                     let rowHtml = (label, sub, badgeHtml, inputAttr, val, extra, zebra) => `<div style="display:flex; align-items:center; gap:8px; padding:8px 10px; ${zebra ? 'background:#f8fafc;' : ''}">
                             <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${label}</div>
@@ -13407,17 +13447,35 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                         }
                         let same = saIsSameTeacher(g.base);
                         let toggle = `<label style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; color:${same ? '#15803d' : '#64748b'}; background:${same ? '#dcfce7' : '#f1f5f9'}; border:1px solid ${same ? '#86efac' : '#e2e8f0'}; padding:1px 7px; border-radius:10px; cursor:pointer;">
-                            <input type="checkbox" ${same ? 'checked' : ''} onchange="saToggleSame('${saEsc(g.base)}', this.checked)" style="margin:0;"> 부별 강사 같음</label>`;
+                            <input type="checkbox" ${same ? 'checked' : ''} onchange="saToggleSame('${saEsc(g.base)}', this.checked)" style="margin:0;"> 모두 같은 강사</label>`;
                         if (same) {
                             let val = g.items.map(s => saTeacherFor(s.name)).find(v => v) || '';
                             let tplSet = [...new Set(g.items.map(s => s.tpl))];
                             let badges = tplSet.length === 1 ? saTplBadge(g.items[0]) : g.items.map(saTplBadge).join('');
-                            return rowHtml(`${saEsc(g.base)} <span style="font-weight:600; color:#64748b; font-size:12px;">(${g.items.length}개 부)</span>`,
-                                g.items.map(s => saEsc(s.name.replace(g.base, '').trim() || s.name) + ' ' + s.students.length + '명').join(' · '),
+                            return rowHtml(`${saEsc(g.base)} <span style="font-weight:600; color:#64748b; font-size:12px;">(${g.items.length}개 강좌)</span>`,
+                                g.items.map(s => saEsc(saVariantLabel(s.name, g.base)) + ' ' + s.students.length + '명').join(' · '),
                                 badges, `data-sa-group="${saEsc(g.base)}"`, val, toggle, zebra++ % 2);
                         }
                         return g.items.map((s, k) => rowHtml(saEsc(s.name), `${s.students.length}명`, saTplBadge(s), `data-sa-teacher="${saEsc(s.name)}"`, saTeacherFor(s.name), k === 0 ? toggle : '', zebra++ % 2)).join('');
                     }).join('') + `</div>`;
+                }
+
+                if (saState.quarter && saState.subjects.length) {
+                    body += `<div style="margin-top:8px;"><button type="button" onclick="saToggleGroupEdit()" style="font-size:12px; font-weight:700; color:#1e3a5f; background:white; border:1px dashed #94a3b8; padding:6px 10px; border-radius:6px; cursor:pointer;">🔗 같은 부서 묶기 설정 ${saState.showGroupEdit ? '닫기 ▲' : '열기 ▼'}</button></div>`;
+                    if (saState.showGroupEdit) {
+                        body += `<div style="margin-top:8px; border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#f8fafc;">
+                            <div style="font-size:11.5px; color:#475569; line-height:1.6; margin-bottom:8px;">
+                                <b>묶음 이름이 같은 강좌끼리 한 부서</b>로 봐요. (강사명 한 번 입력 · 3단계에서 한 탭으로 합치기 가능)<br>
+                                · 묶고 싶으면 묶음 이름을 똑같이, 따로 하고 싶으면 다르게 적으세요. 비우면 자동으로 정해져요.</div>` +
+                            saState.subjects.map(s => {
+                                let key = saGroupKeyOf(s.name), manual = !!((saState.groupMap || {})[s.name]);
+                                return `<div style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+                                    <div style="flex:1; min-width:0; font-size:12.5px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${saEsc(s.name)}</div>
+                                    <span style="font-size:11px; color:#94a3b8;">→</span>
+                                    <input value="${saEsc(key)}" data-n="${saEsc(s.name)}" onchange="saSetGroup(this.dataset.n, this.value)" style="${SA_INPUT} width:140px; flex-shrink:0; padding:6px 8px; font-size:12.5px; ${manual ? 'border-color:#d4af37; background:#fffbeb;' : ''}" placeholder="묶음 이름">
+                                </div>`;
+                            }).join('') + `</div>`;
+                    }
                 }
 
                 let contacts = saContacts(), cCount = Object.keys(contacts).length;
@@ -13463,7 +13521,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                             return `<label style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer; border-top:1px dashed #e2e8f0;">
                                 <input type="checkbox" ${on ? 'checked' : ''} onchange="saToggleMerge('${saEsc(g.base)}', this.checked)" style="margin-top:2px;">
                                 <span>${g.items.map(s => `${saEsc(s.name)} <b>${s.students.length}명</b>`).join(' + ')}<br>
-                                <span style="color:${on ? '#15803d' : '#94a3b8'}; font-weight:700;">→ '${saEsc(g.base)}부' 한 탭으로 합치기 (총 ${g.items.reduce((a, s) => a + s.students.length, 0)}명, 비고에 원래 부 표시)</span></span></label>`;
+                                <span style="color:${on ? '#15803d' : '#94a3b8'}; font-weight:700;">→ '${saEsc(saMergedName(g.base))}' 한 탭으로 합치기 (총 ${g.items.reduce((a, s) => a + s.students.length, 0)}명, 비고에 원래 부 표시)</span></span></label>`;
                         }).join('') + `</div>`;
                 }
                 foot = `<button type="button" onclick="closeSmartAtt()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
@@ -13541,15 +13599,16 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 if (g.items.length > 1 && merge[g.base]) {
                     let teachers = [...new Set(g.items.map(s => saTeacherFor(s.name)).filter(Boolean))];
                     let students = [];
-                    g.items.forEach(s => { let bu = (s.name.match(/(\d+)부/) || [])[1]; students = students.concat(mk(s, bu ? bu + '부' : s.name)); });
+                    g.items.forEach(s => { students = students.concat(mk(s, saVariantLabel(s.name, g.base))); });
                     students.sort((a, b) => (toNum(a.grade) - toNum(b.grade)) || (toNum(a.classNum) - toNum(b.classNum)) || (toNum(a.studentNum) - toNum(b.studentNum)));
-                    out.push({ name: g.base + '부', tpl: g.items.some(s => s.tpl === '8') ? '8' : '4', teacher: teachers.join(', '), students, mergedFrom: g.items.map(s => s.name) });
+                    out.push({ name: saMergedName(g.base), tpl: g.items.some(s => s.tpl === '8') ? '8' : '4', teacher: teachers.join(', '), students, mergedFrom: g.items.map(s => s.name) });
                 } else {
                     g.items.forEach(s => out.push({ name: s.name, tpl: s.tpl, teacher: saTeacherFor(s.name), students: mk(s, '') }));
                 }
             });
             return out;
         }
+        function saMergedName(base) { return /부$/.test(base) ? base : base + '부'; }
         async function saToggleMerge(base, on) {
             if (!saState.mergeGroups) saState.mergeGroups = {};
             saState.mergeGroups[base] = !!on;
