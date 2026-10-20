@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V17.0</title>
+    <title>방과후 지원금 돌보미 V17.6</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1120,7 +1120,7 @@
         <div>
             <div class="brand">
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V17.0</span>
+                <span class="brand-version">V17.6</span>
             </div>
     </div>
     
@@ -13531,8 +13531,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                         <div style="font-size:13px; color:#64748b; margin-bottom:8px;">학생이 적은 강좌는 같은 부서끼리 합쳐 한 탭으로 저장할 수 있어요.</div>` +
                         multi.map(g => {
                             let on = !!(saState.mergeGroups || {})[g.base];
-                            return `<label style="display:flex; align-items:flex-start; gap:10px; padding:9px 0; cursor:pointer; border-top:1px dashed #e2e8f0; font-size:14px; line-height:1.6;">
-                                <input type="checkbox" ${on ? 'checked' : ''} onchange="saToggleMerge('${saEsc(g.base)}', this.checked)" style="margin-top:4px; width:17px; height:17px; flex-shrink:0;">
+                            return `<label style="display:flex; align-items:flex-start; gap:9px; padding:8px 0; cursor:pointer; border-top:1px dashed #e2e8f0; font-size:13px; line-height:1.55;">
+                                <input type="checkbox" ${on ? 'checked' : ''} onchange="saToggleMerge('${saEsc(g.base)}', this.checked)" style="margin-top:3px; width:15px; height:15px; flex-shrink:0;">
                                 <span>${g.items.map(s => `${saEsc(s.name)} <b>${s.students.length}명</b>`).join(' + ')}<br>
                                 <span style="color:${on ? '#15803d' : '#94a3b8'}; font-weight:700;">→ '${saEsc(saMergedName(g.base))}' 한 탭으로 합치기 (총 ${g.items.reduce((a, s) => a + s.students.length, 0)}명, 비고에 원래 부 표시)</span></span></label>`;
                         }).join('') + `</div>`;
