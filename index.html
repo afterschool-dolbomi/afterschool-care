@@ -1174,11 +1174,11 @@
         </div>
         
         <div style="color: #ffffff; font-size: 12px; font-weight: bold; text-align: center; margin-top: 20px; text-shadow: 0px 1px 2px rgba(0,0,0,0.5); letter-spacing: 0.5px; opacity: 0.9;">
-            ⓒ인천갈월초 늘봄행정실무사 <br> <무단 복제·재배포 및 상업적 이용 금지>
+            ⓒ인천갈월초 늘봄행정실무사 <br> <span id="copyrightLine2" style="display:inline-block; white-space:nowrap; letter-spacing:-0.4px;"><무단 복제·재배포 및 상업적 이용 금지></span>
         </div>
        <!-- ✨ 후원자 감사 전광판 (메인 홈에서만 표시) -->
-       <div id="sponsorTicker" title="후원해 주셔서 감사합니다 💝" style="display:none; margin-top:12px; width:100%; overflow:hidden; border-radius:8px; border:1px solid rgba(253,224,71,0.45); background:linear-gradient(90deg, rgba(15,23,42,0.9), rgba(30,58,95,0.9)); box-shadow:inset 0 0 8px rgba(0,0,0,0.5); padding:6px 0; cursor:default;">
-            <div class="sponsor-track"><span>💝 본 프로그램 개발을 후원해 주신 <b>우*명, 최*정</b> 선생님 감사합니다^^</span></div>
+       <div id="sponsorTicker" title="후원해 주셔서 감사합니다 💝" style="display:none; flex-shrink:0; min-height:30px; box-sizing:border-box; line-height:16px; margin-top:12px; width:100%; overflow:hidden; border-radius:8px; border:1px solid rgba(253,224,71,0.45); background:linear-gradient(90deg, rgba(15,23,42,0.9), rgba(30,58,95,0.9)); box-shadow:inset 0 0 8px rgba(0,0,0,0.5); padding:6px 0; cursor:default;">
+            <div class="sponsor-track"><span>💝 본 프로그램 개발을 후원해 주신 <b>우*명, 최*정</b> 님 감사합니다^^</span></div>
        </div>
        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
             <button class="btn-3d btn-side" onclick="toggleDonatePopup()" id="btnDonate" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
@@ -3996,7 +3996,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             let isCollapsed = sb.classList.contains('collapsed');
             let txt = document.getElementById('sidebarToggleText');
             if (txt) txt.style.display = isCollapsed ? 'none' : 'inline';
-            if (!isCollapsed && window.fitSidebarWidth) setTimeout(window.fitSidebarWidth, 350);
+            if (!isCollapsed && window.fitSidebarWidth) setTimeout(function(){ window.fitSidebarWidth(); if (window.fitCopyright) window.fitCopyright(); }, 350);
         }
   
   
@@ -13832,6 +13832,26 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
         renderGrid = function () { var r = _rg.apply(this, arguments); try { updateSponsorTicker(); } catch (e) {} return r; };
     }
     if (document.readyState === 'complete') updateSponsorTicker(); else window.addEventListener('load', updateSponsorTicker);
+})();
+</script>
+<script>
+// ✨ 저작권 두 번째 줄이 한 줄에 들어가도록 글자 간격·크기 자동 조절
+(function () {
+    function fitCopyright() {
+        var el = document.getElementById('copyrightLine2'); if (!el) return;
+        var box = el.parentElement; if (!box || !box.clientWidth) return;
+        var avail = box.clientWidth - 2, ls = -0.4, fs = 12;
+        el.style.letterSpacing = ls + 'px'; el.style.fontSize = fs + 'px';
+        var guard = 0;
+        while (el.scrollWidth > avail && guard++ < 20) {
+            if (ls > -1.2) ls -= 0.2; else fs -= 0.5;
+            el.style.letterSpacing = ls.toFixed(1) + 'px'; el.style.fontSize = fs + 'px';
+        }
+    }
+    window.fitCopyright = fitCopyright;
+    var run = function () { try { fitCopyright(); } catch (e) {} };
+    if (document.readyState === 'complete') run(); else window.addEventListener('load', run);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setTimeout(run, 50); });
 })();
 </script>
 </body>
