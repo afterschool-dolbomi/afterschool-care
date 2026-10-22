@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V17.7</title>
+    <title>방과후 지원금 돌보미 V17.8</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -29,14 +29,14 @@
 
 
         /* --- 좌측 사이드바 --- */
-       .sidebar { width: var(--sidebar-w, 250px); flex-shrink: 0; background-color: var(--sidebar-bg); padding: 24px 14px; display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 10; transition: background-color 0.3s, width 0.3s ease, padding 0.3s ease; }
+       .sidebar { width: var(--sidebar-w, 250px); flex-shrink: 0; background-color: var(--sidebar-bg); padding: 10px 14px 24px; display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 10; transition: background-color 0.3s, width 0.3s ease, padding 0.3s ease; }
         .sidebar.collapsed { width: 44px; padding: 16px 8px; overflow: hidden; }
       .sidebar.collapsed > div { display: none !important; }
         .sidebar.collapsed .sidebar-expand-tab { display: flex !important; }
        #statusPanelWrap.open { opacity: 1 !important; pointer-events: auto !important; }
         
         /* ✨ 브랜드 타이틀 3D 느낌 디자인 (이모티콘 제거, 밝은색상, 흰색 테두리, 스크롤 방지 사이즈 조절) */
-        .brand { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap; overflow: hidden; }
+        .brand { margin-bottom: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 0; white-space: nowrap; overflow: hidden; }
         .brand-title { 
             font-size: 21px; 
             font-weight: 900; 
@@ -48,8 +48,9 @@
                 3px 3px 0px #172554,
                 4px 4px 6px rgba(0,0,0,0.6);
             letter-spacing: -0.5px; 
+            line-height: 1.15;
         }
-        .brand-version { font-size: 11px; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 3px 6px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); letter-spacing: 0; align-self: flex-end; margin-bottom: 4px; flex-shrink: 0;}
+        .brand-version { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); background: none; padding: 0; margin: 0 0 1px 1px; line-height: 1; letter-spacing: 0.3px; } /* ✨ 제목 바로 위 작은 흰 글씨 */
 
         .stat-section { margin-bottom: 24px; }
         .stat-title { font-size: 12px; font-weight: 700; color: #9ca3af; margin-bottom: 12px; }
@@ -1125,8 +1126,8 @@
         </button>
         <div>
             <div class="brand">
+                <span class="brand-version">V17.8</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
-                <span class="brand-version">V17.7</span>
             </div>
     </div>
     
@@ -2819,6 +2820,11 @@
             if (typeof saAutoGroup === 'function') return saAutoGroup(name);
             return name;
         }
+        // ✨ 주N회 표시: '과목 목록 관리'의 표준차시(한 달) 기준 (4 → 주1회, 8 → 주2회). 표준차시가 없을 때만 이번 달 차시로 계산
+        function getTsWeeklyLabelFor(sub, q, sessThisMonth) {
+            let std = (sub && sub.fees && sub.fees[q]) ? toNum(sub.fees[q].stdSessions) : 0;
+            return getTsWeeklyLabel(std > 0 ? std : sessThisMonth);
+        }
         function getTsWeeklyLabel(sessCount) {
             let n = Math.max(1, Math.round(toNum(sessCount) / 4));
             return `(주${n}회)`;
@@ -3098,11 +3104,11 @@
                 let doMerge = mergeParts && sameSess;
                 let rowGroups = [];
                 if (doMerge) {
-                    let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(parts[0].sessThisMonth);
+                    let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabelFor(parts[0].sub, q, parts[0].sessThisMonth);
                     rowGroups.push({ displayName: `${base}${labelSuffix}`, subjectNames: parts.map(p => p.name), masterRef: parts[0].sub });
                 } else {
                     parts.forEach(p => {
-                        let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabel(p.sessThisMonth);
+                        let labelSuffix = (month === 'pre') ? ' (수강전취소)' : getTsWeeklyLabelFor(p.sub, q, p.sessThisMonth);
                         rowGroups.push({ displayName: `${p.name}${labelSuffix}`, subjectNames: [p.name], masterRef: p.sub });
                     });
                 }
@@ -3155,6 +3161,7 @@
 
                             let isYukaTs = (r.freeTier === '육아기근로단축');
                             let g3Amt = 0, frAmt = 0, skAmt = 0, thisCharge = 0; let chargeArrOut = [];
+                            let refundNote = ''; // ✨ 환불로 이번 차 금액이 기본과 달라진 경우 비고용 사유
 
                             if (month === 'pre') {
                                 // ✨ 수강전 취소: 몇 차인지 나누지 않고, 이 과목에 남아있는 분기 전체 순수강료를 그대로 청구(환불)액으로 사용
@@ -3230,6 +3237,21 @@
                                     chargeArrOut = chargeArr;
                                     if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain + usePreSk; }
                                 }
+                                // ✨ 이번 차 청구액이 기본 금액보다 적고 환불 기록이 있으면 → '사유 N회 환불' 문구 만들기
+                                if (thisCharge > 0 && thisCharge < monthlyBaseSu && (s.refundLog || []).some(l => toNum(l.amount) > 0)) {
+                                    let logs = (s.refundLog || []).filter(l => toNum(l.amount) > 0);
+                                    let mine = logs.filter(l => Number(l.month) === month);
+                                    if (!mine.length) mine = logs;
+                                    let stSess = (masterSub && masterSub.sessions && masterSub.sessions[q]) ? toNum(masterSub.sessions[q][`m${month}`]) : 0;
+                                    let perSess = stSess > 0 ? monthlyBaseSu / stSess : 0;
+                                    refundNote = mine.map(l => {
+                                        let n = toNum(l.sessions) > 0 ? toNum(l.sessions) : (perSess > 0 ? Math.round(toNum(l.amount) / perSess) : 0);
+                                        let reason = String(l.reason || '').trim();
+                                        if (/\d+\s*(회|차시)\s*환불/.test(reason)) return reason;          // '1회 환불', '1차시 환불'이라고 적었으면 그대로
+                                        let cnt = n > 0 ? `${n}회 환불` : '환불';
+                                        return reason ? `${reason}${cnt}` : cnt;                           // 예: 독감1회 환불 / 사유 없으면 1회 환불
+                                    }).filter(Boolean).join(', ');
+                                }
                             }
                             if (thisCharge <= 0) return;
                             let parts2 = [];
@@ -3269,7 +3291,7 @@
                             }
                             let tfParts = splitAmountByWeightsIn10Won(tfFullSplit.g, parts2.map(p => p.amount));
                             parts2.forEach((p, pi) => {
-                                rg.contributions.push({ amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, isSplit });
+                                rg.contributions.push({ amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, isSplit, refundNote, refundLabel: `${r.grade}-${r.classNum} ${r.name}` });
                             });
                         });
                     });
@@ -3288,6 +3310,16 @@
                         }
                     });
 
+                    // ✨ 기본 금액이 아닌 줄에 학생이 2명 이하이고 환불 때문이면 → 비고에 '학년-반 이름 사유' 표시
+                    Object.keys(buckets).forEach(key => {
+                        let cs = rg.contributions.filter(c => c.amount === buckets[key].amount);
+                        let students = [...new Set(cs.map(c => c.refundLabel))];
+                        if (students.length === 0 || students.length > 2) return;
+                        students.forEach(lbl => {
+                            let c = cs.find(x => x.refundLabel === lbl && x.refundNote);
+                            if (c) { let line = `${lbl} ${c.refundNote}`; if (!buckets[key].notes.includes(line)) buckets[key].notes.push(line); }
+                        });
+                    });
                     let masterFee = rg.masterRef.fees && rg.masterRef.fees[q];
                     let masterSu = masterFee ? toNum(masterFee.su) : 0;
                     let baseAmt = null;
