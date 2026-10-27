@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V17.8</title>
+    <title>방과후 지원금 돌보미 V17.9</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -282,6 +282,7 @@
         
         body.dark-mode .panel-header, body.dark-mode .detail-header { border-color: #374151; }
 		body.dark-mode .detail-body { background: #374151 !important; }
+        body.dark-mode .sub-manage-footer { background: #1f2937 !important; border-color: #4b5563 !important; } body.dark-mode #subSelCount { color: #e5e7eb !important; }
         body.dark-mode .panel-footer { background: #111827; border-color: #374151; }
         body.dark-mode .q-header { background: #374151; border-color: #4b5563; color: white; }
         body.dark-mode .subject-table th { background: #374151 !important; color: white; border-color: #4b5563 !important; }
@@ -566,6 +567,42 @@
             .upd-btn-float:active { transform:scale(0.97); }
         }
 
+        /* ===== ✨ 운영보고서 ===== */
+        #reportOverlay { display:none; position:fixed; inset:0; z-index:99990; background:#e9edf3; font-family:'Pretendard', '맑은 고딕', sans-serif; }
+        #reportOverlay.open { display:flex; }
+        .rpt-side { width:340px; flex-shrink:0; height:100%; display:flex; flex-direction:column; background:linear-gradient(180deg, #1e3a5f, #0f172a); border-right:3px solid #d4af37; box-shadow:4px 0 14px rgba(15,23,42,0.3); z-index:2; }
+        .rpt-side-head { padding:16px 16px 14px; border-bottom:1px solid rgba(255,255,255,0.12); flex-shrink:0; }
+        .rpt-side-actions { display:flex; gap:6px; margin-top:12px; }
+        .rpt-side-actions .rpt-btn-print { flex:1; justify-content:center; }
+        .rpt-side-body { padding:14px 16px 24px; overflow-y:auto; flex:1; }
+        .rpt-main { flex:1; min-width:0; height:100%; overflow:auto; }
+        .rpt-bar-title { color:white; font-size:17px; font-weight:900; letter-spacing:-0.3px; display:flex; align-items:center; gap:10px; line-height:1.3; }
+        .rpt-bar-title small { color:#94a3b8; font-size:11.5px; font-weight:600; letter-spacing:0; }
+        .rpt-emblem { width:34px; height:34px; border-radius:50%; border:2px solid #d4af37; background:rgba(212,175,55,0.15); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+        .rpt-btn { border:none; border-radius:8px; padding:9px 14px; font-weight:800; font-size:13.5px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+        .rpt-btn-print { background:linear-gradient(135deg, #fde68a, #d4af37); color:#0f172a; box-shadow:0 3px 8px rgba(212,175,55,0.4); }
+        .rpt-btn-close { background:rgba(255,255,255,0.08); color:#e2e8f0; border:1px solid rgba(255,255,255,0.25); }
+        .rpt-grp-t { color:#fde68a; font-size:12.5px; font-weight:900; margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid rgba(212,175,55,0.35); }
+        .rpt-f { display:block; margin-bottom:9px; }
+        .rpt-f > span { display:block; color:#cbd5e1; font-size:11.5px; font-weight:700; margin-bottom:4px; }
+        .rpt-f input, .rpt-f select, .rpt-f textarea { width:100%; box-sizing:border-box; background:white; border:1px solid #cbd5e1; border-radius:6px; padding:7px 9px; font-size:13px; outline:none; color:#0f172a; font-family:inherit; }
+        .rpt-f textarea { resize:vertical; line-height:1.5; }
+        .rpt-f input:focus, .rpt-f select:focus, .rpt-f textarea:focus { border-color:#d4af37; box-shadow:0 0 0 2px rgba(212,175,55,0.3); }
+        .rpt-f2 { display:block; }
+        .rpt-seg { display:flex; background:rgba(15,23,42,0.45); padding:3px; gap:2px; border-radius:7px; border:1px solid rgba(255,255,255,0.15); }
+        .rpt-seg button { flex:1; border:none; background:transparent; color:#cbd5e1; font-size:12.5px; font-weight:800; padding:6px 10px; border-radius:5px; cursor:pointer; }
+        .rpt-seg button.on { background:#d4af37; color:#0f172a; }
+        .rpt-chips { display:flex; flex-direction:column; gap:5px; }
+        .rpt-chip { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; padding:7px 10px; border-radius:7px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,0.18); color:#cbd5e1; background:rgba(255,255,255,0.04); transition:0.15s; }
+        .rpt-chip input { display:none; }
+        .rpt-chip .dot { width:15px; height:15px; border-radius:4px; border:1.5px solid #94a3b8; display:inline-flex; align-items:center; justify-content:center; font-size:10px; color:transparent; flex-shrink:0; }
+        .rpt-chip.on { background:rgba(212,175,55,0.16); border-color:rgba(212,175,55,0.7); color:#fff; }
+        .rpt-chip.on .dot { background:#d4af37; border-color:#d4af37; color:#0f172a; }
+        .rpt-chip-tools { font-size:11.5px; color:#94a3b8; display:flex; justify-content:flex-end; gap:12px; margin-top:4px; }
+        .rpt-chip-tools a { color:#fde68a; cursor:pointer; text-decoration:underline; }
+        .rpt-paper-wrap { padding:26px 20px 60px; }
+        #rptFrame { width:210mm; max-width:100%; border:0; display:block; margin:0 auto; background:white; box-shadow:0 10px 30px rgba(15,23,42,0.18); min-height:400px; }
+        @media (max-width: 900px) { .rpt-side { width:280px; } }
     </style>
 	
 	
@@ -750,6 +787,39 @@
         </div>
     </div>
 
+    <!-- ✨ [v17.9] 운영보고서 작성 화면 -->
+    <div id="reportOverlay">
+        <aside class="rpt-side">
+            <div class="rpt-side-head">
+                <div class="rpt-bar-title"><span class="rpt-emblem">📊</span><div>운영보고서 작성<br><small>입력된 데이터로 자동 집계됩니다</small></div></div>
+                <div class="rpt-side-actions">
+                    <button type="button" class="rpt-btn rpt-btn-print" onclick="printOpsReport()">🖨️ 인쇄하기 / PDF 저장</button>
+                    <button type="button" class="rpt-btn rpt-btn-close" onclick="closeOpsReport()">✕ 닫기</button>
+                </div>
+            </div>
+            <div class="rpt-side-body">
+                <div class="rpt-grp-t">📝 기본 정보</div>
+                <label class="rpt-f"><span>보고서 제목</span><textarea id="rptTitle" rows="2" oninput="rptFieldChanged()"></textarea></label>
+                <label class="rpt-f"><span>학교명</span><input id="rptSchool" placeholder="예) 인천갈월초등학교" oninput="rptFieldChanged()"></label>
+                <label class="rpt-f"><span>작성자</span><input id="rptWriter" placeholder="예) 늘봄행정실무사 홍길동" oninput="rptFieldChanged()"></label>
+                <div class="rpt-f2">
+                    <label class="rpt-f"><span>집계 범위</span><select id="rptScope" onchange="rptFieldChanged()"></select></label>
+                    <label class="rpt-f"><span>수강현황 보기</span><select id="rptDeptView" onchange="rptFieldChanged()"><option value="dept">부서별 (1부·2부 합침)</option><option value="course">강좌별 (개별 강좌)</option></select></label>
+                </div>
+                <label class="rpt-f"><span id="rptG3TotalLbl">올해 초3 전체 학생 수</span><input id="rptG3Total" type="number" min="0" placeholder="예) 112 (학교 전체 3학년 인원)" oninput="rptFieldChanged()"><small style="display:block; color:#94a3b8; font-size:11px; margin-top:4px; line-height:1.4;">프로그램엔 이용 학생만 등록되어 있어서, 전체 인원을 넣어야 정확한 이용률이 나와요</small></label>
+                <div class="rpt-f" id="rptApprovalField"><span>결재란</span>
+                    <div class="rpt-seg"><button type="button" id="rptApprOn" onclick="rptSetApproval(true)">넣기</button><button type="button" id="rptApprOff" onclick="rptSetApproval(false)">빼기</button></div>
+                    <input id="rptApprovalLabels" placeholder="담당,행정실장,교감,교장" oninput="rptFieldChanged()" style="margin-top:6px;"></div>
+
+                <div class="rpt-grp-t" style="margin-top:18px;">☑️ 보고서에 넣을 항목</div>
+                <div class="rpt-chips" id="rptChips"></div>
+
+                <div class="rpt-grp-t" style="margin-top:18px;">💬 종합 의견</div>
+                <label class="rpt-f"><textarea id="rptOpinion" rows="5" placeholder="운영 성과, 개선 사항, 차기 계획 등 (보고서 마지막 '종합 의견'에 표시)" oninput="rptFieldChanged()"></textarea></label>
+            </div>
+        </aside>
+        <main class="rpt-main"><div class="rpt-paper-wrap"><iframe id="rptFrame" title="운영보고서 미리보기"></iframe></div></main>
+    </div>
     <!-- ✨ 똑똑한 출석부 만들기 마법사 -->
     <div id="smartAttModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:600px; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
@@ -1126,7 +1196,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V17.8</span>
+                <span class="brand-version">V17.9</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1237,9 +1307,20 @@
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
 
+                <div style="background:linear-gradient(135deg, #fffbeb, #fef3c7); border:2px solid #d4af37; border-radius:14px; padding:16px; box-shadow:0 4px 12px rgba(212,175,55,0.25);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <span style="background:#1e3a5f; color:#fde68a; font-size:11px; font-weight:900; padding:2px 8px; border-radius:10px;">NEW</span>
+                        <span style="font-size:17px; font-weight:900; color:#1e3a5f; line-height:1.3;">📊 운영보고서 만들기</span>
+                    </div>
+                    <div style="font-size:14px; color:#334155; line-height:1.75;">
+                        <b style="color:#92400e;">업무,저장,인쇄 → 운영보고서 만들기</b>를 누르면 화면 전체가 <b>보고서 작성 화면</b>으로 바뀌어요.<br>
+                        · 분기 총괄 요약, 부서별 수강현황·실적, 수강자 증가추이, <b>예산 집행률</b>, 지원 유형별·학년별 현황, 환불 이력, 전입·전출 잔액, <b>마감 체크리스트</b>까지 자동 집계<br>
+                        · 넣을 항목만 골라서 체크, <b>결재란</b>·학교명·작성자·종합 의견 입력 후 <b>A4로 인쇄 / PDF 저장</b>
+                    </div>
+                </div>
+
                 <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); border:2px solid #d4af37; border-radius:14px; padding:16px; box-shadow:0 4px 12px rgba(30,58,95,0.25);">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                        <span style="background:#d4af37; color:#0f172a; font-size:11px; font-weight:900; padding:2px 8px; border-radius:10px;">NEW</span>
                         <span style="font-size:17px; font-weight:900; color:#fde68a; line-height:1.3;">📒 똑똑한 출석부 만들기</span>
                     </div>
                     <div style="font-size:14px; color:#e2e8f0; line-height:1.75;">
@@ -1793,10 +1874,13 @@
             <button class="close-btn" onclick="closeModal('subManageModal')">&times;</button>
         </div>
         <div class="detail-body" style="max-height:400px;">
-            <div style="text-align:right; margin-bottom: 15px;">
-                <button class="btn-save" style="height:34px; padding:0 18px; border:none; border-radius:4px; background:var(--sidebar-accent); color:white; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="saveSelectedSubjects()">✅ 선택 반영 (저장)</button>
-            </div>
-            <div id="subCheckListArea" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;"></div>
+            <div id="subCheckListArea" style="display:flex; flex-direction:column; gap:10px;" onchange="updateSubSelCount()"></div>
+        </div>
+        <!-- ✨ [v17.9] 저장 버튼을 스크롤 영역 밖(하단 고정)으로 이동 → 스크롤 위치와 상관없이 항상 보임 -->
+        <div class="sub-manage-footer" style="flex-shrink:0; display:flex; align-items:center; gap:8px; padding:12px 16px; border-top:1px solid #e5e7eb; background:white; box-shadow:0 -4px 10px rgba(0,0,0,0.06);">
+            <span id="subSelCount" style="font-size:13px; font-weight:700; color:#475569; margin-right:auto;"></span>
+            <button class="btn-tool" style="height:36px; padding:0 14px; border:1px solid #d1d5db; border-radius:6px; background:white; color:#374151; font-weight:bold; cursor:pointer;" onclick="closeModal('subManageModal')">취소</button>
+            <button class="btn-save" style="height:36px; padding:0 18px; border:none; border-radius:6px; background:var(--sidebar-accent); color:white; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="saveSelectedSubjects()">✅ 선택 반영 (저장)</button>
         </div>
     </div>
 
@@ -1831,6 +1915,7 @@
                 <button class="btn-save" style="background: #8b5cf6; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(139,92,246,0.3);" onclick="closePrintExportModal(); generateEduOfficeExcel();">🏫 교육청-학생별 지원 내역 관리 서식 작성</button>
                 <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
                 <button class="btn-save" style="background: linear-gradient(135deg, #1e3a5f, #0f172a); width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37; color:#fde68a;" onclick="closePrintExportModal(); openSmartAttModal();">📒 똑똑한 출석부 만들기</button>
+                <button class="btn-save" style="background: linear-gradient(135deg, #fde68a, #d4af37); width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(212,175,55,0.35); border: 1px solid #b8860b; color:#0f172a; font-weight:800;" onclick="closePrintExportModal(); openOpsReport();">📊 운영보고서 만들기</button>
                 <button class="btn-save" style="background: #b91c1c; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); openRefundRosterModal();">🧾 환불 명단 엑셀 저장</button>
                 <button class="btn-save" style="background: #0f766e; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d4af37;" onclick="closePrintExportModal(); openTuitionStatementModal();">📋 방과후 정산파일(N월 교육비) 저장</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
@@ -5680,36 +5765,56 @@ function toggleStatusPanel() {
                     q_allocs.forEach(a => {
                         if (!a) return;
                         a.refG3Su=0; a.refFrSu=0; a.refSkSu=0; a.refG3Gy=0; a.refFrGy=0; a.refSkGy=0; a.refG3J=0; a.refFrJ=0; a.refSkJ=0; // ✨ 화면 표시용 환불 배분액 (과목별 보기에서 사용)
-                        [['Su','rSu'], ['Gy','rGy'], ['J','rJ']].forEach(([suffix, rKey]) => {
+                        // ✨ [v17.9] 환불 항목(refundLog)별로 어느 지원금에서 환불할지 정함
+                        //   ① 항목에 환불지원금을 직접 지정(l.fund = 'sk'|'free'|'g3')했으면 그 칸에서 먼저 환불
+                        //   ② '자동'인 항목은 차 순서대로(앞 차부터) 수익자 → 자유수강 → 초3 순으로 환불
+                        //   (예전처럼 모든 항목을 같은 비율로 반반 나누지 않음)
+                        let subObj = (r[q] && r[q].subs) ? r[q].subs[a.sIdx] : null;
+                        let logs = (subObj && Array.isArray(subObj.refundLog)) ? subObj.refundLog : [];
+                        const monthOrd = m => m === 'pre' ? 0 : (m === undefined || m === null || m === '' ? 99 : toNum(m));
+                        let order = logs.map((l, li) => li).sort((x, y) => (monthOrd(logs[x].month) - monthOrd(logs[y].month)) || (x - y));
+                        a.refEntries = {};
+                        [['Su','rSu','amount'], ['Gy','rGy','gy'], ['J','rJ','j']].forEach(([suffix, rKey, lKey]) => {
                             let refundAmt = a[rKey];
-                            if (refundAmt > 0) {
-                                let g3Key = 'g3'+suffix, frKey = 'fr'+suffix, skKey = 'sk'+suffix;
-                                let base = a[g3Key] + a[frKey] + a[skKey];
-                                if (base > 0) {
-                                    let applyRefund = Math.min(refundAmt, base);
-
-                                    // ✨ 1순위: 수익자 부담분에서 먼저 최대한 뺀다
-                                    let refSk = Math.min(applyRefund, a[skKey]);
-                                    let remainRefund = applyRefund - refSk;
-
-                                    // ✨ 그래도 남으면 자유수강에서 먼저, 그다음 초3에서 뺀다
-                                    let refG3 = 0, refFr = 0;
-                                    if (remainRefund > 0) {
-                                        let g3frBase = a[g3Key] + a[frKey];
-                                        if (g3frBase > 0) {
-                                            refFr = Math.min(remainRefund, a[frKey]);
-                                            refG3 = remainRefund - refFr;
-                                        }
-                                    }
-
-                                    a[g3Key] -= refG3; a[frKey] -= refFr; a[skKey] -= refSk;
-                                    remG3_Total += refG3; if(idx <= h1CutoffIndex) remG3_H1 += refG3; availableG3ForQ += refG3;
-                                    remFree += refFr;
-                                    q_usedG3 -= refG3; q_usedFree -= refFr;
-                                    q_over -= refSk;
-                                    a['refG3'+suffix] = refG3; a['refFr'+suffix] = refFr; a['refSk'+suffix] = refSk;
+                            if (!(refundAmt > 0)) return;
+                            let g3Key = 'g3'+suffix, frKey = 'fr'+suffix, skKey = 'sk'+suffix;
+                            let base = a[g3Key] + a[frKey] + a[skKey];
+                            if (base <= 0) return;
+                            let remaining = Math.min(refundAmt, base);
+                            let avail = { sk: a[skKey], fr: a[frKey], g3: a[g3Key] };
+                            let taken = { sk: 0, fr: 0, g3: 0 };
+                            // 항목별 금액 (기록 합계가 실제 환불액보다 적으면 남는 몫은 '자동' 덩어리로 처리)
+                            let chunks = [];
+                            order.forEach(li => {
+                                let amt = Math.min(toNum(logs[li][lKey]), remaining - chunks.reduce((s2, c2) => s2 + c2.amt, 0));
+                                if (amt > 0) chunks.push({ li, amt, fund: logs[li].fund });
+                            });
+                            let logged = chunks.reduce((s2, c2) => s2 + c2.amt, 0);
+                            if (remaining - logged > 0) chunks.push({ li: -1, amt: remaining - logged, fund: undefined });
+                            const put = (c2, b2, v) => {
+                                if (v <= 0) return;
+                                avail[b2] -= v; taken[b2] += v; c2.left -= v;
+                                if (c2.li >= 0) {
+                                    let e = a.refEntries[c2.li] || (a.refEntries[c2.li] = { sk: { Su: 0, Gy: 0, J: 0 }, fr: { Su: 0, Gy: 0, J: 0 }, g3: { Su: 0, Gy: 0, J: 0 } });
+                                    e[b2][suffix] += v;
                                 }
-                            }
+                            };
+                            chunks.forEach(c2 => c2.left = c2.amt);
+                            // ① 지정된 항목 먼저
+                            chunks.forEach(c2 => {
+                                let b2 = c2.fund === 'sk' ? 'sk' : (c2.fund === 'free' ? 'fr' : (c2.fund === 'g3' ? 'g3' : null));
+                                if (b2) put(c2, b2, Math.min(c2.left, avail[b2]));
+                            });
+                            // ② 나머지(자동 + 지정 칸이 모자라 넘친 몫): 수익자 → 자유수강 → 초3
+                            chunks.forEach(c2 => { ['sk', 'fr', 'g3'].forEach(b2 => put(c2, b2, Math.min(c2.left, avail[b2]))); });
+
+                            let refSk = taken.sk, refFr = taken.fr, refG3 = taken.g3;
+                            a[g3Key] -= refG3; a[frKey] -= refFr; a[skKey] -= refSk;
+                            remG3_Total += refG3; if(idx <= h1CutoffIndex) remG3_H1 += refG3; availableG3ForQ += refG3;
+                            remFree += refFr;
+                            q_usedG3 -= refG3; q_usedFree -= refFr;
+                            q_over -= refSk;
+                            a['refG3'+suffix] = refG3; a['refFr'+suffix] = refFr; a['refSk'+suffix] = refSk;
                         });
                         // ✨ 환불 반영 후 최종 net 값으로 갱신 (다운스트림 화면에서 쓰는 "순 배분액" 의미 유지)
                         a.netSu = a.g3Su + a.frSu + a.skSu;
@@ -7783,7 +7888,7 @@ function updateG3LimitTotal() {
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${egy ? formatMoney(egy) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${ej ? formatMoney(ej) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; font-weight:800; color:#b91c1c;">${formatMoney(eTotal)}</td>
-													<td style="padding:6px; border:1px solid #e5e7eb; text-align:left;">${getRefundSourceHtml(subs[it.sIdx], c.allocs && c.allocs['q' + q] ? c.allocs['q' + q][it.sIdx] : null, l)}</td>
+													<td style="padding:6px; border:1px solid #e5e7eb; text-align:left;">${getRefundSourceHtml(subs[it.sIdx], c.allocs && c.allocs['q' + q] ? c.allocs['q' + q][it.sIdx] : null, l, { r, q, sIdx: it.sIdx, li: it.li })}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;"><input type="text" value="${l.reason || ''}" placeholder="사유 입력" style="width:100%; padding:3px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px; box-sizing:border-box;" onchange="updateRefundLogReason('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)"></td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center;"><button type="button" onclick="deleteRefundLogEntry('${r.id}', ${q}, ${it.sIdx}, ${it.li})" style="border:none; background:none; color:#9ca3af; cursor:pointer; font-size:14px;">🗑️</button></td>
                                                 </tr>`;
@@ -8301,25 +8406,45 @@ function updateG3LimitTotal() {
         }
 		
 		
-		function getRefundSourceHtml(s, alloc, l) {
-    alloc = alloc || {};
-    let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
+		function getRefundEntrySplit(s, alloc, l) {
+            // ✨ [v17.9] calcStudent가 항목별로 정한 환불 지원금 배분 사용 (없으면 예전 비율 방식)
+            alloc = alloc || {};
+            let li = (s.refundLog || []).indexOf(l);
+            if (alloc.refEntries && li >= 0) {
+                let e = alloc.refEntries[li];
+                const z = { Su: 0, Gy: 0, J: 0 };
+                return { sk: e ? e.sk : z, g3: e ? e.g3 : z, fr: e ? e.fr : z };
+            }
+            let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
+            let rs = rSu > 0 ? toNum(l.amount) / rSu : 0, rg = rGy > 0 ? toNum(l.gy) / rGy : 0, rj = rJ > 0 ? toNum(l.j) / rJ : 0;
+            let su = distributeRatioRounded([toNum(alloc.refSkSu), toNum(alloc.refG3Su), toNum(alloc.refFrSu)], rs);
+            let gy = distributeRatioRounded([toNum(alloc.refSkGy), toNum(alloc.refG3Gy), toNum(alloc.refFrGy)], rg);
+            let j = distributeRatioRounded([toNum(alloc.refSkJ), toNum(alloc.refG3J), toNum(alloc.refFrJ)], rj);
+            return { sk: { Su: su[0], Gy: gy[0], J: j[0] }, g3: { Su: su[1], Gy: gy[1], J: j[1] }, fr: { Su: su[2], Gy: gy[2], J: j[2] } };
+        }
+		function getRefundSourceHtml(s, alloc, l, ctx) {
+    let sp = getRefundEntrySplit(s, alloc, l);
     let cats = [
-        { label: '수익자', color: '#b91c1c', su: toNum(alloc.refSkSu), gy: toNum(alloc.refSkGy), j: toNum(alloc.refSkJ) },
-        { label: getG3Label(), color: '#0284c7', su: toNum(alloc.refG3Su), gy: toNum(alloc.refG3Gy), j: toNum(alloc.refG3J) },
-        { label: '자유수강', color: '#9333ea', su: toNum(alloc.refFrSu), gy: toNum(alloc.refFrGy), j: toNum(alloc.refFrJ) }
+        { label: '수익자', color: '#b91c1c', v: sp.sk },
+        { label: getG3Label(), color: '#0284c7', v: sp.g3 },
+        { label: '자유수강', color: '#9333ea', v: sp.fr }
     ];
-    let rs = rSu > 0 ? toNum(l.amount) / rSu : 0;
-    let rg = rGy > 0 ? toNum(l.gy) / rGy : 0;
-    let rj = rJ > 0 ? toNum(l.j) / rJ : 0;
-    let suP = distributeRatioRounded(cats.map(c => c.su), rs);
-    let gyP = distributeRatioRounded(cats.map(c => c.gy), rg);
-    let jP = distributeRatioRounded(cats.map(c => c.j), rj);
-    let out = cats.map((c, i) => {
-        let amt = suP[i] + gyP[i] + jP[i];
+    let out = cats.map(c => {
+        let amt = c.v.Su + c.v.Gy + c.v.J;
         return amt > 0 ? '<div style="color:' + c.color + '; font-weight:700; white-space:nowrap;">' + c.label + ' ' + formatMoney(amt) + '</div>' : '';
-    }).join('');
-    return out || '<span style="color:#9ca3af;">-</span>';
+    }).join('') || '<span style="color:#9ca3af;">-</span>';
+    if (ctx && ctx.r) {
+        let r = ctx.r, f = l.fund || '';
+        let opts = [['', '자동']];
+        opts.push(['sk', '수익자']);
+        if (r.hasFree) opts.push(['free', '자유수강']);
+        if (r.hasG3) opts.push(['g3', getG3LabelShort()]);
+        if (f && !opts.some(o => o[0] === f)) opts.push([f, f === 'free' ? '자유수강' : (f === 'g3' ? getG3LabelShort() : '수익자')]);
+        let selStyle = f ? 'border:1.5px solid #d4af37; background:#fffbeb; color:#92400e;' : 'border:1px solid #cbd5e1; background:white; color:#475569;';
+        out += '<select class="no-print" title="이 환불을 어느 지원금에서 뺄지 지정 (자동: 앞 차부터 수익자 → 자유수강 → 초3 순)" onchange="setRefundLogFund(\'' + r.id + '\', ' + ctx.q + ', ' + ctx.sIdx + ', ' + ctx.li + ', this.value)" style="margin-top:4px; width:100%; font-size:11.5px; padding:2px 4px; border-radius:4px; font-weight:700; ' + selStyle + '">'
+            + opts.map(o => '<option value="' + o[0] + '"' + (o[0] === f ? ' selected' : '') + '>' + (o[0] ? '📌 ' + o[1] + '에서 환불' : '⚙️ 자동') + '</option>').join('') + '</select>';
+    }
+    return out;
 }
 		
 		
@@ -8378,6 +8503,17 @@ function updateG3LimitTotal() {
                     let suParts = distributeRatioRounded(cats.map(c => c.su), ratioSu);
                     let gyParts = distributeRatioRounded(cats.map(c => c.gy), ratioGy);
                     let jParts = distributeRatioRounded(cats.map(c => c.j), ratioJ);
+                    // ✨ [v17.9] 항목별 환불지원금 배분이 있으면(기록 합계 = 실제 환불액) 그 값을 그대로 사용
+                    let logs = s.refundLog || [];
+                    let lgSu = logs.reduce((t, l) => t + toNum(l.amount), 0), lgGy = logs.reduce((t, l) => t + toNum(l.gy), 0), lgJ = logs.reduce((t, l) => t + toNum(l.j), 0);
+                    if (alloc.refEntries && lgSu >= rSu && lgGy >= rGy && lgJ >= rJ) {
+                        suParts = [0, 0, 0]; gyParts = [0, 0, 0]; jParts = [0, 0, 0];
+                        logs.forEach((l, li) => {
+                            if (month && l.month !== month) return;
+                            let e = alloc.refEntries[li]; if (!e) return;
+                            ['sk', 'g3', 'fr'].forEach((b, bi) => { suParts[bi] += e[b].Su; gyParts[bi] += e[b].Gy; jParts[bi] += e[b].J; });
+                        });
+                    }
                     cats.forEach((cat, ci) => {
                         let su = suParts[ci], gy = gyParts[ci], j = jParts[ci];
                         let amount = su + gy + j;
@@ -9097,6 +9233,22 @@ function updateG3LimitTotal() {
             document.getElementById('refundLogMonthModal').style.display = 'none';
             refundLogMonthCtx = null;
         }
+        // ✨ [v17.9] 환불 항목별 '어느 지원금에서 환불할지' 지정 (''=자동, 'sk'=수익자, 'free'=자유수강, 'g3'=초3)
+        function setRefundLogFund(id, q, sIdx, li, val) {
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s || !s.refundLog || !s.refundLog[li]) return;
+            if (val) s.refundLog[li].fund = val; else delete s.refundLog[li].fund;
+            persistData();
+            let modal = document.getElementById('detailModal');
+            let bodyEl = modal ? modal.querySelector('.detail-body') : null;
+            let keep = bodyEl ? bodyEl.scrollTop : 0;
+            showDetailModal(id);
+            let bodyEl2 = modal ? modal.querySelector('.detail-body') : null;
+            if (bodyEl2) bodyEl2.scrollTop = keep;
+            if (typeof renderGrid === 'function') renderGrid();
+        }
         function updateRefundLogReason(id, q, sIdx, li, val) {
             let r = db.find(x => x.id == id);
             if (!r) return;
@@ -9420,6 +9572,13 @@ function updateG3LimitTotal() {
             }
             document.getElementById('subManageOverlay').classList.add('active');
             document.getElementById('subManageModal').style.display = 'flex';
+            updateSubSelCount();
+        };
+        window.updateSubSelCount = function() {
+            let el = document.getElementById('subSelCount');
+            if (!el) return;
+            let n = document.querySelectorAll('#subCheckListArea input[type="checkbox"]:checked').length;
+            el.textContent = `선택한 과목 ${n}개`;
         };
 
         window.saveSelectedSubjects = function() {
@@ -13208,6 +13367,536 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             saState.subjects = all.map(s => Object.assign({}, s, { students: s.allStudents.filter(st => st.lastMonth >= c) })).filter(s => s.students.length > 0);
             saState.droppedCount = all.reduce((a, s) => a + (s.allStudents.length - s.allStudents.filter(st => st.lastMonth >= c).length), 0);
         }
+        const RPT_PAPER_CSS = "        * { margin:0; padding:0; box-sizing:border-box; }\n        body { font-family:'Pretendard','맑은 고딕','Malgun Gothic',sans-serif; background:white; }\n        .rpt-paper { padding:16mm 15mm 18mm; box-sizing:border-box; color:#111827; font-size:12.5px; }\n        .rpt-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }\n        .rpt-head-left { flex:1; min-width:0; }\n        .rpt-org { font-size:12px; color:#1e3a5f; font-weight:800; letter-spacing:1px; }\n        .rpt-doc-title { font-size:22px; font-weight:900; letter-spacing:-0.5px; word-break:keep-all; line-height:1.3; margin:6px 0 4px; color:#0f172a; }\n        .rpt-doc-sub { font-size:11.5px; color:#475569; }\n        .rpt-approval { border-collapse:collapse; font-size:11px; flex-shrink:0; }\n        .rpt-approval th { background:#f1f5f9; border:1px solid #64748b; padding:3px 6px; font-weight:800; color:#1e293b; min-width:58px; white-space:nowrap; }\n        .rpt-approval td { border:1px solid #64748b; height:46px; text-align:center; vertical-align:middle; }\n        .rpt-approval td img { max-width:42px; max-height:40px; }\n        .rpt-approval .side { writing-mode:vertical-rl; width:18px; background:#1e3a5f; color:white; font-weight:800; letter-spacing:4px; border:1px solid #1e3a5f; padding:4px 2px; }\n        .rpt-rule { height:4px; background:linear-gradient(90deg, #1e3a5f 0 70%, #d4af37 70% 100%); margin:12px 0 6px; }\n        .rpt-meta { display:grid; grid-template-columns:repeat(4, 1fr); border:1px solid #cbd5e1; margin-bottom:6px; }\n        .rpt-meta div { padding:6px 8px; border-right:1px solid #e2e8f0; font-size:11.5px; }\n        .rpt-meta div:last-child { border-right:none; }\n        .rpt-meta b { display:block; font-size:10.5px; color:#64748b; font-weight:700; margin-bottom:2px; }\n\n        .rpt-kpis { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:14px 0 4px; }\n        .rpt-kpi { border:1px solid #dbe3ee; border-top:3px solid #1e3a5f; padding:8px 10px; background:#f8fafc; }\n        .rpt-kpi.g3 { border-top-color:#0284c7; } .rpt-kpi.free { border-top-color:#9333ea; } .rpt-kpi.sk { border-top-color:#b91c1c; }\n        .rpt-kpi .k { font-size:10.5px; color:#64748b; font-weight:700; }\n        .rpt-kpi .v { font-size:17px; font-weight:900; color:#0f172a; margin-top:2px; }\n        .rpt-kpi .s { font-size:10px; color:#94a3b8; margin-top:1px; }\n\n        .rpt-sec { margin-top:20px; }\n        .rpt-sec.keep { break-inside:avoid; page-break-inside:avoid; }\n        table.rpt-t tr { break-inside:avoid; }\n        .rpt-sec-h { display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #1e3a5f; padding-bottom:5px; margin-bottom:6px; }\n        .rpt-sec-no { background:#1e3a5f; color:#fde68a; font-weight:900; font-size:12px; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; align-self:center; }\n        .rpt-sec-t { font-size:15px; font-weight:900; color:#0f172a; }\n        .rpt-sec-r { margin-left:auto; font-size:11px; color:#64748b; }\n        .rpt-note { font-size:11px; color:#64748b; margin:2px 0 6px; line-height:1.5; }\n        table.rpt-t { width:100%; border-collapse:collapse; font-size:11.5px; }\n        table.rpt-t th { background:#eef2f7; color:#1e293b; font-weight:800; border:1px solid #c8d2df; padding:6px 6px; text-align:center; }\n        table.rpt-t thead th { border-top:2px solid #1e3a5f; }\n        table.rpt-t td { border:1px solid #dde4ed; padding:5px 7px; }\n        table.rpt-t td.n { text-align:right; font-variant-numeric:tabular-nums; }\n        table.rpt-t td.c { text-align:center; }\n        table.rpt-t tbody tr:nth-child(even) td { background:#fafbfd; }\n        table.rpt-t tfoot td { background:#1e3a5f; color:white; font-weight:800; border-color:#1e3a5f; }\n        .c-g3 { color:#0369a1; } .c-free { color:#7e22ce; } .c-sk { color:#b91c1c; } .c-ok { color:#15803d; } .c-mute { color:#94a3b8; }\n        .rpt-trend { display:grid; grid-template-columns:1fr 280px; gap:14px; align-items:start; }\n        .rpt-bar-row { display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11.5px; }\n        .rpt-bar-row .lbl { width:44px; font-weight:800; color:#334155; }\n        .rpt-bar-row .track { flex:1; height:16px; background:#eef2f7; border-radius:3px; overflow:hidden; }\n        .rpt-bar-row .fill { height:100%; background:linear-gradient(90deg, #1e3a5f, #3b82f6); }\n        .rpt-bar-row .val { width:52px; text-align:right; font-weight:800; }\n        .rpt-usage { border:1px solid #c8d2df; border-left:4px solid #d4af37; background:#fffdf5; padding:9px 12px; margin-bottom:10px; font-size:12px; line-height:1.6; }\n        .rpt-usage .row { display:flex; gap:8px; align-items:baseline; margin:2px 0; }\n        .rpt-usage .tag { flex-shrink:0; font-size:10.5px; font-weight:800; color:white; padding:1px 7px; border-radius:3px; }\n        .rpt-usage .tag.free { background:#7e22ce; } .rpt-usage .tag.g3 { background:#0369a1; }\n        .rpt-usage .src { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-gauge { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }\n        .rpt-gauge-box { border:1px solid #dbe3ee; padding:10px 12px; }\n        .rpt-gauge-box .t { font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between; }\n        .rpt-gauge-box .pct { font-size:20px; font-weight:900; }\n        .rpt-gauge-box .track { height:9px; background:#eef2f7; border-radius:5px; overflow:hidden; margin-top:5px; }\n        .rpt-gauge-box .fill { height:100%; }\n        .rpt-gauge-box .s { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-check { display:flex; align-items:flex-start; gap:8px; padding:6px 4px; border-bottom:1px dashed #e2e8f0; font-size:11.5px; }\n        .rpt-check .ic { width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:11px; flex-shrink:0; }\n        .rpt-check .ok { background:#dcfce7; color:#15803d; } .rpt-check .warn { background:#fef3c7; color:#b45309; } .rpt-check .bad { background:#fee2e2; color:#b91c1c; }\n        .rpt-check .d { color:#64748b; font-size:10.5px; margin-top:1px; }\n        .rpt-foot { margin-top:22px; padding-top:8px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:10.5px; color:#94a3b8; }\n        .rpt-empty { text-align:center; color:#94a3b8; padding:10px !important; }\n        .rpt-toggle-inline { font-size:11px; color:#1e3a5f; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }\n\n        @page { size: A4 portrait; margin: 12mm 11mm; }\n        @media print { .rpt-paper { padding:0 !important; } .rpt-sec-h, table.rpt-t thead { break-after:avoid; } * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }\n";
+        // ===== ✨ [v17.9] 운영보고서 만들기 =====
+        const RPT_KEY = 'edusync_report_v1';
+        const RPT_SECTIONS = [
+            ['summary', '분기 총괄 요약'],
+            ['dept', '부서별 수강현황'],
+            ['trend', '수강자 증가추이'],
+            ['perf', '부서별 실적 요약'],
+            ['budget', '예산 집행 현황'],
+            ['tier', '지원 유형별 현황'],
+            ['grade', '학년별 참여 현황'],
+            ['refund', '환불·조정 이력'],
+            ['transfer', '전입·전출 조정 현황'],
+            ['check', '마감 현황 체크리스트'],
+            ['opinion', '종합 의견']
+        ];
+        function rptEsc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function rptWon(v) { return Math.round(toNum(v)).toLocaleString(); }
+        function rptPct(a, b) { return b > 0 ? (a / b * 100).toFixed(1) + '%' : '-'; }
+        function rptLoad() {
+            let st = {};
+            try { st = JSON.parse(localStorage.getItem(RPT_KEY) || '{}') || {}; } catch (e) { st = {}; }
+            let y = String(getCurrentAcademicYear());
+            if (!st.on) { st.on = {}; RPT_SECTIONS.forEach(([k]) => st.on[k] = true); }
+            RPT_SECTIONS.forEach(([k]) => { if (st.on[k] === undefined) st.on[k] = true; });
+            if (st.approval === undefined) st.approval = true;
+            if (!st.approvalLabels) st.approvalLabels = '담당,행정실장,교감,교장';
+            if (!st.deptView) st.deptView = 'dept';
+            if (!st.scope) st.scope = 'all';
+            if (!st.titles) st.titles = {};
+            if (!st.opinions) st.opinions = {};
+            if (!st.g3Totals) st.g3Totals = {};
+            st._year = y;
+            return st;
+        }
+        function rptSave(st) { try { localStorage.setItem(RPT_KEY, JSON.stringify(st)); } catch (e) {} }
+        function rptDefaultTitle() { return `${getCurrentAcademicYear()}학년도 방과후학교 자유수강권·${getG3Label()} 운영보고서`; }
+
+        function openOpsReport() {
+            let ov = document.getElementById('reportOverlay');
+            if (!ov) return;
+            let st = rptLoad();
+            let y = st._year;
+            document.getElementById('rptTitle').value = st.titles[y] || rptDefaultTitle();
+            document.getElementById('rptSchool').value = st.school || '';
+            document.getElementById('rptWriter').value = st.writer || '';
+            document.getElementById('rptApprovalLabels').value = st.approvalLabels;
+            rptSyncApprovalUi(st.approval);
+            document.getElementById('rptOpinion').value = st.opinions[y] || '';
+            document.getElementById('rptG3Total').value = st.g3Totals[y] || '';
+            document.getElementById('rptG3TotalLbl').textContent = `올해 ${getG3LabelShort()} 전체 학생 수`;
+            let sc = document.getElementById('rptScope');
+            let n = maxQuarter === 6 ? 6 : 4;
+            sc.innerHTML = `<option value="all">연간 전체 (1~${n}분기)</option>` + Array.from({ length: n }, (_, i) => `<option value="${i + 1}">${i + 1}분기까지 누적</option>`).join('');
+            sc.value = (st.scope === 'all' || toNum(st.scope) <= n) ? String(st.scope) : 'all';
+            document.getElementById('rptDeptView').value = st.deptView;
+            rptRenderChips(st);
+            ov.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            rptRender();
+        }
+        function closeOpsReport() {
+            let ov = document.getElementById('reportOverlay');
+            if (ov) ov.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        function rptRenderChips(st) {
+            let box = document.getElementById('rptChips');
+            let html = RPT_SECTIONS.map(([k, label], i) => `<label class="rpt-chip ${st.on[k] ? 'on' : ''}" data-k="${k}"><input type="checkbox" ${st.on[k] ? 'checked' : ''} onchange="rptToggleSec('${k}', this.checked)"><span class="dot">✓</span>${i + 1}. ${label}</label>`).join('');
+            html += `<span class="rpt-chip-tools"><a onclick="rptAll(true)">전체 선택</a><a onclick="rptAll(false)">전체 해제</a></span>`;
+            box.innerHTML = html;
+        }
+        function rptToggleSec(k, on) {
+            let st = rptLoad();
+            if (k === '__approval') st.approval = on; else st.on[k] = on;
+            rptSave(st);
+            let chip = document.querySelector(`#rptChips .rpt-chip[data-k="${k}"]`);
+            if (chip) chip.classList.toggle('on', on);
+            rptRender();
+        }
+        function rptSyncApprovalUi(on) {
+            document.getElementById('rptApprOn').classList.toggle('on', !!on);
+            document.getElementById('rptApprOff').classList.toggle('on', !on);
+            let inp = document.getElementById('rptApprovalLabels');
+            inp.disabled = !on; inp.style.opacity = on ? '1' : '0.45';
+        }
+        function rptSetApproval(on) {
+            let st = rptLoad(); st.approval = on; rptSave(st);
+            rptSyncApprovalUi(on); rptRender();
+        }
+        function rptAll(on) {
+            let st = rptLoad();
+            RPT_SECTIONS.forEach(([k]) => st.on[k] = on);
+            rptSave(st); rptRenderChips(st); rptRender();
+        }
+        let rptTimer = null;
+        function rptFieldChanged() {
+            let st = rptLoad();
+            let y = st._year;
+            st.titles[y] = document.getElementById('rptTitle').value;
+            st.school = document.getElementById('rptSchool').value;
+            st.writer = document.getElementById('rptWriter').value;
+            st.approvalLabels = document.getElementById('rptApprovalLabels').value;
+            st.opinions[y] = document.getElementById('rptOpinion').value;
+            st.g3Totals[y] = document.getElementById('rptG3Total').value;
+            st.scope = document.getElementById('rptScope').value;
+            st.deptView = document.getElementById('rptDeptView').value;
+            rptSave(st);
+            clearTimeout(rptTimer);
+            rptTimer = setTimeout(rptRender, 250);
+        }
+
+        // ---------- 집계 ----------
+        function rptCollect(scope) {
+            let n = maxQuarter === 6 ? 6 : 4;
+            let lastQ = scope === 'all' ? n : Math.min(n, toNum(scope) || n);
+            let qs = Array.from({ length: lastQ }, (_, i) => i + 1);
+            let subjNames = new Set((savedSubjects || []).map(s => (s.name || '').trim()));
+            let D = {
+                n, lastQ, qs,
+                q: {}, // 분기별 총괄
+                dept: {}, course: {}, // 이름 → {byQ:{q:Set}, cnt, bill, g3, free, sk}
+                tiers: {}, grades: {},
+                refunds: {}, refundNoReason: 0,
+                transfers: [],
+                g3: { students: 0, allowance: 0, used: 0, b90: 0, b50: 0, blow: 0, none: 0, usedStudents: 0 },
+                free: { students: 0, allowance: 0, used: 0, b90: 0, b50: 0, blow: 0, none: 0, usedStudents: 0 },
+                overStudents: 0, overTotal: 0, supportedOverStudents: 0, supportedOverTotal: 0,
+                unusedTargets: [], missingInfo: [], unknownSubs: new Set(), missingStd: {},
+                totalStudents: 0, supportedStudents: 0, genStudents: 0
+            };
+            qs.forEach(q => { D.q[q] = { students: 0, g3t: 0, frt: 0, gen: 0, g3: 0, free: 0, sk: 0, bill: 0 }; D.refunds[q] = { cnt: 0, amt: 0 }; });
+            const ensure = (map, key) => map[key] || (map[key] = { byQ: {}, cnt: 0, bill: 0, g3: 0, free: 0, sk: 0, students: new Set() });
+
+            let freeRecs = [];
+            (db || []).forEach(r => {
+                let res;
+                try { res = calcStudent(r); } catch (e) { return; }
+                let supported = !!(r.hasG3 || r.hasFree);
+                let anyEnroll = false, sumG3 = 0, sumFree = 0, sumOver = 0, sumExp = 0;
+                qs.forEach(q => {
+                    let qk = 'q' + q;
+                    let rq = res[qk] || {};
+                    let exp = toNum(rq.exp);
+                    let enrolled = exp > 0;
+                    sumG3 += toNum(rq.usedG3); sumFree += toNum(rq.usedFree); sumOver += toNum(rq.over); sumExp += exp;
+                    if (enrolled) {
+                        anyEnroll = true;
+                        let Q = D.q[q];
+                        Q.students++; if (r.hasG3) Q.g3t++; if (r.hasFree) Q.frt++; if (!r.hasG3 && !r.hasFree) Q.gen++;
+                        Q.g3 += toNum(rq.usedG3); Q.free += toNum(rq.usedFree); Q.sk += toNum(rq.over); Q.bill += exp;
+                    }
+                    let subs = (r[qk] && r[qk].subs) || [];
+                    let allocs = (res.allocs && res.allocs[qk]) || [];
+                    subs.forEach((s, si) => {
+                        let name = (s.name || '').trim();
+                        let a = allocs[si];
+                        let gross = toNum(s.su) + toNum(s.gy) + toNum(s.j);
+                        let refund = toNum(s.rSu) + toNum(s.rGy) + toNum(s.rJ);
+                        if (refund > 0) {
+                            let logs = (s.refundLog || []).filter(l => toNum(l.amount) + toNum(l.gy) + toNum(l.j) > 0);
+                            D.refunds[q].cnt += Math.max(1, logs.length);
+                            D.refunds[q].amt += refund;
+                            if (logs.length ? logs.some(l => !String(l.reason || '').trim()) : !String(s.reasonManual || s.reason || '').trim()) D.refundNoReason++;
+                        }
+                        if (!name || gross <= 0) return;
+                        if (subjNames.size && !subjNames.has(name)) D.unknownSubs.add(name);
+                        let sub = (savedSubjects || []).find(x => (x.name || '').trim() === name);
+                        if (sub && !(sub.fees && sub.fees[q] && toNum(sub.fees[q].stdSessions) > 0)) {
+                            (D.missingStd[q] || (D.missingStd[q] = new Set())).add(name);
+                        }
+                        let net = a ? (a.netSu + a.netGy + a.netJ) : Math.max(0, gross - refund);
+                        if (net <= 0) return; // 전액 환불 제외
+                        [[D.dept, baseSubjectName(name)], [D.course, name]].forEach(([map, key]) => {
+                            let o = ensure(map, key);
+                            (o.byQ[q] || (o.byQ[q] = new Set())).add(r.id);
+                            o.cnt++;
+                            // ✨ 현황보기 [중복안함 표]와 같은 기준: 학생-과목 1건을 초3 > 자유수강 > 수익자 중 한 칸에만
+                            let cq = (o.cat || (o.cat = {}))[q] || (o.cat[q] = { g3: 0, free: 0, ben: 0 });
+                            if (a && (a.g3Su + a.g3Gy + a.g3J) > 0) cq.g3++;
+                            else if (a && (a.frSu + a.frGy + a.frJ) > 0) cq.free++;
+                            else cq.ben++;
+                            o.bill += net;
+                            if (a) { o.g3 += a.g3Su + a.g3Gy + a.g3J; o.free += a.frSu + a.frGy + a.frJ; o.sk += a.skSu + a.skGy + a.skJ; }
+                            else o.sk += net;
+                        });
+                    });
+                });
+
+                if (anyEnroll) D.totalStudents++;
+                if (anyEnroll && !supported) D.genStudents++;
+                if (supported) D.supportedStudents++;
+                if (sumOver > 0) { D.overStudents++; D.overTotal += sumOver; if (supported) { D.supportedOverStudents++; D.supportedOverTotal += sumOver; } }
+                if (r.hasG3) {
+                    let al = getG3AllowanceFor(r);
+                    D.g3.students++; D.g3.allowance += al; D.g3.used += sumG3;
+                    if (sumG3 > 0) D.g3.usedStudents++;
+                    if (sumG3 <= 0) D.g3.none++;
+                    else if (al > 0) { let ratio = sumG3 / al; if (ratio >= 0.9) D.g3.b90++; else if (ratio >= 0.5) D.g3.b50++; else D.g3.blow++; }
+                }
+                if (r.hasFree) freeRecs.push({ key: `${toNum(r.grade)}-${toNum(r.classNum)}-${toNum(r.studentNum)}`, al: getFreeLimitFor(r), used: sumFree });
+                if (supported && sumExp <= 0) D.unusedTargets.push(r);
+                if (!toNum(r.grade) || !toNum(r.classNum) || !String(r.name || '').trim()) D.missingInfo.push(r);
+
+                // 지원 유형별
+                let tierKeys = [];
+                if (r.hasG3) tierKeys.push(getG3Label());
+                if (r.hasFree) tierKeys.push('자유수강권 · ' + (r.freeTier || '유형 미지정'));
+                if (!supported) tierKeys.push('일반(수익자부담)');
+                tierKeys.forEach(t => {
+                    let o = D.tiers[t] || (D.tiers[t] = { students: 0, enrolled: 0, g3: 0, free: 0, sk: 0 });
+                    o.students++; if (anyEnroll) o.enrolled++;
+                    if (t === getG3Label()) o.g3 += sumG3;
+                    else if (t.startsWith('자유수강권')) o.free += sumFree;
+                    else o.sk += sumOver;
+                });
+                // 학년별
+                let g = toNum(r.grade) || 0;
+                let go = D.grades[g] || (D.grades[g] = { students: 0, enrolled: 0, g3t: 0, frt: 0, bill: 0, support: 0, sk: 0 });
+                go.students++; if (anyEnroll) go.enrolled++;
+                if (r.hasG3) go.g3t++; if (r.hasFree) go.frt++;
+                go.bill += sumExp; go.support += sumG3 + sumFree; go.sk += sumOver;
+
+                if (r.transferIn || r.transferOut) {
+                    D.transfers.push({ r, g3Al: r.hasG3 ? getG3AllowanceFor(r) : 0, g3Used: sumG3, frAl: r.hasFree ? getFreeLimitFor(r) : 0, frUsed: sumFree });
+                }
+            });
+            // ✨ 자유수강권 대상 인원 = '자유수강권 명단(NEIS)'에서 특수반·[통보X](지원제외)를 뺀 나머지
+            //    (NEIS 명단이 없으면 프로그램에 자유수강으로 등록된 학생 기준)
+            const addFree = (al, used) => {
+                let F = D.free;
+                F.students++; F.allowance += al; F.used += used;
+                if (used > 0) F.usedStudents++;
+                if (used <= 0) F.none++;
+                else if (al > 0) { let ratio = used / al; if (ratio >= 0.9) F.b90++; else if (ratio >= 0.5) F.b50++; else F.blow++; }
+            };
+            let neisAll = (typeof neisList !== 'undefined' && Array.isArray(neisList)) ? neisList : [];
+            if (neisAll.length) {
+                let recMap = {}; freeRecs.forEach(x => recMap[x.key] = x);
+                D.free.source = 'neis';
+                D.free.exSpecial = neisAll.filter(st => st.status === '특수반').length;
+                D.free.exNotify = neisAll.filter(st => st.status === '통보X').length;
+                D.free.missing = neisAll.filter(st => st.status === '제외').length;
+                let seen = new Set();
+                neisAll.filter(st => st.status !== '특수반' && st.status !== '통보X').forEach(st => {
+                    let key = `${toNum(st.grade)}-${toNum(st.classNum)}-${toNum(st.studentNum)}`;
+                    if (seen.has(key)) return; seen.add(key);
+                    let m = recMap[key];
+                    addFree(m ? m.al : getFreeAllowanceDefault(), m ? m.used : 0);
+                });
+            } else {
+                D.free.source = 'db';
+                freeRecs.forEach(x => addFree(x.al, x.used));
+            }
+            return D;
+        }
+
+        // ---------- 렌더링 ----------
+        function rptRender() {
+            let frame = document.getElementById('rptFrame');
+            if (!frame) return;
+            let st = rptLoad();
+            let D = rptCollect(st.scope);
+            rptApplyG3Total(D, toNum(st.g3Totals[st._year]));
+            let doc = rptBuildHtml(st, D);
+            frame.srcdoc = doc;
+            frame.onload = () => {
+                try {
+                    let h = frame.contentDocument.documentElement.scrollHeight;
+                    frame.style.height = (h + 4) + 'px';
+                } catch (e) {}
+            };
+        }
+
+        // ✨ 초3 전체 인원(사용자 입력)으로 대상자 수 보정: 프로그램엔 이용 학생만 등록되므로 미등록 = 미이용으로 계산
+        function rptApplyG3Total(D, total) {
+            let G = D.g3;
+            G.registered = G.students;
+            G.inputTotal = total > 0 ? total : 0;
+            if (total > 0 && total >= G.students) {
+                let extra = total - G.students;
+                G.students = total;
+                G.none += extra;
+                G.allowance += extra * getG3Allowance();
+            }
+        }
+        function rptBuildHtml(st, D) {
+            let y = st._year;
+            let title = (st.titles[y] || rptDefaultTitle()).trim() || rptDefaultTitle();
+            let school = (st.school || '').trim();
+            let now = new Date();
+            let pad = v => String(v).padStart(2, '0');
+            let issued = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}.`;
+            let scopeLabel = st.scope === 'all' ? `연간 전체 (1~${D.n}분기)` : `1~${D.lastQ}분기 누적`;
+            let g3L = getG3Label();
+            let secNo = 0;
+            const sec = (title, right, body, keep) => `<section class="rpt-sec ${keep ? 'keep' : ''}"><div class="rpt-sec-h"><span class="rpt-sec-no">${++secNo}</span><span class="rpt-sec-t">${title}</span>${right ? `<span class="rpt-sec-r">${right}</span>` : ''}</div>${body}</section>`;
+            let parts = [];
+
+            // 합계
+            let T = { students: D.totalStudents, g3: 0, free: 0, sk: 0, bill: 0, enrollSum: 0 };
+            D.qs.forEach(q => { let Q = D.q[q]; T.g3 += Q.g3; T.free += Q.free; T.sk += Q.sk; T.bill += Q.bill; T.enrollSum += Q.students; });
+
+            // 결재란
+            let approval = '';
+            if (st.approval) {
+                let labels = String(st.approvalLabels || '').split(/[,，\/]/).map(s => s.trim()).filter(Boolean).slice(0, 6);
+                if (labels.length) approval = `<table class="rpt-approval"><tr><td class="side" rowspan="2">결재</td>${labels.map(l => `<th>${rptEsc(l)}</th>`).join('')}</tr><tr>${labels.map(() => '<td></td>').join('')}</tr></table>`;
+            }
+
+            let head = `
+                <div class="rpt-head">
+                    <div class="rpt-head-left">
+                        <div class="rpt-org">${rptEsc(school || '○○초등학교')} · 방과후학교</div>
+                        <div class="rpt-doc-title">${rptEsc(title)}</div>
+                        <div class="rpt-doc-sub">자유수강권·${rptEsc(g3L)} 집행 및 방과후학교 운영 실적 보고</div>
+                    </div>
+                    ${approval}
+                </div>
+                <div class="rpt-rule"></div>
+                <div class="rpt-meta">
+                    <div><b>학년도</b>${y}학년도 (${D.n}분기제)</div>
+                    <div><b>집계 기준</b>${scopeLabel}</div>
+                    <div><b>발행일</b>${issued}</div>
+                    <div><b>작성자</b>${rptEsc(st.writer || '-')}</div>
+                </div>
+                <div class="rpt-kpis">
+                    <div class="rpt-kpi"><div class="k">수강 학생 (실인원)</div><div class="v">${D.totalStudents.toLocaleString()}명</div><div class="s">분기 연인원 ${T.enrollSum.toLocaleString()}명</div></div>
+                    <div class="rpt-kpi g3"><div class="k">${rptEsc(g3L)} 집행</div><div class="v">${rptWon(T.g3)}원</div><div class="s">집행률 ${rptPct(D.g3.used, D.g3.allowance)}</div></div>
+                    <div class="rpt-kpi free"><div class="k">자유수강권 집행</div><div class="v">${rptWon(T.free)}원</div><div class="s">집행률 ${rptPct(D.free.used, D.free.allowance)}</div></div>
+                    <div class="rpt-kpi sk"><div class="k">수익자부담</div><div class="v">${rptWon(T.sk)}원</div><div class="s">일반 ${D.genStudents}명 · 초과 ${D.supportedOverStudents}명</div></div>
+                    <div class="rpt-kpi"><div class="k">총 청구액</div><div class="v">${rptWon(T.bill)}원</div><div class="s">지원율 ${rptPct(T.g3 + T.free, T.bill)}</div></div>
+                </div>`;
+
+            // 1. 분기 총괄 요약
+            if (st.on.summary) {
+                let rows = D.qs.map(q => { let Q = D.q[q]; return `<tr><td class="c"><b>${q}분기</b></td><td class="n">${Q.students}</td><td class="n">${Q.g3t}</td><td class="n">${Q.frt}</td><td class="n">${Q.gen}</td><td class="n c-g3">${rptWon(Q.g3)}</td><td class="n c-free">${rptWon(Q.free)}</td><td class="n c-sk">${rptWon(Q.sk)}</td><td class="n"><b>${rptWon(Q.bill)}</b></td><td class="n">${rptPct(Q.g3 + Q.free, Q.bill)}</td></tr>`; }).join('');
+                let tg3t = D.qs.reduce((s, q) => s + D.q[q].g3t, 0), tfrt = D.qs.reduce((s, q) => s + D.q[q].frt, 0), tgen = D.qs.reduce((s, q) => s + D.q[q].gen, 0);
+                parts.push(sec('분기 총괄 요약', '단위: 명, 원', `
+                    <table class="rpt-t"><thead><tr><th>분기</th><th>수강 학생</th><th>${rptEsc(getG3LabelShort())} 대상</th><th>자유 대상</th><th>일반(수익자)</th><th>${rptEsc(getG3LabelShort())} 지원액</th><th>자유 지원액</th><th>수익자부담</th><th>총 청구액</th><th>지원율</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot><tr><td class="c">합계</td><td class="n">${T.enrollSum}</td><td class="n">${tg3t}</td><td class="n">${tfrt}</td><td class="n">${tgen}</td><td class="n">${rptWon(T.g3)}</td><td class="n">${rptWon(T.free)}</td><td class="n">${rptWon(T.sk)}</td><td class="n">${rptWon(T.bill)}</td><td class="n">${rptPct(T.g3 + T.free, T.bill)}</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 수강 학생은 해당 분기에 결제(환불 반영 후) 금액이 있는 학생 수이며, 합계는 분기별 연인원입니다. ${rptEsc(getG3LabelShort())}·자유 대상은 두 지원을 함께 받는 학생이 양쪽에 포함되며, 일반(수익자)은 지원 대상이 아닌 학생입니다. 수익자부담은 일반 학생 결제액과 지원 대상자의 한도 초과분을 합한 금액입니다. 지원율 = (${rptEsc(g3L)} + 자유수강권) ÷ 총 청구액</div>`, true));
+            }
+
+            // 2. 부서별 수강현황 - ✨ 현황보기의 [중복안함 표]와 같은 기준 (N부 합침, 학생-과목 1건 = 1명, 초3 > 자유 > 수익자 한 칸)
+            let byCourse = st.deptView === 'course';
+            let deptMap = byCourse ? D.course : D.dept;
+            let orderRef = byCourse ? (savedSubjects || []).map(s => (s.name || '').trim()) : (typeof ensureSubjectOrderList === 'function' ? ensureSubjectOrderList() : []);
+            let deptKeys = Object.keys(deptMap).sort((a, b) => {
+                let ia = orderRef.indexOf(a), ib = orderRef.indexOf(b);
+                if (ia === -1) ia = 1e6; if (ib === -1) ib = 1e6;
+                return (ia - ib) || a.localeCompare(b, 'ko');
+            });
+            if (st.on.dept) {
+                let colTot = {}; D.qs.forEach(q => colTot[q] = 0);
+                let gt = { g3: 0, free: 0, ben: 0 };
+                let rows = deptKeys.map(k => {
+                    let o = deptMap[k]; let tot = 0, rg3 = 0, rfr = 0, rben = 0;
+                    let cells = D.qs.map(q => {
+                        let c = (o.cat && o.cat[q]) || { g3: 0, free: 0, ben: 0 };
+                        let n = c.g3 + c.free + c.ben;
+                        tot += n; colTot[q] += n; rg3 += c.g3; rfr += c.free; rben += c.ben;
+                        return `<td class="n">${n || '<span class="c-mute">-</span>'}</td>`;
+                    }).join('');
+                    gt.g3 += rg3; gt.free += rfr; gt.ben += rben;
+                    return `<tr><td>${rptEsc(k)}</td>${cells}<td class="n"><b>${tot}</b></td><td class="n c-g3">${rg3}</td><td class="n c-free">${rfr}</td><td class="n c-sk">${rben}</td></tr>`;
+                }).join('') || `<tr><td class="rpt-empty" colspan="${D.qs.length + 5}">수강 데이터가 없습니다</td></tr>`;
+                let grand = D.qs.reduce((s, q) => s + colTot[q], 0);
+                parts.push(sec(`${byCourse ? '강좌별' : '부서별'} 수강현황 (연인원)`, '단위: 명', `
+                    <table class="rpt-t"><thead><tr><th rowspan="2" style="text-align:left">${byCourse ? '강좌명' : '강좌(1부·2부 합침)'}</th><th colspan="${D.qs.length}">분기별 수강 인원</th><th rowspan="2">연인원</th><th colspan="3">연인원 구분</th></tr>
+                    <tr>${D.qs.map(q => `<th>${q}분기</th>`).join('')}<th>${rptEsc(getG3LabelShort())}</th><th>자유</th><th>수익자</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot><tr><td class="c">합계 (${deptKeys.length}개)</td>${D.qs.map(q => `<td class="n">${colTot[q]}</td>`).join('')}<td class="n">${grand}</td><td class="n">${gt.g3}</td><td class="n">${gt.free}</td><td class="n">${gt.ben}</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 현황보기의 <b>[중복안함 표]</b>와 같은 기준입니다. 분기별 인원은 그 분기 중복안함 표의 합계와 같습니다. ${byCourse ? '' : '1부·2부처럼 나뉜 강좌는 합쳐서 셉니다. '}한 학생이 1부와 2부를 모두 들으면 2명으로 셉니다. 연인원 구분은 ${rptEsc(getG3LabelShort())} → 자유수강 → 수익자 순서로 한 칸에만 넣습니다. 지원금을 다 써서 100% 수익자로 결제된 수강은 수익자로 셉니다. 전액 환불한 수강은 뺍니다.</div>`));
+            }
+            // 3. 수강자 증가추이
+            if (st.on.trend) {
+                let max = Math.max(1, ...D.qs.map(q => D.q[q].students));
+                let bars = D.qs.map(q => `<div class="rpt-bar-row"><span class="lbl">${q}분기</span><span class="track"><span class="fill" style="display:block; width:${(D.q[q].students / max * 100).toFixed(1)}%"></span></span><span class="val">${D.q[q].students}명</span></div>`).join('');
+                let lastDataQ = Math.max(0, ...D.qs.filter(q => D.q[q].students > 0));
+                let chg = D.qs.slice(1).map(q => {
+                    if (q > lastDataQ) return `<tr><td class="c">${q - 1}→${q}분기</td><td class="c c-mute" colspan="2">미집계</td></tr>`;
+                    let a = D.q[q - 1].students, b = D.q[q].students, d = b - a;
+                    let cls = d > 0 ? 'c-ok' : (d < 0 ? 'c-sk' : 'c-mute');
+                    return `<tr><td class="c">${q - 1}→${q}분기</td><td class="n ${cls}">${d > 0 ? '▲ ' : d < 0 ? '▼ ' : ''}${Math.abs(d)}명</td><td class="n ${cls}">${a > 0 ? (d >= 0 ? '+' : '') + (d / a * 100).toFixed(1) + '%' : '-'}</td></tr>`;
+                }).join('') || `<tr><td class="rpt-empty" colspan="3">비교할 분기가 없습니다</td></tr>`;
+                parts.push(sec('수강자 증가추이', '분기별 수강 학생(실인원)', `
+                    <div class="rpt-trend"><div>${bars}</div>
+                    <table class="rpt-t"><thead><tr><th>구간</th><th>증감</th><th>증감률</th></tr></thead><tbody>${chg}</tbody></table></div>`, true));
+            }
+
+            // 4. 부서별 실적 요약
+            if (st.on.perf) {
+                let t = { cnt: 0, bill: 0, g3: 0, free: 0, sk: 0 };
+                let rows = deptKeys.map(k => {
+                    let o = deptMap[k];
+                    t.cnt += o.cnt; t.bill += o.bill; t.g3 += o.g3; t.free += o.free; t.sk += o.sk;
+                    return `<tr><td>${rptEsc(k)}</td><td class="n">${o.cnt}</td><td class="n"><b>${rptWon(o.bill)}</b></td><td class="n c-g3">${rptWon(o.g3)}</td><td class="n c-free">${rptWon(o.free)}</td><td class="n c-sk">${rptWon(o.sk)}</td><td class="n">${rptPct(o.g3 + o.free, o.bill)}</td></tr>`;
+                }).join('') || `<tr><td class="rpt-empty" colspan="7">수강 데이터가 없습니다</td></tr>`;
+                parts.push(sec(`${byCourse ? '강좌별' : '부서별'} 실적 요약`, '단위: 건, 원', `
+                    <table class="rpt-t"><thead><tr><th style="text-align:left">${byCourse ? '강좌명' : '부서'}</th><th>수강건수</th><th>총 청구액</th><th>${rptEsc(getG3LabelShort())}</th><th>자유</th><th>수익자부담</th><th>지원 비중</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot><tr><td class="c">합계</td><td class="n">${t.cnt}</td><td class="n">${rptWon(t.bill)}</td><td class="n">${rptWon(t.g3)}</td><td class="n">${rptWon(t.free)}</td><td class="n">${rptWon(t.sk)}</td><td class="n">${rptPct(t.g3 + t.free, t.bill)}</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 수강건수는 분기별 수강 건을 모두 더한 값(연간 수강건수)이며, 금액은 환불 반영 후 순금액입니다.</div>`));
+            }
+
+            // 5. 예산 집행 현황
+            if (st.on.budget) {
+                const gauge = (label, o, color) => {
+                    let p = o.allowance > 0 ? Math.min(100, o.used / o.allowance * 100) : 0;
+                    return `<div class="rpt-gauge-box"><div class="t"><span>${label}</span><span>${o.inputTotal === 0 ? '등록' : '대상'} ${o.students}명 · 이용 ${o.usedStudents}명</span></div>
+                        <div class="pct" style="color:${color}">${rptPct(o.used, o.allowance)}</div>
+                        <div class="track"><div class="fill" style="width:${p.toFixed(1)}%; background:${color}"></div></div>
+                        <div class="s">집행 ${rptWon(o.used)}원 / 배정 ${rptWon(o.allowance)}원 · 잔액 ${rptWon(Math.max(0, o.allowance - o.used))}원</div></div>`;
+                };
+                let F = D.free, G = D.g3;
+                let freeSrc = F.source === 'neis'
+                    ? `자유수강권 명단(NEIS) ${(F.students + F.exSpecial + F.exNotify).toLocaleString()}명 중 특수반 ${F.exSpecial}명·[통보X] ${F.exNotify}명을 뺀 인원`
+                    : `자유수강권 명단(NEIS)이 없어 프로그램에 자유수강으로 등록된 학생 기준`;
+                let usageBox = `<div class="rpt-usage">
+                    <div class="row"><span class="tag free">자유수강권</span><span>총 자유수강권 대상자 <b>${F.students.toLocaleString()}명</b> 중 <b class="c-free">${F.usedStudents.toLocaleString()}명(${rptPct(F.usedStudents, F.students)})</b>이 자유수강권을 한 번이라도 이용했습니다. <span class="c-sk">(미이용 ${F.none.toLocaleString()}명)</span></span></div>
+                    ${G.inputTotal ? `<div class="row"><span class="tag g3">${rptEsc(getG3LabelShort())}</span><span>올해 ${rptEsc(getG3LabelShort())} 전체 학생 <b>${G.students.toLocaleString()}명</b> 중 <b class="c-g3">${G.usedStudents.toLocaleString()}명(${rptPct(G.usedStudents, G.students)})</b>이 ${rptEsc(g3L)}을 한 번이라도 이용했습니다. <span class="c-sk">(미이용 ${G.none.toLocaleString()}명)</span></span></div>`
+                        : (G.registered ? `<div class="row"><span class="tag g3">${rptEsc(getG3LabelShort())}</span><span>${rptEsc(g3L)} 이용 학생 <b class="c-g3">${G.usedStudents.toLocaleString()}명</b> <span class="c-mute">(${rptEsc(getG3LabelShort())} 전체 학생 수를 입력하지 않아 이용률은 계산하지 않았습니다)</span></span></div>` : '')}
+                    ${G.inputTotal && G.inputTotal < G.registered ? `<div class="src c-sk">※ 입력한 ${rptEsc(getG3LabelShort())} 전체 학생 수(${G.inputTotal}명)가 프로그램 등록 인원(${G.registered}명)보다 적어 등록 인원 기준으로 계산했습니다.</div>` : ''}
+                    <div class="src">※ 자유수강권 대상자: ${freeSrc}${F.source === 'neis' && F.missing ? ` (명단누락 ${F.missing}명 포함)` : ''}</div>
+                </div>`;
+                parts.push(sec('예산 집행 현황', scopeLabel + ' 집행 기준', `
+                    ${usageBox}
+                    <div class="rpt-gauge">${gauge(rptEsc(g3L), D.g3, '#0369a1')}${gauge('자유수강권', D.free, '#7e22ce')}</div>
+                    <table class="rpt-t"><thead><tr><th>한도 소진 구간</th><th>${rptEsc(getG3LabelShort())} 대상자</th><th>자유수강권 대상자</th><th>비고</th></tr></thead>
+                    <tbody>
+                        <tr><td class="c">90% 이상 사용</td><td class="n">${D.g3.b90}명</td><td class="n">${D.free.b90}명</td><td class="c">거의 소진</td></tr>
+                        <tr><td class="c">50% ~ 90% 미만</td><td class="n">${D.g3.b50}명</td><td class="n">${D.free.b50}명</td><td class="c">정상 사용</td></tr>
+                        <tr><td class="c">50% 미만</td><td class="n">${D.g3.blow}명</td><td class="n">${D.free.blow}명</td><td class="c">사용 독려 필요</td></tr>
+                        <tr><td class="c">미이용 (0원)</td><td class="n">${D.g3.none}명</td><td class="n">${D.free.none}명</td><td class="c">수강 안내 필요</td></tr>
+                    </tbody>
+                    <tfoot><tr><td class="c">지원 대상자 중 한도 초과(수익자부담) 발생</td><td class="n" colspan="2">${D.supportedOverStudents}명 · ${rptWon(D.supportedOverTotal)}원</td><td class="c">전체 수익자부담 ${rptWon(D.overTotal)}원</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 배정액은 학생별 한도(전입·전출 조정 한도 포함)의 합계입니다. 프로그램에 등록되지 않은 대상자(자유수강권 NEIS 명단, 입력한 ${rptEsc(getG3LabelShort())} 전체 인원)는 기본 한도로 계산합니다.</div>`, true));
+            }
+
+            // 6. 지원 유형별 현황
+            if (st.on.tier) {
+                let keys = Object.keys(D.tiers).sort((a, b) => {
+                    const rk = k => k === g3L ? 0 : (k.startsWith('자유') ? 1 : 2);
+                    return rk(a) - rk(b) || a.localeCompare(b, 'ko');
+                });
+                let rows = keys.map(k => { let o = D.tiers[k]; let amt = o.g3 + o.free + o.sk; return `<tr><td>${rptEsc(k)}</td><td class="n">${o.students}</td><td class="n">${o.enrolled}</td><td class="n">${rptPct(o.enrolled, o.students)}</td><td class="n">${rptWon(amt)}</td><td class="n">${o.enrolled ? rptWon(amt / o.enrolled) : '-'}</td></tr>`; }).join('') || `<tr><td class="rpt-empty" colspan="6">데이터가 없습니다</td></tr>`;
+                parts.push(sec('지원 유형별 현황', '단위: 명, 원', `
+                    <table class="rpt-t"><thead><tr><th style="text-align:left">지원 유형</th><th>등록 학생</th><th>수강 학생</th><th>참여율</th><th>집행액</th><th>1인당 평균</th></tr></thead><tbody>${rows}</tbody></table>
+                    <div class="rpt-note">※ 집행액: ${rptEsc(g3L)}·자유수강권은 지원금 사용액, 일반 학생은 수익자부담액입니다. 한 학생이 두 가지 지원을 함께 받으면 각 유형에 모두 포함됩니다.</div>`, true));
+            }
+
+            // 7. 학년별 참여 현황
+            if (st.on.grade) {
+                let keys = Object.keys(D.grades).map(Number).sort((a, b) => a - b);
+                let t = { students: 0, enrolled: 0, g3t: 0, frt: 0, bill: 0, support: 0, sk: 0 };
+                let rows = keys.map(g => { let o = D.grades[g]; Object.keys(t).forEach(k => t[k] += o[k]); return `<tr><td class="c">${g ? g + '학년' : '미지정'}</td><td class="n">${o.students}</td><td class="n">${o.enrolled}</td><td class="n">${o.g3t}</td><td class="n">${o.frt}</td><td class="n">${rptWon(o.bill)}</td><td class="n">${rptWon(o.support)}</td><td class="n">${rptWon(o.sk)}</td></tr>`; }).join('') || `<tr><td class="rpt-empty" colspan="8">데이터가 없습니다</td></tr>`;
+                parts.push(sec('학년별 참여 현황', '단위: 명, 원', `
+                    <table class="rpt-t"><thead><tr><th>학년</th><th>등록 학생</th><th>수강 학생</th><th>${rptEsc(getG3LabelShort())} 대상</th><th>자유 대상</th><th>총 청구액</th><th>지원액</th><th>수익자부담</th></tr></thead><tbody>${rows}</tbody>
+                    <tfoot><tr><td class="c">합계</td><td class="n">${t.students}</td><td class="n">${t.enrolled}</td><td class="n">${t.g3t}</td><td class="n">${t.frt}</td><td class="n">${rptWon(t.bill)}</td><td class="n">${rptWon(t.support)}</td><td class="n">${rptWon(t.sk)}</td></tr></tfoot></table>`, true));
+            }
+
+            // 8. 환불·조정 이력
+            if (st.on.refund) {
+                let tc = 0, ta = 0;
+                let rows = D.qs.map(q => { let o = D.refunds[q]; tc += o.cnt; ta += o.amt; return `<tr><td class="c">${q}분기</td><td class="n">${o.cnt}건</td><td class="n">${rptWon(o.amt)}원</td><td class="n">${o.cnt ? rptWon(o.amt / o.cnt) + '원' : '-'}</td></tr>`; }).join('');
+                parts.push(sec('환불·조정 이력 요약', '', `
+                    <table class="rpt-t"><thead><tr><th>분기</th><th>환불 건수</th><th>환불 총액</th><th>건당 평균</th></tr></thead><tbody>${rows}</tbody>
+                    <tfoot><tr><td class="c">연간 합계</td><td class="n">${tc}건</td><td class="n">${rptWon(ta)}원</td><td class="n">${tc ? rptWon(ta / tc) + '원' : '-'}</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 환불 총액은 수강료·교재비·재료비 환불액의 합계입니다.</div>`, true));
+            }
+
+            // 9. 전입·전출 조정 현황
+            if (st.on.transfer) {
+                let list = D.transfers.slice().sort((a, b) => (toNum(a.r.grade) - toNum(b.r.grade)) || (toNum(a.r.classNum) - toNum(b.r.classNum)) || (toNum(a.r.studentNum) - toNum(b.r.studentNum)));
+                let rows = list.map(t => {
+                    let r = t.r;
+                    let kind = [];
+                    if (r.transferIn) kind.push(`전입(${r.transferInQuarter || 1}분기${r.transferInDate ? ', ' + rptEsc(r.transferInDate) : ''})`);
+                    if (r.transferOut) kind.push(`전출(${r.transferOutQuarter || '-'}분기${r.transferOutDate ? ', ' + rptEsc(r.transferOutDate) : ''})`);
+                    return `<tr><td class="c">${toNum(r.grade)}-${toNum(r.classNum)}-${toNum(r.studentNum)}</td><td class="c">${rptEsc(r.name)}</td><td class="c">${kind.join(' / ')}</td>
+                        <td class="n c-g3">${r.hasG3 ? rptWon(t.g3Al) : '-'}</td><td class="n">${r.hasG3 ? rptWon(t.g3Used) : '-'}</td><td class="n"><b>${r.hasG3 ? rptWon(Math.max(0, t.g3Al - t.g3Used)) : '-'}</b></td>
+                        <td class="n c-free">${r.hasFree ? rptWon(t.frAl) : '-'}</td><td class="n">${r.hasFree ? rptWon(t.frUsed) : '-'}</td><td class="n"><b>${r.hasFree ? rptWon(Math.max(0, t.frAl - t.frUsed)) : '-'}</b></td></tr>`;
+                }).join('') || `<tr><td class="rpt-empty" colspan="9">전입·전출 학생이 없습니다</td></tr>`;
+                parts.push(sec('전입·전출 조정 현황', `${list.length}명`, `
+                    <table class="rpt-t"><thead><tr><th rowspan="2">학적</th><th rowspan="2">이름</th><th rowspan="2">구분</th><th colspan="3">${rptEsc(g3L)}</th><th colspan="3">자유수강권</th></tr>
+                    <tr><th>조정 한도</th><th>사용</th><th>잔액(이관)</th><th>조정 한도</th><th>사용</th><th>잔액(이관)</th></tr></thead><tbody>${rows}</tbody></table>
+                    <div class="rpt-note">※ 잔액은 전출 시 다음 학교로 이관(통보)할 금액 확인용입니다.</div>`));
+            }
+
+            // 10. 마감 현황 체크리스트
+            if (st.on.check) {
+                const item = (lv, title, desc) => `<div class="rpt-check"><span class="ic ${lv}">${lv === 'ok' ? '✓' : (lv === 'warn' ? '!' : '✕')}</span><div><b>${title}</b>${desc ? `<div class="d">${desc}</div>` : ''}</div></div>`;
+                let items = [];
+                let stdQs = Object.keys(D.missingStd).filter(q => D.missingStd[q].size);
+                items.push(stdQs.length ? item('bad', '표준차시 미입력 과목이 있습니다', stdQs.map(q => `${q}분기: ${[...D.missingStd[q]].slice(0, 8).map(rptEsc).join(', ')}${D.missingStd[q].size > 8 ? ` 외 ${D.missingStd[q].size - 8}개` : ''}`).join('<br>') + '<br>→ 과목 목록 관리에서 표준차시를 입력해 주세요.') : item('ok', '모든 수강 과목에 표준차시가 입력되어 있습니다'));
+                items.push(D.unknownSubs.size ? item('warn', `과목 목록에 없는 강좌명 ${D.unknownSubs.size}개`, [...D.unknownSubs].slice(0, 10).map(rptEsc).join(', ') + ' → 과목 목록에 등록하거나 이름을 맞춰 주세요.') : item('ok', '학생 수강 과목이 모두 과목 목록과 일치합니다'));
+                items.push(D.missingInfo.length ? item('warn', `학년·반·이름 누락 학생 ${D.missingInfo.length}명`, D.missingInfo.slice(0, 10).map(r => rptEsc(r.name || '(이름 없음)')).join(', ')) : item('ok', '모든 학생의 학년·반·이름이 입력되어 있습니다'));
+                items.push(D.refundNoReason ? item('warn', `환불 사유가 비어 있는 과목 ${D.refundNoReason}건`, '정산파일 비고·환불 명단에 사유가 표시되도록 입력을 권장합니다.') : item('ok', '환불 건에 사유가 모두 입력되어 있습니다'));
+                items.push(D.unusedTargets.length ? item('warn', `지원금을 한 번도 사용하지 않은 대상자 ${D.unusedTargets.length}명`, D.unusedTargets.slice(0, 12).map(r => `${toNum(r.grade)}-${toNum(r.classNum)} ${rptEsc(r.name)}`).join(', ') + (D.unusedTargets.length > 12 ? ` 외 ${D.unusedTargets.length - 12}명` : '') + ' → 수강 안내(독려) 대상') : item('ok', '모든 지원 대상자가 지원금을 사용했습니다'));
+                items.push(D.supportedOverStudents ? item('warn', `지원 대상자 중 한도 초과(수익자부담) ${D.supportedOverStudents}명 · ${rptWon(D.supportedOverTotal)}원`, '행정실 수납(CMS) 명단에 자부담 금액이 반영되었는지 확인하세요.') : item('ok', '지원 대상자 중 한도 초과 학생이 없습니다'));
+                parts.push(sec('마감 현황 체크리스트', '자동 점검', items.join('')));
+            }
+
+            // 11. 종합 의견
+            if (st.on.opinion) {
+                let op = (st.opinions[y] || '').trim();
+                parts.push(sec('종합 의견', '', `<div style="border:1px solid #c8d2df; min-height:90px; padding:10px 12px; line-height:1.7; font-size:12px; white-space:pre-wrap;">${op ? rptEsc(op) : '<span class="c-mute">(상단 \'종합 의견\' 칸에 입력하면 이곳에 표시됩니다. 운영 성과, 개선 사항, 차기 계획 등을 적어 주세요.)</span>'}</div>`, true));
+            }
+
+            let css = RPT_PAPER_CSS;
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${rptEsc(title)}</title><style>${css}</style></head><body><div class="rpt-paper">
+                ${head}
+                ${parts.join('') || '<div class="rpt-note" style="text-align:center; padding:30px 0;">보고서에 포함할 항목을 위에서 선택해 주세요.</div>'}
+                <div class="rpt-foot"><span>${rptEsc(school || '')} 방과후학교 · ${rptEsc(title)}</span><span>방과후 지원금 돌보미 자동 집계 · ${issued}</span></div>
+            </div></body></html>`;
+        }
+
+        function printOpsReport() {
+            let frame = document.getElementById('rptFrame');
+            if (!frame || !frame.contentWindow) return;
+            try { frame.contentWindow.focus(); frame.contentWindow.print(); }
+            catch (e) { alert('인쇄 창을 열지 못했습니다. 브라우저의 인쇄(Ctrl+P)를 이용해 주세요.'); }
+        }
+        document.addEventListener('keydown', function (e) {
+            let ov = document.getElementById('reportOverlay');
+            if (ov && ov.classList.contains('open') && (e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) { e.preventDefault(); printOpsReport(); }
+        });
+
         function openSmartAttModal() {
             let mem = saMem();
             saState = {
