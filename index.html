@@ -13526,6 +13526,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
         // ===== ✨ [v17.9] 운영보고서 만들기 =====
         const RPT_KEY = 'edusync_report_v1';
         const RPT_SECTIONS = [
+            ['policy', '지원금 제도·중복 지원'],
             ['summary', '분기 총괄 요약'],
             ['dept', '부서별 수강현황'],
             ['openclose', '신규개설·폐강 부서'],
@@ -13745,6 +13746,13 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 
                 if (anyEnroll) D.totalStudents++;
                 if (anyEnroll && !supported) D.genStudents++;
+                if (r.hasG3 && r.hasFree) {
+                    let du = D.dual || (D.dual = { students: 0, enrolled: 0, both: 0, onlyG3: 0, onlyFree: 0, none: 0, g3: 0, free: 0, sk: 0, yuka: 0 });
+                    du.students++; if (anyEnroll) du.enrolled++;
+                    if (r.freeTier === '육아기근로단축') du.yuka++;
+                    if (sumG3 > 0 && sumFree > 0) du.both++; else if (sumG3 > 0) du.onlyG3++; else if (sumFree > 0) du.onlyFree++; else du.none++;
+                    du.g3 += sumG3; du.free += sumFree; du.sk += sumOver;
+                }
                 if (supported) D.supportedStudents++;
                 if (sumOver > 0) { D.overStudents++; D.overTotal += sumOver; if (supported) { D.supportedOverStudents++; D.supportedOverTotal += sumOver; } }
                 if (r.hasG3) {
@@ -13887,6 +13895,38 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <div class="rpt-kpi sk"><div class="k">수익자부담</div><div class="v">${rptWon(T.sk)}원</div><div class="s">일반 ${D.genStudents}명 · 초과 ${D.supportedOverStudents}명</div></div>
                     <div class="rpt-kpi"><div class="k">총 청구액</div><div class="v">${rptWon(T.bill)}원</div><div class="s">지원율 ${rptPct(T.g3 + T.free, T.bill)}</div></div>
                 </div>`;
+
+            // ✨ [v18.0] 지원금 제도 안내 + 중복 지원 현황 (관리자·감사자용)
+            if (st.on.policy) {
+                let g3Year = toNum(getG3Allowance()), g3H1 = toNum(getG3H1Default()), g3H2 = toNum(getG3H2Default());
+                let freeYear = toNum(getFreeAllowanceDefault());
+                let gMin = getG3MinGrade(), gMax = getG3MaxGrade();
+                let gradeTxt = gMin === gMax ? `초등 ${gMin}학년 전체` : `초등 ${gMin}~${gMax}학년 전체`;
+                let carry = isG3CarryOver();
+                let du = D.dual || { students: 0, enrolled: 0, both: 0, onlyG3: 0, onlyFree: 0, none: 0, g3: 0, free: 0, sk: 0, yuka: 0 };
+                const ok = '<span style="color:#15803d; font-weight:900;">○ 중복 가능</span>', no = '<span style="color:#b91c1c; font-weight:900;">✕ 중복 불가</span>';
+                parts.push(sec('지원금 제도 및 중복 지원 현황', `${y}학년도 설정 기준`, `
+                    <table class="rpt-t"><thead><tr><th style="width:110px;">구분</th><th>지원 대상</th><th style="width:150px;">1인당 연간 지원액</th><th>사용 기준</th></tr></thead>
+                    <tbody>
+                        <tr><td class="c c-g3"><b>${rptEsc(g3L)}</b></td><td>${gradeTxt} (학년도 설정)</td><td class="n"><b>${rptWon(g3Year)}원</b><div class="c-mute" style="font-size:10.5px;">상반기 ${rptWon(g3H1)}원 · 하반기 ${rptWon(g3H2)}원</div></td><td>상반기 잔액은 하반기로 <b>${carry ? '이월됨' : '이월되지 않음(소멸)'}</b></td></tr>
+                        <tr><td class="c c-free"><b>자유수강권</b></td><td>교육급여 수급자·법정차상위·한부모가족 등 NEIS 자유수강권 선정 학생</td><td class="n"><b>${rptWon(freeYear)}원</b><div class="c-mute" style="font-size:10.5px;">전입·전출 등은 학생별 조정</div></td><td>선정일이 속한 달 <b>1일부터</b> 수강분에 사용 (예: 5월 15일 선정 → 5월 1일 수강분부터)</td></tr>
+                        <tr><td class="c c-sk"><b>수익자부담</b></td><td>지원 대상이 아닌 일반 학생, 지원 대상자의 한도 초과분</td><td class="n">-</td><td>보호자 부담 (행정실 CMS 수납)</td></tr>
+                    </tbody></table>
+                    <div class="rpt-usage" style="margin-top:8px;">
+                        <div style="font-weight:900; color:#1e3a5f; margin-bottom:4px;">📌 지원금 중복 사용 기준</div>
+                        <table class="rpt-t" style="margin:2px 0 6px;"><tbody>
+                            <tr><td>자유수강권 + ${rptEsc(g3L)}</td><td class="c">${ok}</td><td>육아기근로단축 + ${rptEsc(g3L)}</td><td class="c">${ok}</td><td>특수지원금 + ${rptEsc(g3L)}</td><td class="c">${ok}</td></tr>
+                            <tr><td>육아기근로단축 + 자유수강권</td><td class="c">${no}</td><td>특수지원금 + 자유수강권</td><td class="c">${no}</td><td colspan="2"></td></tr>
+                        </tbody></table>
+                        <div>· 두 지원금을 함께 받는 학생은 <b>${rptEsc(g3L)} → 자유수강권 → 수익자부담</b> 순서로 결제됩니다. (육아기근로단축 대상은 자유수강 몫을 먼저 사용)</div>
+                        <div>· 1인당 최대 지원액: ${rptEsc(g3L)} ${rptWon(g3Year)}원 + 자유수강권 ${rptWon(freeYear)}원 = <b>연간 ${rptWon(g3Year + freeYear)}원</b></div>
+                    </div>
+                    <table class="rpt-t" style="margin-top:4px;"><thead><tr><th colspan="6" style="text-align:left;">👥 ${rptEsc(g3L)}·자유수강권 중복 지원 학생 현황</th></tr>
+                        <tr><th>중복 대상 학생</th><th>수강 학생</th><th>두 지원금 모두 사용</th><th>${rptEsc(getG3LabelShort())}만 사용</th><th>자유수강만 사용</th><th>미사용</th></tr></thead>
+                    <tbody><tr><td class="n"><b>${du.students}명</b></td><td class="n">${du.enrolled}명</td><td class="n c-ok"><b>${du.both}명</b></td><td class="n c-g3">${du.onlyG3}명</td><td class="n c-free">${du.onlyFree}명</td><td class="n c-sk">${du.none}명</td></tr></tbody>
+                    <tfoot><tr><td class="c" colspan="2">중복 대상 학생 지원액 (${scopeLabel})</td><td class="n" colspan="2">${rptEsc(getG3LabelShort())} ${rptWon(du.g3)}원 + 자유 ${rptWon(du.free)}원</td><td class="n" colspan="2">합계 ${rptWon(du.g3 + du.free)}원 · 수익자부담 ${rptWon(du.sk)}원</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 중복 대상 학생 = 프로그램에 ${rptEsc(g3L)}과 자유수강권이 함께 등록된 학생${du.yuka ? ` (육아기근로단축 ${du.yuka}명 포함)` : ''}. '${rptEsc(getG3LabelShort())}만 사용'은 ${rptEsc(g3L)} 안에서 수강료가 모두 해결되어 자유수강권을 아직 쓰지 않은 학생입니다.</div>`, true));
+            }
 
             // 1. 분기 총괄 요약
             if (st.on.summary) {
