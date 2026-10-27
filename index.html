@@ -13528,6 +13528,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
         const RPT_SECTIONS = [
             ['summary', '분기 총괄 요약'],
             ['dept', '부서별 수강현황'],
+            ['openclose', '신규개설·폐강 부서'],
             ['trend', '수강자 증가추이'],
             ['perf', '부서별 실적 요약'],
             ['mat', '교재비·재료비 집계'],
@@ -13559,13 +13560,19 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             return st;
         }
         function rptSave(st) { try { localStorage.setItem(RPT_KEY, JSON.stringify(st)); } catch (e) {} }
-        function rptDefaultTitle() { return `${getCurrentAcademicYear()}학년도 방과후학교 자유수강권·${getG3Label()} 운영보고서`; }
+        // ✨ 기본 제목: 학년도·초3지원금 명칭(학년도 설정)이 바뀌면 자동으로 따라 바뀜
+        function rptDefaultTitle() { return `${getCurrentAcademicYear()}학년도 초등방과후 (수익자,${getG3Label()},자유수강) 운영보고서`; }
+        function rptIsAutoTitle(t) {
+            t = String(t || '').trim();
+            return !t || t === rptDefaultTitle() || /^\d{4}학년도 방과후학교 자유수강권·.+ 운영보고서$/.test(t) || /^\d{4}학년도 초등방과후 \(수익자,.+,자유수강\) 운영보고서$/.test(t);
+        }
 
         function openOpsReport() {
             let ov = document.getElementById('reportOverlay');
             if (!ov) return;
             let st = rptLoad();
             let y = st._year;
+            if (rptIsAutoTitle(st.titles[y])) { st.titles[y] = ''; rptSave(st); } // 직접 고치지 않은 제목은 항상 최신 기본 제목으로
             document.getElementById('rptTitle').value = st.titles[y] || rptDefaultTitle();
             document.getElementById('rptSchool').value = st.school || '';
             document.getElementById('rptWriter').value = st.writer || '';
@@ -13622,7 +13629,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
         function rptFieldChanged() {
             let st = rptLoad();
             let y = st._year;
-            st.titles[y] = document.getElementById('rptTitle').value;
+            let tv = document.getElementById('rptTitle').value;
+            st.titles[y] = rptIsAutoTitle(tv) ? '' : tv; // 기본 제목 그대로면 저장하지 않음 → 명칭이 바뀌면 자동 반영
             st.school = document.getElementById('rptSchool').value;
             st.writer = document.getElementById('rptWriter').value;
             st.approvalLabels = document.getElementById('rptApprovalLabels').value;
@@ -13644,7 +13652,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             let D = {
                 n, lastQ, qs,
                 q: {}, // 분기별 총괄
-                dept: {}, course: {}, // 이름 → {byQ:{q:Set}, cnt, bill, g3, free, sk}
+                dept: {}, course: {}, subj: {}, // subj = 과목 단위(1부·2부·A/B·(가)/(나) 모두 합침) / 이름 → {byQ:{q:Set}, cnt, bill, g3, free, sk}
                 tiers: {}, grades: {},
                 refunds: {}, refundNoReason: 0,
                 transfers: [],
@@ -13719,7 +13727,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                         }
                         let net = a ? (a.netSu + a.netGy + a.netJ) : Math.max(0, gross - refund);
                         if (net <= 0) return; // 전액 환불 제외
-                        [[D.dept, baseSubjectName(name)], [D.course, name]].forEach(([map, key]) => {
+                        [[D.dept, baseSubjectName(name)], [D.course, name], [D.subj, getSubjectBaseName(name)]].forEach(([map, key]) => {
                             let o = ensure(map, key);
                             (o.byQ[q] || (o.byQ[q] = new Set())).add(r.id);
                             o.cnt++;
@@ -13922,6 +13930,45 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <tfoot><tr><td class="c">합계 (${deptKeys.length}개)</td>${D.qs.map(q => `<td class="n">${colTot[q]}</td>`).join('')}<td class="n">${grand}</td><td class="n">${gt.g3}</td><td class="n">${gt.free}</td><td class="n">${gt.ben}</td></tr></tfoot></table>
                     <div class="rpt-note">※ 현황보기의 <b>[중복안함 표]</b>와 같은 기준입니다. 분기별 인원은 그 분기 중복안함 표의 합계와 같습니다. ${byCourse ? '' : '1부·2부처럼 나뉜 강좌는 합쳐서 셉니다. '}한 학생이 1부와 2부를 모두 들으면 2명으로 셉니다. 연인원 구분은 ${rptEsc(getG3LabelShort())} → 자유수강 → 수익자 순서로 한 칸에만 넣습니다. 지원금을 다 써서 100% 수익자로 결제된 수강은 수익자로 셉니다. 전액 환불한 수강은 뺍니다.</div>`));
             }
+            // ✨ [v18.0] 신규개설·폐강 부서 (직전 분기와 비교)
+            if (st.on.openclose) {
+                // ✨ 수강현황 보기 설정과 상관없이 항상 '과목' 단위로 판단 (1부·2부, A부·B부, (가)·(나) 등 시간표 변동은 무시)
+                let ocMap = D.subj;
+                let ocOrder = typeof ensureSubjectOrderList === 'function' ? ensureSubjectOrderList() : [];
+                let ocKeys = Object.keys(ocMap).sort((a, b) => { let ia = ocOrder.indexOf(a), ib = ocOrder.indexOf(b); if (ia < 0) ia = 1e6; if (ib < 0) ib = 1e6; return (ia - ib) || a.localeCompare(b, 'ko'); });
+                const cntOf = (k, q) => { let c = ocMap[k] && ocMap[k].cat && ocMap[k].cat[q]; return c ? c.g3 + c.free + c.ben : 0; };
+                let lastDataQ = Math.max(0, ...D.qs.filter(q => ocKeys.some(k => cntOf(k, q) > 0)));
+                let unit = '부서';
+                let sumRows = '', detRows = '';
+                let tOpen = 0, tClose = 0;
+                D.qs.forEach(q => {
+                    if (q > lastDataQ) { sumRows += `<tr><td class="c"><b>${q}분기</b></td><td class="c c-mute" colspan="4">미집계</td></tr>`; return; }
+                    let running = ocKeys.filter(k => cntOf(k, q) > 0);
+                    let opened = [], closed = [];
+                    if (q > 1) {
+                        running.forEach(k => {
+                            if (cntOf(k, q - 1) > 0) return;
+                            let before = D.qs.some(p => p < q - 1 && cntOf(k, p) > 0);
+                            opened.push({ k, n: cntOf(k, q), re: before });
+                        });
+                        ocKeys.forEach(k => { if (cntOf(k, q - 1) > 0 && cntOf(k, q) === 0) closed.push({ k, n: cntOf(k, q - 1) }); });
+                    }
+                    tOpen += opened.length; tClose += closed.length;
+                    let diff = opened.length - closed.length;
+                    sumRows += `<tr><td class="c"><b>${q}분기</b></td><td class="n">${running.length}개</td>
+                        <td class="n c-ok">${q > 1 ? (opened.length ? '+' + opened.length + '개' : '-') : '<span class="c-mute">기준</span>'}</td>
+                        <td class="n c-sk">${q > 1 ? (closed.length ? '−' + closed.length + '개' : '-') : '<span class="c-mute">기준</span>'}</td>
+                        <td class="n">${q > 1 ? (diff > 0 ? '▲ ' + diff : diff < 0 ? '▼ ' + (-diff) : '변동 없음') : '-'}</td></tr>`;
+                    opened.forEach(o => { detRows += `<tr><td class="c">${q}분기</td><td class="c"><span style="display:inline-block; padding:1px 8px; border-radius:10px; font-size:10.5px; font-weight:800; color:white; background:${o.re ? '#0369a1' : '#15803d'};">${o.re ? '재개설' : '신규개설'}</span></td><td>${rptEsc(o.k)}</td><td class="n">${o.n}명</td><td class="c c-mute">${q - 1}분기 없음 → ${q}분기 ${o.n}명</td></tr>`; });
+                    closed.forEach(o => { detRows += `<tr><td class="c">${q}분기</td><td class="c"><span style="display:inline-block; padding:1px 8px; border-radius:10px; font-size:10.5px; font-weight:800; color:white; background:#b91c1c;">폐강</span></td><td>${rptEsc(o.k)}</td><td class="n">${o.n}명</td><td class="c c-mute">${q - 1}분기 ${o.n}명 → ${q}분기 수강생 없음</td></tr>`; });
+                });
+                if (!detRows) detRows = `<tr><td class="rpt-empty" colspan="5">분기 사이에 신규개설·폐강된 ${unit}가 없습니다</td></tr>`;
+                parts.push(sec(`신규개설·폐강 ${unit} 현황`, `신규 ${tOpen}개 · 폐강 ${tClose}개`, `
+                    <table class="rpt-t"><thead><tr><th>분기</th><th>운영 ${unit} 수</th><th>신규개설(재개설 포함)</th><th>폐강</th><th>증감</th></tr></thead><tbody>${sumRows}</tbody></table>
+                    <table class="rpt-t" style="margin-top:8px;"><thead><tr><th style="width:62px;">분기</th><th style="width:78px;">구분</th><th style="text-align:left">과목(부서)</th><th style="width:70px;">인원</th><th>비교</th></tr></thead><tbody>${detRows}</tbody></table>
+                    <div class="rpt-note">※ 직전 분기와 비교합니다. 직전 분기에 수강생이 없다가 생기면 <b>신규개설</b>, 그 전에 운영했던 ${unit}가 다시 생기면 <b>재개설</b>, 직전 분기에 수강생이 있다가 없어지면 <b>폐강</b>으로 봅니다. 1분기는 비교 기준이며, 아직 수강 데이터가 없는 분기는 미집계로 표시합니다. 1부·2부, A부·B부, (가)·(나)처럼 시간표로 나뉜 반은 <b>하나의 과목으로 합쳐서</b> 판단합니다(수강현황 보기 설정과 무관). 인원은 전액 환불을 뺀 수강 건수입니다.</div>`, true));
+            }
+
             // 3. 수강자 증가추이
             if (st.on.trend) {
                 let max = Math.max(1, ...D.qs.map(q => D.q[q].students));
