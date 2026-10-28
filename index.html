@@ -2540,7 +2540,9 @@
                         // ② 카트에 이미 반영된 몫을 뺀 "수기 미태그 총액"을 배분표(manualAlloc) 기준으로 항목화
                         let loggedSu = s.refundLog.reduce((sum, l) => sum + toNum(l.amount), 0);
                         let manualSu = Math.max(0, toNum(s.rSu) - loggedSu);
-                        let manualGy = toNum(s.rGy), manualJ = toNum(s.rJ);
+                        // ✨ [v18.3] 이미 목록에 기록된 교재비·재료비 환불은 빼고 남은 몫만 항목화 (중복 '미지정' 항목 생성 방지)
+                        let manualGy = Math.max(0, toNum(s.rGy) - s.refundLog.reduce((sum, l) => sum + toNum(l.gy), 0));
+                        let manualJ = Math.max(0, toNum(s.rJ) - s.refundLog.reduce((sum, l) => sum + toNum(l.j), 0));
                         let manualTotal = manualSu + manualGy + manualJ;
 
                         if (manualTotal > 0) {
@@ -2613,22 +2615,6 @@
                                 g: addG, s: addS, gy: untrackedGy, j: untrackedJ,
                                 amount: untrackedSu, source: 'manual'
                             });
-                            didReconcile = true;
-                        }
-                        // ✨ [v18.3] 반대로 '환불 내역 목록'에는 있는데 과목 환불금액(rSu/rGy/rJ)에 빠져 있는 경우(예전 버전 데이터),
-                        //    환불 내역 기록을 기준으로 환불금액을 맞춤 (결제금액을 넘지 않게)
-                        let loggedSu = s.refundLog.reduce((sum, l) => sum + toNum(l.amount), 0);
-                        loggedG = s.refundLog.reduce((sum, l) => sum + toNum(l.g), 0);
-                        loggedS = s.refundLog.reduce((sum, l) => sum + toNum(l.s), 0);
-                        loggedGy = s.refundLog.reduce((sum, l) => sum + toNum(l.gy), 0);
-                        loggedJ = s.refundLog.reduce((sum, l) => sum + toNum(l.j), 0);
-                        if (loggedGy > toNum(s.rGy) + 0.5) { s.rGy = Math.min(loggedGy, toNum(s.gy)); didReconcile = true; }
-                        if (loggedJ > toNum(s.rJ) + 0.5) { s.rJ = Math.min(loggedJ, toNum(s.j)); didReconcile = true; }
-                        if (loggedSu > toNum(s.rSu) + 0.5) {
-                            let suGross = (toNum(s.g) > 0 || toNum(s.s) > 0) ? toNum(s.g) + toNum(s.s) : toNum(s.su);
-                            s.rSu = Math.min(loggedSu, suGross);
-                            if (loggedG > toNum(s.rG)) s.rG = Math.min(loggedG, toNum(s.g) || loggedG);
-                            if (loggedS > toNum(s.rS)) s.rS = Math.min(loggedS, toNum(s.s) || loggedS);
                             didReconcile = true;
                         }
                     });
@@ -5852,10 +5838,20 @@ function toggleStatusPanel() {
                         };
 
                         // 2. 수동 입력 금액을 한도에서 가장 먼저 차감
-                        let actG3 = r.hasG3 ? Math.min(a.g3Su + a.g3Gy + a.g3J, availableG3ForQ) : 0;
+                        // ✨ [v18.3] 수동 입력액이 남은 한도보다 크면, 한도까지만 지원금으로 인정하고 넘는 몫은 배분표에서도 빼서
+                        //    다음 단계(다른 지원금 → 수익자)로 넘김. (예전엔 배분표엔 그대로 남고 한도 사용액엔 일부만 잡혀 합계가 어긋났음)
+                        const trimManual = (keys, keep) => {
+                            let cut = keys.reduce((t, k) => t + a[k], 0) - keep;
+                            keys.forEach(k => { if (cut <= 0) return; let d = Math.min(a[k], cut); a[k] -= d; cut -= d; });
+                        };
+                        let wantG3 = a.g3Su + a.g3Gy + a.g3J;
+                        let actG3 = r.hasG3 ? Math.min(wantG3, Math.max(0, availableG3ForQ)) : 0;
+                        if (actG3 < wantG3) trimManual(['g3Su', 'g3Gy', 'g3J'], actG3);
                         availableG3ForQ -= actG3; remG3_Total -= actG3; if(idx <= h1CutoffIndex) remG3_H1 -= actG3; q_usedG3 += actG3;
                         
-                        let actFree = r.hasFree ? Math.min(a.frSu + a.frGy + a.frJ, remFree) : 0;
+                        let wantFree = a.frSu + a.frGy + a.frJ;
+                        let actFree = r.hasFree ? Math.min(wantFree, Math.max(0, remFree)) : 0;
+                        if (actFree < wantFree) trimManual(['frSu', 'frGy', 'frJ'], actFree);
                         remFree -= actFree; q_usedFree += actFree;
 
                         q_allocs[sIdx] = a;
@@ -8040,6 +8036,12 @@ function updateG3LimitTotal() {
                         ` : ''}
                         <div class="no-print" style="margin-top:14px;">
                             <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:8px;">🧾 ${q}분기 환불 내역 목록 ${refundHistoryItems.length ? `<span style="color:#b91c1c;">(${refundHistoryItems.length}건)</span>` : ''}</div>
+                            ${validSubs.map(vs => { let ex = getRefundLogExcess(vs); let exSu = ex.su, exGy = ex.gy, exJ = ex.j; if (exSu + exGy + exJ <= 0) return ''; let si = subs.indexOf(vs);
+                                return `<div style="margin-bottom:8px; padding:10px 12px; background:#fff7ed; border:1.5px solid #fb923c; border-radius:8px; font-size:12.5px; color:#9a3412; line-height:1.6;">
+                                    ⚠️ <b>${vs.name}</b>: 아래 환불 내역 목록 합계가 실제 환불금액보다 <b>${[exSu ? '수강료 ' + formatMoney(exSu) : '', exGy ? '교재비 ' + formatMoney(exGy) : '', exJ ? '재료비 ' + formatMoney(exJ) : ''].filter(Boolean).join(', ')}</b> 많아요. (예전 버전에서 같은 환불이 '미지정' 항목으로 한 번 더 생긴 경우가 많아요)<br>
+                                    → 실제로 환불하지 않은 항목이면 그 줄의 🗑️로 지우세요. <b>실제 환불금액은 바뀌지 않고</b> 목록만 정리됩니다.
+                                    <button type="button" onclick="syncRefundToLog('${r.id}', ${q}, ${si})" style="margin-left:6px; padding:3px 10px; border-radius:5px; border:1px solid #ea580c; background:white; color:#c2410c; font-weight:800; font-size:11.5px; cursor:pointer;">목록이 맞아요 → 환불금액에 반영</button>
+                                </div>`; }).join('')}
                             ${refundHistoryItems.length === 0
                                 ? `<div style="font-size:12.5px; color:#9ca3af; padding:10px; background:#f9fafb; border-radius:6px; border:1px solid var(--border-color);">이 분기에 등록된 환불 내역이 없습니다.</div>`
                                                                 : `<div style="border:1px solid #e2e8f0; border-radius:8px; overflow-x:auto;">
@@ -8059,7 +8061,7 @@ function updateG3LimitTotal() {
                                                 // ✨ [v18.2] 환불 합계: 강사료·수용비로 환불했으면 강사료+수용비+교재비+재료비 (수강료는 표시만, 중복 합산 안 함) / 수강료로만 환불했으면 수강료+교재비+재료비
                                                 let eTotal = (eg > 0 || es > 0) ? (eg + es + egy + ej) : (eSu + egy + ej);
                                                 let srcBadge = l.source === 'cart' ? '<span title="환불 관리(카트)로 적용" style="font-size:10px;">🛒</span>' : '<span title="수기 입력" style="font-size:10px;">✏️</span>';
-                                                let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>');
+                                                let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>' + (!(l.reason || '').trim() ? '<div style="font-size:10px; color:#9a3412; font-weight:600; line-height:1.2;">자동 생성 항목</div>' : ''));
                                                 return `<tr>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;">${it.subjectName}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
@@ -9394,11 +9396,14 @@ function updateG3LimitTotal() {
             if (!confirm(`${monthLabel}${sessLabel}${formatMoney(entryTotal)} 환불 기록을 삭제할까요?\n강사료/수용비/교재비/재료비에서 이 기록에 기록된 금액만큼 정확히 되돌립니다.`)) return;
 
             // ✨ 삭제 시점에 비율을 다시 계산하지 않고, 이 기록에 저장된 실제 금액을 그대로 되돌림 (반올림 오차 방지)
-            s.rG = Math.max(0, toNum(s.rG) - toNum(entry.g));
-            s.rS = Math.max(0, toNum(s.rS) - toNum(entry.s));
-            s.rSu = Math.max(0, toNum(s.rSu) - toNum(entry.amount));
-            s.rGy = Math.max(0, toNum(s.rGy) - toNum(entry.gy));
-            s.rJ = Math.max(0, toNum(s.rJ) - toNum(entry.j));
+            // ✨ [v18.3] 단, 목록 합계가 실제 환불금액보다 많은 경우(실제 환불에 반영 안 된 중복 항목)는 그 초과분부터 지우고 실제 환불금액은 건드리지 않음
+            let ex = getRefundLogExcess(s);
+            const back = (v, exv) => Math.max(0, toNum(v) - exv);
+            s.rG = Math.max(0, toNum(s.rG) - back(entry.g, ex.g));
+            s.rS = Math.max(0, toNum(s.rS) - back(entry.s, ex.s));
+            s.rSu = Math.max(0, toNum(s.rSu) - back(entry.amount, ex.su));
+            s.rGy = Math.max(0, toNum(s.rGy) - back(entry.gy, ex.gy));
+            s.rJ = Math.max(0, toNum(s.rJ) - back(entry.j, ex.j));
 
             s.refundLog.splice(logIdx, 1);
             persistData();
@@ -9406,6 +9411,28 @@ function updateG3LimitTotal() {
             if (typeof renderGrid === 'function') renderGrid();
         }
 
+        // ✨ [v18.3] 환불 내역 목록 합계가 실제 환불금액(rSu/rGy/rJ)보다 많은 몫 (예전 버전에서 생긴 중복 '미지정' 항목 등)
+        function getRefundLogExcess(s) {
+            const sum = k => (s.refundLog || []).reduce((t, l) => t + toNum(l[k]), 0);
+            return {
+                su: Math.max(0, sum('amount') - toNum(s.rSu)), g: Math.max(0, sum('g') - toNum(s.rG)), s: Math.max(0, sum('s') - toNum(s.rS)),
+                gy: Math.max(0, sum('gy') - toNum(s.rGy)), j: Math.max(0, sum('j') - toNum(s.rJ))
+            };
+        }
+        // 목록 기준으로 실제 환불금액을 맞춤 (사용자가 직접 확인 후 누를 때만)
+        function syncRefundToLog(id, q, sIdx) {
+            let r = db.find(x => x.id == id); if (!r) return;
+            let s = r[`q${q}`] && r[`q${q}`].subs[sIdx]; if (!s) return;
+            const sum = k => (s.refundLog || []).reduce((t, l) => t + toNum(l[k]), 0);
+            if (!confirm('환불 내역 목록에 적힌 금액을 실제 환불금액으로 반영할까요?\n\n목록에 실제로 환불하지 않은 항목(중복으로 생긴 미지정 항목 등)이 있다면, 먼저 🗑️로 그 항목을 지워 주세요.')) return;
+            let suGross = (toNum(s.g) > 0 || toNum(s.s) > 0) ? toNum(s.g) + toNum(s.s) : toNum(s.su);
+            s.rSu = Math.min(Math.max(toNum(s.rSu), sum('amount')), suGross);
+            s.rG = Math.min(Math.max(toNum(s.rG), sum('g')), toNum(s.g) || sum('g'));
+            s.rS = Math.min(Math.max(toNum(s.rS), sum('s')), toNum(s.s) || sum('s'));
+            s.rGy = Math.min(Math.max(toNum(s.rGy), sum('gy')), toNum(s.gy));
+            s.rJ = Math.min(Math.max(toNum(s.rJ), sum('j')), toNum(s.j));
+            persistData(); showDetailModal(id); if (typeof renderGrid === 'function') renderGrid();
+        }
         let refundLogMonthCtx = null; // {id, q, sIdx, li}
         function openRefundLogMonthPicker(id, q, sIdx, li) {
             let r = db.find(x => x.id == id);
