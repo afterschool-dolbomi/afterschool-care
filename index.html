@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V18.0</title>
+    <title>방과후 지원금 돌보미 V18.3</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1258,7 +1258,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V18.0</span>
+                <span class="brand-version">V18.3</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1359,10 +1359,12 @@
     </div>
 </header>
 
-    <div id="featureUpdatePopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.55); z-index:99997; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+    <div id="featureUpdatePopupOverlay" onclick="if(event.target===this) closeFeatureUpdatePopup()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.55); z-index:99997; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:#fffaf3; border-radius:20px; overflow:hidden; width:92%; max-width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 25px 60px -12px rgba(0,0,0,0.35); animation: popIn 0.3s ease-out forwards;">
 
-            <div style="background:linear-gradient(135deg, #e0c3fc, #8ec5fc); padding:28px 26px; text-align:center;">
+            <div style="background:linear-gradient(135deg, #e0c3fc, #8ec5fc); padding:28px 26px; text-align:center; position:sticky; top:0; z-index:5; box-shadow:0 4px 12px rgba(76,29,149,0.15);">
+                <!-- ✨ [v18.1] 스크롤 위치와 상관없이 항상 보이는 닫기(X) 버튼 -->
+                <button type="button" onclick="closeFeatureUpdatePopup()" title="닫기" aria-label="닫기" style="position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(255,255,255,0.75); color:#3b0764; font-size:18px; font-weight:900; line-height:1; cursor:pointer; box-shadow:0 2px 6px rgba(59,7,100,0.2); display:flex; align-items:center; justify-content:center;" onmouseover="this.style.background='white'" onmouseout="this.style.background='rgba(255,255,255,0.75)'">✕</button>
                 <div style="font-size:12.5px; font-weight:800; color:#4c1d95; letter-spacing:1.5px; margin-bottom:6px;">✨ NEW UPDATE</div>
                 <h2 style="margin:0; font-size:21px; font-weight:900; color:#3b0764;">✨ 새로워진 기능을 소개해요</h2>
             </div>
@@ -2454,6 +2456,7 @@
             reconcileRefundLogs(); // ✨ 그 이후에도 어긋난 금액이 생기면 매번 자동 보정
             repairRefundLogSplitDrift(); // ✨ "미지정" 항목이 중복 생성된 것을 실제 금액은 그대로 두고 한 줄로 정리 (딱 한 번만 실행)
             repairRefundLogDecimalDrift(); // ✨ 과거에 소수점 원 단위로 저장된 환불 내역을 정수로 정리 (딱 한 번만 실행)
+            try { if (fillGSFromSubjectFees() > 0) persistData(); } catch (e) {} // ✨ [v18.3] 수강료만 있고 강사료·수용비가 빈 수강 기록을 과목 기준단가로 채움
             validateAndFixCalculations();
             renderFormQuarters();
             updateGlobalStats();
@@ -5198,9 +5201,10 @@ function toggleStatusPanel() {
                         }
                     }
                 });
+                let filled = fillGSFromSubjectFees([keepName]); // ✨ [v18.3] 수강료가 기준과 같으면 강사료·수용비도 채움
                 persistData();
                 renderGrid();
-                alert(`반영 완료. 학생 기록 ${updatedCount}건이 '${keepName}'(으)로 변경되었습니다.`);
+                alert(`반영 완료. 학생 기록 ${updatedCount}건이 '${keepName}'(으)로 변경되었습니다.` + (filled ? `\n수강료가 기준단가와 같은 ${filled}건은 강사료·수용비도 함께 채웠습니다.` : ''));
             }, () => { /* 과목 목록만 통합, 학생 기록은 그대로 둠 */ });
         }
 
@@ -5367,6 +5371,7 @@ function toggleStatusPanel() {
                 savedSubjects.push({ name: newName, fees, sessions });
                 persistSubjects();
                 renderSubjectList();
+                if (fillGSFromSubjectFees([newName]) > 0) { persistData(); renderGrid(); }
                 subjectEditDirty = false;
                 editSubjectForm(savedSubjects.length - 1, { force: true, savedMsg: `'${newName}' 과목을 추가했어요` });
                 return;
@@ -5384,6 +5389,8 @@ function toggleStatusPanel() {
             if (goNext && idx + 1 < savedSubjects.length) editSubjectForm(idx + 1, { force: true, savedMsg: `'${newName}' 저장 완료 → 다음 과목` });
             else editSubjectForm(idx, { force: true, savedMsg: '저장되었습니다' });
 
+            // ✨ [v18.3] 수강료만 있고 강사료·수용비가 빈 학생 기록은 금액 변화 없이 강사료·수용비만 채움 (수강료가 기준과 같을 때만)
+            if (fillGSFromSubjectFees([newName]) > 0) { persistData(); renderGrid(); }
             if (!nameChanged && !feesChanged) return;
 
             let msgParts = [];
@@ -5419,9 +5426,10 @@ function toggleStatusPanel() {
                         }
                     }
                 });
+                let filledG = fillGSFromSubjectFees([newName]);
                 persistData();
                 renderGrid();
-                let resultMsg = '반영 완료.';
+                let resultMsg = '반영 완료.' + (filledG ? `\n강사료·수용비가 비어 있던 학생 기록 ${filledG}건을 기준단가로 채웠습니다.` : '');
                 if (nameChanged) resultMsg += `\n과목명 변경: ${updatedNameCount}건`;
                 if (feesChanged) resultMsg += `\n단가 변경: ${updatedFeeCount}건 반영, ${skippedFeeCount}건은 개별 수정 금액이라 건너뜀`;
                 alert(resultMsg);
@@ -8029,7 +8037,8 @@ function updateG3LimitTotal() {
                                                 let eg = toNum(l.g), es = toNum(l.s), egy = toNum(l.gy), ej = toNum(l.j);
                                                 let eSu = toNum(l.amount);
                                                 let isUnsplitSu = (eg === 0 && es === 0 && eSu > 0);
-                                                let eTotal = eSu + egy + ej;
+                                                // ✨ [v18.2] 환불 합계: 강사료·수용비로 환불했으면 강사료+수용비+교재비+재료비 (수강료는 표시만, 중복 합산 안 함) / 수강료로만 환불했으면 수강료+교재비+재료비
+                                                let eTotal = (eg > 0 || es > 0) ? (eg + es + egy + ej) : (eSu + egy + ej);
                                                 let srcBadge = l.source === 'cart' ? '<span title="환불 관리(카트)로 적용" style="font-size:10px;">🛒</span>' : '<span title="수기 입력" style="font-size:10px;">✏️</span>';
                                                 let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>');
                                                 return `<tr>
@@ -8037,7 +8046,7 @@ function updateG3LimitTotal() {
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${eg ? formatMoney(eg) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${es ? formatMoney(es) : '-'}</td>
-                                                    <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; color:#0f766e; font-weight:700;">${isUnsplitSu ? formatMoney(eSu) : '-'}</td>
+                                                    <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; color:#0f766e; font-weight:700;" title="${isUnsplitSu ? '수강료로 직접 환불' : '강사료+수용비 합계 (환불 합계에 중복으로 더하지 않음)'}">${eSu > 0 ? (isUnsplitSu ? formatMoney(eSu) : `<span style="opacity:0.85;">${formatMoney(eSu)}</span><div style="font-size:10px; font-weight:600; color:#64748b; line-height:1.2;">(강사료+수용비)</div>`) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${egy ? formatMoney(egy) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right;">${ej ? formatMoney(ej) : '-'}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:right; font-weight:800; color:#b91c1c;">${formatMoney(eTotal)}</td>
@@ -8845,6 +8854,49 @@ function updateG3LimitTotal() {
         }
 
         // ✨ 강사료/수용비 분리 비율 소스 결정: 학생 자체에 강사료/수용비가 있으면 그대로, 없으면 과목목록관리의 같은 분기 단가가 이 학생 수강료와 정확히 같을 때만 그 비율을 사용. 둘 다 아니면 null(미분류 → 수강료로만 처리)
+        // ✨ [v18.3] 학생 수강 기록에 수강료만 있고 강사료·수용비가 비어 있으면,
+        //   같은 이름 과목의 기준 수강료와 '정확히 같을 때만' 기준 강사료·수용비로 채움 (코디마스터 업로드와 같은 규칙)
+        //   환불액도 같은 비율로 강사료/수용비에 나눠 맞춤. 바뀐 건수를 돌려줌
+        function fillGSFromSubjectFees(onlyNames) {
+            let changed = 0;
+            let nameSet = onlyNames ? new Set(onlyNames.map(n => String(n).trim())) : null;
+            (db || []).forEach(r => {
+                for (let q = 1; q <= 6; q++) {
+                    let qd = r[`q${q}`];
+                    if (!qd || !Array.isArray(qd.subs)) continue;
+                    let touched = false;
+                    qd.subs.forEach(s => {
+                        let nm = String(s.name || '').trim();
+                        if (!nm || (nameSet && !nameSet.has(nm))) return;
+                        if (toNum(s.g) > 0 || toNum(s.s) > 0 || !(toNum(s.su) > 0)) return;
+                        let master = savedSubjects.find(x => String(x.name || '').trim() === nm);
+                        let f = master && master.fees && master.fees[q];
+                        if (!f) return;
+                        let fg = toNum(f.g), fs = toNum(f.s);
+                        if (!(fg > 0 || fs > 0) || fg + fs !== toNum(s.su)) return;
+                        s.g = fg; s.s = fs;
+                        // 환불액(수강료)도 강사료/수용비로 나눔
+                        if (toNum(s.rSu) > 0 && !(toNum(s.rG) > 0) && !(toNum(s.rS) > 0)) {
+                            let src = { g: fg, s: fs }, rg = 0, rs = 0, logged = 0;
+                            (s.refundLog || []).forEach(l => {
+                                let amt = toNum(l.amount);
+                                if (amt > 0 && !(toNum(l.g) > 0) && !(toNum(l.s) > 0)) { let sp = splitSuByRatio(amt, src); l.g = sp.g; l.s = sp.s; }
+                                rg += toNum(l.g); rs += toNum(l.s); logged += amt;
+                            });
+                            let rest = toNum(s.rSu) - logged;
+                            if (rest > 0) { let sp = splitSuByRatio(rest, src); rg += sp.g; rs += sp.s; }
+                            s.rG = rg; s.rS = rs;
+                        }
+                        touched = true; changed++;
+                    });
+                    if (touched) {
+                        qd.g = qd.subs.reduce((t, x) => t + toNum(x.g), 0);
+                        qd.s = qd.subs.reduce((t, x) => t + toNum(x.s), 0);
+                    }
+                }
+            });
+            return changed;
+        }
         function getSubjectGSRatioSource(s, q) {
             let g0 = toNum(s.g), s0 = toNum(s.s);
             if (g0 > 0 || s0 > 0) return { g: g0, s: s0 };
@@ -13522,7 +13574,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             saState.subjects = all.map(s => Object.assign({}, s, { students: s.allStudents.filter(st => st.lastMonth >= c) })).filter(s => s.students.length > 0);
             saState.droppedCount = all.reduce((a, s) => a + (s.allStudents.length - s.allStudents.filter(st => st.lastMonth >= c).length), 0);
         }
-        const RPT_PAPER_CSS = "        * { margin:0; padding:0; box-sizing:border-box; }\n        body { font-family:'Pretendard','맑은 고딕','Malgun Gothic',sans-serif; background:white; }\n        .rpt-paper { padding:16mm 15mm 18mm; box-sizing:border-box; color:#111827; font-size:12.5px; }\n        .rpt-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }\n        .rpt-head-left { flex:1; min-width:0; }\n        .rpt-org { font-size:12px; color:#1e3a5f; font-weight:800; letter-spacing:1px; }\n        .rpt-doc-title { font-size:22px; font-weight:900; letter-spacing:-0.5px; word-break:keep-all; line-height:1.3; margin:6px 0 4px; color:#0f172a; }\n        .rpt-doc-sub { font-size:11.5px; color:#475569; }\n        .rpt-approval { border-collapse:collapse; font-size:11px; flex-shrink:0; }\n        .rpt-approval th { background:#f1f5f9; border:1px solid #64748b; padding:3px 6px; font-weight:800; color:#1e293b; min-width:58px; white-space:nowrap; }\n        .rpt-approval td { border:1px solid #64748b; height:46px; text-align:center; vertical-align:middle; }\n        .rpt-approval td img { max-width:42px; max-height:40px; }\n        .rpt-approval .side { writing-mode:vertical-rl; width:18px; background:#1e3a5f; color:white; font-weight:800; letter-spacing:4px; border:1px solid #1e3a5f; padding:4px 2px; }\n        .rpt-rule { height:4px; background:linear-gradient(90deg, #1e3a5f 0 70%, #d4af37 70% 100%); margin:12px 0 6px; }\n        .rpt-meta { display:grid; grid-template-columns:repeat(4, 1fr); border:1px solid #cbd5e1; margin-bottom:6px; }\n        .rpt-meta div { padding:6px 8px; border-right:1px solid #e2e8f0; font-size:11.5px; }\n        .rpt-meta div:last-child { border-right:none; }\n        .rpt-meta b { display:block; font-size:10.5px; color:#64748b; font-weight:700; margin-bottom:2px; }\n\n        .rpt-kpis { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:14px 0 4px; }\n        .rpt-kpi { border:1px solid #dbe3ee; border-top:3px solid #1e3a5f; padding:8px 10px; background:#f8fafc; }\n        .rpt-kpi.g3 { border-top-color:#0284c7; } .rpt-kpi.free { border-top-color:#9333ea; } .rpt-kpi.sk { border-top-color:#b91c1c; }\n        .rpt-kpi .k { font-size:10.5px; color:#64748b; font-weight:700; }\n        .rpt-kpi .v { font-size:17px; font-weight:900; color:#0f172a; margin-top:2px; }\n        .rpt-kpi .s { font-size:10px; color:#94a3b8; margin-top:1px; }\n\n        .rpt-sec { margin-top:20px; }\n        .rpt-sec.keep { break-inside:avoid; page-break-inside:avoid; }\n        table.rpt-t tr { break-inside:avoid; }\n        .rpt-sec-h { display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #1e3a5f; padding-bottom:5px; margin-bottom:6px; }\n        .rpt-sec-no { background:#1e3a5f; color:#fde68a; font-weight:900; font-size:12px; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; align-self:center; }\n        .rpt-sec-t { font-size:15px; font-weight:900; color:#0f172a; }\n        .rpt-sec-r { margin-left:auto; font-size:11px; color:#64748b; }\n        .rpt-note { font-size:11px; color:#64748b; margin:2px 0 6px; line-height:1.5; }\n        table.rpt-t { width:100%; border-collapse:collapse; font-size:11.5px; }\n        table.rpt-t th { background:#eef2f7; color:#1e293b; font-weight:800; border:1px solid #c8d2df; padding:6px 6px; text-align:center; }\n        table.rpt-t thead th { border-top:2px solid #1e3a5f; }\n        table.rpt-t td { border:1px solid #dde4ed; padding:5px 7px; }\n        table.rpt-t td.n { text-align:right; font-variant-numeric:tabular-nums; }\n        table.rpt-t td.c { text-align:center; }\n        table.rpt-t tbody tr:nth-child(even) td { background:#fafbfd; }\n        table.rpt-t tfoot td { background:#1e3a5f; color:white; font-weight:800; border-color:#1e3a5f; }\n        .c-g3 { color:#0369a1; } .c-free { color:#7e22ce; } .c-sk { color:#b91c1c; } .c-ok { color:#15803d; } .c-mute { color:#94a3b8; }\n        .rpt-trend { display:grid; grid-template-columns:1fr 280px; gap:14px; align-items:start; }\n        .rpt-bar-row { display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11.5px; }\n        .rpt-bar-row .lbl { width:44px; font-weight:800; color:#334155; }\n        .rpt-bar-row .track { flex:1; height:16px; background:#eef2f7; border-radius:3px; overflow:hidden; }\n        .rpt-bar-row .fill { height:100%; background:linear-gradient(90deg, #1e3a5f, #3b82f6); }\n        .rpt-bar-row .val { width:52px; text-align:right; font-weight:800; }\n        .rpt-usage { border:1px solid #c8d2df; border-left:4px solid #d4af37; background:#fffdf5; padding:9px 12px; margin-bottom:10px; font-size:12px; line-height:1.6; }\n        .rpt-usage .row { display:flex; gap:8px; align-items:baseline; margin:2px 0; }\n        .rpt-usage .tag { flex-shrink:0; font-size:10.5px; font-weight:800; color:white; padding:1px 7px; border-radius:3px; }\n        .rpt-usage .tag.free { background:#7e22ce; } .rpt-usage .tag.g3 { background:#0369a1; }\n        .rpt-usage .src { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-gauge { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }\n        .rpt-gauge-box { border:1px solid #dbe3ee; padding:10px 12px; }\n        .rpt-gauge-box .t { font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between; }\n        .rpt-gauge-box .pct { font-size:20px; font-weight:900; }\n        .rpt-gauge-box .track { height:9px; background:#eef2f7; border-radius:5px; overflow:hidden; margin-top:5px; }\n        .rpt-gauge-box .fill { height:100%; }\n        .rpt-gauge-box .s { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-check { display:flex; align-items:flex-start; gap:8px; padding:6px 4px; border-bottom:1px dashed #e2e8f0; font-size:11.5px; }\n        .rpt-check .ic { width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:11px; flex-shrink:0; }\n        .rpt-check .ok { background:#dcfce7; color:#15803d; } .rpt-check .warn { background:#fef3c7; color:#b45309; } .rpt-check .bad { background:#fee2e2; color:#b91c1c; }\n        .rpt-check .d { color:#64748b; font-size:10.5px; margin-top:1px; }\n        .rpt-foot { margin-top:22px; padding-top:8px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:10.5px; color:#94a3b8; }\n        .rpt-empty { text-align:center; color:#94a3b8; padding:10px !important; }\n        .rpt-toggle-inline { font-size:11px; color:#1e3a5f; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }\n\n        @page { size: A4 portrait; margin: 12mm 11mm; }\n        @media print { .rpt-paper { padding:0 !important; } .rpt-sec-h, table.rpt-t thead { break-after:avoid; } * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }\n";
+        const RPT_PAPER_CSS = "        * { margin:0; padding:0; box-sizing:border-box; }\n        body { font-family:'Pretendard','맑은 고딕','Malgun Gothic',sans-serif; background:white; }\n        .rpt-paper { padding:16mm 15mm 18mm; box-sizing:border-box; color:#111827; font-size:12.5px; }\n        .rpt-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }\n        .rpt-head-left { flex:1; min-width:0; }\n        .rpt-org { font-size:12px; color:#1e3a5f; font-weight:800; letter-spacing:1px; }\n        .rpt-doc-title { font-size:22px; font-weight:900; letter-spacing:-0.5px; word-break:keep-all; line-height:1.3; margin:6px 0 4px; color:#0f172a; }\n        .rpt-doc-sub { font-size:11.5px; color:#475569; }\n        .rpt-approval { border-collapse:collapse; font-size:11px; flex-shrink:0; }\n        .rpt-approval th { background:#f1f5f9; border:1px solid #64748b; padding:3px 6px; font-weight:800; color:#1e293b; min-width:58px; white-space:nowrap; }\n        .rpt-approval td { border:1px solid #64748b; height:46px; text-align:center; vertical-align:middle; }\n        .rpt-approval td img { max-width:42px; max-height:40px; }\n        .rpt-approval .side { writing-mode:vertical-rl; width:18px; background:#1e3a5f; color:white; font-weight:800; letter-spacing:4px; border:1px solid #1e3a5f; padding:4px 2px; }\n        .rpt-rule { height:4px; background:linear-gradient(90deg, #1e3a5f 0 70%, #d4af37 70% 100%); margin:12px 0 6px; }\n        .rpt-meta { display:grid; grid-template-columns:repeat(4, 1fr); border:1px solid #cbd5e1; margin-bottom:6px; }\n        .rpt-meta div { padding:6px 8px; border-right:1px solid #e2e8f0; font-size:11.5px; }\n        .rpt-meta div:last-child { border-right:none; }\n        .rpt-meta b { display:block; font-size:10.5px; color:#64748b; font-weight:700; margin-bottom:2px; }\n\n        .rpt-kpis { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:14px 0 4px; }\n        .rpt-kpi { border:1px solid #dbe3ee; border-top:3px solid #1e3a5f; padding:8px 10px; background:#f8fafc; }\n        .rpt-kpi.g3 { border-top-color:#0284c7; } .rpt-kpi.free { border-top-color:#9333ea; } .rpt-kpi.sk { border-top-color:#b91c1c; }\n        .rpt-kpi .k { font-size:10.5px; color:#64748b; font-weight:700; }\n        .rpt-kpi .v { font-size:17px; font-weight:900; color:#0f172a; margin-top:2px; }\n        .rpt-kpi .s { font-size:10px; color:#94a3b8; margin-top:1px; }\n\n        .rpt-sec { margin-top:20px; }\n        .rpt-sec.keep { break-inside:avoid; page-break-inside:avoid; }\n        table.rpt-t tr { break-inside:avoid; }\n        .rpt-sec-h { display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #1e3a5f; padding-bottom:5px; margin-bottom:6px; }\n        .rpt-sec-no { background:#1e3a5f; color:#fde68a; font-weight:900; font-size:12px; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0; align-self:center; }\n        .rpt-sec-t { font-size:15px; font-weight:900; color:#0f172a; }\n        .rpt-sec-r { margin-left:auto; font-size:11px; color:#64748b; }\n        .rpt-note { font-size:11px; color:#64748b; margin:2px 0 6px; line-height:1.5; }\n        table.rpt-t { width:100%; border-collapse:collapse; font-size:11.5px; }\n        table.rpt-t th { background:#eef2f7; color:#1e293b; font-weight:800; border:1px solid #c8d2df; padding:6px 6px; text-align:center; }\n        table.rpt-t thead th { border-top:2px solid #1e3a5f; }\n        table.rpt-t td { border:1px solid #dde4ed; padding:5px 7px; }\n        table.rpt-t td.n { text-align:right; font-variant-numeric:tabular-nums; }\n        table.rpt-t td.c { text-align:center; white-space:nowrap; }\n        table.rpt-t th { word-break:keep-all; }\n        table.rpt-t.compact { font-size:10.5px; }\n        table.rpt-t.compact th, table.rpt-t.compact td { padding:5px 4px; }\n        table.rpt-t tbody tr:nth-child(even) td { background:#fafbfd; }\n        table.rpt-t tfoot td { background:#1e3a5f; color:white; font-weight:800; border-color:#1e3a5f; }\n        .c-g3 { color:#0369a1; } .c-free { color:#7e22ce; } .c-sk { color:#b91c1c; } .c-ok { color:#15803d; } .c-mute { color:#94a3b8; }\n        .rpt-trend { display:grid; grid-template-columns:1fr 280px; gap:14px; align-items:start; }\n        .rpt-bar-row { display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11.5px; }\n        .rpt-bar-row .lbl { width:44px; font-weight:800; color:#334155; }\n        .rpt-bar-row .track { flex:1; height:16px; background:#eef2f7; border-radius:3px; overflow:hidden; }\n        .rpt-bar-row .fill { height:100%; background:linear-gradient(90deg, #1e3a5f, #3b82f6); }\n        .rpt-bar-row .val { width:52px; text-align:right; font-weight:800; }\n        .rpt-usage { border:1px solid #c8d2df; border-left:4px solid #d4af37; background:#fffdf5; padding:9px 12px; margin-bottom:10px; font-size:12px; line-height:1.6; }\n        .rpt-usage .row { display:flex; gap:8px; align-items:baseline; margin:2px 0; }\n        .rpt-usage .tag { flex-shrink:0; font-size:10.5px; font-weight:800; color:white; padding:1px 7px; border-radius:3px; }\n        .rpt-usage .tag.free { background:#7e22ce; } .rpt-usage .tag.g3 { background:#0369a1; }\n        .rpt-usage .src { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-gauge { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }\n        .rpt-gauge-box { border:1px solid #dbe3ee; padding:10px 12px; }\n        .rpt-gauge-box .t { font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between; }\n        .rpt-gauge-box .pct { font-size:20px; font-weight:900; }\n        .rpt-gauge-box .track { height:9px; background:#eef2f7; border-radius:5px; overflow:hidden; margin-top:5px; }\n        .rpt-gauge-box .fill { height:100%; }\n        .rpt-gauge-box .s { font-size:10.5px; color:#64748b; margin-top:4px; }\n        .rpt-check { display:flex; align-items:flex-start; gap:8px; padding:6px 4px; border-bottom:1px dashed #e2e8f0; font-size:11.5px; }\n        .rpt-check .ic { width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:11px; flex-shrink:0; }\n        .rpt-check .ok { background:#dcfce7; color:#15803d; } .rpt-check .warn { background:#fef3c7; color:#b45309; } .rpt-check .bad { background:#fee2e2; color:#b91c1c; }\n        .rpt-check .d { color:#64748b; font-size:10.5px; margin-top:1px; }\n        .rpt-foot { margin-top:22px; padding-top:8px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:10.5px; color:#94a3b8; }\n        .rpt-empty { text-align:center; color:#94a3b8; padding:10px !important; }\n        .rpt-toggle-inline { font-size:11px; color:#1e3a5f; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }\n\n        @page { size: A4 portrait; margin: 12mm 11mm; }\n        @media print { .rpt-paper { padding:0 !important; } .rpt-sec-h, table.rpt-t thead { break-after:avoid; } * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }\n";
         // ===== ✨ [v17.9] 운영보고서 만들기 =====
         const RPT_KEY = 'edusync_report_v1';
         const RPT_SECTIONS = [
@@ -13663,7 +13715,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 unusedTargets: [], missingInfo: [], unknownSubs: new Set(), missingStd: {},
                 totalStudents: 0, supportedStudents: 0, genStudents: 0
             };
-            qs.forEach(q => { D.q[q] = { students: 0, g3t: 0, frt: 0, gen: 0, g3: 0, free: 0, sk: 0, bill: 0 }; D.refunds[q] = { cnt: 0, amt: 0 }; });
+            qs.forEach(q => { D.q[q] = { students: 0, enroll: 0, g3t: 0, frt: 0, gen: 0, g3: 0, free: 0, sk: 0, bill: 0 }; D.refunds[q] = { cnt: 0, amt: 0 }; });
             D.mat = { q: {}, dept: {}, course: {} };
             qs.forEach(q => { D.mat.q[q] = { gy: 0, j: 0, gyG3: 0, gyFr: 0, gySk: 0, jG3: 0, jFr: 0, jSk: 0, rGy: 0, rJ: 0, cntGy: 0, cntJ: 0 }; });
             const ensureMat = (map, key) => map[key] || (map[key] = { gy: 0, j: 0, sup: 0, sk: 0, rGy: 0, rJ: 0, cntGy: 0, cntJ: 0 });
@@ -13728,6 +13780,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                         }
                         let net = a ? (a.netSu + a.netGy + a.netJ) : Math.max(0, gross - refund);
                         if (net <= 0) return; // 전액 환불 제외
+                        D.q[q].enroll++; // ✨ 수강인원(학생-과목 건수)
                         [[D.dept, baseSubjectName(name)], [D.course, name], [D.subj, getSubjectBaseName(name)]].forEach(([map, key]) => {
                             let o = ensure(map, key);
                             (o.byQ[q] || (o.byQ[q] = new Set())).add(r.id);
@@ -13889,7 +13942,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <div><b>작성자</b>${rptEsc(st.writer || '-')}</div>
                 </div>
                 <div class="rpt-kpis">
-                    <div class="rpt-kpi"><div class="k">수강 학생 (실인원)</div><div class="v">${D.totalStudents.toLocaleString()}명</div><div class="s">분기 연인원 ${T.enrollSum.toLocaleString()}명</div></div>
+                    <div class="rpt-kpi"><div class="k">수강 학생 (실인원)</div><div class="v">${D.totalStudents.toLocaleString()}명</div><div class="s">분기 연인원 ${T.enrollSum.toLocaleString()}명 · 수강인원 ${D.qs.reduce((s, q) => s + D.q[q].enroll, 0).toLocaleString()}명</div></div>
                     <div class="rpt-kpi g3"><div class="k">${rptEsc(g3L)} 집행</div><div class="v">${rptWon(T.g3)}원</div><div class="s">집행률 ${rptPct(D.g3.used, D.g3.allowance)}</div></div>
                     <div class="rpt-kpi free"><div class="k">자유수강권 집행</div><div class="v">${rptWon(T.free)}원</div><div class="s">집행률 ${rptPct(D.free.used, D.free.allowance)}</div></div>
                     <div class="rpt-kpi sk"><div class="k">수익자부담</div><div class="v">${rptWon(T.sk)}원</div><div class="s">일반 ${D.genStudents}명 · 초과 ${D.supportedOverStudents}명</div></div>
@@ -13930,13 +13983,13 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 
             // 1. 분기 총괄 요약
             if (st.on.summary) {
-                let rows = D.qs.map(q => { let Q = D.q[q]; return `<tr><td class="c"><b>${q}분기</b></td><td class="n">${Q.students}</td><td class="n">${Q.g3t}</td><td class="n">${Q.frt}</td><td class="n">${Q.gen}</td><td class="n c-g3">${rptWon(Q.g3)}</td><td class="n c-free">${rptWon(Q.free)}</td><td class="n c-sk">${rptWon(Q.sk)}</td><td class="n"><b>${rptWon(Q.bill)}</b></td><td class="n">${rptPct(Q.g3 + Q.free, Q.bill)}</td></tr>`; }).join('');
-                let tg3t = D.qs.reduce((s, q) => s + D.q[q].g3t, 0), tfrt = D.qs.reduce((s, q) => s + D.q[q].frt, 0), tgen = D.qs.reduce((s, q) => s + D.q[q].gen, 0);
+                let rows = D.qs.map(q => { let Q = D.q[q]; return `<tr><td class="c"><b>${q}분기</b></td><td class="n"><b>${Q.students}</b></td><td class="n">${Q.enroll}</td><td class="n">${Q.students ? (Q.enroll / Q.students).toFixed(1) : '-'}</td><td class="n">${Q.g3t}</td><td class="n">${Q.frt}</td><td class="n">${Q.gen}</td><td class="n c-g3">${rptWon(Q.g3)}</td><td class="n c-free">${rptWon(Q.free)}</td><td class="n c-sk">${rptWon(Q.sk)}</td><td class="n"><b>${rptWon(Q.bill)}</b></td><td class="n">${rptPct(Q.g3 + Q.free, Q.bill)}</td></tr>`; }).join('');
+                let tg3t = D.qs.reduce((s, q) => s + D.q[q].g3t, 0), tfrt = D.qs.reduce((s, q) => s + D.q[q].frt, 0), tgen = D.qs.reduce((s, q) => s + D.q[q].gen, 0), tEnroll = D.qs.reduce((s, q) => s + D.q[q].enroll, 0);
                 parts.push(sec('분기 총괄 요약', '단위: 명, 원', `
-                    <table class="rpt-t"><thead><tr><th>분기</th><th>수강 학생</th><th>${rptEsc(getG3LabelShort())} 대상</th><th>자유 대상</th><th>일반(수익자)</th><th>${rptEsc(getG3LabelShort())} 지원액</th><th>자유 지원액</th><th>수익자부담</th><th>총 청구액</th><th>지원율</th></tr></thead>
+                    <table class="rpt-t compact"><thead><tr><th>분기</th><th>실인원</th><th>수강인원</th><th>1인당<br>과목 수</th><th>${rptEsc(getG3LabelShort())} 대상</th><th>자유 대상</th><th>일반(수익자)</th><th>${rptEsc(getG3LabelShort())} 지원액</th><th>자유 지원액</th><th>수익자부담</th><th>총 청구액</th><th>지원율</th></tr></thead>
                     <tbody>${rows}</tbody>
-                    <tfoot><tr><td class="c">합계</td><td class="n">${T.enrollSum}</td><td class="n">${tg3t}</td><td class="n">${tfrt}</td><td class="n">${tgen}</td><td class="n">${rptWon(T.g3)}</td><td class="n">${rptWon(T.free)}</td><td class="n">${rptWon(T.sk)}</td><td class="n">${rptWon(T.bill)}</td><td class="n">${rptPct(T.g3 + T.free, T.bill)}</td></tr></tfoot></table>
-                    <div class="rpt-note">※ 수강 학생은 해당 분기에 결제(환불 반영 후) 금액이 있는 학생 수이며, 합계는 분기별 연인원입니다. ${rptEsc(getG3LabelShort())}·자유 대상은 두 지원을 함께 받는 학생이 양쪽에 포함되며, 일반(수익자)은 지원 대상이 아닌 학생입니다. 수익자부담은 일반 학생 결제액과 지원 대상자의 한도 초과분을 합한 금액입니다. 지원율 = (${rptEsc(g3L)} + 자유수강권) ÷ 총 청구액</div>`, true));
+                    <tfoot><tr><td class="c">합계</td><td class="n">${T.enrollSum}</td><td class="n">${tEnroll}</td><td class="n">${T.enrollSum ? (tEnroll / T.enrollSum).toFixed(1) : '-'}</td><td class="n">${tg3t}</td><td class="n">${tfrt}</td><td class="n">${tgen}</td><td class="n">${rptWon(T.g3)}</td><td class="n">${rptWon(T.free)}</td><td class="n">${rptWon(T.sk)}</td><td class="n">${rptWon(T.bill)}</td><td class="n">${rptPct(T.g3 + T.free, T.bill)}</td></tr></tfoot></table>
+                    <div class="rpt-note">※ 합계 줄은 분기별 인원을 더한 연인원입니다. 1인당 과목 수 = 수강인원 ÷ 실인원. ${rptEsc(getG3LabelShort())}·자유 대상은 두 지원을 함께 받는 학생이 양쪽에 포함되며, 일반(수익자)은 지원 대상이 아닌 학생입니다. 수익자부담은 일반 학생 결제액과 지원 대상자의 한도 초과분을 합한 금액입니다. 지원율 = (${rptEsc(g3L)} + 자유수강권) ÷ 총 청구액</div><div class="rpt-note" style="background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #1e3a5f; padding:6px 9px; margin-top:6px;"><b style="color:#1e3a5f;">📖 실인원과 수강인원</b><br>· <b>실인원</b>: 방과후를 듣는 <b>학생 수</b>입니다. 한 학생이 여러 과목을 들어도 1명으로 셉니다.<br>· <b>수강인원</b>: 과목별 수강 <b>건수</b>입니다. 한 학생이 영어와 수학 2과목을 들으면 실인원은 1명, 수강인원은 2명입니다. (부서별 수강현황 인원과 같은 기준)<br>· 전액 환불한 수강은 두 인원 모두에서 뺍니다.</div>`, true));
             }
 
             // 2. 부서별 수강현황 - ✨ 현황보기의 [중복안함 표]와 같은 기준 (N부 합침, 학생-과목 1건 = 1명, 초3 > 자유 > 수익자 한 칸)
@@ -14009,20 +14062,22 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <div class="rpt-note">※ 직전 분기와 비교합니다. 직전 분기에 수강생이 없다가 생기면 <b>신규개설</b>, 그 전에 운영했던 ${unit}가 다시 생기면 <b>재개설</b>, 직전 분기에 수강생이 있다가 없어지면 <b>폐강</b>으로 봅니다. 1분기는 비교 기준이며, 아직 수강 데이터가 없는 분기는 미집계로 표시합니다. 1부·2부, A부·B부, (가)·(나)처럼 시간표로 나뉜 반은 <b>하나의 과목으로 합쳐서</b> 판단합니다(수강현황 보기 설정과 무관). 인원은 전액 환불을 뺀 수강 건수입니다.</div>`, true));
             }
 
-            // 3. 수강자 증가추이
+            // 3. 수강자 증가추이 - ✨ [v18.1] 실인원 + 수강인원 함께
             if (st.on.trend) {
-                let max = Math.max(1, ...D.qs.map(q => D.q[q].students));
-                let bars = D.qs.map(q => `<div class="rpt-bar-row"><span class="lbl">${q}분기</span><span class="track"><span class="fill" style="display:block; width:${(D.q[q].students / max * 100).toFixed(1)}%"></span></span><span class="val">${D.q[q].students}명</span></div>`).join('');
+                let max = Math.max(1, ...D.qs.map(q => Math.max(D.q[q].students, D.q[q].enroll)));
+                let bars = D.qs.map(q => `<div style="margin:6px 0 8px;"><div style="font-size:11.5px; font-weight:800; color:#334155; margin-bottom:2px;">${q}분기</div>
+                    <div class="rpt-bar-row" style="margin:2px 0;"><span class="lbl" style="width:52px; font-size:10.5px; color:#1e3a5f;">실인원</span><span class="track"><span class="fill" style="display:block; width:${(D.q[q].students / max * 100).toFixed(1)}%"></span></span><span class="val">${D.q[q].students}명</span></div>
+                    <div class="rpt-bar-row" style="margin:2px 0;"><span class="lbl" style="width:52px; font-size:10.5px; color:#b45309;">수강인원</span><span class="track"><span class="fill" style="display:block; width:${(D.q[q].enroll / max * 100).toFixed(1)}%; background:linear-gradient(90deg, #b45309, #d4af37);"></span></span><span class="val">${D.q[q].enroll}명</span></div></div>`).join('');
                 let lastDataQ = Math.max(0, ...D.qs.filter(q => D.q[q].students > 0));
+                const cell = (a, b) => { let d = b - a; let cls = d > 0 ? 'c-ok' : (d < 0 ? 'c-sk' : 'c-mute'); return `<td class="n ${cls}">${d > 0 ? '▲ ' : d < 0 ? '▼ ' : ''}${Math.abs(d)}명</td><td class="n ${cls}">${a > 0 ? (d >= 0 ? '+' : '') + (d / a * 100).toFixed(1) + '%' : '-'}</td>`; };
                 let chg = D.qs.slice(1).map(q => {
-                    if (q > lastDataQ) return `<tr><td class="c">${q - 1}→${q}분기</td><td class="c c-mute" colspan="2">미집계</td></tr>`;
-                    let a = D.q[q - 1].students, b = D.q[q].students, d = b - a;
-                    let cls = d > 0 ? 'c-ok' : (d < 0 ? 'c-sk' : 'c-mute');
-                    return `<tr><td class="c">${q - 1}→${q}분기</td><td class="n ${cls}">${d > 0 ? '▲ ' : d < 0 ? '▼ ' : ''}${Math.abs(d)}명</td><td class="n ${cls}">${a > 0 ? (d >= 0 ? '+' : '') + (d / a * 100).toFixed(1) + '%' : '-'}</td></tr>`;
-                }).join('') || `<tr><td class="rpt-empty" colspan="3">비교할 분기가 없습니다</td></tr>`;
-                parts.push(sec('수강자 증가추이', '분기별 수강 학생(실인원)', `
-                    <div class="rpt-trend"><div>${bars}</div>
-                    <table class="rpt-t"><thead><tr><th>구간</th><th>증감</th><th>증감률</th></tr></thead><tbody>${chg}</tbody></table></div>`, true));
+                    if (q > lastDataQ) return `<tr><td class="c">${q - 1}→${q}분기</td><td class="c c-mute" colspan="4">미집계</td></tr>`;
+                    return `<tr><td class="c">${q - 1}→${q}분기</td>${cell(D.q[q - 1].students, D.q[q].students)}${cell(D.q[q - 1].enroll, D.q[q].enroll)}</tr>`;
+                }).join('') || `<tr><td class="rpt-empty" colspan="5">비교할 분기가 없습니다</td></tr>`;
+                parts.push(sec('수강자 증가추이', '분기별 실인원·수강인원', `
+                    <div class="rpt-trend" style="grid-template-columns:1fr 330px;"><div>${bars}</div>
+                    <table class="rpt-t"><thead><tr><th rowspan="2">구간</th><th colspan="2">실인원</th><th colspan="2">수강인원</th></tr><tr><th>증감</th><th>증감률</th><th>증감</th><th>증감률</th></tr></thead><tbody>${chg}</tbody></table></div>
+                    <div class="rpt-note">※ <b>실인원</b> = 학생 수(여러 과목을 들어도 1명), <b>수강인원</b> = 과목별 수강 건수(영어·수학 2과목이면 2명). 전액 환불한 수강은 제외합니다.</div>`, true));
             }
 
             // 4. 부서별 실적 요약
@@ -14047,7 +14102,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     let M = D.mat.q[q]; Object.keys(t).forEach(k => t[k] += M[k]);
                     return `<tr><td class="c"><b>${q}분기</b></td>
                         <td class="n">${M.cntGy}</td><td class="n"><b>${rptWon(M.gy)}</b></td><td class="n c-g3">${rptWon(M.gyG3)}</td><td class="n c-free">${rptWon(M.gyFr)}</td><td class="n c-sk">${rptWon(M.gySk)}</td>
-                        <td class="n">${M.cntJ}</td><td class="n"><b>${rptWon(M.j)}</b></td><td class="n c-g3">${rptWon(M.jG3)}</td><td class="n c-free">${rptWon(M.jFr)}</td><td class="n c-sk">${rptWon(M.jSk)}</td></tr>`;
+                        <td class="n">${M.cntJ}</td><td class="n"><b>${rptWon(M.j)}</b></td><td class="n c-g3">${rptWon(M.jG3)}</td><td class="n c-free">${rptWon(M.jFr)}</td><td class="n c-sk">${rptWon(M.jSk)}</td>
+                        <td class="n" style="background:#fffbeb; border-left:2px solid #d4af37;"><b>${rptWon(M.gy + M.j)}</b></td></tr>`;
                 }).join('');
                 let matMap = byCourse ? D.mat.course : D.mat.dept;
                 let mKeys = deptKeys.filter(k => matMap[k] && (matMap[k].gy + matMap[k].j + matMap[k].rGy + matMap[k].rJ) > 0);
@@ -14061,11 +14117,11 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 let matTot = t.gy + t.j, matSup = t.gyG3 + t.gyFr + t.jG3 + t.jFr, matSk = t.gySk + t.jSk;
                 parts.push(sec('교재비·재료비 집계', '단위: 건, 원', `
                     <div class="rpt-usage"><div class="row"><span class="tag" style="background:#1e3a5f;">총괄</span><span>교재비·재료비 총 <b>${rptWon(matTot)}원</b> (교재비 ${rptWon(t.gy)}원 · 재료비 ${rptWon(t.j)}원) 중 지원금 <b class="c-ok">${rptWon(matSup)}원(${rptPct(matSup, matTot)})</b>, 수익자부담 <b class="c-sk">${rptWon(matSk)}원(${rptPct(matSk, matTot)})</b>입니다.${(t.rGy + t.rJ) ? ` 환불 ${rptWon(t.rGy + t.rJ)}원은 제외한 금액입니다.` : ''}</span></div></div>
-                    <table class="rpt-t"><thead>
-                        <tr><th rowspan="2">분기</th><th colspan="5">교재비</th><th colspan="5">재료비</th></tr>
+                    <table class="rpt-t compact"><thead>
+                        <tr><th rowspan="2">분기</th><th colspan="5">교재비</th><th colspan="5">재료비</th><th rowspan="2" style="background:#fef3c7; border-left:2px solid #d4af37;">교재비+재료비<br>합계</th></tr>
                         <tr><th>건수</th><th>순액</th><th>${rptEsc(getG3LabelShort())}</th><th>자유</th><th>수익자</th><th>건수</th><th>순액</th><th>${rptEsc(getG3LabelShort())}</th><th>자유</th><th>수익자</th></tr></thead>
                     <tbody>${qRows}</tbody>
-                    <tfoot><tr><td class="c">합계</td><td class="n">${t.cntGy}</td><td class="n">${rptWon(t.gy)}</td><td class="n">${rptWon(t.gyG3)}</td><td class="n">${rptWon(t.gyFr)}</td><td class="n">${rptWon(t.gySk)}</td><td class="n">${t.cntJ}</td><td class="n">${rptWon(t.j)}</td><td class="n">${rptWon(t.jG3)}</td><td class="n">${rptWon(t.jFr)}</td><td class="n">${rptWon(t.jSk)}</td></tr></tfoot></table>
+                    <tfoot><tr><td class="c">합계</td><td class="n">${t.cntGy}</td><td class="n">${rptWon(t.gy)}</td><td class="n">${rptWon(t.gyG3)}</td><td class="n">${rptWon(t.gyFr)}</td><td class="n">${rptWon(t.gySk)}</td><td class="n">${t.cntJ}</td><td class="n">${rptWon(t.j)}</td><td class="n">${rptWon(t.jG3)}</td><td class="n">${rptWon(t.jFr)}</td><td class="n">${rptWon(t.jSk)}</td><td class="n" style="border-left:2px solid #d4af37;">${rptWon(t.gy + t.j)}</td></tr></tfoot></table>
                     <table class="rpt-t" style="margin-top:8px;"><thead><tr><th style="text-align:left">${byCourse ? '강좌명' : '강좌(1부·2부 합침)'}</th><th>교재 건수</th><th>교재비</th><th>재료 건수</th><th>재료비</th><th>합계</th><th>지원금</th><th>수익자</th><th>환불액</th></tr></thead>
                     <tbody>${cRows}</tbody>
                     <tfoot><tr><td class="c">합계</td><td class="n">${t.cntGy}</td><td class="n">${rptWon(ct.gy)}</td><td class="n">${t.cntJ}</td><td class="n">${rptWon(ct.j)}</td><td class="n">${rptWon(ct.gy + ct.j)}</td><td class="n">${rptWon(ct.sup)}</td><td class="n">${rptWon(ct.sk)}</td><td class="n">${rptWon(ct.r)}</td></tr></tfoot></table>
