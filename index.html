@@ -2615,6 +2615,22 @@
                             });
                             didReconcile = true;
                         }
+                        // ✨ [v18.3] 반대로 '환불 내역 목록'에는 있는데 과목 환불금액(rSu/rGy/rJ)에 빠져 있는 경우(예전 버전 데이터),
+                        //    환불 내역 기록을 기준으로 환불금액을 맞춤 (결제금액을 넘지 않게)
+                        let loggedSu = s.refundLog.reduce((sum, l) => sum + toNum(l.amount), 0);
+                        loggedG = s.refundLog.reduce((sum, l) => sum + toNum(l.g), 0);
+                        loggedS = s.refundLog.reduce((sum, l) => sum + toNum(l.s), 0);
+                        loggedGy = s.refundLog.reduce((sum, l) => sum + toNum(l.gy), 0);
+                        loggedJ = s.refundLog.reduce((sum, l) => sum + toNum(l.j), 0);
+                        if (loggedGy > toNum(s.rGy) + 0.5) { s.rGy = Math.min(loggedGy, toNum(s.gy)); didReconcile = true; }
+                        if (loggedJ > toNum(s.rJ) + 0.5) { s.rJ = Math.min(loggedJ, toNum(s.j)); didReconcile = true; }
+                        if (loggedSu > toNum(s.rSu) + 0.5) {
+                            let suGross = (toNum(s.g) > 0 || toNum(s.s) > 0) ? toNum(s.g) + toNum(s.s) : toNum(s.su);
+                            s.rSu = Math.min(loggedSu, suGross);
+                            if (loggedG > toNum(s.rG)) s.rG = Math.min(loggedG, toNum(s.g) || loggedG);
+                            if (loggedS > toNum(s.rS)) s.rS = Math.min(loggedS, toNum(s.s) || loggedS);
+                            didReconcile = true;
+                        }
                     });
                 }
             });
@@ -7553,7 +7569,10 @@ function updateG3LimitTotal() {
                                 isNewTime = saveTime; 
                             }
 
-                            subs.push({ name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate });
+                            let keepExtra = {};
+                            // ✨ [v18.3] 개별 수정창으로 저장해도 환불 내역(사유·몇차·환불지원금 지정)과 수동 배분이 지워지지 않도록 그대로 유지
+                            if (oldSub) ['refundLog', 'manualAlloc', 'rMonth', 'reasonManual', 'reason', 'mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ', '_refundLogMigratedV2'].forEach(k => { if (oldSub[k] !== undefined) keepExtra[k] = JSON.parse(JSON.stringify(oldSub[k])); });
+                            subs.push(Object.assign(keepExtra, { name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate }));
                             sumG += g; sumS += acc; sumSu += su; sumGy += gy; sumJ += j;
 
                             if(name && !savedSubjects.some(subObj => subObj.name === name)) {
