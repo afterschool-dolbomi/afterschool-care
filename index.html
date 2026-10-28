@@ -2457,6 +2457,7 @@
             repairRefundLogSplitDrift(); // ✨ "미지정" 항목이 중복 생성된 것을 실제 금액은 그대로 두고 한 줄로 정리 (딱 한 번만 실행)
             repairRefundLogDecimalDrift(); // ✨ 과거에 소수점 원 단위로 저장된 환불 내역을 정수로 정리 (딱 한 번만 실행)
             try { if (fillGSFromSubjectFees() > 0) persistData(); } catch (e) {} // ✨ [v18.3] 수강료만 있고 강사료·수용비가 빈 수강 기록을 과목 기준단가로 채움
+            setTimeout(() => { try { checkDupUntaggedRefundsOnStart(); } catch (e) {} }, 1200); // ✨ [v18.3] 중복 '미지정' 환불 한 번에 정리
             validateAndFixCalculations();
             renderFormQuarters();
             updateGlobalStats();
@@ -9432,6 +9433,66 @@ function updateG3LimitTotal() {
             s.rGy = Math.min(Math.max(toNum(s.rGy), sum('gy')), toNum(s.gy));
             s.rJ = Math.min(Math.max(toNum(s.rJ), sum('j')), toNum(s.j));
             persistData(); showDetailModal(id); if (typeof renderGrid === 'function') renderGrid();
+        }
+        // ✨ [v18.3] 예전 버전에서 생긴 '중복 의심 미지정 환불' 찾기
+        //   = 몇차 미지정 + 사유 없음 + 교재비·재료비만 있음 + 같은 과목의 다른(몇차 지정된) 환불 항목과 교재비·재료비 금액이 똑같은 항목
+        function findDupUntaggedRefunds() {
+            let list = [];
+            (db || []).forEach(r => {
+                for (let q = 1; q <= 6; q++) {
+                    let qd = r[`q${q}`]; if (!qd || !qd.subs) continue;
+                    qd.subs.forEach((s, sIdx) => {
+                        let logs = s.refundLog || [];
+                        let tagged = logs.filter(l => !(l.month === undefined || l.month === null || l.month === ''));
+                        if (!tagged.length) return;
+                        logs.forEach((l, li) => {
+                            if (!(l.month === undefined || l.month === null || l.month === '')) return;
+                            if (String(l.reason || '').trim()) return;
+                            let comp = { amount: toNum(l.amount), gy: toNum(l.gy), j: toNum(l.j) };
+                            // 예전 버그는 교재비·재료비만 중복으로 만들었으므로, 수강료가 들어 있는 항목은 실제 환불일 수 있어 건드리지 않음
+                            if (comp.amount > 0 || toNum(l.g) > 0 || toNum(l.s) > 0) return;
+                            if (comp.gy + comp.j <= 0) return;
+                            let dup = tagged.some(t => ['amount', 'gy', 'j'].every(k => comp[k] === 0 || comp[k] === toNum(t[k])));
+                            if (dup) list.push({ r, q, sIdx, li, s, l });
+                        });
+                    });
+                }
+            });
+            return list;
+        }
+        function cleanupDupUntaggedRefunds(list) {
+            // 같은 과목 안에서는 뒤쪽 항목부터 지워야 순번이 안 꼬임
+            list.slice().sort((a, b) => b.li - a.li).forEach(it => {
+                let s = it.s, entry = it.l;
+                let ex = getRefundLogExcess(s);
+                const back = (v, exv) => Math.max(0, toNum(v) - exv);
+                s.rG = Math.max(0, toNum(s.rG) - back(entry.g, ex.g));
+                s.rS = Math.max(0, toNum(s.rS) - back(entry.s, ex.s));
+                s.rSu = Math.max(0, toNum(s.rSu) - back(entry.amount, ex.su));
+                s.rGy = Math.max(0, toNum(s.rGy) - back(entry.gy, ex.gy));
+                s.rJ = Math.max(0, toNum(s.rJ) - back(entry.j, ex.j));
+                let idx = s.refundLog.indexOf(entry);
+                if (idx >= 0) s.refundLog.splice(idx, 1);
+            });
+            persistData();
+        }
+        function checkDupUntaggedRefundsOnStart() {
+            let list = findDupUntaggedRefunds();
+            if (!list.length) return;
+            let sig = list.map(it => `${it.r.id}/${it.q}/${it.s.name}/${toNum(it.l.amount)}/${toNum(it.l.gy)}/${toNum(it.l.j)}`).join('|');
+            try { if (localStorage.getItem('edusync_dup_refund_keep') === sig) return; } catch (e) {}
+            let names = list.slice(0, 12).map(it => {
+                let amt = toNum(it.l.amount) + toNum(it.l.gy) + toNum(it.l.j);
+                return ` · ${it.r.grade}-${it.r.classNum} ${it.r.name} (${it.q}분기 ${it.s.name}, ${amt.toLocaleString()}원)`;
+            }).join('\n') + (list.length > 12 ? `\n 외 ${list.length - 12}건` : '');
+            let ok = confirm(`🧹 예전 버전에서 같은 환불이 '미지정' 항목으로 한 번 더 생긴 것으로 보이는 기록이 ${list.length}건 있어요.\n\n${names}\n\n[확인] 을 누르면 이 중복 항목을 한 번에 지우고, 실제 환불금액도 원래대로(중복 몫을 뺀 금액) 돌려놓아요.\n[취소] 를 누르면 그대로 둡니다. (다시 묻지 않음 — 실제 환불이면 취소하세요)`);
+            if (ok) {
+                cleanupDupUntaggedRefunds(list);
+                if (typeof renderGrid === 'function') renderGrid();
+                alert(`정리 완료: 중복 환불 항목 ${list.length}건을 지웠어요.`);
+            } else {
+                try { localStorage.setItem('edusync_dup_refund_keep', sig); } catch (e) {}
+            }
         }
         let refundLogMonthCtx = null; // {id, q, sIdx, li}
         function openRefundLogMonthPicker(id, q, sIdx, li) {
