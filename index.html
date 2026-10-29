@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V18.3</title>
+    <title>방과후 지원금 돌보미 V18.4</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -948,22 +948,22 @@
                         <div style="border:2px solid #d4af37; border-radius:8px; padding:10px;">
                         <div style="font-size:11.5px; font-weight:800; color:#1e3a5f; margin-bottom:8px;">✏️ 수강료 직접 입력</div>
                         <div style="font-size:11px; color:#64748b; margin-bottom:4px;">수강료 (나누지 않고 총액만 입력해도 OK)</div>
-                        <input type="number" id="mrfSu" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box; margin-bottom:8px;" oninput="onMrfSuInput()">
+                        <input type="number" min="0" id="mrfSu" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box; margin-bottom:8px;" oninput="onMrfSuInput()">
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                             <div>
                                 <div style="font-size:11px; color:#64748b; margin-bottom:4px;">강사료</div>
-                                <input type="number" id="mrfG" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfGsInput()">
+                                <input type="number" min="0" id="mrfG" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfGsInput()">
                             </div>
                             <div>
                                 <div style="font-size:11px; color:#64748b; margin-bottom:4px;">수용비</div>
-                                <input type="number" id="mrfS" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfGsInput()">
+                                <input type="number" min="0" id="mrfS" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfGsInput()">
                             </div>
                         </div>
                     </div>
                                        <div style="border:2px solid #d4af37; border-radius:8px; padding:10px;">
                         <div style="font-size:11.5px; font-weight:800; color:#1e3a5f; margin-bottom:8px;">🧮 수강료 자동계산 <span style="background:#2563eb; color:white; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:10px; margin-left:2px; vertical-align:middle;">추천</span></div>
                         <div style="font-size:11px; color:#64748b; margin-bottom:4px;">환불할 차시 수</div>
-                        <input type="number" id="mrfSessionCount" placeholder="예: 2" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfSessionCountInput()">
+                        <input type="number" min="0" id="mrfSessionCount" placeholder="예: 2" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onMrfSessionCountInput()">
                         <div id="mrfAutoPreview" style="margin-top:8px; font-size:11px; color:#9ca3af; line-height:1.5;">차시 수를 입력하면 강사료·수용비가 자동으로 계산됩니다.</div>
                     </div>
                 </div>
@@ -972,11 +972,11 @@
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                         <div>
                             <div style="font-size:11px; color:#64748b; margin-bottom:4px;">교재비</div>
-                            <input type="number" id="mrfGy" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="number" min="0" id="mrfGy" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
                         <div>
                             <div style="font-size:11px; color:#64748b; margin-bottom:4px;">재료비</div>
-                            <input type="number" id="mrfJ" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                            <input type="number" min="0" id="mrfJ" placeholder="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
                         </div>
                     </div>
                 </div>
@@ -1258,7 +1258,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V18.3</span>
+                <span class="brand-version">V18.4</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1989,6 +1989,7 @@
                 <button class="btn-save" style="background: #1e3a5f; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37;" onclick="closePrintExportModal(); openAdminRosterModal();">🏛️ 행정실 CMS 엑셀 수납 명단 저장</button>
                 <button class="btn-save" style="background: linear-gradient(135deg, #1e3a5f, #0f172a); width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(30,58,95,0.3); border: 1px solid #d4af37; color:#fde68a;" onclick="closePrintExportModal(); openSmartAttModal();">📒 똑똑한 출석부 만들기</button>
                 <button class="btn-save" style="background: linear-gradient(135deg, #fde68a, #d4af37); width: 100%; height: 45px; font-size: 14px; border-radius: 6px; box-shadow: 0 4px 6px rgba(212,175,55,0.35); border: 1px solid #b8860b; color:#0f172a; font-weight:800;" onclick="closePrintExportModal(); openOpsReport();">📊 운영보고서 만들기</button>
+                <button class="btn-save" style="background: white; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 2px solid #1e3a5f; color:#1e3a5f; font-weight:800;" onclick="closePrintExportModal(); openCalcChangeModal('backup');">🔍 금액 변동 확인 (백업과 비교)</button>
                 <button class="btn-save" style="background: #b91c1c; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); openRefundRosterModal();">🧾 환불 명단 엑셀 저장</button>
                 <button class="btn-save" style="background: #0f766e; width: 100%; height: 45px; font-size: 14px; border-radius: 6px; border: 1px solid #d4af37;" onclick="closePrintExportModal(); openTuitionStatementModal();">📋 방과후 정산파일(N월 교육비) 저장</button>
                 <button class="btn-save" style="background: #10b981; width: 100%; height: 45px; font-size: 14px; border-radius: 6px;" onclick="closePrintExportModal(); exportCurrentViewExcel();">📥 현재화면 엑셀저장</button>
@@ -2457,7 +2458,10 @@
             repairRefundLogSplitDrift(); // ✨ "미지정" 항목이 중복 생성된 것을 실제 금액은 그대로 두고 한 줄로 정리 (딱 한 번만 실행)
             repairRefundLogDecimalDrift(); // ✨ 과거에 소수점 원 단위로 저장된 환불 내역을 정수로 정리 (딱 한 번만 실행)
             try { if (fillGSFromSubjectFees() > 0) persistData(); } catch (e) {} // ✨ [v18.3] 수강료만 있고 강사료·수용비가 빈 수강 기록을 과목 기준단가로 채움
-            setTimeout(() => { try { checkDupUntaggedRefundsOnStart(); } catch (e) {} }, 1200); // ✨ [v18.3] 중복 '미지정' 환불 한 번에 정리
+            setTimeout(() => {
+                try { checkDupUntaggedRefundsOnStart(); } catch (e) {} // ✨ [v18.3] 중복 '미지정' 환불 한 번에 정리
+                try { runCalcChangeCheckOnStart(); } catch (e) { window.__calcSnapUnlocked = true; } // ✨ [v18.4] 지난번과 금액이 달라진 학생 알려주기
+            }, 1200);
             validateAndFixCalculations();
             renderFormQuarters();
             updateGlobalStats();
@@ -2702,6 +2706,7 @@
             if(isTimeTravelMode) return; 
             localStorage.setItem('edusync_db_v3', JSON.stringify(db));
             updateGlobalStats();
+            if (typeof scheduleCalcSnapshot === 'function') scheduleCalcSnapshot();
         }
         function persistNeisList() {
             if(isTimeTravelMode) return;
@@ -4866,6 +4871,7 @@ function toggleStatusPanel() {
         function persistSubjects() {
 		 if(isTimeTravelMode) return;
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
+            if (typeof scheduleCalcSnapshot === 'function') scheduleCalcSnapshot();
         }
 
         function baseSubjectName(name) {
@@ -8062,7 +8068,7 @@ function updateG3LimitTotal() {
                                                 // ✨ [v18.2] 환불 합계: 강사료·수용비로 환불했으면 강사료+수용비+교재비+재료비 (수강료는 표시만, 중복 합산 안 함) / 수강료로만 환불했으면 수강료+교재비+재료비
                                                 let eTotal = (eg > 0 || es > 0) ? (eg + es + egy + ej) : (eSu + egy + ej);
                                                 let srcBadge = l.source === 'cart' ? '<span title="환불 관리(카트)로 적용" style="font-size:10px;">🛒</span>' : '<span title="수기 입력" style="font-size:10px;">✏️</span>';
-                                                let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>' + (!(l.reason || '').trim() ? '<div style="font-size:10px; color:#9a3412; font-weight:600; line-height:1.2;">자동 생성 항목</div>' : ''));
+                                                let monthHtml = l.month === 'pre' ? '수강전취소' : (l.month ? `${l.month}차` : '<span style="color:#dc2626;">미지정</span>');
                                                 return `<tr>
                                                     <td style="padding:6px; border:1px solid #e5e7eb;">${it.subjectName}</td>
                                                     <td style="padding:6px; border:1px solid #e5e7eb; text-align:center; color:#1e40af; font-weight:700; cursor:pointer;" onclick="openRefundLogMonthPicker('${r.id}', ${q}, ${it.sIdx}, ${it.li})" title="클릭해서 몇 차인지 수정">${monthHtml} ${srcBadge}</td>
@@ -8349,6 +8355,12 @@ function updateG3LimitTotal() {
             manualRefundCtx.month = m;
             renderMrfMonthBtns();
             if (m === 'pre') autoFillMrfPreCancelSessions();
+            else if (manualRefundCtx.preFilled) {
+                // ✨ [v18.3] 수강전취소로 자동 채워진 차시 수는 다른 차를 고르면 비워줌
+                let el = document.getElementById('mrfSessionCount');
+                if (el && String(el.value) === String(manualRefundCtx.preFilled)) { el.value = ''; onMrfSessionCountInput(); }
+                manualRefundCtx.preFilled = null;
+            }
         }
         function autoFillMrfPreCancelSessions() {
             if (!manualRefundCtx) return;
@@ -8361,6 +8373,7 @@ function updateG3LimitTotal() {
             let total = sub ? getSubjectTotalSessions(sub, q) : 0;
             if (total > 0) {
                 document.getElementById('mrfSessionCount').value = total;
+                manualRefundCtx.preFilled = total;
                 onMrfSessionCountInput();
             }
         }
@@ -8399,7 +8412,7 @@ function updateG3LimitTotal() {
             if (!manualRefundCtx) return;
             let { id, q, sIdx } = manualRefundCtx;
             let preview = document.getElementById('mrfAutoPreview');
-            let count = toNum(document.getElementById('mrfSessionCount').value);
+            let count = Math.abs(toNum(document.getElementById('mrfSessionCount').value));
             if (!count) {
                 preview.style.color = '#9ca3af';
                 preview.innerText = '차시 수를 입력하면 강사료·수용비가 자동으로 계산됩니다.';
@@ -8442,8 +8455,9 @@ function updateG3LimitTotal() {
             let suDirect = toNum(document.getElementById('mrfSu').value);
             let gy = toNum(document.getElementById('mrfGy').value);
             let j = toNum(document.getElementById('mrfJ').value);
-            let sessionCount = toNum(document.getElementById('mrfSessionCount').value);
+            let sessionCount = Math.abs(toNum(document.getElementById('mrfSessionCount').value));
             let reason = (document.getElementById('mrfReason').value || '').trim();
+            if ([g, sVal, suDirect, gy, j].some(v => v < 0)) return alert('환불 금액에는 마이너스(-)를 입력할 수 없어요.');
 
             let hasGS = (g > 0 || sVal > 0);
             let hasSuOnly = (!hasGS && suDirect > 0);
@@ -11792,6 +11806,7 @@ function updateG3LimitTotal() {
                         <td style="text-align:center;">
                             <button class="btn-tool" style="background:#10b981; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" onclick="loadSnapshot('${snap.id}')">이동</button>
 							<button class="btn-tool" style="background:#3b82f6; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" onclick="editSnapshotMemo('${snap.id}')">수정</button>
+                            <button class="btn-tool" style="background:#1e3a5f; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; margin-right:4px;" title="이 백업과 지금 학생 금액을 비교" onclick="openCalcChangeModal('backup', { snapId: '${snap.id}' })">비교</button>
                             <button class="btn-tool" style="background:#ef4444; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold;" onclick="deleteSnapshot('${snap.id}')">삭제</button>
                         </td>
                     </tr>
@@ -15035,6 +15050,173 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
     if (document.readyState === 'complete') run(); else window.addEventListener('load', run);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setTimeout(run, 50); });
 })();
+</script>
+<script>
+// ✨ [v18.3] 숫자칸에 커서가 있는 채로 마우스 휠을 굴리면 값이 -1, -6처럼 바뀌던 문제 방지 → 휠은 화면 스크롤로만 사용
+document.addEventListener('wheel', function (e) {
+    var t = document.activeElement;
+    if (t && t.tagName === 'INPUT' && t.type === 'number' && (e.target === t || t.contains(e.target))) t.blur();
+}, { passive: true });
+// ✨ 환불 입력칸에는 마이너스 금액·차시가 들어가지 않도록 자동으로 빼기
+document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== 'INPUT' || t.type !== 'number') return;
+    if (!t.closest || !t.closest('#manualRefundModal')) return;
+    if (String(t.value).indexOf('-') !== -1 || Number(t.value) < 0) { t.value = String(Math.abs(Number(t.value) || 0) || ''); }
+}, true);
+</script>
+<script>
+// ===== ✨ [v18.4] 금액 변동 감시: 프로그램 업데이트·데이터 정리로 학생 금액이 바뀌면 누가 얼마나 바뀌었는지 알려줌 =====
+//  · 자동 기준(edusync_calc_autosnap_v1): 저장할 때마다 '지금 계산 결과'를 기록 → 다음에 켰을 때 새 계산과 비교
+//  · 날짜별 과거 기록(백업)과도 언제든 비교 가능 (업무,저장,인쇄 → 금액 변동 확인 / 백업 목록의 [비교])
+var CALC_SNAP_KEY = 'edusync_calc_autosnap_v1', CALC_DIFF_KEY = 'edusync_calc_lastdiff_v1';
+var CALC_FIELDS = [['usedG3', null], ['usedFree', '자유수강 사용'], ['over', '수익자부담'], ['exp', '결제액(환불 후)']];
+function calcFieldLabel(k) { return k === 'usedG3' ? (typeof getG3LabelShort === 'function' ? getG3LabelShort() : '초3') + ' 사용' : k === 'usedFree' ? '자유수강 사용' : k === 'over' ? '수익자부담' : k === 'exp' ? '결제액(환불 후)' : k === 'remG3' ? (typeof getG3LabelShort === 'function' ? getG3LabelShort() : '초3') + ' 잔액' : k === 'remFree' ? '자유수강 잔액' : k; }
+function buildCalcSnapshot(dbArr, mq) {
+    var snap = { at: Date.now(), ver: document.title, students: {} };
+    var keepMq = maxQuarter; if (mq) maxQuarter = mq;
+    try {
+        var nq = (maxQuarter === 6) ? 6 : 4;
+        (dbArr || db || []).forEach(function (r) {
+            var c; try { c = calcStudent(r); } catch (e) { return; }
+            var d = {};
+            for (var q = 1; q <= nq; q++) { var Q = c['q' + q] || {}; d['q' + q] = [Math.round(toNum(Q.usedG3)), Math.round(toNum(Q.usedFree)), Math.round(toNum(Q.over)), Math.round(toNum(Q.exp))]; }
+            d.rem = [r.hasG3 ? Math.round(toNum(c.remG3)) : 0, r.hasFree ? Math.round(toNum(c.remFree)) : 0];
+            snap.students[r.id] = { n: r.grade + '-' + r.classNum + '-' + r.studentNum + ' ' + r.name, d: d };
+        });
+    } finally { maxQuarter = keepMq; }
+    return snap;
+}
+function diffCalcSnapshots(prev, cur) {
+    var rows = [];
+    if (!prev || !prev.students || !cur || !cur.students) return rows;
+    Object.keys(cur.students).forEach(function (id) {
+        var a = prev.students[id], b = cur.students[id];
+        if (!a) return; // 새로 등록한 학생은 비교 대상 아님
+        Object.keys(b.d).forEach(function (k) {
+            var av = a.d[k], bv = b.d[k];
+            if (!av) return;
+            var keys = k === 'rem' ? ['remG3', 'remFree'] : ['usedG3', 'usedFree', 'over', 'exp'];
+            keys.forEach(function (f, i) {
+                var x = toNum(av[i]), y = toNum(bv[i]);
+                if (Math.abs(x - y) >= 1) rows.push({ id: id, n: b.n, q: k === 'rem' ? '연간' : k.replace('q', '') + '분기', f: f, before: x, after: y });
+            });
+        });
+    });
+    return rows;
+}
+var __calcSnapTimer = null;
+function scheduleCalcSnapshot() {
+    if (window.__calcSnapUnlocked !== true) return; // 프로그램을 켤 때 비교가 끝나기 전에는 덮어쓰지 않음
+    if (typeof isTimeTravelMode !== 'undefined' && isTimeTravelMode) return;
+    clearTimeout(__calcSnapTimer);
+    __calcSnapTimer = setTimeout(function () {
+        try {
+            var cur = buildCalcSnapshot();
+            var prev = null; try { prev = JSON.parse(localStorage.getItem(CALC_SNAP_KEY) || 'null'); } catch (e) {}
+            if (prev && !window.__backupNudgeShown && diffCalcSnapshots(prev, cur).length) showBackupNudge();
+            localStorage.setItem(CALC_SNAP_KEY, JSON.stringify(cur));
+        } catch (e) {}
+    }, 800);
+}
+window.addEventListener('beforeunload', function () {
+    if (window.__calcSnapUnlocked !== true) return;
+    if (typeof isTimeTravelMode !== 'undefined' && isTimeTravelMode) return;
+    try { localStorage.setItem(CALC_SNAP_KEY, JSON.stringify(buildCalcSnapshot())); } catch (e) {}
+});
+function runCalcChangeCheckOnStart() {
+    var prev = null; try { prev = JSON.parse(localStorage.getItem(CALC_SNAP_KEY) || 'null'); } catch (e) {}
+    var cur = buildCalcSnapshot();
+    window.__calcSnapUnlocked = true;
+    try { localStorage.setItem(CALC_SNAP_KEY, JSON.stringify(cur)); } catch (e) {}
+    if (!prev) return; // 처음 한 번은 기준만 만들어 둠
+    var rows = diffCalcSnapshots(prev, cur);
+    if (!rows.length) return;
+    try { localStorage.setItem(CALC_DIFF_KEY, JSON.stringify({ at: Date.now(), fromAt: prev.at, fromVer: prev.ver, toVer: cur.ver, rows: rows })); } catch (e) {}
+    openCalcChangeModal('start', { rows: rows, fromAt: prev.at, fromVer: prev.ver, toVer: cur.ver });
+}
+function fmtCalcTime(t) { if (!t) return '-'; var d = new Date(t), p = function (v) { return String(v).padStart(2, '0'); }; return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+function calcChangeTableHtml(rows) {
+    if (!rows.length) return '<div style="padding:22px; text-align:center; color:#15803d; font-weight:800; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;">✅ 바뀐 금액이 없어요. 모든 학생 금액이 그대로예요.</div>';
+    var byStu = {}; rows.forEach(function (x) { (byStu[x.id] = byStu[x.id] || { n: x.n, list: [] }).list.push(x); });
+    var html = '<table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#eef2f7;">' +
+        ['학생', '분기', '항목', '이전', '지금', '차이'].map(function (t, i) { return '<th style="padding:8px 6px; border-bottom:2px solid #1e3a5f; text-align:' + (i >= 3 ? 'right' : 'center') + '; position:sticky; top:0; background:#eef2f7;">' + t + '</th>'; }).join('') + '</tr></thead><tbody>';
+    Object.keys(byStu).forEach(function (id) {
+        var g = byStu[id];
+        g.list.forEach(function (x, i) {
+            var d = x.after - x.before;
+            html += '<tr style="border-bottom:1px solid #eef2f7;">' +
+                (i === 0 ? '<td rowspan="' + g.list.length + '" style="padding:7px 6px; text-align:center; vertical-align:top; border-right:1px solid #eef2f7;"><a style="color:#1e40af; font-weight:800; cursor:pointer; text-decoration:underline;" onclick="closeCalcChangeModal(); showDetailModal(\'' + id + '\')">' + g.n + '</a></td>' : '') +
+                '<td style="padding:7px 6px; text-align:center;">' + x.q + '</td><td style="padding:7px 6px; text-align:center;">' + calcFieldLabel(x.f) + '</td>' +
+                '<td style="padding:7px 6px; text-align:right; color:#64748b;">' + x.before.toLocaleString() + '원</td>' +
+                '<td style="padding:7px 6px; text-align:right; font-weight:800;">' + x.after.toLocaleString() + '원</td>' +
+                '<td style="padding:7px 6px; text-align:right; font-weight:800; color:' + (d > 0 ? '#b91c1c' : '#1d4ed8') + ';">' + (d > 0 ? '+' : '') + d.toLocaleString() + '원</td></tr>';
+        });
+    });
+    return html + '</tbody></table>';
+}
+function openCalcChangeModal(mode, info) {
+    closeCalcChangeModal();
+    var cur = buildCalcSnapshot();
+    var last = null; try { last = JSON.parse(localStorage.getItem(CALC_DIFF_KEY) || 'null'); } catch (e) {}
+    var title, sub, body;
+    if (mode === 'start') {
+        var nStu = Object.keys(info.rows.reduce(function (m, x) { m[x.id] = 1; return m; }, {})).length;
+        title = '💡 지난번과 금액이 달라진 학생이 ' + nStu + '명 있어요';
+        sub = '프로그램을 새 버전으로 바꾸거나 데이터가 자동 정리되면서 계산 결과가 달라진 학생이에요. 지난번 사용(' + fmtCalcTime(info.fromAt) + ') 때 금액과 비교했어요.';
+        body = calcChangeTableHtml(info.rows);
+    } else {
+        title = '🔍 금액 변동 확인 (백업과 비교)';
+        var snaps = (typeof snapshots !== 'undefined' && Array.isArray(snapshots)) ? snapshots : [];
+        var pickId = (info && info.snapId) || (snaps[0] && snaps[0].id);
+        var picked = snaps.find(function (x) { return x.id === pickId; });
+        if (picked) {
+            var bsnap = buildCalcSnapshot((picked.data && picked.data.db) || [], picked.data && picked.data.maxQuarter);
+            var rowsB = diffCalcSnapshots(bsnap, cur);
+            var opts = snaps.map(function (x) { return '<option value="' + x.id + '"' + (x.id === pickId ? ' selected' : '') + '>' + x.date + (x.isAuto ? ' (자동)' : '') + (x.memo ? ' · ' + String(x.memo).replace(/</g, '&lt;').slice(0, 30) : '') + '</option>'; }).join('');
+            sub = '<b>날짜별 과거 기록(백업)</b>과 지금 학생 금액을 비교해요. 그 뒤에 직접 입력·수정한 내용과 프로그램 업데이트로 바뀐 내용이 모두 나와요.' +
+                '<div style="margin-top:8px;"><select onchange="openCalcChangeModal(\'backup\', { snapId: this.value })" style="padding:6px 8px; border-radius:6px; border:none; font-weight:700; max-width:100%;">' + opts + '</select></div>';
+            body = calcChangeTableHtml(rowsB);
+        } else {
+            sub = '아직 저장한 <b>날짜별 과거 기록(백업)</b>이 없어요. 금액 정리를 마쳤을 때 백업을 저장해 두면, 나중에 그때와 지금 금액을 비교할 수 있어요.';
+            body = '<div style="text-align:center; padding:16px;"><button type="button" onclick="closeCalcChangeModal(); openSnapshotModal();" style="height:40px; padding:0 18px; border-radius:8px; border:none; background:#a21caf; color:white; font-weight:800; cursor:pointer;">⏳ 지금 상태 백업하러 가기</button></div>';
+        }
+        if (last && last.rows && last.rows.length) {
+            body += '<div style="margin-top:16px; font-weight:900; color:#9a3412; font-size:13px;">🕘 최근에 프로그램을 켤 때 자동으로 발견한 변동 (' + fmtCalcTime(last.at) + ')</div><div style="margin-top:6px;">' + calcChangeTableHtml(last.rows) + '</div>';
+        }
+    }
+    var ov = document.createElement('div');
+    ov.id = 'calcChangeOverlay';
+    ov.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:99996; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
+    ov.onclick = function (e) { if (e.target === ov) closeCalcChangeModal(); };
+    ov.innerHTML = '<div style="background:white; border-radius:14px; width:94%; max-width:820px; max-height:86vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">' +
+        '<div style="background:linear-gradient(135deg,#1e3a5f,#0f172a); border-bottom:3px solid #d4af37; padding:18px 22px; position:relative; flex-shrink:0;">' +
+        '<button type="button" onclick="closeCalcChangeModal()" aria-label="닫기" style="position:absolute; top:12px; right:14px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>' +
+        '<div style="color:white; font-size:17px; font-weight:900; padding-right:30px;">' + title + '</div>' +
+        '<div style="color:#cbd5e1; font-size:12.5px; margin-top:6px; line-height:1.6;">' + sub + '</div></div>' +
+        '<div style="padding:16px 20px; overflow:auto; flex:1;">' + body +
+        '<div style="margin-top:12px; font-size:12px; color:#64748b; line-height:1.6;">※ 학생 이름을 누르면 상세창이 열려요. 금액은 분기별 사용액과 연간 잔액 기준이에요.</div></div>' +
+        '<div style="flex-shrink:0; display:flex; gap:8px; justify-content:flex-end; padding:12px 20px; border-top:1px solid #e2e8f0; flex-wrap:wrap;">' +
+        '<button type="button" onclick="closeCalcChangeModal(); openSnapshotModal();" style="height:38px; padding:0 14px; border-radius:7px; border:2px solid #a21caf; background:white; color:#a21caf; font-weight:800; cursor:pointer;">⏳ 지금 상태 백업하기</button>' +
+        '<button type="button" onclick="closeCalcChangeModal()" style="height:38px; padding:0 18px; border-radius:7px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer;">확인</button></div></div>';
+    document.body.appendChild(ov);
+}
+window.addEventListener('load', function () { setTimeout(function () { if (window.__calcSnapUnlocked !== true) { try { runCalcChangeCheckOnStart(); } catch (e) { window.__calcSnapUnlocked = true; } } }, 6000); });
+function closeCalcChangeModal() { var o = document.getElementById('calcChangeOverlay'); if (o) o.remove(); }
+// ✨ 학생 금액이 바뀌는 작업을 했을 때 한 번만 '백업해 두세요' 안내
+function showBackupNudge() {
+    window.__backupNudgeShown = true;
+    if (document.getElementById('backupNudge')) return;
+    var el = document.createElement('div');
+    el.id = 'backupNudge';
+    el.style.cssText = 'position:fixed; right:20px; bottom:20px; z-index:99995; width:340px; max-width:calc(100vw - 40px); background:white; border:2px solid #a21caf; border-radius:12px; box-shadow:0 12px 30px rgba(15,23,42,0.25); padding:14px 16px; font-size:13px; color:#334155; line-height:1.6; word-break:keep-all;';
+    el.innerHTML = '<div style="font-weight:900; color:#701a75; font-size:14px; margin-bottom:4px;">💾 학생 금액이 바뀌었어요</div>' +
+        '정리가 끝났다면 <b>⏳ 8.날짜별 과거 기록(백업)</b>에서 지금 상태를 저장해 두세요. 나중에 금액이 달라졌을 때 백업과 바로 비교할 수 있어요.' +
+        '<div style="display:flex; gap:6px; justify-content:flex-end; margin-top:10px;">' +
+        '<button type="button" onclick="document.getElementById(\'backupNudge\').remove()" style="height:32px; padding:0 12px; border-radius:6px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer;">나중에</button>' +
+        '<button type="button" onclick="document.getElementById(\'backupNudge\').remove(); openSnapshotModal();" style="height:32px; padding:0 12px; border-radius:6px; border:none; background:#a21caf; color:white; font-weight:800; cursor:pointer;">⏳ 지금 백업하기</button></div>';
+    document.body.appendChild(el);
+}
 </script>
 </body>
 </html>
