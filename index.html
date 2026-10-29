@@ -15073,36 +15073,55 @@ var CALC_SNAP_KEY = 'edusync_calc_autosnap_v1', CALC_DIFF_KEY = 'edusync_calc_la
 var CALC_FIELDS = [['usedG3', null], ['usedFree', '자유수강 사용'], ['over', '수익자부담'], ['exp', '결제액(환불 후)']];
 function calcFieldLabel(k) { return k === 'usedG3' ? (typeof getG3LabelShort === 'function' ? getG3LabelShort() : '초3') + ' 사용' : k === 'usedFree' ? '자유수강 사용' : k === 'over' ? '수익자부담' : k === 'exp' ? '결제액(환불 후)' : k === 'remG3' ? (typeof getG3LabelShort === 'function' ? getG3LabelShort() : '초3') + ' 잔액' : k === 'remFree' ? '자유수강 잔액' : k; }
 function buildCalcSnapshot(dbArr, mq) {
-    var snap = { at: Date.now(), ver: document.title, students: {} };
+    // fmt 2: 분기별로 [지원금(초3/자유/수익자) × 항목(수강료/교재비/재료비, 환불 전 금액)] + 지원금별 환불금액 + 결제액
+    var snap = { fmt: 2, at: Date.now(), ver: document.title, students: {} };
     var keepMq = maxQuarter; if (mq) maxQuarter = mq;
     try {
         var nq = (maxQuarter === 6) ? 6 : 4;
         (dbArr || db || []).forEach(function (r) {
             var c; try { c = calcStudent(r); } catch (e) { return; }
             var d = {};
-            for (var q = 1; q <= nq; q++) { var Q = c['q' + q] || {}; d['q' + q] = [Math.round(toNum(Q.usedG3)), Math.round(toNum(Q.usedFree)), Math.round(toNum(Q.over)), Math.round(toNum(Q.exp))]; }
-            d.rem = [r.hasG3 ? Math.round(toNum(c.remG3)) : 0, r.hasFree ? Math.round(toNum(c.remFree)) : 0];
-            snap.students[r.id] = { n: r.grade + '-' + r.classNum + '-' + r.studentNum + ' ' + r.name, d: d };
+            for (var q = 1; q <= nq; q++) {
+                var o = { exp: Math.round(toNum((c['q' + q] || {}).exp)) };
+                ((c.allocs && c.allocs['q' + q]) || []).forEach(function (a) {
+                    if (!a) return;
+                    [['g3', 'G3'], ['fr', 'Fr'], ['sk', 'Sk']].forEach(function (p) {
+                        ['Su', 'Gy', 'J'].forEach(function (X) {
+                            var ref = toNum(a['ref' + p[1] + X]);
+                            o[p[0] + X] = (o[p[0] + X] || 0) + Math.round(toNum(a[p[0] + X]) + ref); // 환불 전 금액
+                            o[p[0] + 'R'] = (o[p[0] + 'R'] || 0) + Math.round(ref);                // 환불금액
+                        });
+                    });
+                });
+                d['q' + q] = o;
+            }
+            snap.students[r.id] = { n: r.name, no: r.grade + '-' + r.classNum + '-' + r.studentNum, sort: [toNum(r.grade), toNum(r.classNum), toNum(r.studentNum)], d: d };
         });
     } finally { maxQuarter = keepMq; }
     return snap;
 }
 function diffCalcSnapshots(prev, cur) {
     var rows = [];
-    if (!prev || !prev.students || !cur || !cur.students) return rows;
+    if (!prev || prev.fmt !== 2 || !prev.students || !cur || !cur.students) return rows;
+    var g3s = (typeof getG3Label === 'function') ? getG3Label() : '초3지원금';
+    var FUND = { g3: g3s, fr: '자유수강', sk: '수익자' }, COMP = { Su: '수강료', Gy: '교재비', J: '재료비', R: '환불금액' };
     Object.keys(cur.students).forEach(function (id) {
         var a = prev.students[id], b = cur.students[id];
         if (!a) return; // 새로 등록한 학생은 비교 대상 아님
-        Object.keys(b.d).forEach(function (k) {
-            var av = a.d[k], bv = b.d[k];
-            if (!av) return;
-            var keys = k === 'rem' ? ['remG3', 'remFree'] : ['usedG3', 'usedFree', 'over', 'exp'];
-            keys.forEach(function (f, i) {
-                var x = toNum(av[i]), y = toNum(bv[i]);
-                if (Math.abs(x - y) >= 1) rows.push({ id: id, n: b.n, q: k === 'rem' ? '연간' : k.replace('q', '') + '분기', f: f, before: x, after: y });
+        Object.keys(b.d).forEach(function (qk) {
+            var A = a.d[qk] || {}, B = b.d[qk] || {};
+            var changes = [];
+            ['sk', 'fr', 'g3'].forEach(function (f) {
+                ['Su', 'Gy', 'J', 'R'].forEach(function (X) {
+                    var dv = toNum(B[f + X]) - toNum(A[f + X]);
+                    if (Math.abs(dv) >= 1) changes.push({ label: FUND[f] + '(' + COMP[X] + ')', fund: f, d: dv });
+                });
             });
+            var expD = toNum(B.exp) - toNum(A.exp);
+            if (changes.length || Math.abs(expD) >= 1) rows.push({ id: id, n: b.n, no: b.no, sort: b.sort, q: qk.replace('q', ''), changes: changes, expD: expD });
         });
     });
+    rows.sort(function (x, y) { return (x.sort[0] - y.sort[0]) || (x.sort[1] - y.sort[1]) || (x.sort[2] - y.sort[2]) || (x.q - y.q); });
     return rows;
 }
 var __calcSnapTimer = null;
@@ -15138,20 +15157,20 @@ function runCalcChangeCheckOnStart() {
 function fmtCalcTime(t) { if (!t) return '-'; var d = new Date(t), p = function (v) { return String(v).padStart(2, '0'); }; return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
 function calcChangeTableHtml(rows) {
     if (!rows.length) return '<div style="padding:22px; text-align:center; color:#15803d; font-weight:800; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;">✅ 바뀐 금액이 없어요. 모든 학생 금액이 그대로예요.</div>';
-    var byStu = {}; rows.forEach(function (x) { (byStu[x.id] = byStu[x.id] || { n: x.n, list: [] }).list.push(x); });
-    var html = '<table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#eef2f7;">' +
-        ['학생', '분기', '항목', '이전', '지금', '차이'].map(function (t, i) { return '<th style="padding:8px 6px; border-bottom:2px solid #1e3a5f; text-align:' + (i >= 3 ? 'right' : 'center') + '; position:sticky; top:0; background:#eef2f7;">' + t + '</th>'; }).join('') + '</tr></thead><tbody>';
-    Object.keys(byStu).forEach(function (id) {
-        var g = byStu[id];
-        g.list.forEach(function (x, i) {
-            var d = x.after - x.before;
-            html += '<tr style="border-bottom:1px solid #eef2f7;">' +
-                (i === 0 ? '<td rowspan="' + g.list.length + '" style="padding:7px 6px; text-align:center; vertical-align:top; border-right:1px solid #eef2f7;"><a style="color:#1e40af; font-weight:800; cursor:pointer; text-decoration:underline;" onclick="closeCalcChangeModal(); showDetailModal(\'' + id + '\')">' + g.n + '</a></td>' : '') +
-                '<td style="padding:7px 6px; text-align:center;">' + x.q + '</td><td style="padding:7px 6px; text-align:center;">' + calcFieldLabel(x.f) + '</td>' +
-                '<td style="padding:7px 6px; text-align:right; color:#64748b;">' + x.before.toLocaleString() + '원</td>' +
-                '<td style="padding:7px 6px; text-align:right; font-weight:800;">' + x.after.toLocaleString() + '원</td>' +
-                '<td style="padding:7px 6px; text-align:right; font-weight:800; color:' + (d > 0 ? '#b91c1c' : '#1d4ed8') + ';">' + (d > 0 ? '+' : '') + d.toLocaleString() + '원</td></tr>';
-        });
+    var sgn = function (d) { return (d > 0 ? '+' : '') + Math.round(d).toLocaleString() + '원'; };
+    var FC = { g3: '#0369a1', fr: '#7e22ce', sk: '#b91c1c' };
+    var th = function (t, al) { return '<th style="padding:7px 8px; border-bottom:2px solid #1e3a5f; background:#eef2f7; position:sticky; top:0; text-align:' + (al || 'center') + '; white-space:nowrap;">' + t + '</th>'; };
+    var html = '<table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr>' + th('학번') + th('이름') + th('분기') + th('바뀐 금액', 'left') + th('결제액 차이', 'right') + '</tr></thead><tbody>';
+    rows.forEach(function (x) {
+        var chips = x.changes.map(function (c) {
+            return '<span style="display:inline-block; margin:2px 8px 2px 0; white-space:nowrap;"><span style="color:' + FC[c.fund] + '; font-weight:700;">' + c.label + '</span> <b style="color:' + (c.d > 0 ? '#b91c1c' : '#1d4ed8') + ';">' + sgn(c.d) + '</b></span>';
+        }).join('') || '<span style="color:#94a3b8;">-</span>';
+        html += '<tr style="border-bottom:1px solid #eef2f7;">' +
+            '<td style="padding:6px 8px; text-align:center; white-space:nowrap; color:#475569;">' + x.no + '</td>' +
+            '<td style="padding:6px 8px; text-align:center; white-space:nowrap;"><a style="color:#1e40af; font-weight:800; cursor:pointer; text-decoration:underline;" onclick="closeCalcChangeModal(); showDetailModal(\'' + x.id + '\')">' + x.n + '</a></td>' +
+            '<td style="padding:6px 8px; text-align:center; white-space:nowrap;">' + x.q + '분기</td>' +
+            '<td style="padding:6px 8px; line-height:1.5;">' + chips + '</td>' +
+            '<td style="padding:6px 8px; text-align:right; white-space:nowrap; font-weight:800; color:' + (Math.abs(x.expD) < 1 ? '#94a3b8' : (x.expD > 0 ? '#b91c1c' : '#1d4ed8')) + ';">' + (Math.abs(x.expD) < 1 ? '0원' : sgn(x.expD)) + '</td></tr>';
     });
     return html + '</tbody></table>';
 }
@@ -15195,7 +15214,7 @@ function openCalcChangeModal(mode, info) {
         '<div style="color:white; font-size:17px; font-weight:900; padding-right:30px;">' + title + '</div>' +
         '<div style="color:#cbd5e1; font-size:12.5px; margin-top:6px; line-height:1.6;">' + sub + '</div></div>' +
         '<div style="padding:16px 20px; overflow:auto; flex:1;">' + body +
-        '<div style="margin-top:12px; font-size:12px; color:#64748b; line-height:1.6;">※ 학생 이름을 누르면 상세창이 열려요. 금액은 분기별 사용액과 연간 잔액 기준이에요.</div></div>' +
+        '<div style="margin-top:4px; font-size:12px; color:#64748b; line-height:1.6;">※ 이름을 누르면 상세창이 열려요. <b>바뀐 금액</b>은 어느 지원금(수익자·자유수강·초3)의 어느 항목(수강료·교재비·재료비·환불금액)이 늘었는지(+)/줄었는지(−)예요. <b>결제액 차이</b>는 그 분기에 낸 전체 금액(환불 후)의 차이예요.</div></div>' +
         '<div style="flex-shrink:0; display:flex; gap:8px; justify-content:flex-end; padding:12px 20px; border-top:1px solid #e2e8f0; flex-wrap:wrap;">' +
         '<button type="button" onclick="closeCalcChangeModal(); openSnapshotModal();" style="height:38px; padding:0 14px; border-radius:7px; border:2px solid #a21caf; background:white; color:#a21caf; font-weight:800; cursor:pointer;">⏳ 지금 상태 백업하기</button>' +
         '<button type="button" onclick="closeCalcChangeModal()" style="height:38px; padding:0 18px; border-radius:7px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer;">확인</button></div></div>';
@@ -15209,11 +15228,12 @@ function showBackupNudge() {
     if (document.getElementById('backupNudge')) return;
     var el = document.createElement('div');
     el.id = 'backupNudge';
-    el.style.cssText = 'position:fixed; right:20px; bottom:20px; z-index:99995; width:340px; max-width:calc(100vw - 40px); background:white; border:2px solid #a21caf; border-radius:12px; box-shadow:0 12px 30px rgba(15,23,42,0.25); padding:14px 16px; font-size:13px; color:#334155; line-height:1.6; word-break:keep-all;';
+    el.style.cssText = 'position:fixed; right:20px; bottom:20px; z-index:99995; width:440px; max-width:calc(100vw - 40px); background:white; border:2px solid #a21caf; border-radius:12px; box-shadow:0 12px 30px rgba(15,23,42,0.25); padding:14px 16px; font-size:13px; color:#334155; line-height:1.6; word-break:keep-all;';
     el.innerHTML = '<div style="font-weight:900; color:#701a75; font-size:14px; margin-bottom:4px;">💾 학생 금액이 바뀌었어요</div>' +
         '정리가 끝났다면 <b>⏳ 8.날짜별 과거 기록(백업)</b>에서 지금 상태를 저장해 두세요. 나중에 금액이 달라졌을 때 백업과 바로 비교할 수 있어요.' +
-        '<div style="display:flex; gap:6px; justify-content:flex-end; margin-top:10px;">' +
+        '<div style="display:flex; gap:6px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;">' +
         '<button type="button" onclick="document.getElementById(\'backupNudge\').remove()" style="height:32px; padding:0 12px; border-radius:6px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer;">나중에</button>' +
+        '<button type="button" onclick="document.getElementById(\'backupNudge\').remove(); openCalcChangeModal(\'backup\');" style="height:32px; padding:0 12px; border-radius:6px; border:1.5px solid #1e3a5f; background:white; color:#1e3a5f; font-weight:800; cursor:pointer;">🔍 백업기록과 비교하기</button>' +
         '<button type="button" onclick="document.getElementById(\'backupNudge\').remove(); openSnapshotModal();" style="height:32px; padding:0 12px; border-radius:6px; border:none; background:#a21caf; color:white; font-weight:800; cursor:pointer;">⏳ 지금 백업하기</button></div>';
     document.body.appendChild(el);
 }
