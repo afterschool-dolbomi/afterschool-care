@@ -763,26 +763,20 @@
 .qs-drag-row.qs-drag-over-top { box-shadow: inset 0 2px 0 0 #4338ca; }
 .qs-drag-row.qs-drag-over-bottom { box-shadow: inset 0 -2px 0 0 #4338ca; }
 		
-            /* ✨ 업데이트 보기 버튼: 넓은 화면에선 가운데, 좁은 화면에선 제목줄 흐름에 맞춰 자연스럽게 배치 */
         /* ✨ 새 기능 알림: 처음 접속 시 5초 동안 업데이트 보기 버튼 반짝임 */
         @keyframes updGlow {
             0%, 100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.75), 0 2px 8px rgba(225,29,72,0.45); filter: brightness(1); }
             50% { box-shadow: 0 0 0 9px rgba(225,29,72,0), 0 0 20px 5px rgba(251,113,133,0.95); filter: brightness(1.18); }
         }
         body.upd-glow-on .upd-btn { animation: updGlow 0.9s ease-in-out infinite; }
-        body.upd-glow-on .upd-btn-float:active, body.upd-glow-on .upd-btn:active { animation: none; }
+        body.upd-glow-on .upd-btn:active { animation: none; }
         /* ✨ 후원자 전광판 */
         #sponsorTicker .sponsor-track { display:inline-block; white-space:nowrap; padding-left:100%; animation: sponsorScroll 16s linear infinite; color:#fde68a; font-size:12.5px; font-weight:700; text-shadow:0 0 6px rgba(253,224,71,0.55); }
         #sponsorTicker .sponsor-track b { color:#ffffff; }
         #sponsorTicker:hover .sponsor-track { animation-play-state: paused; }
         @keyframes sponsorScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
         @media (prefers-reduced-motion: reduce) { #sponsorTicker .sponsor-track { animation-duration: 30s; } }
-        .upd-btn-float { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
-        .upd-btn-float:active { transform:translate(-50%,-50%) scale(0.97); } /* ✨ 눌림 효과가 위치를 흐트러뜨리지 않게 */
-        @media (max-width: 1800px) {
-            .upd-btn-float { position:static; transform:none; margin-left:auto; }
-            .upd-btn-float:active { transform:scale(0.97); }
-        }
+        .upd-btn:active { transform:scale(0.97); }
 
         /* ===== ✨ 운영보고서 ===== */
         #reportOverlay { display:none; position:fixed; inset:0; z-index:99990; background:#e9edf3; font-family:'Pretendard', '맑은 고딕', sans-serif; }
@@ -1559,6 +1553,8 @@
             
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
             <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; width: 110px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
+            <!-- ✨ 업데이트 보기 버튼 (이름 검색 오른쪽 고정) -->
+            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
@@ -6796,9 +6792,7 @@ function toggleStatusPanel() {
                             ${chaViewFilter !== 'all' && chaMissingCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 차별로 나눌 수 없어 '전체'에서만 보입니다.">⚠️차시 미입력 ${chaMissingCount}건 제외</span>` : ''}
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
-                        ${currentTab === 'all' ? `<button class="upd-btn-float upd-btn" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
                         <div style="display:flex; align-items:center; gap:10px;">
-                            ${currentTab !== 'all' ? `<button class="upd-btn" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
                           <div class="fee-toggle-wrap no-print" onclick="toggleFeeView()" title="수강료 / 강사료 전환">
                             <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#94a3b8' : '#1e3a5f'};">수강료 보기</span>
                             <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
@@ -7066,7 +7060,6 @@ function toggleStatusPanel() {
                                 <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
                                 <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
                             </div>
-                            <button class="upd-btn-float upd-btn" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
                         </div>
                     `;
                     
@@ -7436,7 +7429,6 @@ function toggleStatusPanel() {
                                 
                             </div>
                             <div style="display:flex; gap:8px; flex-shrink:0; align-items:center; margin-left:auto;">
-                                <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
                                 <button class="btn-tool no-print" style="background: ${isRefundViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px; white-space:nowrap;" onclick="toggleRefundView()">
                                     ${isRefundViewOn ? '◀ 환불금액 닫기' : '▶ 환불금액 보기'}
                                 </button>
