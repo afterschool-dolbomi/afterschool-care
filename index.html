@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.0</title>
+    <title>방과후 지원금 돌보미 V19.2</title>
    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -116,11 +116,19 @@
         .btn-tool:active { transform: translateY(2px); box-shadow: none; }
         /* ✨ 수강료 보기 / 강사료 보기 슬라이드 토글 스위치 */
         .fee-toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; -webkit-user-select:none; user-select:none; }
-        .fee-toggle-label { font-size:14px; font-weight:800; }
+        .fee-toggle-label { font-size:14px; font-weight:800; white-space:nowrap; }
         .fee-toggle-track { position:relative; width:44px; height:24px; border-radius:12px; background:#cbd5e1; transition:background 0.2s ease; flex-shrink:0; }
         .fee-toggle-track.on { background:#0ea5e9; }
         .fee-toggle-knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:white; box-shadow:0 1px 3px rgba(0,0,0,0.3); transition:left 0.2s ease; }
         .fee-toggle-track.on .fee-toggle-knob { left:22px; }
+        /* ✨ [v19.2] 과목별 보기 차 선택(전체·1차·2차·3차) + 차 뱃지 */
+        .cha-filter { display:inline-flex; flex-shrink:0; border:1px solid #c4b5fd; border-radius:999px; overflow:hidden; }
+        .cha-filter button { white-space:nowrap; border:none; background:white; color:#6d28d9; font-size:13px; font-weight:800; padding:5px 12px; cursor:pointer; }
+        .cha-filter button + button { border-left:1px solid #ddd6fe; }
+        .cha-filter button.on { background:#7c3aed; color:white; }
+        .cha-badge { display:inline-block; margin-top:3px; font-size:11px; font-weight:800; padding:1px 7px; border-radius:999px; background:#ede9fe; color:#6d28d9; }
+        .cha-badge.c2 { background:#e0f2fe; color:#0369a1; } .cha-badge.c3 { background:#dcfce7; color:#15803d; }
+        .cha-badge.miss { background:#fef3c7; color:#b45309; }
         
 
       
@@ -1467,7 +1475,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.0</span>
+                <span class="brand-version">V19.2</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -2534,6 +2542,8 @@
         let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
         let isSuikViewOn = true; // ✨ 수익자 관리 프로그램이라 항상 켜진 상태로 고정
         let isFeeViewOn = false; // ✨ 과목별 보기 - false: 수강료 보기, true: 강사료 보기(강사료·수용비로 분할)
+        let chaViewFilter = 'all'; // ✨ [v19.2] 과목별 보기 금액 단위 - 'all': 분기금액(전체), 1·2·3: 그 차의 차시금액
+        let chaMissingCount = 0; // ✨ [v19.2] 차시금액 보기에서 차시 미입력으로 제외된 줄 수
 
         let isRefundViewOn = false;
         let isG3RefundOn = false, isFreeRefundOn = false, isSkRefundOn = false; // ✨ 과목별 보기 - 지원금별 환불보기 토글
@@ -3289,6 +3299,159 @@
             if (hasCustomGS) return splitSuByRatioTs(amount, masterG, masterS);
             let g = Math.min(amount, Math.ceil((amount / 1.05) / 10 - 1e-6) * 10);
             return { g, s: amount - g };
+        }
+
+        // ✨ [v19.2] 과목별 보기 '차시금액' - 청구서(N월 교육비)와 같은 계산으로 한 과목의 분기 수강료를 1차·2차(·3차)로 나눔
+        //    - 차별 정상 금액: getTsMonthlyNormals (표준차시 기준 가감, 10원 단위, 마지막 차가 나머지 흡수)
+        //    - 환불은 청구서와 같은 규칙으로 태그된 차부터 차감하고, 지원금은 1차부터 순서대로 소진
+        //    - 강사료는 차별 금액마다 한 번만 계산(강사료 올림·수용비 내림)한 뒤 지원금/수익자 몫 비율로 나눔
+        //    pools = { g3, fr, preSk } : 이 과목의 분기 초3·자유수강 수강료 몫과 차시비율 제외분(1차부터 수익자 처리)
+        function computeChaBreakdown(masterSub, q, su, quarterSu, pools, refundLog, isYuka) {
+            let months = getMonthsPerQuarter();
+            let normals = getTsMonthlyNormals(masterSub, q, su);
+            let out = { ok: false, m: {} };
+            if (!Object.keys(normals).length) return out;
+            let chargeArr = [];
+            for (let m = 1; m <= months; m++) chargeArr[m] = toNum(normals[m]);
+            // 환불 차감 (청구서 exportTeacherSettlement 와 같은 규칙)
+            let refundEntries = (refundLog || [])
+                .map(l => ({ k: (l.month === 'pre') ? 1 : Number(l.month), amount: toNum(l.amount), first: !!l.monthFirst }))
+                .filter(e => e.amount > 0 && e.k >= 1 && e.k <= months)
+                .sort((x, y) => x.k - y.k);
+            refundEntries.forEach(e => {
+                let rem = e.amount, k = e.k;
+                if (e.first) {
+                    let cK = Math.min(chargeArr[k], rem); chargeArr[k] -= cK; rem -= cK;
+                    for (let j = k + 1; j <= months && rem > 0; j++) { let c = Math.min(chargeArr[j], rem); chargeArr[j] -= c; rem -= c; }
+                    for (let j = k - 1; j >= 1 && rem > 0; j--) { let c2 = Math.min(chargeArr[j], rem); chargeArr[j] -= c2; rem -= c2; }
+                    return;
+                }
+                if (rem <= chargeArr[k]) { chargeArr[k] -= rem; return; }
+                let laterSum = 0;
+                for (let j = k + 1; j <= months; j++) laterSum += chargeArr[j];
+                if (rem < laterSum) {
+                    rem -= chargeArr[k]; chargeArr[k] = 0;
+                    for (let j = k + 1; j <= months && rem > 0; j++) { let c = Math.min(chargeArr[j], rem); chargeArr[j] -= c; rem -= c; }
+                } else {
+                    for (let j = k + 1; j <= months; j++) chargeArr[j] = 0;
+                    rem -= laterSum;
+                    let cK = Math.min(chargeArr[k], rem); chargeArr[k] -= cK; rem -= cK;
+                    for (let j = k - 1; j >= 1 && rem > 0; j--) { let c2 = Math.min(chargeArr[j], rem); chargeArr[j] -= c2; rem -= c2; }
+                }
+            });
+            // 차 태그가 없는 환불 등으로 합계가 분기 순수강료보다 크면 마지막 차부터 차감 (합계 일치 보장)
+            let chargeTotal = 0;
+            for (let m = 1; m <= months; m++) chargeTotal += chargeArr[m];
+            let chargeExcess = chargeTotal - quarterSu;
+            for (let j = months; j >= 1 && chargeExcess > 0; j--) { let c = Math.min(chargeArr[j], chargeExcess); chargeArr[j] -= c; chargeExcess -= c; }
+
+            // 지원금 1차부터 소진 (육아기근로단축은 자유수강 먼저)
+            let poolG3 = toNum(pools.g3), poolFr = toNum(pools.fr), poolPreSk = toNum(pools.preSk);
+            for (let m = 1; m <= months; m++) {
+                let charge = chargeArr[m] || 0;
+                let usePreSk = Math.min(poolPreSk, charge); poolPreSk -= usePreSk;
+                let remain = charge - usePreSk, useG3 = 0, useFr = 0;
+                if (isYuka) {
+                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                } else {
+                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                }
+                out.m[m] = { charge, g3: useG3, fr: useFr, sk: remain + usePreSk, feeG: { g3: 0, fr: 0, sk: 0 } };
+            }
+
+            // 강사료: 차별 금액 기준으로 한 번 계산, 분기 강사료 한도 안에서 마지막 차가 나머지를 가져감
+            let msFee = masterSub && masterSub.fees && masterSub.fees[q];
+            let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
+            let hasGS = (mG > 0 || mS > 0);
+            let tfOne = (m, chg) => {
+                let sp = computeTeacherFeeSplit(chg, mG, mS, hasGS);
+                if (msFee && mG > 0 && su === toNum(msFee.su) && chg === toNum(normals[m])) {
+                    let gN = toNum(getTsMonthlyNormals(masterSub, q, mG)[m]);
+                    if (gN > 0 && gN <= chg) sp = { g: gN, s: chg - gN };
+                }
+                return sp;
+            };
+            let gCap = (msFee && mG > 0 && su === toNum(msFee.su) && quarterSu === su)
+                ? mG
+                : computeTeacherFeeSplit(quarterSu, mG, mS, hasGS).g;
+            let lastM = 0, gPrev = 0;
+            for (let m = 1; m <= months; m++) if ((chargeArr[m] || 0) > 0) lastM = m;
+            for (let m = 1; m <= months; m++) {
+                let o = out.m[m], chg = o.charge;
+                if (chg <= 0) continue;
+                let g = (m === lastM) ? (gCap - gPrev) : Math.min(tfOne(m, chg).g, gCap - gPrev);
+                g = Math.max(0, Math.min(g, chg)); gPrev += g;
+                let parts = splitAmountByWeightsIn10Won(g, [o.g3, o.fr, o.sk]);
+                o.feeG = { g3: parts[0], fr: parts[1], sk: parts[2] };
+            }
+            out.ok = true;
+            return out;
+        }
+
+        // ✨ [v19.2] 과목별 보기 줄(학생·과목·분기)을 차별 줄로 펼침. 교재비·재료비는 일시불이라 1차에 표시
+        function expandSubjectRowsByCha(rows) {
+            let months = getMonthsPerQuarter();
+            let out = [];
+            const zero = { charge: 0, g3: 0, fr: 0, sk: 0, feeG: { g3: 0, fr: 0, sk: 0 } };
+            rows.forEach(row => {
+                let s = row.sObj || {}, a = row.alloc || {}, q = row.qNum;
+                let su = toNum(s.su);
+                if (su <= 0) { out.push(Object.assign({}, row, { cha: 1 })); return; }
+                let masterSub = savedSubjects.find(x => x.name === row.sName);
+                let isYuka = (row.r.freeTier === '육아기근로단축');
+                let net = computeChaBreakdown(masterSub, q, su, toNum(a.netSu),
+                    { g3: row.g3Su, fr: row.freeSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu) : 0 },
+                    s.refundLog || [], isYuka);
+                if (!net.ok) { out.push(Object.assign({}, row, { cha: 0, chaMissing: true })); return; }
+                let gross = computeChaBreakdown(masterSub, q, su, su,
+                    { g3: row.g3Su + row.g3RefundSu, fr: row.freeSu + row.freeRefundSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu + row.skRefundSu) : 0 },
+                    [], isYuka);
+                let msFee = masterSub && masterSub.fees && masterSub.fees[q];
+                let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
+                let hasGS = (mG > 0 || mS > 0);
+                for (let m = 1; m <= months; m++) {
+                    let n = net.m[m] || zero, gr = (gross.ok && gross.m[m]) || zero;
+                    let f = (m === 1);
+                    let g3Gy = f ? row.g3Gy : 0, g3J = f ? row.g3J : 0;
+                    let freeGy = f ? row.freeGy : 0, freeJ = f ? row.freeJ : 0;
+                    let skGy = f ? row.skGy : 0, skJ = f ? row.skJ : 0;
+                    let g3RSu = Math.max(0, gr.g3 - n.g3), frRSu = Math.max(0, gr.fr - n.fr), skRSu = Math.max(0, gr.sk - n.sk);
+                    let g3RGy = f ? row.g3RefundGy : 0, g3RJ = f ? row.g3RefundJ : 0;
+                    let frRGy = f ? row.freeRefundGy : 0, frRJ = f ? row.freeRefundJ : 0;
+                    let skRGy = f ? row.skRefundGy : 0, skRJ = f ? row.skRefundJ : 0;
+                    let netSu = n.g3 + n.fr, netGy = g3Gy + freeGy, netJ = g3J + freeJ;
+                    let realSu = netSu + n.sk, realGy = netGy + skGy, realJ = netJ + skJ;
+                    let realTot = realSu + realGy + realJ;
+                    let refTot = g3RSu + frRSu + skRSu + g3RGy + g3RJ + frRGy + frRJ + skRGy + skRJ;
+                    if (realTot === 0 && refTot === 0) continue;
+                    let g3RF = computeTeacherFeeSplit(g3RSu, mG, mS, hasGS), frRF = computeTeacherFeeSplit(frRSu, mG, mS, hasGS), skRF = computeTeacherFeeSplit(skRSu, mG, mS, hasGS);
+                    let netFeeG = n.feeG.g3 + n.feeG.fr, netFeeS = netSu - netFeeG;
+                    out.push(Object.assign({}, row, {
+                        cha: m,
+                        g3Su: n.g3, g3Gy, g3J, g3Tot: n.g3 + g3Gy + g3J,
+                        freeSu: n.fr, freeGy, freeJ, freeTot: n.fr + freeGy + freeJ,
+                        netSu, netGy, netJ, netTot: netSu + netGy + netJ,
+                        skSu: n.sk, skGy, skJ, skTot: n.sk + skGy + skJ,
+                        realSu, realGy, realJ, realTot,
+                        g3RefundSu: g3RSu, g3RefundGy: g3RGy, g3RefundJ: g3RJ, g3RefundTot: g3RSu + g3RGy + g3RJ,
+                        freeRefundSu: frRSu, freeRefundGy: frRGy, freeRefundJ: frRJ, freeRefundTot: frRSu + frRGy + frRJ,
+                        skRefundSu: skRSu, skRefundGy: skRGy, skRefundJ: skRJ, skRefundTot: skRSu + skRGy + skRJ,
+                        g3FeeG: n.feeG.g3, g3FeeS: n.g3 - n.feeG.g3,
+                        freeFeeG: n.feeG.fr, freeFeeS: n.fr - n.feeG.fr,
+                        netFeeG, netFeeS,
+                        skFeeG: n.feeG.sk, skFeeS: n.sk - n.feeG.sk,
+                        realFeeG: netFeeG + n.feeG.sk, realFeeS: netFeeS + (n.sk - n.feeG.sk),
+                        g3RefundFeeG: g3RF.g, g3RefundFeeS: g3RF.s,
+                        freeRefundFeeG: frRF.g, freeRefundFeeS: frRF.s,
+                        skRefundFeeG: skRF.g, skRefundFeeS: skRF.s
+                    }));
+                }
+            });
+            chaMissingCount = out.filter(x => x.chaMissing).length;
+            if (chaViewFilter !== 'all') out = out.filter(x => x.cha === chaViewFilter);
+            return out;
         }
 
                 // ✨ 정산파일 부서(과목) 순서 - 사용자가 드래그로 정한 순서를 저장해두고 엑셀 저장 순서로 사용
@@ -4882,6 +5045,11 @@ function toggleStatusPanel() {
         // ✨ 과목별 보기 - 수강료 보기 / 강사료 보기 토글 (제목 줄의 슬라이드 스위치에서 호출)
         function toggleFeeView() {
             isFeeViewOn = !isFeeViewOn;
+            renderGrid();
+        }
+        // ✨ [v19.2] 과목별 보기 - 전체(분기금액) / 1차·2차·3차(차시금액) 선택
+        function setChaViewFilter(v) {
+            chaViewFilter = v;
             renderGrid();
         }
 		
@@ -6563,6 +6731,7 @@ function toggleStatusPanel() {
                                 subjectRows.push({
                                     r, c, qStr: q, qNum: qIdx + 1, sName: subName, isNew: s.isNew,
                                     alloc, // ✨ 뱃지 표시용 원본 연결
+                                    sObj: s, // ✨ [v19.2] 차시금액 보기용 원본 과목(수강료·환불기록·차시비율)
                                     g3Su, g3Gy, g3J, g3Tot: g3Su+g3Gy+g3J,
                                     freeSu, freeGy, freeJ, freeTot: freeSu+freeGy+freeJ,
                                     netSu: supSu, netGy: supGy, netJ: supJ, netTot: supSu+supGy+supJ,
@@ -6615,11 +6784,16 @@ function toggleStatusPanel() {
 			   
 
                 currentSubjectViewData = subjectRows;
+                // ✨ [v19.2] 차시금액 보기: 한 줄(학생·과목·분기)을 1차·2차(·3차) 줄로 나눠서 표시 (엑셀 내보내기는 분기금액 그대로)
+                let chaMonths = getMonthsPerQuarter();
+                if (chaViewFilter !== 'all' && chaViewFilter > chaMonths) chaViewFilter = 'all'; // 6분기제로 바뀌면 3차 선택 해제
+                if (chaViewFilter !== 'all') subjectRows = expandSubjectRowsByCha(subjectRows);
 
                document.getElementById('tabBanner').innerHTML = `
                     <div style="position:relative; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황</span>
+                            <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황${chaViewFilter !== 'all' ? ` <span style="color:#7c3aed;">· ${chaViewFilter}차 차시금액</span>` : ''}</span>
+                            ${chaViewFilter !== 'all' && chaMissingCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 차별로 나눌 수 없어 '전체'에서만 보입니다.">⚠️차시 미입력 ${chaMissingCount}건 제외</span>` : ''}
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
                         ${currentTab === 'all' ? `<button class="upd-btn-float upd-btn" onclick="openFeatureUpdatePopup()" style="background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:7px 16px; border-radius:20px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>` : ''}
@@ -6630,6 +6804,7 @@ function toggleStatusPanel() {
                             <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
                             <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#0ea5e9' : '#94a3b8'};">강사료 보기</span>
                         </div>
+                        <div class="cha-filter no-print" title="전체 = 분기금액 / 1차·2차${chaMonths === 3 ? '·3차' : ''} = 과목 목록 관리의 차시로 청구서와 같은 방식으로 나눈 차시금액">${['all'].concat(Array.from({ length: chaMonths }, (_, i) => i + 1)).map(v => `<button type="button" class="${chaViewFilter === v ? 'on' : ''}" onclick="setChaViewFilter(${v === 'all' ? "'all'" : v})">${v === 'all' ? '전체' : v + '차'}</button>`).join('')}</div>
                         </div>
                     </div>
                 `;
@@ -6776,7 +6951,7 @@ function toggleStatusPanel() {
                                                         <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg);">
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                             </td>
-                           <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}</td>
+                           <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}${row.chaMissing ? '<br><span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않아 차별로 나눌 수 없어요. 분기금액 그대로 표시합니다.">⚠️차시 미입력</span>' : (row.cha ? `<br><span class="cha-badge c${row.cha}">${row.cha}차</span>` : '')}</td>
                            <td style="${br} width:52px; max-width:52px; padding:6px 2px;">${badge}</td>
                             
                             ${isFeeViewOn
@@ -8266,11 +8441,18 @@ function updateG3LimitTotal() {
                     return p.join(' · ');
                 };
 
+                // 분기 중간 자유수강 전환 표시 (차시 비율 적용 과목의 적용일)
+                let convDates = [...new Set(validSubs.filter(s => r.hasFree && s.sessionRatioEnabled && s.freeApplyDate).map(s => {
+                    let fd = s.freeApplyDate.split('-');
+                    return fd.length >= 3 ? `${Number(fd[1])}/${Number(fd[2])}` : s.freeApplyDate;
+                }))];
+                let convChip = convDates.length ? `<span class="sd-chip free" title="${ratioNotes.join('\n').replace(/"/g, '&quot;')}">🍼 분기 중간에 자유수강자로 전환됨 (${convDates.join(', ')})</span>` : '';
+
                 main += `<div class="sd-acc${isOpen ? '' : ' closed'}">
                     <div class="sd-acc-h" onclick="sdToggleQ('${r.id}', ${q}, this)">
                         <div class="sd-qn">${q}</div>
                         <div class="sd-acc-ttl">
-                            <div class="title">${q}분기 ${refundHistoryItems.length ? `<span class="sd-chip sk">환불 ${refundHistoryItems.length}건</span>` : ''}</div>
+                            <div class="title">${q}분기 ${convChip} ${refundHistoryItems.length ? `<span class="sd-chip sk">환불 ${refundHistoryItems.length}건</span>` : ''}</div>
                             <div class="subs">${validSubs.map(s => s.name || '(과목명 미상)').join(' · ')}</div>
                         </div>
                         <div class="figs">
@@ -9934,6 +10116,8 @@ function updateG3LimitTotal() {
             let expiredList = [], soonList = [];
             db.forEach(r => {
                 if (r.hasFree && r.freeTier === '육아기근로단축' && r.freeEndDate) {
+                    // ✨ 자유수강권 한도를 기본값보다 줄여 이미 조정한 학생은 알림 제외
+                    if (getFreeLimitFor(r) < getFreeAllowanceDefault()) return;
                     let endDate = new Date(r.freeEndDate); endDate.setHours(0,0,0,0);
                     let diffDays = Math.round((endDate - today) / (1000*60*60*24));
                     if (diffDays <= 0) expiredList.push(r);
