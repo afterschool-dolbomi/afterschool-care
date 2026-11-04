@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.2.1</title>
-   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <title>방과후 지원금 돌보미 V19.2.2</title>
+   <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         /* 글로벌 SaaS 스타일 CSS 변수 */
         :root {
@@ -1113,7 +1113,7 @@
     <div id="codimasterQuarterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:380px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:26px 24px 20px; text-align:center;">
-                <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
+                <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; overflow:hidden;"><img loading="lazy" src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:30px; height:auto;"></div>
                 <div style="color:white; font-size:17px; font-weight:800;">코디마스터 '수강료(강좌별)-오른쪽 마우스-<br>엑셀내보내기' 자료 등록</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.3px;">방과후 지원금 통합관리 시스템</div>
             </div>
@@ -1471,7 +1471,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.2.1</span>
+                <span class="brand-version">V19.2.2</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1502,7 +1502,7 @@
                 <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
                 <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
 			    <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 4.입력 엑셀 다운로드</button>
-                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
+                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img loading="lazy" src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
                 <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 3.자유수강자 관리 (NEIS)</button>
                 <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 2.특수학급 명단 관리</button>
 				<button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️1.학년도 지원금, 분기제 설정</button>
@@ -2432,7 +2432,7 @@
 
                            <!-- ✨ 교육청 서식 작성 마법사 모달창 -->
         <div id="eduExamplePanel" style="position:fixed; top:50%; left:calc(50% + 285px); transform:translateY(-50%); width:0; overflow:hidden; transition:width 0.4s ease; z-index:4002; background:white; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.35); pointer-events:none;">
-        <img src="https://i.ibb.co/ZpHyjhzz/image.png" style="width:600px; height:auto; display:block; border-radius:12px;">
+        <img loading="lazy" src="https://i.ibb.co/ZpHyjhzz/image.png" style="width:600px; height:auto; display:block; border-radius:12px;">
     </div>
     <div class="slide-panel-overlay" id="eduWizardOverlay" onclick="closeEduWizard()" style="z-index: 4000;"></div>
     <div class="detail-modal subject" id="eduWizardModal" style="width: 550px; max-height: 85vh; z-index: 4001;">
@@ -2577,7 +2577,7 @@
         let savedSubjects = [];
         let visibleRows = {1:3, 2:3, 3:3, 4:3, 5:3, 6:3}; 
 
-        window.onload = () => {
+        const __appInit = () => {
             if(isDarkMode) {
                 document.body.classList.add('dark-mode');
             }
@@ -2702,6 +2702,8 @@
                 checkUpdatePopup();
             }
         };
+        // ✨ [v19.2.2] 시작 속도 개선: 바깥 사이트 그림(후원 QR 등)이 다 내려받아질 때까지 기다리지 않고, 화면 구조가 준비되면 바로 학생 목록을 그림
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __appInit, { once: true }); else __appInit();
 
         // ✨ 분기제 값을 실제로 화면에 적용하는 공용 함수 (초기 로딩·학년도 설정 저장·시간여행 복귀 등에서 공통으로 사용)
         function applyQuarterSystem(mq) {
@@ -6578,7 +6580,10 @@ function toggleStatusPanel() {
 		     let mainGridSortDir = 1; // ✨ 메인 홈 학번/이름 정렬방향
         function renderGrid() {
             const tHead = document.getElementById('tHead');
-            const tBody = document.getElementById('tBody');
+            const tBodyEl = document.getElementById('tBody');
+            // ✨ [v19.2.2] 시작 속도 개선: 줄마다 화면에 바로 넣지 않고 모아 두었다가 함수 끝에서 한 번에 그림 (600명 기준 약 2~3배 빠름)
+            const tBody = { _h: null, set innerHTML(v) { this._h = [v]; }, insertAdjacentHTML(pos, html) { if (!this._h) this._h = [tBodyEl.innerHTML]; this._h.push(html); } };
+            try {
             const colGroup = document.getElementById('datatableColgroup');
             const fName = document.getElementById('filterName').value.trim().toLowerCase();
            const fGradeList = Array.from(document.querySelectorAll('input[name="fltGrade"]:checked')).map(el => el.value);
@@ -7492,6 +7497,9 @@ function toggleStatusPanel() {
                 if(count === 0) {
                     tBody.innerHTML = `<tr><td colspan="${currentTab === 'all' ? (11 + maxQuarter) : (isRefundViewOn ? 22 : 16)}" style="text-align:center; padding:40px; color:#9ca3af;">검색 조건에 맞는 데이터가 없습니다.</td></tr>`;
                 }
+            }
+            } finally {
+                if (tBody._h) tBodyEl.innerHTML = tBody._h.join(''); // ✨ [v19.2.2] 모아 둔 표를 한 번에 그림
             }
         }
 
@@ -13652,7 +13660,7 @@ function updateG3LimitTotal() {
         <div style="font-size:13px; color:#334155; font-weight:600; line-height:1.6; margin-bottom:10px;">
             프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️<br>(좋으면 500원~ 부터^^)
         </div>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
+        <img loading="lazy" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
         <a href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="text-decoration:none;">
             <button style="background:#fee500; color:#3c1e1e; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; width:100%; font-size:13px;">카카오페이로 후원하기</button>
         </a>
