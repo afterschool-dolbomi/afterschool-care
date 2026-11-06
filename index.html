@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.4</title>
+    <title>방과후 지원금 돌보미 V19.5</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -485,6 +485,83 @@
         .sd-chip.g3 { background: #e0f2fe; color: #0369a1; } .sd-chip.free { background: #f3e8ff; color: #7c3aed; }
         .sd-chip.sk { background: #fff1f2; color: #be123c; } .sd-chip.tin { background: #e0f2fe; color: #0284c7; } .sd-chip.tout { background: #fce7f3; color: #be185d; }
         .sd-chip.manual { background: #fee2e2; color: #dc2626; }
+        .sd-chip.mk { background: #ccfbf1; color: #0f766e; box-shadow: inset 0 0 0 1px #5eead4; } /* ✨ [v19.5] 보강관리 표시 */
+        .sd-rlog-title.mk { color: #0f766e; }
+        .sd-rlog.mk { min-width: 760px; }
+        .sd-rlog.mk th { background: #ccfbf1; color: #134e4a; border-bottom-color: #5eead4; border-right-color: #99f6e4; }
+        .sd-rlog.mk td { text-align: center; font-variant-numeric: tabular-nums; }
+        .sd-rlog.mk td.l { text-align: left; }
+        .sd-rlog.mk .mv { font-weight: 800; color: #1e3a5f; white-space: nowrap; }
+
+        /* ===== ✨ [v19.5] 보강 관리 창 ===== */
+        #bogangModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.75); z-index: 99998; align-items: center; justify-content: center; backdrop-filter: blur(2px); color: #1f2937; }
+        .bg-win { background: #fff; border-radius: 14px; overflow: hidden; width: 96%; max-width: 1150px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #cbd5e1; }
+        .bg-head { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 16px 24px 13px; text-align: center; flex-shrink: 0; position: relative; }
+        .bg-head .x { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; }
+        .bg-head .ic { width: 44px; height: 44px; background: rgba(212,175,55,0.15); border: 2px solid #d4af37; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; color: #fde68a; }
+        .bg-head .ic svg { width: 20px; height: 20px; }
+        .bg-head .t { color: #fff; font-size: 16.5px; font-weight: 800; }
+        .bg-head .s { color: #94a3b8; font-size: 12px; margin-top: 3px; }
+        .bg-body { padding: 16px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; word-break: keep-all; }
+        .bg-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+        .bg-pane { background: #f8fafc; border: 2px solid #d4af37; border-radius: 10px; padding: 14px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+        .bg-pane h4, .bg-sec { margin: 0; font-size: 14px; font-weight: 800; color: #1e3a5f; }
+        .bg-sec span { color: #0f766e; }
+        .bg-lab { font-size: 12.5px; color: #64748b; font-weight: 600; margin-bottom: -3px; }
+        .bg-seg { display: grid; gap: 6px; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+        .bg-seg button { padding: 7px 4px; border-radius: 7px; border: 1.5px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .bg-seg button small { display: block; font-size: 11px; font-weight: 600; opacity: 0.85; }
+        .bg-seg button.on { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+        .bg-seg button.from.on { background: #be123c; border-color: #be123c; }
+        .bg-seg button.to.on { background: #0f766e; border-color: #0f766e; }
+        .bg-seg button:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        .bg-inp { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff; color: #0f172a; box-sizing: border-box; }
+        .bg-step { display: flex; align-items: center; gap: 8px; }
+        .bg-step button { width: 34px; height: 34px; border-radius: 7px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 18px; font-weight: 800; color: #1e3a5f; cursor: pointer; }
+        .bg-step button:disabled { color: #cbd5e1; background: #f8fafc; cursor: not-allowed; }
+        .bg-step .v { min-width: 70px; text-align: center; font-size: 18px; font-weight: 900; color: #0f766e; }
+        .bg-step .max { font-size: 12.5px; color: #64748b; font-weight: 600; }
+        .bg-warn { font-size: 12.5px; font-weight: 700; color: #be123c; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 6px 9px; }
+        .bg-ok { font-size: 13.5px; font-weight: 800; color: #0f766e; background: #f0fdfa; border: 1px solid #5eead4; border-radius: 8px; padding: 8px 12px; }
+        .bg-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+        .bg-chips button { padding: 4px 10px; border-radius: 999px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+        .bg-chips button.on { background: #ccfbf1; border-color: #5eead4; color: #0f766e; }
+        .bg-stu { border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; flex: 1; min-height: 150px; max-height: 300px; overflow-y: auto; }
+        .bg-stu label { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 9px; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; cursor: pointer; }
+        .bg-stu label:last-child { border-bottom: none; }
+        .bg-stu label.off { opacity: 0.5; cursor: not-allowed; }
+        .bg-stu input { width: 16px; height: 16px; accent-color: #0f766e; margin: 0; }
+        .bg-stu .cls { color: #94a3b8; font-size: 12px; margin-left: 5px; }
+        .bg-stu .res { font-size: 12.5px; font-weight: 700; color: #64748b; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bg-stu .res b { color: #0f766e; }
+        .bg-stu .prev { font-size: 11.5px; color: #b45309; font-weight: 700; margin-left: 6px; }
+        .bg-stu .none { color: #9ca3af; text-align: center; padding: 18px; font-size: 13px; }
+        .bg-note { font-size: 12.5px; color: #64748b; }
+        .bg-pv { border: 1px solid #5eead4; background: #f0fdfa; border-radius: 10px; padding: 10px 14px; }
+        .bg-pv .pt { font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 7px; }
+        .bg-pv .grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+        .bg-pv .c { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; text-align: center; }
+        .bg-pv .c.minus { border-color: #fecdd3; } .bg-pv .c.plus { border-color: #5eead4; }
+        .bg-pv .h { font-size: 12.5px; color: #64748b; font-weight: 700; }
+        .bg-pv .n { font-size: 18px; font-weight: 900; color: #0f172a; font-variant-numeric: tabular-nums; }
+        .bg-pv .n s { color: #94a3b8; font-weight: 600; font-size: 14px; margin-right: 4px; }
+        .bg-pv .c.minus .n { color: #be123c; } .bg-pv .c.plus .n { color: #0f766e; }
+        .bg-pv .m { font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }
+        .bg-pv .ps { font-size: 13px; color: #0f766e; margin-top: 7px; font-weight: 600; }
+        .bg-tw { border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; background: #fff; }
+        .bg-tw table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+        .bg-tw th { position: static; box-shadow: none; background: #ccfbf1; color: #134e4a; font-weight: 800; font-size: 13px; padding: 7px 9px; border-bottom: 1px solid #5eead4; white-space: nowrap; text-align: center; }
+        .bg-tw td { padding: 7px 9px; border-bottom: 1px solid #f1f5f9; text-align: center; background: #fff; color: #1f2937; white-space: normal; }
+        .bg-tw tbody tr:last-child td { border-bottom: none; }
+        .bg-tw td.l { text-align: left; } .bg-tw td.b { font-weight: 800; }
+        .bg-tw .mv { font-weight: 800; color: #1e3a5f; white-space: nowrap; }
+        .bg-tw .del { border: none; background: none; font-size: 14px; cursor: pointer; }
+        .bg-tw .empty { color: #94a3b8; text-align: center; padding: 14px; font-size: 13.5px; }
+        .bg-acts { display: flex; gap: 8px; }
+        .bg-btn { flex: 1; padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13.5px; border: 1px solid #cbd5e1; background: #fff; color: #475569; cursor: pointer; }
+        .bg-btn.main { flex: 1.4; border: none; background: #0f766e; color: #fff; box-shadow: 0 4px 10px rgba(15,118,110,0.32); }
+        .bg-btn.navy { background: #1e3a5f; color: #fff; border: none; }
+        .bg-btn:disabled { background: #e2e8f0; color: #94a3b8; box-shadow: none; cursor: not-allowed; border: none; }
         .sd-btn { border: 1px solid #cbd5e1; background: #fff; color: #334155; border-radius: 7px; padding: 8px 14px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: 0.15s; }
         .sd-btn:hover { background: #f1f5f9; }
         .sd-btn.sm { padding: 5px 11px; font-size: 13px; }
@@ -1320,6 +1397,19 @@
                </div>
     </div>
 
+    <!-- ✨ [v19.5] 보강 관리 창 -->
+    <div id="bogangModal">
+        <div class="bg-win" onclick="event.stopPropagation();">
+            <div class="bg-head">
+                <button type="button" class="x" onclick="closeBogangModal()" aria-label="닫기">✕</button>
+                <div class="ic"><i data-lucide="calendar-clock"></i></div>
+                <div class="t">보강 관리</div>
+                <div class="s">일부 학생의 차시를 뒤 차로 옮깁니다. 부서 전체가 바뀔 때는 과목 목록 관리에서 고치세요.</div>
+            </div>
+            <div class="bg-body" id="bogangBody"></div>
+        </div>
+    </div>
+
     <div id="refundRosterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:white; border-radius:14px; overflow:hidden; width:94%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
             <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
@@ -1471,7 +1561,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.4</span>
+                <span class="brand-version">V19.5</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1565,6 +1655,7 @@
             <button class="btn-tool" onclick="toggleStatusPanel()" id="btnStatusView" title="현황 보기"><i data-lucide="layout-grid"></i> 현황</button>
             <button class="btn-tool" id="btn-print-export" onclick="openPrintExportModal()" title="정산 저장 및 인쇄"><i data-lucide="printer"></i> 업무,저장,인쇄</button>
             <button class="btn-tool" id="btn-refund-manage" onclick="openRefundManagerModal()" title="환불 관리"><i data-lucide="rotate-ccw"></i> 환불관리</button>
+            <button class="btn-tool" id="btn-bogang-manage" onclick="openBogangModal()" title="보강 관리"><i data-lucide="calendar-clock"></i> 보강관리</button>
 			<div class="toolbar-divider"></div>
 			<button class="btn-tool" onclick="toggleViewMode()" id="btnViewMode" style="background:#8b5cf6; color:white; border:none;"><i data-lucide="list"></i> 과목별 보기</button>
 			<button class="btn-tool" onclick="toggleDarkMode()" id="btnDarkMode" title="다크 모드"><i data-lucide="moon" id="iconMoon"></i><i data-lucide="sun" id="iconSun" style="display:none;"></i> <span id="darkModeLabel">다크모드</span></button>
@@ -1585,6 +1676,16 @@
             </div>
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
+
+                <div style="background:linear-gradient(135deg, #f0fdfa, #ccfbf1); border:2.5px solid #0f766e; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(15,118,110,0.22); word-break:keep-all;">
+                    <div style="margin-bottom:6px;"><span style="background:#0f766e; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능</span></div>
+                    <div style="font-size:20px; font-weight:900; color:#134e4a; line-height:1.3; margin-bottom:6px;">📅 보강관리: 일부 학생만 차시 옮기기</div>
+                    <div style="font-size:14px; color:#334155; line-height:1.75;">
+                        3학년만 현장체험을 가는 날처럼 <b>부서의 일부 학생만</b> 수업이 빠질 때, 그 학생들의 차시만 뒤 차로 옮겨요.<br>
+                        위쪽 메뉴의 <b>보강관리</b>에서 과목·차·학생을 고르고, 여러 부서를 담아 한 번에 적용하세요.<br>
+                        분기 수강료와 지원금은 그대로이고 <b>차별 청구 금액만</b> 바뀌어요. 아동 이름을 누르면 <b>보강관리 N차시 적용</b> 문구와 목록이 보여요.
+                    </div>
+                </div>
 
                 <div style="background:linear-gradient(135deg, #fff1f2, #ffe4e6); border:2.5px solid #e11d48; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(225,29,72,0.22); word-break:keep-all;">
                     <div style="margin-bottom:6px;"><span style="background:#e11d48; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능</span></div>
@@ -3301,6 +3402,27 @@
             return { g, s: amount - g };
         }
 
+        // ✨ [v19.5] 보강관리: 학생별 보강 기록(s.bogangLog)을 이 학생의 차시에 반영
+        //    기록 = { id, from, to, n, reason, date } : from차의 n차시를 to차로 옮김 (분기 합계는 그대로)
+        //    과목 목록의 차시가 나중에 줄어들어도 음수가 되지 않도록 남은 차시까지만 옮김
+        function getBogangSessions(sub, q, logs) {
+            let adj = Object.assign({}, (sub && sub.sessions && sub.sessions[q]) || {});
+            (logs || []).forEach(l => {
+                let f = `m${l.from}`, t = `m${l.to}`;
+                let n = Math.min(toNum(l.n), toNum(adj[f]));
+                if (n <= 0) return;
+                adj[f] = toNum(adj[f]) - n;
+                adj[t] = toNum(adj[t]) + n;
+            });
+            return adj;
+        }
+        // 보강이 있는 학생이면 차시만 바뀐 과목 사본을, 없으면 원래 과목을 돌려줌 (getTsMonthlyNormals 등에 그대로 넘겨 씀)
+        function bogangSub(sub, q, s) {
+            let logs = s && s.bogangLog;
+            if (!sub || !logs || !logs.length) return sub;
+            return Object.assign({}, sub, { sessions: Object.assign({}, sub.sessions, { [q]: getBogangSessions(sub, q, logs) }) });
+        }
+
         // ✨ [v19.2] 과목별 보기 '차시금액' - 청구서(N월 교육비)와 같은 계산으로 한 과목의 분기 수강료를 1차·2차(·3차)로 나눔
         //    - 차별 정상 금액: getTsMonthlyNormals (표준차시 기준 가감, 10원 단위, 마지막 차가 나머지 흡수)
         //    - 환불은 청구서와 같은 규칙으로 태그된 차부터 차감하고, 지원금은 1차부터 순서대로 소진
@@ -3399,7 +3521,7 @@
                 let s = row.sObj || {}, a = row.alloc || {}, q = row.qNum;
                 let su = toNum(s.su);
                 if (su <= 0) { out.push(Object.assign({}, row, { cha: 1 })); return; }
-                let masterSub = savedSubjects.find(x => x.name === row.sName);
+                let masterSub = bogangSub(savedSubjects.find(x => x.name === row.sName), q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
                 let isYuka = (row.r.freeTier === '육아기근로단축');
                 let net = computeChaBreakdown(masterSub, q, su, toNum(a.netSu),
                     { g3: row.g3Su, fr: row.freeSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu) : 0 },
@@ -3690,7 +3812,7 @@
                         let calc = null;
                         qd.subs.forEach((s, sIdx) => {
                             if (!s.name || rg.subjectNames.indexOf(s.name) === -1) return;
-                            let masterSub = savedSubjects.find(x => x.name === s.name);
+                            let masterSub = bogangSub(savedSubjects.find(x => x.name === s.name), q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
                             let stTotalSessions = getSubjectTotalSessions(masterSub, q);
                             if (!stTotalSessions) return;
                             if (month !== 'pre') {
@@ -3799,6 +3921,8 @@
                                         return reason ? `${reason}${cnt}` : cnt;                           // 예: 독감1회 환불 / 사유 없으면 1회 환불
                                     }).filter(Boolean).join(', ');
                                 }
+                                // ✨ [v19.5] 환불 문구가 없고 이번 차에 걸린 보강이 있으면 비고에 보강 내용 표시
+                                if (!refundNote) refundNote = getBogangNote(s, month);
                             }
                             if (thisCharge <= 0) return;
                             let parts2 = [];
@@ -5975,6 +6099,7 @@ function toggleStatusPanel() {
                                 s.name = ''; s.g = 0; s.s = 0; s.su = 0; s.gy = 0; s.j = 0;
                                 s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
                                 s.refundLog = []; s.manualAlloc = {}; s.rMonth = undefined; s.reasonManual = undefined;
+                                s.bogangLog = [];
                                 delete s.mG3Su; delete s.mG3Gy; delete s.mG3J;
                                 delete s.mFreeSu; delete s.mFreeGy; delete s.mFreeJ;
                                 delete s.mSuikSu; delete s.mSuikGy; delete s.mSuikJ;
@@ -7989,7 +8114,7 @@ function updateG3LimitTotal() {
 
                             let keepExtra = {};
                             // ✨ [v18.3] 개별 수정창으로 저장해도 환불 내역(사유·몇차·환불지원금 지정)과 수동 배분이 지워지지 않도록 그대로 유지
-                            if (oldSub) ['refundLog', 'manualAlloc', 'rMonth', 'reasonManual', 'reason', 'mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ', '_refundLogMigratedV2'].forEach(k => { if (oldSub[k] !== undefined) keepExtra[k] = JSON.parse(JSON.stringify(oldSub[k])); });
+                            if (oldSub) ['refundLog', 'bogangLog', 'manualAlloc', 'rMonth', 'reasonManual', 'reason', 'mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ', '_refundLogMigratedV2'].forEach(k => { if (oldSub[k] !== undefined) keepExtra[k] = JSON.parse(JSON.stringify(oldSub[k])); });
                             subs.push(Object.assign(keepExtra, { name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate }));
                             sumG += g; sumS += acc; sumSu += su; sumGy += gy; sumJ += j;
 
@@ -8471,11 +8596,15 @@ function updateG3LimitTotal() {
                 }))];
                 let convChip = convDates.length ? `<span class="sd-chip free" title="${ratioNotes.join('\n').replace(/"/g, '&quot;')}">🍼 분기 중간에 자유수강자로 전환됨 (${convDates.join(', ')})</span>` : '';
 
+                // ✨ [v19.5] 보강이 있는 분기는 접어도 머리줄에서 알 수 있게 표시
+                let bogangSessions = validSubs.reduce((sumN, vs) => sumN + (vs.bogangLog || []).reduce((t, l) => t + toNum(l.n), 0), 0);
+                let bogangChip = bogangSessions ? `<span class="sd-chip mk">보강관리 ${bogangSessions}차시 적용</span>` : '';
+
                 main += `<div class="sd-acc${isOpen ? '' : ' closed'}">
                     <div class="sd-acc-h" onclick="sdToggleQ('${r.id}', ${q}, this)">
                         <div class="sd-qn">${q}</div>
                         <div class="sd-acc-ttl">
-                            <div class="title">${q}분기 ${convChip} ${refundHistoryItems.length ? `<span class="sd-chip sk">환불 ${refundHistoryItems.length}건</span>` : ''}</div>
+                            <div class="title">${q}분기 ${convChip} ${refundHistoryItems.length ? `<span class="sd-chip sk">환불 ${refundHistoryItems.length}건</span>` : ''} ${bogangChip}</div>
                             <div class="subs">${validSubs.map(s => s.name || '(과목명 미상)').join(' · ')}</div>
                         </div>
                         <div class="figs">
@@ -8503,6 +8632,7 @@ function updateG3LimitTotal() {
                         </div>
                         ${ratioNotes.length ? `<div class="sd-ratio-notes">${ratioNotes.map(note => `<div>🍼 ${note}</div>`).join('')}</div>` : ''}
                         ${sdBuildRefundLog(r, c, q, subs, validSubs, refundHistoryItems)}
+                        ${sdBuildBogangLog(r, q, subs, validSubs)}
                     </div>
                 </div>`;
             }
@@ -8793,6 +8923,279 @@ function updateG3LimitTotal() {
         }
         function closeRefundManagerModal() {
             document.getElementById('refundManagerModal').style.display = 'none';
+        }
+
+        // ===== ✨ [v19.5] 보강 관리 =====
+        // 일부 학생만 앞 차의 차시를 뒤 차로 옮김. 분기 수강료·지원금은 그대로이고 차별 청구 금액만 바뀜.
+        // 기록은 학생의 과목(s.bogangLog)에 저장하고, 한 번에 적용한 학생들은 같은 id로 묶임.
+        let bgState = null;
+        let bgSeq = 0;
+        function bgMonths() { let a = []; for (let m = 1; m <= getMonthsPerQuarter(); m++) a.push(m); return a; }
+        function bgMaster() { return savedSubjects.find(x => x.name === bgState.subject); }
+        function bgBase(m) {
+            let sub = bgMaster(), sq = sub && sub.sessions ? sub.sessions[bgState.q] : null;
+            return sq ? toNum(sq[`m${m}`]) : 0;
+        }
+        function bgFromOk(m) { return bgBase(m) > 0 && bgMonths().some(x => x > m && bgBase(x) > 0); }
+        function bgToOk(m) { return m > bgState.from && bgBase(m) > 0; }
+        function bgTargets() {
+            if (!bgState.subject) return [];
+            let out = [];
+            db.forEach(r => {
+                let qd = r[`q${bgState.q}`];
+                if (!qd || !qd.subs) return;
+                qd.subs.forEach((s, sIdx) => { if (s.name === bgState.subject) out.push({ r, s, sIdx, key: `${r.id}|${sIdx}` }); });
+            });
+            return out.sort((a, b) => toNum(a.r.grade) - toNum(b.r.grade) || toNum(a.r.classNum) - toNum(b.r.classNum) || toNum(a.r.studentNum) - toNum(b.r.studentNum));
+        }
+        function bgCartLogs(key) {
+            return bgState.cart.filter(c => c.q === bgState.q && c.subject === bgState.subject && c.keys.includes(key));
+        }
+        // 이 차에서 더 보낼 수 있는 차시 = 차시 목록의 차시 − 이미 보낸 차시 (담은 것 포함)
+        function bgSent(t, from) {
+            return (t.s.bogangLog || []).concat(bgCartLogs(t.key)).filter(l => l.from === from).reduce((a, l) => a + toNum(l.n), 0);
+        }
+        function bgRemain(t, from) { return Math.max(0, bgBase(from) - bgSent(t, from)); }
+        function bgFullRefund(t) { return toNum(t.s.su) > 0 && toNum(t.s.rSu) >= toNum(t.s.su); }
+        function bgPickedTargets() { return bgTargets().filter(t => bgState.picked.has(t.key)); }
+        function bgMax() {
+            let list = bgPickedTargets();
+            return list.length ? Math.min(...list.map(t => bgRemain(t, bgState.from))) : bgBase(bgState.from);
+        }
+        function bgSessText(sess) { return bgMonths().map(m => toNum(sess[`m${m}`])).join(' · '); }
+        function bgFix() {
+            let ms = bgMonths();
+            if (!bgFromOk(bgState.from)) bgState.from = ms.find(bgFromOk) || 1;
+            if (!bgToOk(bgState.to)) bgState.to = ms.find(bgToOk) || bgState.from;
+            let mx = bgMax();
+            bgState.n = Math.max(1, Math.min(bgState.n, Math.max(1, mx)));
+        }
+        function openBogangModal() {
+            bgState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q', '')) : 1, subject: '', from: 1, to: 2, n: 1, reason: '', picked: new Set(), grade: '', warn: '', msg: '', cart: [] };
+            renderBogang();
+            document.getElementById('bogangModal').style.display = 'flex';
+            if (window.lucide) lucide.createIcons();
+        }
+        function closeBogangModal() {
+            if (bgState && bgState.cart.length && !confirm(`아직 적용하지 않은 보강 ${bgState.cart.length}건이 있습니다.\n닫으면 담은 목록이 사라집니다. 닫을까요?`)) return;
+            document.getElementById('bogangModal').style.display = 'none';
+        }
+        function bgSet(patch) { Object.assign(bgState, { warn: '', msg: '' }, patch); renderBogang(); }
+        function bgSetQuarter(q) { bgSet({ q, picked: new Set(), grade: '', n: 1 }); }
+        function bgSetSubject(v) { bgSet({ subject: v, picked: new Set(), grade: '', n: 1 }); }
+        function bgSetFrom(m) { bgSet({ from: m, picked: new Set(), grade: '', n: 1 }); }
+        function bgSetTo(m) { bgSet({ to: m }); }
+        function bgStep(d) {
+            let v = bgState.n + d, mx = bgMax();
+            if (v > mx) {
+                bgSet({ warn: `${bgState.from}차 차시 목록은 ${bgBase(bgState.from)}차시라서 ${mx}차시까지만 보낼 수 있어요.` });
+                return;
+            }
+            bgSet({ n: Math.max(1, v) });
+        }
+        function bgPickGrade(g) {
+            let list = bgTargets().filter(t => (g === '' || String(t.r.grade) === String(g)) && bgRemain(t, bgState.from) > 0 && !bgFullRefund(t));
+            bgSet({ grade: g === '' ? 'all' : g, picked: new Set(list.map(t => t.key)) });
+        }
+        function bgClearPick() { bgSet({ grade: '', picked: new Set() }); }
+        function bgTogglePick(key, on) {
+            if (on) bgState.picked.add(key); else bgState.picked.delete(key);
+            bgSet({ grade: '' });
+        }
+        function bgCanAdd() { return bgState.subject && bgState.picked.size > 0 && bgMax() >= 1 && bgToOk(bgState.to) && bgFromOk(bgState.from); }
+        function bgAddCart() {
+            if (!bgCanAdd()) return;
+            let list = bgPickedTargets();
+            bgState.cart.push({ cid: ++bgSeq, q: bgState.q, subject: bgState.subject, from: bgState.from, to: bgState.to, n: bgState.n, reason: bgState.reason.trim(), keys: list.map(t => t.key), names: list.map(t => t.r.name) });
+            bgSet({ picked: new Set(), grade: '', n: 1 });
+        }
+        function bgRemoveCart(cid) { bgSet({ cart: bgState.cart.filter(c => c.cid !== cid) }); }
+        function bgApplyCart() {
+            if (!bgState.cart.length) return;
+            let applied = 0, skipped = 0, today = todayLocal(), base = Date.now();
+            bgState.cart.forEach((c, i) => {
+                let id = `bg${base}_${i}`;
+                let sub = savedSubjects.find(x => x.name === c.subject);
+                let limit = sub && sub.sessions && sub.sessions[c.q] ? toNum(sub.sessions[c.q][`m${c.from}`]) : 0;
+                c.keys.forEach(key => {
+                    let [rid, sIdx] = key.split('|');
+                    let r = db.find(x => String(x.id) === rid);
+                    let s = r && r[`q${c.q}`] && r[`q${c.q}`].subs[Number(sIdx)];
+                    if (!s || s.name !== c.subject) { skipped++; return; }
+                    let sent = (s.bogangLog || []).filter(l => l.from === c.from).reduce((a, l) => a + toNum(l.n), 0);
+                    if (sent + c.n > limit) { skipped++; return; }
+                    if (!s.bogangLog) s.bogangLog = [];
+                    s.bogangLog.push({ id, from: c.from, to: c.to, n: c.n, reason: c.reason, date: today });
+                    applied++;
+                });
+            });
+            persistData();
+            renderGrid();
+            bgSet({ cart: [], msg: `보강을 적용했습니다. (학생 ${applied}명)${skipped ? ` (차시를 넘겨서 ${skipped}명은 적용하지 않았습니다.)` : ''}` });
+        }
+        // 이 분기 적용된 보강을 한 번에 적용한 묶음별로 모음
+        function bgAppliedGroups() {
+            let map = new Map();
+            db.forEach(r => {
+                let qd = r[`q${bgState.q}`];
+                if (!qd || !qd.subs) return;
+                qd.subs.forEach(s => (s.bogangLog || []).forEach(l => {
+                    if (!map.has(l.id)) map.set(l.id, { id: l.id, subject: s.name, from: l.from, to: l.to, n: l.n, reason: l.reason, date: l.date, names: [], results: new Set() });
+                    let g = map.get(l.id);
+                    g.names.push(r.name);
+                    g.results.add(bgSessText(getBogangSessions(savedSubjects.find(x => x.name === s.name), bgState.q, s.bogangLog)));
+                }));
+            });
+            return [...map.values()];
+        }
+        function bgDeleteGroup(id) {
+            let g = bgAppliedGroups().find(x => x.id === id);
+            if (!g || !confirm(`${g.subject} ${g.from}차 → ${g.to}차 ${g.n}차시 보강을 학생 ${g.names.length}명 모두에게서 지울까요?`)) return;
+            db.forEach(r => {
+                let qd = r[`q${bgState.q}`];
+                if (!qd || !qd.subs) return;
+                qd.subs.forEach(s => { if (s.bogangLog) s.bogangLog = s.bogangLog.filter(l => l.id !== id); });
+            });
+            persistData();
+            renderGrid();
+            bgSet({ msg: '보강을 지웠습니다.' });
+        }
+        function bgNames(names) { return names.length > 2 ? `${names[0]} 외 ${names.length - 1}명` : names.join(', '); }
+        function bgListHtml(title, rows, emptyText, headLast) {
+            return `<div><div class="bg-sec" style="margin-bottom:6px;">${title}</div><div class="bg-tw">${rows.length
+                ? `<table><thead><tr><th>과목</th><th>옮긴 차시</th><th>학생</th><th>적용 후 차시</th><th>사유</th><th style="width:40px;"></th></tr></thead><tbody>${rows.join('')}</tbody></table>`
+                : `<div class="empty">${emptyText}</div>`}</div></div>`;
+        }
+        function renderBogang() {
+            bgFix();
+            let st = bgState, ms = bgMonths(), body = document.getElementById('bogangBody');
+            let keepScroll = body.scrollTop;
+            let sub = bgMaster(), targets = bgTargets();
+            let hasSess = sub && ms.some(bgFromOk);
+            let names = savedSubjects.map(s => s.name).sort((a, b) => a.localeCompare(b, 'ko'));
+            let quarterBtns = ''; for (let q = 1; q <= maxQuarter; q++) quarterBtns += `<button type="button" class="${st.q === q ? 'on' : ''}" onclick="bgSetQuarter(${q})">${q}분기</button>`;
+            let fromBtns = ms.map(m => `<button type="button" class="from ${hasSess && st.from === m ? 'on' : ''}" ${bgFromOk(m) ? '' : 'disabled'} onclick="bgSetFrom(${m})">${m}차<small>${bgBase(m)}차시</small></button>`).join('');
+            let toBtns = ms.map(m => `<button type="button" class="to ${hasSess && st.to === m ? 'on' : ''}" ${hasSess && bgToOk(m) ? '' : 'disabled'} onclick="bgSetTo(${m})">${m}차<small>${bgBase(m)}차시</small></button>`).join('');
+            let mx = bgMax();
+
+            let grades = [...new Set(targets.map(t => String(t.r.grade)))].sort();
+            let stuList = '';
+            if (!st.subject) stuList = '<div class="none">과목을 먼저 고르세요.</div>';
+            else if (!targets.length) stuList = '<div class="none">이 분기에 이 과목을 수강하는 학생이 없습니다.</div>';
+            else stuList = targets.map(t => {
+                let full = bgFullRefund(t), rem = bgRemain(t, st.from), off = full || rem <= 0, on = st.picked.has(t.key);
+                let logs = (t.s.bogangLog || []).concat(bgCartLogs(t.key));
+                if (on) logs = logs.concat([{ from: st.from, to: st.to, n: st.n }]);
+                let right = full ? '전액 환불' : (rem <= 0 ? '더 보낼 차시 없음' : (on ? `<b>${bgSessText(getBogangSessions(sub, st.q, logs))}</b>` : ''));
+                let sent = bgSent(t, st.from);
+                return `<label class="${off ? 'off' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${off ? 'disabled' : ''} onchange="bgTogglePick('${t.key}', this.checked)"><span>${escHtmlAttr(t.r.name)}<span class="cls">${t.r.grade}-${t.r.classNum}-${t.r.studentNum}</span>${sent ? `<span class="prev">이미 ${sent}차시 보냄</span>` : ''}</span><span class="res">${right}</span></label>`;
+            }).join('');
+
+            let preview = '';
+            if (hasSess && st.subject) {
+                let baseS = (sub.sessions && sub.sessions[st.q]) || {};
+                let afterS = getBogangSessions(sub, st.q, [{ from: st.from, to: st.to, n: st.n }]);
+                let su = toNum(sub.fees && sub.fees[st.q] ? sub.fees[st.q].su : 0);
+                let afterSub = Object.assign({}, sub, { sessions: Object.assign({}, sub.sessions, { [st.q]: afterS }) });
+                let mb = getTsMonthlyNormals(sub, st.q, su), ma = getTsMonthlyNormals(afterSub, st.q, su);
+                let tot = ms.reduce((a, m) => a + toNum(baseS[`m${m}`]), 0);
+                let diff = toNum(mb[st.from]) - toNum(ma[st.from]);
+                preview = `<div class="bg-pv"><div class="pt">${escHtmlAttr(st.subject)} ${st.picked.size}명: ${st.q}분기 ${st.from}차의 ${st.n}차시를 ${st.to}차로 옮기면</div>
+                    <div class="grid">${ms.map(m => {
+                        let b = toNum(baseS[`m${m}`]), a = toNum(afterS[`m${m}`]);
+                        return `<div class="c ${m === st.from ? 'minus' : m === st.to ? 'plus' : ''}"><div class="h">${m}차</div><div class="n">${a !== b ? `<s>${b}</s>` : ''}${a}차시</div><div class="m">${su ? formatMoney(toNum(ma[m])) : '-'}</div></div>`;
+                    }).join('')}<div class="c"><div class="h">분기 합계</div><div class="n">${tot}차시</div><div class="m">${su ? formatMoney(su) : '-'}</div></div></div>
+                    <div class="ps">${su ? `분기 수강료와 지원금은 그대로이고, ${st.from}차 청구는 ${formatMoney(diff)} 줄고 ${st.to}차 청구는 같은 금액만큼 늘어나요.` : '분기 수강료와 지원금은 그대로예요.'}</div></div>`;
+            }
+
+            let cartRows = st.cart.map(c => {
+                let s0 = savedSubjects.find(x => x.name === c.subject);
+                return `<tr><td class="l b">${escHtmlAttr(c.subject)} <span style="color:#64748b; font-weight:600;">${c.q}분기</span></td><td><span class="mv">${c.from}차 → ${c.to}차 ${c.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(c.names))}</td><td>${bgSessText(getBogangSessions(s0, c.q, [c]))}</td><td class="l">${escHtmlAttr(c.reason) || '-'}</td><td><button type="button" class="del" title="담은 목록에서 빼기" onclick="bgRemoveCart(${c.cid})">🗑️</button></td></tr>`;
+            });
+            let applied = bgAppliedGroups();
+            let appliedRows = applied.map(g => `<tr><td class="l b">${escHtmlAttr(g.subject)}</td><td><span class="mv">${g.from}차 → ${g.to}차 ${g.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(g.names))}</td><td>${g.results.size === 1 ? [...g.results][0] : '학생마다 다름'}</td><td class="l">${escHtmlAttr(g.reason) || '-'}</td><td><button type="button" class="del" title="이 보강 지우기" onclick="bgDeleteGroup('${g.id}')">🗑️</button></td></tr>`);
+
+            body.innerHTML = `
+                ${st.msg ? `<div class="bg-ok">✅ ${st.msg}</div>` : ''}
+                <div class="bg-two">
+                    <div class="bg-pane"><h4>1. 어느 차시를 옮길까요?</h4>
+                        <div class="bg-lab">분기</div><div class="bg-seg">${quarterBtns}</div>
+                        <div class="bg-lab">과목</div>
+                        <select class="bg-inp" id="bgSubject" onchange="bgSetSubject(this.value)"><option value="">과목을 선택하세요</option>${names.map(n => `<option value="${escHtmlAttr(n)}" ${n === st.subject ? 'selected' : ''}>${escHtmlAttr(n)}</option>`).join('')}</select>
+                        ${st.subject && !hasSess ? `<div class="bg-warn">이 과목은 ${st.q}분기 차시가 입력되어 있지 않거나 뒤로 옮길 차가 없습니다. 과목 목록 관리에서 차시를 먼저 입력하세요.</div>` : ''}
+                        <div class="bg-lab">보내는 차</div><div class="bg-seg">${fromBtns}</div>
+                        <div class="bg-lab">받는 차 (보강하는 차)</div><div class="bg-seg">${toBtns}</div>
+                        <div class="bg-lab">옮길 차시 수</div>
+                        <div class="bg-step"><button type="button" aria-label="한 차시 줄이기" ${st.n <= 1 ? 'disabled' : ''} onclick="bgStep(-1)">−</button><div class="v">${st.n}차시</div><button type="button" aria-label="한 차시 늘리기" ${hasSess ? '' : 'disabled'} onclick="bgStep(1)">+</button><span class="max">최대 ${mx}차시</span></div>
+                        ${st.warn ? `<div class="bg-warn">${st.warn}</div>` : ''}
+                        <div class="bg-lab">사유</div>
+                        <input class="bg-inp" id="bgReason" value="${escHtmlAttr(st.reason)}" placeholder="사유 (예: 현장체험학습)" oninput="bgState.reason = this.value">
+                    </div>
+                    <div class="bg-pane"><h4>2. 어느 학생인가요?</h4>
+                        <div class="bg-chips"><button type="button" class="${st.grade === 'all' ? 'on' : ''}" onclick="bgPickGrade('')">전체</button>${grades.map(g => `<button type="button" class="${st.grade === g ? 'on' : ''}" onclick="bgPickGrade('${g}')">${g}학년만</button>`).join('')}<button type="button" onclick="bgClearPick()">선택 해제</button></div>
+                        <div class="bg-stu">${stuList}</div>
+                        <div class="bg-note">${st.picked.size}명 선택 · 오른쪽 숫자는 적용 후 ${ms.map(m => m + '차').join('·')} 차시</div>
+                    </div>
+                </div>
+                ${preview}
+                <button type="button" class="bg-btn navy" ${bgCanAdd() ? '' : 'disabled'} onclick="bgAddCart()">담기</button>
+                ${bgListHtml(`담은 보강 목록 <span>${st.cart.length}건</span>`, cartRows, '담은 항목이 없습니다. 위에서 고른 뒤 담기를 눌러 주세요.')}
+                <div class="bg-acts"><button type="button" class="bg-btn" onclick="closeBogangModal()">닫기</button><button type="button" class="bg-btn main" ${st.cart.length ? '' : 'disabled'} onclick="bgApplyCart()">전체 적용</button></div>
+                ${bgListHtml(`적용된 보강 (${st.q}분기) <span>${applied.length}건</span>`, appliedRows, '적용된 보강이 없습니다.')}`;
+            body.scrollTop = keepScroll;
+        }
+        // 정산파일 비고 문구: 이번 차에서 보냈거나 받은 보강
+        function getBogangNote(s, month) {
+            let logs = (s.bogangLog || []).filter(l => l.from === month || l.to === month);
+            return logs.map(l => {
+                let reason = String(l.reason || '').trim();
+                let txt = (l.from === month) ? `${l.n}차시 ${l.to}차로 보강` : `${l.from}차 ${l.n}차시 보강`;
+                return reason ? `${reason} ${txt}` : txt;
+            }).join(', ');
+        }
+        // 아동 상세창: 보강이 있는 분기에만 나오는 목록
+        function sdBuildBogangLog(r, q, subs, validSubs) {
+            let items = [];
+            validSubs.forEach(s => {
+                let sIdx = subs.indexOf(s);
+                (s.bogangLog || []).forEach((l, li) => items.push({ s, sIdx, l, li }));
+            });
+            if (!items.length) return '';
+            let body = items.map(it => {
+                let sess = getBogangSessions(savedSubjects.find(x => x.name === it.s.name), q, it.s.bogangLog);
+                let result = bgMonths().map(m => `${m}차 ${toNum(sess[`m${m}`])}`).join(' · ');
+                return `<tr>
+                    <td class="l"><b>${it.s.name}</b></td>
+                    <td><span class="mv">${it.l.from}차 → ${it.l.to}차 ${it.l.n}차시</span></td>
+                    <td>${result}</td>
+                    <td><input type="text" value="${escHtmlAttr(it.l.reason)}" placeholder="사유 입력" onchange="updateBogangLogReason('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)"></td>
+                    <td style="text-align:center;"><button type="button" class="sd-del" title="이 학생의 보강 삭제" onclick="deleteBogangLogEntry('${r.id}', ${q}, ${it.sIdx}, ${it.li})">🗑️</button></td>
+                </tr>`;
+            }).join('');
+            return `<div class="sd-rlog-wrap no-print">
+                <div class="sd-rlog-title mk">📅 ${q}분기 보강관리 목록 <span>(${items.length}건)</span></div>
+                <div class="sd-rlog-scroll"><table class="sd-rlog mk">
+                    <thead><tr><th>과목</th><th>옮긴 차시</th><th>이 학생의 차시</th><th style="width:26%;">사유</th><th style="width:44px;"></th></tr></thead>
+                    <tbody>${body}</tbody>
+                </table></div>
+            </div>`;
+        }
+        function updateBogangLogReason(id, q, sIdx, li, val) {
+            let r = db.find(x => x.id == id);
+            let s = r && r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s || !s.bogangLog || !s.bogangLog[li]) return;
+            s.bogangLog[li].reason = val;
+            persistData();
+        }
+        function deleteBogangLogEntry(id, q, sIdx, li) {
+            let r = db.find(x => x.id == id);
+            let s = r && r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s || !s.bogangLog || !s.bogangLog[li]) return;
+            if (!confirm('이 학생의 보강을 지울까요? 차별 청구 금액이 원래대로 돌아갑니다.')) return;
+            s.bogangLog.splice(li, 1);
+            persistData();
+            showDetailModal(id);
+            renderGrid();
         }
 
         
@@ -10983,6 +11386,7 @@ function updateG3LimitTotal() {
                                              su:x.burdenSu, gy:x.burdenGy, j:x.burdenJ,
                                             rG:x.rG||0, rS:x.rS||0, rSu:x.rSu||0, rGy:x.rGy||0, rJ:x.rJ||0,
                                             refundLog: x.refundLog || [],
+                                            bogangLog: x.bogangLog || [], // ✨ [v19.5] 보강 기록 백업 보존
                                             isNew:x.isNew||null,
                                             // ✨ 수기 입력값 백업 보존
                                             mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
@@ -11376,6 +11780,7 @@ function updateG3LimitTotal() {
 								let bSu, bGy, bJ;
                                 let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
                                 let refundLog = [];
+                                let bogangLog = []; // ✨ [v19.5] 보강 기록 복원용
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
                                 let sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate; // ✨ 차시 비율 적용 복원용 변수
@@ -11385,6 +11790,7 @@ function updateG3LimitTotal() {
                                     bSu = bk.su; bGy = bk.gy; bJ = bk.j;
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
                                     refundLog = bk.refundLog || [];
+                                    bogangLog = bk.bogangLog || [];
                                     // ✨ 버그 수정: 백업에 isNew가 null(=이미 NEW 만료됨)로 저장된 과목까지
                                     // 복원 시각(uploadTime)으로 되살아나 NEW가 계속 뜨던 문제 수정.
                                     // 'isNew' 키 자체가 없는 구버전 백업일 때만 uploadTime으로 대체.
@@ -11402,7 +11808,7 @@ function updateG3LimitTotal() {
                                     freeApplyDate = bk.freeApplyDate || '';
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate, _slotIdx: sIdx });
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, bogangLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate, _slotIdx: sIdx });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
