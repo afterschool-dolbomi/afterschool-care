@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.5</title>
+    <title>방과후 지원금 돌보미 V19.5.1</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -487,7 +487,12 @@
         .sd-chip.manual { background: #fee2e2; color: #dc2626; }
         .sd-chip.mk { background: #ccfbf1; color: #0f766e; box-shadow: inset 0 0 0 1px #5eead4; } /* ✨ [v19.5] 보강관리 표시 */
         .sd-rlog-title.mk { color: #0f766e; }
-        .sd-rlog.mk { min-width: 760px; }
+        .sd-rlog.mk { min-width: 620px; }
+        .sd-rlog.mk .amt { font-weight: 800; color: #0f766e; white-space: nowrap; }
+        .bg-stu .res .fund { font-size: 11.5px; text-align: right; margin-top: 1px; }
+        .bg-pv .pf { font-size: 13px; font-weight: 700; color: #334155; margin-top: 6px; }
+        body.dark-mode .sd-rlog.mk .amt { color: #5eead4; }
+        body.dark-mode .bg-pv .pf { color: #e5e7eb; }
         .sd-rlog.mk th { background: #ccfbf1; color: #134e4a; border-bottom-color: #5eead4; border-right-color: #99f6e4; }
         .sd-rlog.mk td { text-align: center; font-variant-numeric: tabular-nums; }
         .sd-rlog.mk td.l { text-align: left; }
@@ -532,7 +537,7 @@
         .bg-stu label.off { opacity: 0.5; cursor: not-allowed; }
         .bg-stu input { width: 16px; height: 16px; accent-color: #0f766e; margin: 0; }
         .bg-stu .cls { color: #94a3b8; font-size: 12px; margin-left: 5px; }
-        .bg-stu .res { font-size: 12.5px; font-weight: 700; color: #64748b; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bg-stu .res { font-size: 12.5px; font-weight: 700; color: #64748b; white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
         .bg-stu .res b { color: #0f766e; }
         .bg-stu .prev { font-size: 11.5px; color: #b45309; font-weight: 700; margin-left: 6px; }
         .bg-stu .none { color: #9ca3af; text-align: center; padding: 18px; font-size: 13px; }
@@ -1561,7 +1566,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.5</span>
+                <span class="brand-version">V19.5.1</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1683,7 +1688,8 @@
                     <div style="font-size:14px; color:#334155; line-height:1.75;">
                         3학년만 현장체험을 가는 날처럼 <b>부서의 일부 학생만</b> 수업이 빠질 때, 그 학생들의 차시만 뒤 차로 옮겨요.<br>
                         위쪽 메뉴의 <b>보강관리</b>에서 과목·차·학생을 고르고, 여러 부서를 담아 한 번에 적용하세요.<br>
-                        분기 수강료와 지원금은 그대로이고 <b>차별 청구 금액만</b> 바뀌어요. 아동 이름을 누르면 <b>보강관리 N차시 적용</b> 문구와 목록이 보여요.
+                        분기 수강료와 지원금은 그대로이고 <b>차별 청구 금액만</b> 바뀌어요. 아동 이름을 누르면 <b>보강관리 N차시 적용</b> 문구와 목록이 보여요.<br>
+                        넘어가는 금액이 <b>수익자·자유수강·초3지원금 중 무엇인지</b> 함께 보여요. 자동으로 나뉘고, 아동 상세창의 <b>보강지원금 구분</b>에서 바꿀 수 있어요.
                     </div>
                 </div>
 
@@ -3422,13 +3428,72 @@
             if (!sub || !logs || !logs.length) return sub;
             return Object.assign({}, sub, { sessions: Object.assign({}, sub.sessions, { [q]: getBogangSessions(sub, q, logs) }) });
         }
+        // ✨ [v19.5.1] 보강 1건마다 넘어가는 금액 = 앞 기록까지 반영했을 때와 이 기록까지 반영했을 때의 '보내는 차' 금액 차이
+        function getBogangMoves(sub, q, su, logs) {
+            let moves = [];
+            if (!sub || !logs || !logs.length) return moves;
+            let prev = getTsMonthlyNormals(sub, q, su);
+            logs.forEach((l, i) => {
+                let after = getTsMonthlyNormals(bogangSub(sub, q, { bogangLog: logs.slice(0, i + 1) }), q, su);
+                moves.push({ from: l.from, to: l.to, amt: Math.max(0, toNum(prev[l.from]) - toNum(after[l.from])), fund: l.fund === 'free' ? 'fr' : (l.fund || '') });
+                prev = after;
+            });
+            return moves;
+        }
+        // ✨ [v19.5.1] 차별 청구액을 재원별로 나눔 (청구서와 과목별 보기 공용)
+        //    ① 보강이 없다고 치고 지원금을 1차부터 소진 ② 보강 금액을 재원째로 받는 차에 옮김
+        //    자동: 수익자 → 지원금 (나중에 소진되는 재원부터) / 지정(l.fund): 그 재원부터.
+        //    지정한 재원이 보내는 차에 모자라면 다른 차의 같은 재원과 맞바꿔 지정대로 넘김 (차별·재원별 합계는 그대로)
+        function allocChaFunds(chargeArr, pools, isYuka, moves) {
+            let months = getMonthsPerQuarter(), base = [], out = {};
+            for (let m = 1; m <= months; m++) base[m] = toNum(chargeArr[m]);
+            let mv = (moves || []).map(x => Object.assign({}, x));
+            for (let i = mv.length - 1; i >= 0; i--) {
+                let x = mv[i];
+                x.amt = Math.min(x.amt, base[x.to] || 0);
+                base[x.to] -= x.amt; base[x.from] += x.amt;
+            }
+            let poolG3 = toNum(pools.g3), poolFr = toNum(pools.fr), poolPreSk = toNum(pools.preSk);
+            for (let m = 1; m <= months; m++) {
+                let charge = base[m];
+                let usePreSk = Math.min(poolPreSk, charge); poolPreSk -= usePreSk;
+                let remain = charge - usePreSk, useG3 = 0, useFr = 0;
+                if (isYuka) {
+                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                } else {
+                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
+                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
+                }
+                out[m] = { charge: toNum(chargeArr[m]), g3: useG3, fr: useFr, sk: remain + usePreSk };
+            }
+            let autoOrder = isYuka ? ['sk', 'g3', 'fr'] : ['sk', 'fr', 'g3'];
+            mv.forEach(x => {
+                let f = out[x.from], t = out[x.to], split = { g3: 0, fr: 0, sk: 0 }, left = x.amt;
+                const take = (b, v) => { f[b] -= v; t[b] += v; split[b] += v; left -= v; };
+                if (x.fund) take(x.fund, Math.min(left, f[x.fund]));
+                autoOrder.forEach(b => take(b, Math.min(left, f[b])));
+                if (x.fund) ['sk', 'fr', 'g3'].filter(b => b !== x.fund).forEach(b => {
+                    for (let p = months; p >= 1 && split[b] > 0; p--) {
+                        if (p === x.to) continue;
+                        let v = Math.min(split[b], out[p][x.fund]);
+                        if (v <= 0) continue;
+                        out[p][x.fund] -= v; out[p][b] += v;
+                        t[x.fund] += v; t[b] -= v;
+                        split[x.fund] += v; split[b] -= v;
+                    }
+                });
+                x.split = split;
+            });
+            return { m: out, moves: mv };
+        }
 
         // ✨ [v19.2] 과목별 보기 '차시금액' - 청구서(N월 교육비)와 같은 계산으로 한 과목의 분기 수강료를 1차·2차(·3차)로 나눔
         //    - 차별 정상 금액: getTsMonthlyNormals (표준차시 기준 가감, 10원 단위, 마지막 차가 나머지 흡수)
         //    - 환불은 청구서와 같은 규칙으로 태그된 차부터 차감하고, 지원금은 1차부터 순서대로 소진
         //    - 강사료는 차별 금액마다 한 번만 계산(강사료 올림·수용비 내림)한 뒤 지원금/수익자 몫 비율로 나눔
         //    pools = { g3, fr, preSk } : 이 과목의 분기 초3·자유수강 수강료 몫과 차시비율 제외분(1차부터 수익자 처리)
-        function computeChaBreakdown(masterSub, q, su, quarterSu, pools, refundLog, isYuka) {
+        function computeChaBreakdown(masterSub, q, su, quarterSu, pools, refundLog, isYuka, moves) {
             let months = getMonthsPerQuarter();
             let normals = getTsMonthlyNormals(masterSub, q, su);
             let out = { ok: false, m: {} };
@@ -3467,21 +3532,10 @@
             let chargeExcess = chargeTotal - quarterSu;
             for (let j = months; j >= 1 && chargeExcess > 0; j--) { let c = Math.min(chargeArr[j], chargeExcess); chargeArr[j] -= c; chargeExcess -= c; }
 
-            // 지원금 1차부터 소진 (육아기근로단축은 자유수강 먼저)
-            let poolG3 = toNum(pools.g3), poolFr = toNum(pools.fr), poolPreSk = toNum(pools.preSk);
-            for (let m = 1; m <= months; m++) {
-                let charge = chargeArr[m] || 0;
-                let usePreSk = Math.min(poolPreSk, charge); poolPreSk -= usePreSk;
-                let remain = charge - usePreSk, useG3 = 0, useFr = 0;
-                if (isYuka) {
-                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
-                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
-                } else {
-                    useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
-                    useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
-                }
-                out.m[m] = { charge, g3: useG3, fr: useFr, sk: remain + usePreSk, feeG: { g3: 0, fr: 0, sk: 0 } };
-            }
+            // 지원금 1차부터 소진 (육아기근로단축은 자유수강 먼저), 보강 금액은 재원째로 옮김
+            let chaAlloc = allocChaFunds(chargeArr, pools, isYuka, moves);
+            for (let m = 1; m <= months; m++) out.m[m] = Object.assign(chaAlloc.m[m], { feeG: { g3: 0, fr: 0, sk: 0 } });
+            out.moves = chaAlloc.moves;
 
             // 강사료: 차별 금액 기준으로 한 번 계산, 분기 강사료 한도 안에서 마지막 차가 나머지를 가져감
             let msFee = masterSub && masterSub.fees && masterSub.fees[q];
@@ -3521,15 +3575,17 @@
                 let s = row.sObj || {}, a = row.alloc || {}, q = row.qNum;
                 let su = toNum(s.su);
                 if (su <= 0) { out.push(Object.assign({}, row, { cha: 1 })); return; }
-                let masterSub = bogangSub(savedSubjects.find(x => x.name === row.sName), q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
+                let origSub = savedSubjects.find(x => x.name === row.sName);
+                let masterSub = bogangSub(origSub, q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
+                let bgMoves = getBogangMoves(origSub, q, su, s.bogangLog); // ✨ [v19.5.1] 보강 금액은 재원째로 옮김
                 let isYuka = (row.r.freeTier === '육아기근로단축');
                 let net = computeChaBreakdown(masterSub, q, su, toNum(a.netSu),
                     { g3: row.g3Su, fr: row.freeSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu) : 0 },
-                    s.refundLog || [], isYuka);
+                    s.refundLog || [], isYuka, bgMoves);
                 if (!net.ok) { out.push(Object.assign({}, row, { cha: 0, chaMissing: true })); return; }
                 let gross = computeChaBreakdown(masterSub, q, su, su,
                     { g3: row.g3Su + row.g3RefundSu, fr: row.freeSu + row.freeRefundSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu + row.skRefundSu) : 0 },
-                    [], isYuka);
+                    [], isYuka, bgMoves);
                 let msFee = masterSub && masterSub.fees && masterSub.fees[q];
                 let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
                 let hasGS = (mG > 0 || mS > 0);
@@ -3890,22 +3946,13 @@
                                 for (let m = 1; m <= monthsInQ; m++) chargeTotal += chargeArr[m];
                                 let chargeExcess = chargeTotal - quarterNetSu;
                                 for (let j = monthsInQ; j >= 1 && chargeExcess > 0; j--) { let c = Math.min(chargeArr[j], chargeExcess); chargeArr[j] -= c; chargeExcess -= c; }
-                                for (let m = 1; m <= monthsInQ; m++) {
-                                    let charge = chargeArr[m] || 0;
-                                    if (m === 1) { var poolPreSk = s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), toNum(a.skSu)) : 0; }
-                                    let usePreSk = Math.min(poolPreSk, charge); poolPreSk -= usePreSk;
-                                    let remain = charge - usePreSk, useG3 = 0, useFr = 0;
-									
-                                    if (isYukaTs) {
-                                        useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
-                                        useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
-                                    } else {
-                                        useG3 = Math.min(poolG3, remain); poolG3 -= useG3; remain -= useG3;
-                                        useFr = Math.min(poolFr, remain); poolFr -= useFr; remain -= useFr;
-                                    }
-                                    chargeArrOut = chargeArr;
-                                    if (m === month) { thisCharge = charge; g3Amt = useG3; frAmt = useFr; skAmt = remain + usePreSk; }
-                                }
+                                // ✨ [v19.5.1] 보강 금액은 재원째로 옮김 (과목별 보기와 같은 계산)
+                                let chaAlloc = allocChaFunds(chargeArr,
+                                    { g3: poolG3, fr: poolFr, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), toNum(a.skSu)) : 0 },
+                                    isYukaTs, getBogangMoves(savedSubjects.find(x => x.name === s.name), q, su, s.bogangLog));
+                                chargeArrOut = chargeArr;
+                                let chaCur = chaAlloc.m[month];
+                                if (chaCur) { thisCharge = chaCur.charge; g3Amt = chaCur.g3; frAmt = chaCur.fr; skAmt = chaCur.sk; }
                                 // ✨ 이번 차 청구액이 기본 금액보다 적고 환불 기록이 있으면 → '사유 N회 환불' 문구 만들기
                                 if (thisCharge > 0 && thisCharge < monthlyBaseSu && (s.refundLog || []).some(l => toNum(l.amount) > 0)) {
                                     let logs = (s.refundLog || []).filter(l => toNum(l.amount) > 0);
@@ -8632,7 +8679,7 @@ function updateG3LimitTotal() {
                         </div>
                         ${ratioNotes.length ? `<div class="sd-ratio-notes">${ratioNotes.map(note => `<div>🍼 ${note}</div>`).join('')}</div>` : ''}
                         ${sdBuildRefundLog(r, c, q, subs, validSubs, refundHistoryItems)}
-                        ${sdBuildBogangLog(r, q, subs, validSubs)}
+                        ${sdBuildBogangLog(r, c, q, subs, validSubs)}
                     </div>
                 </div>`;
             }
@@ -8963,6 +9010,47 @@ function updateG3LimitTotal() {
             return list.length ? Math.min(...list.map(t => bgRemain(t, bgState.from))) : bgBase(bgState.from);
         }
         function bgSessText(sess) { return bgMonths().map(m => toNum(sess[`m${m}`])).join(' · '); }
+        // ✨ [v19.5.1] 학생의 보강 기록별로 넘어가는 금액을 재원별로 계산 (logs를 주면 담은 항목까지 넣어 미리 계산)
+        function getBogangFundSplits(r, q, sIdx, calc, logs) {
+            let s = r[`q${q}`].subs[sIdx];
+            let list = logs || s.bogangLog || [];
+            let sub = savedSubjects.find(x => x.name === s.name), su = toNum(s.su);
+            let a = calc && calc.allocs[`q${q}`] && calc.allocs[`q${q}`][sIdx];
+            if (!sub || !list.length || su <= 0 || !a) return [];
+            let res = computeChaBreakdown(bogangSub(sub, q, { bogangLog: list }), q, su, toNum(a.netSu),
+                { g3: a.g3Su, fr: a.frSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), toNum(a.skSu)) : 0 },
+                s.refundLog || [], r.freeTier === '육아기근로단축', getBogangMoves(sub, q, su, list));
+            return res.moves || [];
+        }
+        function bgFundHtml(sp, stacked) {
+            let cats = [['수익자', '#b91c1c', sp.sk], [getG3Label(), '#0284c7', sp.g3], ['자유수강', '#9333ea', sp.fr]].filter(c => c[2] > 0);
+            if (!cats.length) return '<span style="color:#9ca3af;">-</span>';
+            return cats.map(c => `<${stacked ? 'div' : 'span'} style="color:${c[1]}; font-weight:700; white-space:nowrap;">${c[0]} ${formatMoney(c[2])}</${stacked ? 'div' : 'span'}>`).join(stacked ? '' : ' · ');
+        }
+        function bgAddSplit(sum, mv) { if (mv && mv.split) { sum.g3 += mv.split.g3; sum.fr += mv.split.fr; sum.sk += mv.split.sk; } return sum; }
+        let bgCalcCache = new Map();
+        function bgCalc(r) { if (!bgCalcCache.has(r.id)) bgCalcCache.set(r.id, calcStudent(r)); return bgCalcCache.get(r.id); }
+        // 지금 고른 보강을 이 학생에게 적용했을 때 넘어가는 금액 (이미 적용한 보강과 담은 보강 다음 순서)
+        function bgPickMove(t) {
+            let logs = (t.s.bogangLog || []).concat(bgCartLogs(t.key), [{ from: bgState.from, to: bgState.to, n: bgState.n }]);
+            let moves = getBogangFundSplits(t.r, bgState.q, t.sIdx, bgCalc(t.r), logs);
+            return moves[logs.length - 1];
+        }
+        // 담은 항목 1건의 학생 합계
+        function bgCartSplit(c) {
+            let sum = { g3: 0, fr: 0, sk: 0 };
+            c.keys.forEach(key => {
+                let [rid, sIdx] = key.split('|');
+                let r = db.find(x => String(x.id) === rid);
+                let s = r && r[`q${c.q}`] && r[`q${c.q}`].subs[Number(sIdx)];
+                if (!s) return;
+                let mine = bgState.cart.filter(x => x.q === c.q && x.subject === c.subject && x.keys.includes(key));
+                let saved = s.bogangLog || [];
+                let moves = getBogangFundSplits(r, c.q, Number(sIdx), bgCalc(r), saved.concat(mine));
+                bgAddSplit(sum, moves[saved.length + mine.indexOf(c)]);
+            });
+            return sum;
+        }
         function bgFix() {
             let ms = bgMonths();
             if (!bgFromOk(bgState.from)) bgState.from = ms.find(bgFromOk) || 1;
@@ -9039,12 +9127,16 @@ function updateG3LimitTotal() {
             db.forEach(r => {
                 let qd = r[`q${bgState.q}`];
                 if (!qd || !qd.subs) return;
-                qd.subs.forEach(s => (s.bogangLog || []).forEach(l => {
-                    if (!map.has(l.id)) map.set(l.id, { id: l.id, subject: s.name, from: l.from, to: l.to, n: l.n, reason: l.reason, date: l.date, names: [], results: new Set() });
-                    let g = map.get(l.id);
-                    g.names.push(r.name);
-                    g.results.add(bgSessText(getBogangSessions(savedSubjects.find(x => x.name === s.name), bgState.q, s.bogangLog)));
-                }));
+                qd.subs.forEach((s, sIdx) => {
+                    let moves = (s.bogangLog || []).length ? getBogangFundSplits(r, bgState.q, sIdx, bgCalc(r)) : [];
+                    (s.bogangLog || []).forEach((l, li) => {
+                        if (!map.has(l.id)) map.set(l.id, { id: l.id, subject: s.name, from: l.from, to: l.to, n: l.n, reason: l.reason, date: l.date, names: [], results: new Set(), split: { g3: 0, fr: 0, sk: 0 } });
+                        let g = map.get(l.id);
+                        g.names.push(r.name);
+                        g.results.add(bgSessText(getBogangSessions(savedSubjects.find(x => x.name === s.name), bgState.q, s.bogangLog)));
+                        bgAddSplit(g.split, moves[li]);
+                    });
+                });
             });
             return [...map.values()];
         }
@@ -9063,13 +9155,18 @@ function updateG3LimitTotal() {
         function bgNames(names) { return names.length > 2 ? `${names[0]} 외 ${names.length - 1}명` : names.join(', '); }
         function bgListHtml(title, rows, emptyText, headLast) {
             return `<div><div class="bg-sec" style="margin-bottom:6px;">${title}</div><div class="bg-tw">${rows.length
-                ? `<table><thead><tr><th>과목</th><th>옮긴 차시</th><th>학생</th><th>적용 후 차시</th><th>사유</th><th style="width:40px;"></th></tr></thead><tbody>${rows.join('')}</tbody></table>`
+                ? `<table><thead><tr><th>과목</th><th>옮긴 차시</th><th>학생</th><th>넘어가는 금액 (학생 합계)</th><th>적용 후 차시</th><th>사유</th><th style="width:40px;"></th></tr></thead><tbody>${rows.join('')}</tbody></table>`
                 : `<div class="empty">${emptyText}</div>`}</div></div>`;
         }
         function renderBogang() {
             bgFix();
+            bgCalcCache = new Map();
             let st = bgState, ms = bgMonths(), body = document.getElementById('bogangBody');
             let keepScroll = body.scrollTop;
+            // 학생 목록 스크롤도 유지 (분기·과목이 바뀌어 목록이 달라지면 맨 위부터)
+            let stuBox = body.querySelector('.bg-stu'), stuKey = `${st.q}|${st.subject}`;
+            let keepStu = (stuBox && st.stuKey === stuKey) ? stuBox.scrollTop : 0;
+            st.stuKey = stuKey;
             let sub = bgMaster(), targets = bgTargets();
             let hasSess = sub && ms.some(bgFromOk);
             let names = savedSubjects.map(s => s.name).sort((a, b) => a.localeCompare(b, 'ko'));
@@ -9086,7 +9183,8 @@ function updateG3LimitTotal() {
                 let full = bgFullRefund(t), rem = bgRemain(t, st.from), off = full || rem <= 0, on = st.picked.has(t.key);
                 let logs = (t.s.bogangLog || []).concat(bgCartLogs(t.key));
                 if (on) logs = logs.concat([{ from: st.from, to: st.to, n: st.n }]);
-                let right = full ? '전액 환불' : (rem <= 0 ? '더 보낼 차시 없음' : (on ? `<b>${bgSessText(getBogangSessions(sub, st.q, logs))}</b>` : ''));
+                let pickMove = on && !off ? bgPickMove(t) : null;
+                let right = full ? '전액 환불' : (rem <= 0 ? '더 보낼 차시 없음' : (on ? `<b>${bgSessText(getBogangSessions(sub, st.q, logs))}</b>${pickMove ? `<div class="fund">${bgFundHtml(pickMove.split)}</div>` : ''}` : ''));
                 let sent = bgSent(t, st.from);
                 return `<label class="${off ? 'off' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${off ? 'disabled' : ''} onchange="bgTogglePick('${t.key}', this.checked)"><span>${escHtmlAttr(t.r.name)}<span class="cls">${t.r.grade}-${t.r.classNum}-${t.r.studentNum}</span>${sent ? `<span class="prev">이미 ${sent}차시 보냄</span>` : ''}</span><span class="res">${right}</span></label>`;
             }).join('');
@@ -9100,20 +9198,22 @@ function updateG3LimitTotal() {
                 let mb = getTsMonthlyNormals(sub, st.q, su), ma = getTsMonthlyNormals(afterSub, st.q, su);
                 let tot = ms.reduce((a, m) => a + toNum(baseS[`m${m}`]), 0);
                 let diff = toNum(mb[st.from]) - toNum(ma[st.from]);
-                preview = `<div class="bg-pv"><div class="pt">${escHtmlAttr(st.subject)} ${st.picked.size}명: ${st.q}분기 ${st.from}차의 ${st.n}차시를 ${st.to}차로 옮기면</div>
+                let pickSum = bgPickedTargets().filter(t => !bgFullRefund(t) && bgRemain(t, st.from) > 0).reduce((acc, t) => bgAddSplit(acc, bgPickMove(t)), { g3: 0, fr: 0, sk: 0 });
+                preview =`<div class="bg-pv"><div class="pt">${escHtmlAttr(st.subject)} ${st.picked.size}명: ${st.q}분기 ${st.from}차의 ${st.n}차시를 ${st.to}차로 옮기면</div>
                     <div class="grid">${ms.map(m => {
                         let b = toNum(baseS[`m${m}`]), a = toNum(afterS[`m${m}`]);
                         return `<div class="c ${m === st.from ? 'minus' : m === st.to ? 'plus' : ''}"><div class="h">${m}차</div><div class="n">${a !== b ? `<s>${b}</s>` : ''}${a}차시</div><div class="m">${su ? formatMoney(toNum(ma[m])) : '-'}</div></div>`;
                     }).join('')}<div class="c"><div class="h">분기 합계</div><div class="n">${tot}차시</div><div class="m">${su ? formatMoney(su) : '-'}</div></div></div>
-                    <div class="ps">${su ? `분기 수강료와 지원금은 그대로이고, ${st.from}차 청구는 ${formatMoney(diff)} 줄고 ${st.to}차 청구는 같은 금액만큼 늘어나요.` : '분기 수강료와 지원금은 그대로예요.'}</div></div>`;
+                    <div class="ps">${su ? `분기 수강료와 지원금은 그대로이고, ${st.from}차 청구는 ${formatMoney(diff)} 줄고 ${st.to}차 청구는 같은 금액만큼 늘어나요.` : '분기 수강료와 지원금은 그대로예요.'}</div>
+                    ${pickSum.g3 + pickSum.fr + pickSum.sk > 0 ? `<div class="pf">넘어가는 금액 (선택한 학생 합계): ${bgFundHtml(pickSum)}</div>` : ''}</div>`;
             }
 
             let cartRows = st.cart.map(c => {
                 let s0 = savedSubjects.find(x => x.name === c.subject);
-                return `<tr><td class="l b">${escHtmlAttr(c.subject)} <span style="color:#64748b; font-weight:600;">${c.q}분기</span></td><td><span class="mv">${c.from}차 → ${c.to}차 ${c.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(c.names))}</td><td>${bgSessText(getBogangSessions(s0, c.q, [c]))}</td><td class="l">${escHtmlAttr(c.reason) || '-'}</td><td><button type="button" class="del" title="담은 목록에서 빼기" onclick="bgRemoveCart(${c.cid})">🗑️</button></td></tr>`;
+                return `<tr><td class="l b">${escHtmlAttr(c.subject)} <span style="color:#64748b; font-weight:600;">${c.q}분기</span></td><td><span class="mv">${c.from}차 → ${c.to}차 ${c.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(c.names))}</td><td class="fund">${bgFundHtml(bgCartSplit(c), true)}</td><td>${bgSessText(getBogangSessions(s0, c.q, [c]))}</td><td class="l">${escHtmlAttr(c.reason) || '-'}</td><td><button type="button" class="del" title="담은 목록에서 빼기" onclick="bgRemoveCart(${c.cid})">🗑️</button></td></tr>`;
             });
             let applied = bgAppliedGroups();
-            let appliedRows = applied.map(g => `<tr><td class="l b">${escHtmlAttr(g.subject)}</td><td><span class="mv">${g.from}차 → ${g.to}차 ${g.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(g.names))}</td><td>${g.results.size === 1 ? [...g.results][0] : '학생마다 다름'}</td><td class="l">${escHtmlAttr(g.reason) || '-'}</td><td><button type="button" class="del" title="이 보강 지우기" onclick="bgDeleteGroup('${g.id}')">🗑️</button></td></tr>`);
+            let appliedRows = applied.map(g => `<tr><td class="l b">${escHtmlAttr(g.subject)}</td><td><span class="mv">${g.from}차 → ${g.to}차 ${g.n}차시</span></td><td class="l">${escHtmlAttr(bgNames(g.names))}</td><td class="fund">${bgFundHtml(g.split, true)}</td><td>${g.results.size === 1 ? [...g.results][0] : '학생마다 다름'}</td><td class="l">${escHtmlAttr(g.reason) || '-'}</td><td><button type="button" class="del" title="이 보강 지우기" onclick="bgDeleteGroup('${g.id}')">🗑️</button></td></tr>`);
 
             body.innerHTML = `
                 ${st.msg ? `<div class="bg-ok">✅ ${st.msg}</div>` : ''}
@@ -9143,6 +9243,8 @@ function updateG3LimitTotal() {
                 <div class="bg-acts"><button type="button" class="bg-btn" onclick="closeBogangModal()">닫기</button><button type="button" class="bg-btn main" ${st.cart.length ? '' : 'disabled'} onclick="bgApplyCart()">전체 적용</button></div>
                 ${bgListHtml(`적용된 보강 (${st.q}분기) <span>${applied.length}건</span>`, appliedRows, '적용된 보강이 없습니다.')}`;
             body.scrollTop = keepScroll;
+            let stuBoxNew = body.querySelector('.bg-stu');
+            if (stuBoxNew) stuBoxNew.scrollTop = keepStu;
         }
         // 정산파일 비고 문구: 이번 차에서 보냈거나 받은 보강
         function getBogangNote(s, month) {
@@ -9154,19 +9256,22 @@ function updateG3LimitTotal() {
             }).join(', ');
         }
         // 아동 상세창: 보강이 있는 분기에만 나오는 목록
-        function sdBuildBogangLog(r, q, subs, validSubs) {
+        function sdBuildBogangLog(r, c, q, subs, validSubs) {
             let items = [];
             validSubs.forEach(s => {
                 let sIdx = subs.indexOf(s);
-                (s.bogangLog || []).forEach((l, li) => items.push({ s, sIdx, l, li }));
+                let moves = (s.bogangLog || []).length ? getBogangFundSplits(r, q, sIdx, c) : [];
+                (s.bogangLog || []).forEach((l, li) => items.push({ s, sIdx, l, li, mv: moves[li] }));
             });
             if (!items.length) return '';
             let body = items.map(it => {
                 let sess = getBogangSessions(savedSubjects.find(x => x.name === it.s.name), q, it.s.bogangLog);
-                let result = bgMonths().map(m => `${m}차 ${toNum(sess[`m${m}`])}`).join(' · ');
+                let result = bgMonths().map(m => `<span style="white-space:nowrap;">${m}차 ${toNum(sess[`m${m}`])}</span>`).join(' · ');
+                let amt = it.mv ? it.mv.amt : 0;
                 return `<tr>
                     <td class="l"><b>${it.s.name}</b></td>
-                    <td><span class="mv">${it.l.from}차 → ${it.l.to}차 ${it.l.n}차시</span></td>
+                    <td><span class="mv">${it.l.from}차 → ${it.l.to}차 ${it.l.n}차시</span><div class="amt">${amt ? formatMoney(amt) : '-'}</div></td>
+                    <td class="fund">${bgFundCellHtml(r, q, it)}</td>
                     <td>${result}</td>
                     <td><input type="text" value="${escHtmlAttr(it.l.reason)}" placeholder="사유 입력" onchange="updateBogangLogReason('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)"></td>
                     <td style="text-align:center;"><button type="button" class="sd-del" title="이 학생의 보강 삭제" onclick="deleteBogangLogEntry('${r.id}', ${q}, ${it.sIdx}, ${it.li})">🗑️</button></td>
@@ -9175,10 +9280,38 @@ function updateG3LimitTotal() {
             return `<div class="sd-rlog-wrap no-print">
                 <div class="sd-rlog-title mk">📅 ${q}분기 보강관리 목록 <span>(${items.length}건)</span></div>
                 <div class="sd-rlog-scroll"><table class="sd-rlog mk">
-                    <thead><tr><th>과목</th><th>옮긴 차시</th><th>이 학생의 차시</th><th style="width:26%;">사유</th><th style="width:44px;"></th></tr></thead>
+                    <thead><tr><th>과목</th><th>옮긴 차시·금액</th><th>보강지원금 구분</th><th>이 학생의 차시</th><th style="width:20%;">사유</th><th style="width:44px;"></th></tr></thead>
                     <tbody>${body}</tbody>
                 </table></div>
             </div>`;
+        }
+        // ✨ [v19.5.1] 환불지원금 구분처럼: 재원별 금액 + 자동/지정 선택
+        function bgFundCellHtml(r, q, it) {
+            let f = it.l.fund || '', split = (it.mv && it.mv.split) || { g3: 0, fr: 0, sk: 0 };
+            let opts = [['', '⚙️ 자동'], ['sk', '📌 수익자']];
+            if (r.hasFree) opts.push(['free', '📌 자유수강']);
+            if (r.hasG3) opts.push(['g3', '📌 ' + getG3LabelShort()]);
+            if (f && !opts.some(o => o[0] === f)) opts.push([f, '📌 ' + (f === 'free' ? '자유수강' : (f === 'g3' ? getG3LabelShort() : '수익자'))]);
+            let selStyle = f ? 'border:1.5px solid #d4af37; background:#fffbeb; color:#92400e;' : 'border:1px solid #cbd5e1; background:white; color:#475569;';
+            let short = f && it.mv && split[f === 'free' ? 'fr' : f] < it.mv.amt;
+            return bgFundHtml(split, true)
+                + (short ? '<div style="color:#b45309; font-size:11.5px; font-weight:700; white-space:nowrap;">지정한 지원금이 모자라요</div>' : '')
+                + `<select class="no-print" title="넘어가는 금액을 어느 지원금으로 볼지 지정 (자동: 수익자 → 지원금 순)" onchange="setBogangLogFund('${r.id}', ${q}, ${it.sIdx}, ${it.li}, this.value)" style="margin-top:4px; width:100%; font-size:11.5px; padding:2px 4px; border-radius:4px; font-weight:700; ${selStyle}">`
+                + opts.map(o => `<option value="${o[0]}" ${o[0] === f ? 'selected' : ''}>${o[1]}</option>`).join('') + '</select>';
+        }
+        function setBogangLogFund(id, q, sIdx, li, val) {
+            let r = db.find(x => x.id == id);
+            let s = r && r[`q${q}`] && r[`q${q}`].subs[sIdx];
+            if (!s || !s.bogangLog || !s.bogangLog[li]) return;
+            if (val) s.bogangLog[li].fund = val; else delete s.bogangLog[li].fund;
+            persistData();
+            let modal = document.getElementById('detailModal');
+            let bodyEl = modal ? modal.querySelector('.detail-body') : null;
+            let keep = bodyEl ? bodyEl.scrollTop : 0;
+            showDetailModal(id);
+            let bodyEl2 = modal ? modal.querySelector('.detail-body') : null;
+            if (bodyEl2) bodyEl2.scrollTop = keep;
+            renderGrid();
         }
         function updateBogangLogReason(id, q, sIdx, li, val) {
             let r = db.find(x => x.id == id);
