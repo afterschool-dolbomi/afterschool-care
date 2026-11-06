@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.2.2</title>
+    <title>방과후 지원금 돌보미 V19.4</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1103,7 +1103,7 @@
                 <div style="width:46px; height:46px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:20px;">📒</div>
                 <div style="color:white; font-size:17px; font-weight:800;">똑똑한 출석부 만들기</div>
                 <div style="color:#94a3b8; font-size:12px; margin-top:4px;">강좌별 출석부/출근부/활동일지를 엑셀로 한번에 만듭니다</div>
-                <div id="saStepper" style="display:flex; justify-content:center; gap:6px; margin-top:14px;"></div>
+                <div id="saStepper" style="display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin-top:14px;"></div>
             </div>
             <div id="saBody" style="padding:20px 24px; overflow-y:auto; flex:1;"></div>
             <div id="saFooter" style="padding:14px 24px 18px; border-top:1px solid #e2e8f0; display:flex; gap:8px; flex-shrink:0;"></div>
@@ -1471,7 +1471,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.2.2</span>
+                <span class="brand-version">V19.4</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1614,7 +1614,7 @@
                         <span style="font-size:17px; font-weight:900; color:#fde68a; line-height:1.3;">📒 똑똑한 출석부 만들기</span>
                     </div>
                     <div style="font-size:14px; color:#e2e8f0; line-height:1.75;">
-                        <b style="color:#fde68a;">업무,저장,인쇄 → 똑똑한 출석부 만들기</b>에서 3단계 마법사로 <b>강좌별 출석부/출근부/활동일지</b>를 엑셀로 한번에 만들어요.<br>
+                        <b style="color:#fde68a;">업무,저장,인쇄 → 똑똑한 출석부 만들기</b>에서 4단계 마법사로 <b>강좌별 출석부/출근부/활동일지</b>를 엑셀로 한번에 만들어요.<br>
                         · <b>1단계</b> 분기·차 선택, 제목·차수기간·실장/담당자 이름과 <b>도장 그림</b>, 강좌별 <b>강사명</b>, 학생 <b>연락처</b>(가지고 있는 명단 그대로 올려도 OK), <b>글꼴</b> 선택<br>
                         · <b>2단계</b> 학년·반·번호·이름·연락처가 잘 찾아졌는지 자동 확인<br>
                         · <b>3단계</b> 완성! 학생이 적은 강좌는 <b>1부·2부를 한 탭으로 합치기</b>도 가능<br>
@@ -13851,8 +13851,217 @@ document.addEventListener('keydown', function(e) {
 <script>
 // ✨ 똑똑한 출석부 양식 (주1회 4차시 / 주2회 8차시) - 원본 엑셀을 그대로 보관
 const SMART_ATT_TEMPLATE_B64 = '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';
+// ✨ [v19.4] N차시 출석부 양식 만들기 (4~10차시)
+//   주2회 8차시 양식(시트 모델)을 바탕으로 차시 칸(출결·귀가/사유 한 쌍)과 활동일지 줄 수를 N개로 바꿈
+//   - 차시 칸: 1차시~(N-1)차시는 양식 1차시 칸 서식, 마지막 차시는 양식 마지막(8차시) 칸 서식
+//   - noNote: 맨 오른쪽 비고 칸을 없앰 (8차시 이상) → 그 너비만큼 차시 칸을 넓힘
+//   - 칸 너비: 전체 표 너비가 8차시 양식과 비슷하도록 차시 수에 맞춰 넓히거나 좁힘
+//   - 결재란은 이름 칸이 넓어지도록, 활동일지(활동내용·특이사항·보강계획)는 칸 너비 비율대로 다시 나눔
+function saReshapeSessionModel(srcModel, N, noNote) {
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+    const colNum = (letters) => letters.split('').reduce((n, ch) => n * 26 + (ch.charCodeAt(0) - 64), 0);
+    const colLetter = (n) => { let s = ''; while (n > 0) { let m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+    const splitAddr = (a) => { const m = /^([A-Z]+)(\d+)$/.exec(a); return [m[1], +m[2]]; };
+    const txt = (v) => v == null ? '' : typeof v === 'string' ? v : (v.richText ? v.richText.map(t => t.text).join('') : String(v));
+    const model = clone(srcModel);
+    const rowsBy = {}; model.rows.forEach(r => rowsBy[r.number] = r);
+    const cellAt = (rn, c) => { const r = rowsBy[rn]; return r ? (r.cells || []).find(x => x.address === colLetter(c) + rn) : null; };
+
+    // 1) 양식 구조 찾기: 'k차시' 머리글 줄, 활동일지 줄
+    let headRow = null, sessCols = [], actHead = null, actRows = [];
+    model.rows.forEach(r => (r.cells || []).forEach(c => {
+        const t = txt(c.value).replace(/\s/g, ''), [L] = splitAddr(c.address), cn = colNum(L);
+        if (/^\d+차시$/.test(t) && cn > 2) { headRow = headRow || r.number; if (r.number === headRow) sessCols.push(cn); }
+        if (t === '활동일지') actHead = r.number;
+        if (/^\d+차시$/.test(t) && cn === 2) actRows.push(r.number);
+    }));
+    sessCols.sort((a, b) => a - b);
+    const P = sessCols.length; // 양식의 차시 수 (8)
+    if (!headRow || P < 2 || !actHead || !actRows.length) throw new Error('출석부 양식에서 차시 칸을 찾지 못했어요.');
+    actRows.sort((a, b) => a - b);
+    const S0 = sessCols[0];                 // 첫 차시 칸 (G)
+    const srcNote = S0 + 2 * P;             // 양식 비고 칸 (W)
+    const newNote = S0 + 2 * N;             // 새 비고 칸
+    const lastCol = noNote ? newNote - 1 : newNote; // 표의 맨 오른쪽 칸
+    const srcLastAct = actRows[actRows.length - 1];
+    const dRow = N - actRows.length;        // 활동일지 줄 수 변화 → 그 아래 줄들이 밀리는 수
+
+    // 2) 열 대응표 (새 열 → 양식 열) + 너비
+    const srcCol = (c) => {
+        if (c < S0) return c;
+        if (c >= newNote) return srcNote + (c - newNote);
+        const k = Math.floor((c - S0) / 2), off = (c - S0) % 2;
+        return (k === N - 1 ? S0 + 2 * (P - 1) : S0) + off;
+    };
+    const srcWidth = (c) => { const col = (model.cols || []).find(x => c >= x.min && c <= x.max); return col && col.width ? col.width : 9; };
+    const pairW = srcWidth(S0) + srcWidth(S0 + 1);
+    const f = Math.max(0.85, Math.min(1.6, (pairW * P + (noNote ? srcWidth(srcNote) : 0)) / (pairW * N)));
+    const newWidth = (c) => (c >= S0 && c < newNote) ? Math.round(srcWidth(srcCol(c)) * f * 1000) / 1000 : srcWidth(srcCol(c));
+    const newCols = [];
+    for (let c = 1; c <= lastCol; c++) {
+        const sc = (model.cols || []).find(x => srcCol(c) >= x.min && srcCol(c) <= x.max) || {};
+        newCols.push(Object.assign({}, clone(sc), { min: c, max: c, width: newWidth(c) }));
+    }
+    const tail = (model.cols || []).find(x => x.max >= 16000);
+    if (tail) newCols.push(Object.assign({}, clone(tail), { min: lastCol + 1, max: tail.max }));
+
+    // 3) 줄 대응표 (새 줄 → 양식 줄)
+    const firstAct = actRows[0], midAct = actRows[1] || actRows[0];
+    const srcRowOf = (rn) => {
+        if (rn <= actHead) return rn;
+        if (rn <= actHead + N) { const i = rn - actHead; return i === N ? srcLastAct : (i === 1 ? firstAct : midAct); }
+        return rn - dRow;
+    };
+    const maxSrcRow = Math.max(...model.rows.map(r => r.number));
+
+    // 칸 너비 비율대로 열 구간 나누기 (cols 안에서 각 구간 최소 1칸)
+    // mins: 구간마다 최소 너비(글자가 들어가도록) - 칸이 남을 때만 지킴
+    const splitByWidth = (cols, targets, mins) => {
+        const tot = targets.reduce((a, b) => a + b, 0), wsum = cols.reduce((a, c) => a + newWidth(c), 0);
+        const out = []; let i = 0, acc = 0, goal = 0;
+        targets.forEach((t, k) => {
+            goal += t / tot * wsum;
+            const remainSeg = targets.length - k - 1, start = i, min = (mins && mins[k]) || 0;
+            if (remainSeg === 0) { out.push([cols[start], cols[cols.length - 1]]); return; }
+            let j = i; acc += newWidth(cols[j]); let segW = newWidth(cols[j]);
+            while (j + 1 < cols.length - remainSeg && (segW < min || Math.abs(acc + newWidth(cols[j + 1]) - goal) < Math.abs(acc - goal))) { j++; acc += newWidth(cols[j]); segW += newWidth(cols[j]); }
+            out.push([cols[start], cols[j]]); i = j + 1;
+        });
+        return out;
+    };
+    const range = (a, b) => { const r = []; for (let c = a; c <= b; c++) r.push(c); return r; };
+    const srcW = (a, b) => range(a, b).reduce((s, c) => s + srcWidth(c), 0);
+
+    // 4) 구간을 다시 나눌 줄: 제목줄(늘봄지원실장·담당자가 있는 줄), 활동일지 머리글+각 차시 줄
+    const segRows = {}; // 새 줄 번호 → [[양식 시작열, 양식 끝열, 새 시작열, 새 끝열], ...]
+    const srcMergesOf = (rn) => model.merges.map(m => m.split(':')).filter(([a, b]) => splitAddr(a)[1] === rn && splitAddr(b || a)[1] === rn)
+        .map(([a, b]) => [colNum(splitAddr(a)[0]), colNum(splitAddr(b || a)[0])]);
+    const srcSegments = (rn) => { // 양식 줄의 칸 묶음 (병합 + 낱칸)
+        const ms = srcMergesOf(rn), segs = []; let c = 1;
+        while (c <= srcNote) { const m = ms.find(x => x[0] === c); if (m) { segs.push(m); c = m[1] + 1; } else { segs.push([c, c]); c++; } }
+        return segs;
+    };
+    let apprRow = null;
+    model.rows.forEach(r => (r.cells || []).forEach(c => { if (/늘봄지원실장/.test(txt(c.value)) && !/\[\[/.test(txt(c.value))) apprRow = r.number; }));
+    if (apprRow && apprRow < headRow) {
+        const segs = srcSegments(apprRow);
+        // 양식 차시 영역의 묶음: [기간(앞 칸에서 이어짐), 실장 글자, 실장 이름, 실장 도장, 담당 글자, 담당 이름, 담당 도장, 맨 끝 칸]
+        const lead = segs.filter(s => s[1] < S0), per = segs.find(s => s[0] < S0 && s[1] >= S0);
+        const body = segs.filter(s => s[0] >= S0);
+        const stampIdx = body.findIndex(s => { const c = cellAt(apprRow, s[0]); return c && /\[\[실장인\]\]/.test(txt(c.value)); });
+        if (per && stampIdx === 2 && body.length === 7) {
+            // 맨 끝 칸(양식의 빈칸)까지 담당 도장에 포함해 칸을 남기지 않고, 이름 칸에 너비를 몰아 줌
+            const srcSegs = [per, body[0], body[1], body[2], body[3], body[4], [body[5][0], body[6][1]]];
+            const cols = range(S0, lastCol), widths = cols.map(newWidth), R = widths.reduce((a, b) => a + b, 0);
+            const mins = [8, 15, 12, 6, 7.5, 12, 6];              // 글자가 들어가는 최소 너비
+            const slack = Math.max(0, R - 81);                    // 81 = 아래 기본 너비 합
+            const goals = [12 + slack * 0.5, 15, 14 + slack * 0.25, 8, 10, 14 + slack * 0.25, 8]; // 기간·이름 칸에 남는 너비를 나눠 줌
+            let best = null;
+            const pick = (k, i, score, cuts) => {
+                if (k === 6) { // 마지막 구간은 남은 칸 전부
+                    const w = widths.slice(i).reduce((a, b) => a + b, 0);
+                    const sc = score + Math.max(0, mins[6] - w) * 100 + Math.abs(w - goals[6]);
+                    if (!best || sc < best.sc) best = { sc, cuts: cuts.concat([[cols[i], cols[cols.length - 1]]]) };
+                    return;
+                }
+                let w = 0;
+                for (let j = i; j <= cols.length - (7 - k); j++) { // 뒤 구간마다 최소 1칸은 남김
+                    w += widths[j];
+                    pick(k + 1, j + 1, score + Math.max(0, mins[k] - w) * 100 + Math.abs(w - goals[k]), cuts.concat([[cols[i], cols[j]]]));
+                }
+            };
+            pick(0, 0, 0, []);
+            if (best) {
+                const out = lead.map(s => [s[0], s[1], s[0], s[1]]);
+                srcSegs.forEach((s, i) => out.push([s[0], s[1], i === 0 ? per[0] : best.cuts[i][0], best.cuts[i][1]]));
+                segRows[apprRow] = out;
+            }
+        }
+        if (!segRows[apprRow]) throw new Error('출석부 양식의 결재란 모양을 읽지 못했어요.');
+    }
+    // 활동일지: [활동일지] [차시] [활동내용 ...] [특이사항] [보강계획] → 활동내용·특이사항·보강계획을 비율로
+    const actLayout = (srcRn) => {
+        const segs = srcSegments(srcRn);
+        const lead = segs.filter(s => s[1] < S0), cross = segs.find(s => s[0] < S0 && s[1] >= S0), rest = segs.filter(s => s[0] >= S0);
+        if (!cross || !rest.length) return null;
+        const targets = [srcW(S0, cross[1])].concat(rest.map(s => srcW(s[0], s[1])));
+        const sp = splitByWidth(range(S0, lastCol), targets);
+        const out = lead.map(s => [s[0], s[1], s[0], s[1]]);
+        out.push([cross[0], cross[1], cross[0], sp[0][1]]);
+        rest.forEach((s, i) => out.push([s[0], s[1], sp[i + 1][0], sp[i + 1][1]]));
+        return out;
+    };
+    for (let rn = actHead; rn <= actHead + N; rn++) { const lay = actLayout(srcRowOf(rn)); if (lay) segRows[rn] = lay; }
+
+    // 5) 새 줄 만들기
+    const newRows = [];
+    const lastNewRow = maxSrcRow + dRow;
+    for (let rn = 1; rn <= lastNewRow; rn++) {
+        const sr = rowsBy[srcRowOf(rn)];
+        if (!sr) continue;
+        const nr = clone(sr); nr.number = rn; delete nr.min; delete nr.max; nr.cells = [];
+        const segs = segRows[rn];
+        for (let c = 1; c <= lastCol; c++) {
+            let sc;
+            if (segs) {
+                const s = segs.find(x => c >= x[2] && c <= x[3]);
+                if (!s) continue;
+                sc = c === s[2] ? s[0] : (c === s[3] ? s[1] : (s[1] - s[0] >= 2 ? s[0] + 1 : s[1]));
+            } else sc = srcCol(c);
+            const src = cellAt(sr.number, sc);
+            if (!src) continue;
+            const cell = clone(src); cell.address = colLetter(c) + rn;
+            if (segs) {
+                const s = segs.find(x => c >= x[2] && c <= x[3]);
+                if (c !== s[2]) { delete cell.value; delete cell.master; cell.type = 0; }
+                else if (s[2] === s[3] && s[1] > s[0]) { // 여러 칸 묶음이 한 칸으로 줄면 오른쪽 테두리는 끝 칸 것
+                    const endC = cellAt(sr.number, s[1]);
+                    if (endC && endC.style && endC.style.border && endC.style.border.right) { cell.style = cell.style || {}; cell.style.border = Object.assign({}, cell.style.border || {}, { right: clone(endC.style.border.right) }); }
+                }
+            }
+            // 차시 이름 다시 매기기
+            if (rn === headRow && c >= S0 && c < newNote && (c - S0) % 2 === 0) { cell.type = 3; cell.value = `${(c - S0) / 2 + 1}차시`; }
+            if (rn > actHead && rn <= actHead + N && c === 2) { cell.type = 3; cell.value = `${rn - actHead}차시`; }
+            // 차시가 많아 칸이 좁아지면 '출결·귀가/사유' 글자를 칸에 맞게 줄임
+            if (rn < actHead && c >= S0 && c < newNote && /^(출결|출결체크|귀가\/사유)$/.test(txt(cell.value).trim())) {
+                cell.style = cell.style || {}; cell.style.alignment = Object.assign({}, cell.style.alignment || {}, { shrinkToFit: true, wrapText: false });
+            }
+            nr.cells.push(cell);
+        }
+        newRows.push(nr);
+    }
+
+    // 6) 병합 다시 만들기
+    const merges = [];
+    const mapC1 = (c) => c < S0 ? c : c >= srcNote ? (noNote ? null : newNote + (c - srcNote)) : null; // 비고 칸을 없애면 그 칸의 병합도 없앰
+    const mapC2 = (c) => c < S0 ? c : c >= srcNote ? lastCol + (noNote ? 0 : c - srcNote) : newNote - 1;
+    model.merges.forEach(m => {
+        const [a, b] = m.split(':'); const [aL, aN] = splitAddr(a), [bL, bN] = splitAddr(b || a);
+        const c1 = colNum(aL), c2 = colNum(bL);
+        if (aN === actHead && bN > aN) { merges.push(`${aL}${actHead}:${colLetter(mapC2(c2))}${actHead + N}`); return; } // 세로 '활동일지'
+        if (aN === apprRow && bN === aN) return;                    // 결재란 줄 → 아래에서 다시
+        if (aN >= actHead && aN <= srcLastAct) return;              // 활동일지 줄 → 아래에서 다시
+        const r1 = aN > srcLastAct ? aN + dRow : aN, r2 = bN > srcLastAct ? bN + dRow : bN; // 아래 안내 줄은 밀어 줌
+        if (c1 >= S0 && c2 < srcNote) { // 차시 칸 병합(출결+귀가 한 쌍) → 새 차시마다
+            const k = Math.floor((c1 - S0) / 2), w = c2 - c1;
+            if (k === 0) for (let j = 0; j < N - 1; j++) merges.push(`${colLetter(S0 + 2 * j)}${r1}:${colLetter(S0 + 2 * j + w)}${r2}`);
+            if (k === P - 1) merges.push(`${colLetter(S0 + 2 * (N - 1))}${r1}:${colLetter(S0 + 2 * (N - 1) + w)}${r2}`);
+            return;
+        }
+        const n1 = mapC1(c1);
+        if (n1 != null) merges.push(`${colLetter(n1)}${r1}:${colLetter(mapC2(c2))}${r2}`);
+    });
+    Object.keys(segRows).forEach(k => segRows[k].forEach(s => { if (s[3] > s[2]) merges.push(`${colLetter(s[2])}${k}:${colLetter(s[3])}${k}`); }));
+
+    model.rows = newRows;
+    model.cols = newCols;
+    model.merges = merges;
+    if (model.dimensions) model.dimensions = `A1:${colLetter(lastCol)}${lastNewRow}`;
+    return model;
+}
+
 // ✨ 똑똑한 출석부 생성기 (브라우저/Node 공용)
-// job = { quarter, cha, title, period, chief, staff, chiefStamp:{base64,ext,w,h}|null, staffStamp, subjects:[{name, tpl:'4'|'8', teacher, students:[{grade,classNum,studentNum,name,phone}]}] }
+// job = { quarter, cha, title, period, chief, staff, chiefStamp:{base64,ext,w,h}|null, staffStamp, subjects:[{name, tpl:'4'|'8'|'5'~'10'(차시 수), teacher, students:[{grade,classNum,studentNum,name,phone}]}] }
 async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(tplBuffer);
@@ -13886,9 +14095,13 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
     };
 
     const report = [];
+    const reshaped = {}; // ✨ [v19.4] 차시 수별 양식 (한 번 만든 건 다시 씀)
     for (const sub of job.subjects) {
-        const src = tplSheets[sub.tpl] || tplSheets['4'];
-        const model = clone(src.model);
+        const nSess = parseInt(sub.tpl, 10) || 4;
+        let model;
+        if (nSess < 5 && tplSheets['4']) model = clone(tplSheets['4'].model); // 4차시는 기본 양식 그대로
+        else if (nSess >= 5 && nSess <= 10 && tplSheets['8']) model = clone(reshaped[nSess] || (reshaped[nSess] = saReshapeSessionModel(tplSheets['8'].model, nSess, nSess >= 8))); // 8차시 이상은 비고 칸 없음
+        else model = clone(tplSheets['4'].model);
 
         // 1) 학생 데이터 행 위치 찾기 ([학년] 등이 있는 행)
         let dataRow = null, tagCols = {};
@@ -13996,7 +14209,10 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 ws.getCell(`A${rn}`).value = i + 1;
                 const put = (tag, v) => { if (tagCols[tag]) ws.getCell(`${tagCols[tag]}${rn}`).value = (v === undefined || v === null || v === '') ? null : v; };
                 put('학년', s ? s.grade : null); put('반', s ? s.classNum : null); put('번호', s ? s.studentNum : null);
-                put('이름', s ? s.name : null); put('연락처', s ? (s.phone || null) : null);
+                // 비고 칸이 없는 출석부(8차시 이상)는 합친 강좌의 원래 부를 이름 옆에 표시
+                const nameWithNote = s && s.note && !noteCol;
+                put('이름', s ? (nameWithNote ? `${s.name}(${s.note})` : s.name) : null); put('연락처', s ? (s.phone || null) : null);
+                if (nameWithNote && tagCols['이름']) { const nc = ws.getCell(`${tagCols['이름']}${rn}`); nc.alignment = Object.assign({}, nc.alignment || {}, { shrinkToFit: true }); }
                 if (noteCol && s && s.note) ws.getCell(`${noteCol}${rn}`).value = s.note;
             }
             // ✨ 학생 칸 글씨 크기를 첫 학생 줄과 똑같이 맞춤 (양식에서 줄마다 크기가 달라도 통일)
@@ -14080,7 +14296,10 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 const f = Object.assign({}, cell.font || {}); f.name = fn; delete f.scheme; delete f.charset; delete f.family; cell.font = f;
             }));
         }
-        report.push({ sheet: ws.name, students: students.length, extra });
+        // ✨ [v19.4] 인쇄: 모든 출석부를 A4 한 장에 맞춤, 여백은 위쪽 1.5cm · 나머지 0
+        ws.pageSetup.fitToPage = true; ws.pageSetup.fitToWidth = 1; ws.pageSetup.fitToHeight = 1;
+        ws.pageSetup.margins = { left: 0, right: 0, top: 1.5 / 2.54, bottom: 0, header: 0, footer: 0 };
+        report.push({ sheet: ws.name, students: students.length, extra, sessions: nSess });
     }
     originals.forEach(w => wb.removeWorksheet(w.id));
     return { wb, report };
@@ -14125,7 +14344,8 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 chiefStamp: saState.chiefStamp, staffStamp: saState.staffStamp,
                 teachers: Object.assign({}, prev.teachers || {}, saState.teachers),
                 sameTeacher: Object.assign({}, prev.sameTeacher || {}, saState.sameTeacher || {}),
-                groupMap: Object.assign({}, saState.groupMap || {})
+                groupMap: Object.assign({}, saState.groupMap || {}),
+                sessCount: Object.assign({}, saState.sessCount || {}) // ✨ [v19.4] { '분기-차': { 강좌명: 차시 수 } }
             };
             saSaveAll(SA_STORE_KEY, all);
         }
@@ -14878,7 +15098,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 step: 1, quarter: null, cha: null,
                 title: mem.title || '', period: '', chief: mem.chief || '', staff: mem.staff || '', fontName: mem.fontName || '맑은 고딕', localFonts: null,
                 chiefStamp: mem.chiefStamp || null, staffStamp: mem.staffStamp || null,
-                teachers: Object.assign({}, mem.teachers || {}), sameTeacher: Object.assign({}, mem.sameTeacher || {}), groupMap: Object.assign({}, mem.groupMap || {}), subjects: [], result: null
+                teachers: Object.assign({}, mem.teachers || {}), sameTeacher: Object.assign({}, mem.sameTeacher || {}), groupMap: Object.assign({}, mem.groupMap || {}), sessCount: JSON.parse(JSON.stringify(mem.sessCount || {})), subjects: [], result: null
             };
             document.getElementById('smartAttModal').style.display = 'flex';
             saRender();
@@ -15093,8 +15313,77 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             saRender();
         }
 
+        // ===== ✨ [v19.4] 3단계 출석부 차시 조절 =====
+        //  기준 차시 = 양식(주1회 4차시 / 주2회 8차시). 휴강·보강으로 이번 차 수업이 늘면 4~10차시로 바꿔 그만큼 칸이 있는 출석부를 만듦
+        const SA_SESS_MIN = 4, SA_SESS_MAX = 10;
+        function saSessKey() { return `${saState.quarter}-${saState.cha}`; }
+        function saBaseSess(s) { return toNum(s.tpl) || 4; }
+        // 과목 설정(과목 목록 관리)에 적힌 '이번 차' 수업 차시 수
+        function saRegSess(s) {
+            let sub = savedSubjects.find(x => x.name === s.name);
+            return (sub && sub.sessions && sub.sessions[saState.quarter]) ? toNum(sub.sessions[saState.quarter][`m${saState.cha}`]) : 0;
+        }
+        function saSessOf(s) {
+            let v = toNum(((saState.sessCount || {})[saSessKey()] || {})[s.name]);
+            return v >= SA_SESS_MIN && v <= SA_SESS_MAX ? v : saBaseSess(s);
+        }
+        function saSetSess(name, v) {
+            let s = saState.subjects.find(x => x.name === name); if (!s) return;
+            v = Math.max(SA_SESS_MIN, Math.min(SA_SESS_MAX, toNum(v)));
+            let all = saState.sessCount || (saState.sessCount = {}), cur = all[saSessKey()] || (all[saSessKey()] = {});
+            if (v === saBaseSess(s)) delete cur[name]; else cur[name] = v;
+            saPersist(); saRender();
+        }
+        function saStepSess(name, d) { let s = saState.subjects.find(x => x.name === name); if (s) saSetSess(name, saSessOf(s) + d); }
+        function saResetSess() { if (saState.sessCount) delete saState.sessCount[saSessKey()]; saPersist(); saRender(); }
+        function saApplyRegSess() {
+            saState.subjects.forEach(s => { let r = saRegSess(s); if (r > saBaseSess(s) && r <= SA_SESS_MAX) { let all = saState.sessCount || (saState.sessCount = {}); (all[saSessKey()] || (all[saSessKey()] = {}))[s.name] = r; } });
+            saPersist(); saRender();
+        }
+        function saSessHtml() {
+            let subs = saState.subjects;
+            let changed = subs.filter(s => saSessOf(s) !== saBaseSess(s)).length;
+            let regMore = subs.filter(s => { let r = saRegSess(s); return r > saBaseSess(s) && r <= SA_SESS_MAX && r !== saSessOf(s); });
+            let html = `<div style="font-size:12.5px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-left:3px solid #d4af37; border-radius:8px; padding:12px; margin-bottom:12px; line-height:1.65;">
+                <div style="font-weight:800; color:#92400e; margin-bottom:3px;">📅 이번차 출석부 차시 칸 갯수 바꾸기</div>
+                기본은 <b>기준 차시</b>(주1회 4차시 · 주2회 8차시) 출석부예요. 공휴일 휴강을 <b>보충 수업</b>하느라 이번 차 수업이 늘었다면
+                숫자를 바꿔 주세요. 그 숫자만큼 <b>차시 칸과 활동일지 줄</b>이 있는 출석부를 만들어 드려요. <span style="color:#94a3b8;">(${SA_SESS_MIN}~${SA_SESS_MAX}차시)</span>
+                <div style="font-size:11.5px; color:#64748b; margin-top:6px; background:white; border:1px dashed #cbd5e1; border-radius:6px; padding:6px 8px;">
+                예) 분기 12차시 과목 · 기준 4차시 → 1차 3차시(공휴일 휴강) · 2차 4차시 · <b style="color:#b45309;">3차 5차시(보충)</b> ⇒ 3차 출석부만 <b>5차시</b>로</div></div>`;
+            if (regMore.length) html += `<button type="button" onclick="saApplyRegSess()" style="display:block; width:100%; padding:13px 14px; margin-bottom:12px; border-radius:10px; border:2px solid #b45309; background:linear-gradient(135deg, #fde68a, #fbbf24); color:#78350f; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 4px 10px rgba(180,83,9,0.3);">📋 과목 설정의 이번 차 차시로 맞추기 (${regMore.length}개 강좌)
+                <span style="display:block; font-size:12px; font-weight:700; color:#92400e; margin-top:3px;">과목 설정에 기준보다 많은 차시가 적힌 강좌를 한 번에 맞춰요</span></button>`;
+            html += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                <span style="font-size:12.5px; font-weight:800; color:#1e3a5f;">${saState.quarter}분기 ${saState.cha}차 · ${subs.length}개 강좌</span>
+                <span style="font-size:11.5px; font-weight:700; color:${changed ? '#b45309' : '#94a3b8'};">${changed ? `✏️ ${changed}개 강좌 차시 바꿈` : '모두 기준 차시'}</span>
+                <span style="flex:1;"></span>
+                ${changed ? `<button type="button" onclick="saResetSess()" style="font-size:11.5px; font-weight:700; color:#475569; background:white; border:1px solid #cbd5e1; padding:5px 9px; border-radius:6px; cursor:pointer;">↺ 모두 기준으로</button>` : ''}
+            </div>`;
+            let btn = (dis) => `width:30px; height:30px; border-radius:7px; border:1px solid ${dis ? '#e2e8f0' : '#cbd5e1'}; background:${dis ? '#f8fafc' : 'white'}; color:${dis ? '#cbd5e1' : '#1e3a5f'}; font-size:16px; font-weight:900; cursor:${dis ? 'not-allowed' : 'pointer'}; line-height:1; padding:0;`;
+            html += `<div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">` + subs.map((s, i) => {
+                let n = saSessOf(s), base = saBaseSess(s), reg = saRegSess(s), diff = n !== base, nm = saEsc(s.name);
+                let regTxt = reg > 0 ? `<span style="font-size:11px; color:${reg > base ? '#b45309' : '#94a3b8'};">과목 설정: 이번 차 ${reg}차시${reg > SA_SESS_MAX ? ` (최대 ${SA_SESS_MAX}차시까지)` : ''}</span>` : '';
+                return `<div style="display:flex; align-items:center; gap:8px; padding:9px 10px; ${diff ? 'background:#fffbeb;' : i % 2 ? 'background:#f8fafc;' : ''}">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:13px; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${nm}</div>
+                        <div style="display:flex; gap:6px; align-items:center; margin-top:2px; flex-wrap:wrap;">${saTplBadge(s)}<span style="font-size:11px; color:#94a3b8;">${s.students.length}명</span>${regTxt}</div>
+                    </div>
+                    ${diff ? `<button type="button" data-n="${nm}" onclick="saSetSess(this.dataset.n, ${base})" title="기준 차시로" style="font-size:11px; color:#64748b; background:none; border:none; cursor:pointer; text-decoration:underline; white-space:nowrap;">기준(${base})으로</button>` : ''}
+                    <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                        <button type="button" data-n="${nm}" ${n <= SA_SESS_MIN ? 'disabled' : ''} onclick="saStepSess(this.dataset.n, -1)" style="${btn(n <= SA_SESS_MIN)}">−</button>
+                        <select data-n="${nm}" onchange="saSetSess(this.dataset.n, this.value)" style="height:30px; border-radius:7px; border:${diff ? '2px solid #d4af37' : '1px solid #cbd5e1'}; background:${diff ? '#fef3c7' : 'white'}; font-size:13.5px; font-weight:800; color:${diff ? '#92400e' : '#1e293b'}; padding:0 4px; cursor:pointer;">
+                            ${Array.from({ length: SA_SESS_MAX - SA_SESS_MIN + 1 }, (_, k) => k + SA_SESS_MIN).map(v => `<option value="${v}" ${v === n ? 'selected' : ''}>${v}차시${v === base ? ' (기준)' : ''}</option>`).join('')}
+                        </select>
+                        <button type="button" data-n="${nm}" ${n >= SA_SESS_MAX ? 'disabled' : ''} onclick="saStepSess(this.dataset.n, 1)" style="${btn(n >= SA_SESS_MAX)}">+</button>
+                    </div>
+                </div>`;
+            }).join('') + `</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:8px; line-height:1.6;">※ 4차시는 기본 양식 그대로, 5~10차시는 차시 수에 맞춰 칸을 새로 그려요. 8·9·10차시는 비고 칸이 없고, 모든 출석부는 한 장에 인쇄돼요.<br>
+            ※ 바꾼 차시 수는 이 분기·차에만 적용되고 기억돼요. 4단계에서 강좌를 합치면 합친 강좌 중 가장 큰 차시로 만들어요.</div>`;
+            return html;
+        }
+
         function saStepper() {
-            let labels = ['기본 정보 입력', '자동 매칭 확인', '완성'];
+            let labels = ['기본 정보 입력', '자동 매칭 확인', '출석부 차시 조절', '합치기·완성'];
             return labels.map((l, i) => {
                 let n = i + 1, on = saState.step === n, done = saState.step > n;
                 return `<div style="display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:14px; font-size:11.5px; font-weight:800; ${on ? 'background:#d4af37; color:#0f172a;' : done ? 'background:rgba(212,175,55,0.25); color:#fde68a;' : 'background:rgba(255,255,255,0.08); color:#94a3b8;'}">${done ? '✓' : n} ${l}</div>`;
@@ -15183,7 +15472,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     if (saState.showGroupEdit) {
                         body += `<div style="margin-top:8px; border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:#f8fafc;">
                             <div style="font-size:11.5px; color:#475569; line-height:1.6; margin-bottom:8px;">
-                                <b>묶음 이름이 같은 강좌끼리 한 부서</b>로 봐요. (강사명 한 번 입력 · 3단계에서 한 탭으로 합치기 가능)<br>
+                                <b>묶음 이름이 같은 강좌끼리 한 부서</b>로 봐요. (강사명 한 번 입력 · 4단계에서 한 탭으로 합치기 가능)<br>
                                 · 묶고 싶으면 묶음 이름을 똑같이, 따로 하고 싶으면 다르게 적으세요. 비우면 자동으로 정해져요.</div>` +
                             saState.subjects.map(s => {
                                 let key = saGroupKeyOf(s.name), manual = !!((saState.groupMap || {})[s.name]);
@@ -15219,8 +15508,12 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             } else if (saState.step === 2) {
                 body = saCheckHtml();
                 foot = `<button type="button" onclick="saState.step=1; saRender();" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">◀ 뒤로가기</button>
-                        <button type="button" onclick="saBuild()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">출석부 만들기 ▶</button>`;
+                        <button type="button" onclick="saState.step=3; saRender();" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">다음 ▶</button>`;
             } else if (saState.step === 3) {
+                body = saSessHtml();
+                foot = `<button type="button" onclick="saState.step=2; saRender();" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">◀ 뒤로가기</button>
+                        <button type="button" onclick="saBuild()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">출석부 만들기 ▶</button>`;
+            } else if (saState.step === 4) {
                 let r = saState.result;
                 body = `<div style="text-align:center; padding:12px 0 4px;">
                     <div style="font-size:42px;">🎉</div>
@@ -15228,7 +15521,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <div style="font-size:12.5px; color:#64748b; margin-top:6px;">${saState.quarter}분기 ${saState.cha}차 · 강좌 ${r.report.length}개 탭 · 학생 ${r.report.reduce((a, b) => a + b.students, 0)}명</div>
                 </div>
                 <div style="margin-top:14px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; font-size:12.5px;">` +
-                    r.report.map((x, i) => `<div style="display:flex; justify-content:space-between; padding:7px 12px; ${i % 2 ? 'background:#f8fafc;' : ''}"><span style="font-weight:700; color:#1e293b;">📄 ${saEsc(x.sheet)}</span><span style="color:#64748b;">${x.students}명${x.extra ? ` <span style="color:#b45309;">(+${x.extra}줄 추가)</span>` : ''}</span></div>`).join('') +
+                    r.report.map((x, i) => `<div style="display:flex; justify-content:space-between; padding:7px 12px; ${i % 2 ? 'background:#f8fafc;' : ''}"><span style="font-weight:700; color:#1e293b;">📄 ${saEsc(x.sheet)} <span style="font-size:11px; font-weight:800; padding:1px 6px; border-radius:9px; ${x.sessions === 4 || x.sessions === 8 ? 'background:#f1f5f9; color:#64748b;' : 'background:#fef3c7; color:#92400e;'}">${x.sessions}차시</span></span><span style="color:#64748b;">${x.students}명${x.extra ? ` <span style="color:#b45309;">(+${x.extra}줄 추가)</span>` : ''}</span></div>`).join('') +
                 `</div><div style="font-size:11.5px; color:#94a3b8; margin-top:10px; text-align:center;">파일명: ${saEsc(r.fileName)}</div>`;
                 let multi = saGroupSubjects(saState.subjects).filter(g => g.items.length > 1);
                 if (multi.length) {
@@ -15240,10 +15533,10 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                             return `<label style="display:flex; align-items:flex-start; gap:9px; padding:8px 0; cursor:pointer; border-top:1px dashed #e2e8f0; font-size:13px; line-height:1.55;">
                                 <input type="checkbox" ${on ? 'checked' : ''} onchange="saToggleMerge('${saEsc(g.base)}', this.checked)" style="margin-top:3px; width:15px; height:15px; flex-shrink:0;">
                                 <span>${g.items.map(s => `${saEsc(s.name)} <b>${s.students.length}명</b>`).join(' + ')}<br>
-                                <span style="color:${on ? '#15803d' : '#94a3b8'}; font-weight:700;">→ '${saEsc(saMergedName(g.base))}' 한 탭으로 합치기 (총 ${g.items.reduce((a, s) => a + s.students.length, 0)}명, 비고에 원래 부 표시)</span></span></label>`;
+                                <span style="color:${on ? '#15803d' : '#94a3b8'}; font-weight:700;">→ '${saEsc(saMergedName(g.base))}' 한 탭으로 합치기 (총 ${g.items.reduce((a, s) => a + s.students.length, 0)}명, ${Math.max(...g.items.map(saSessOf)) >= 8 ? '이름 옆' : '비고'}에 원래 부 표시)</span></span></label>`;
                         }).join('') + `</div>`;
                 }
-                foot = `<button type="button" onclick="closeSmartAtt()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">취소</button>
+                foot = `<button type="button" onclick="saState.step=3; saRender();" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">◀ 차시 조절</button>
                         <button type="button" onclick="saDownload()" style="flex:1.6; padding:11px; border-radius:8px; border:1px solid #d4af37; background:linear-gradient(135deg, #1e3a5f, #0f172a); color:#fde68a; font-weight:800; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">📥 똑똑한 출석부 다운로드</button>`;
             }
             document.getElementById('saBody').innerHTML = body;
@@ -15320,9 +15613,9 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     let students = [];
                     g.items.forEach(s => { students = students.concat(mk(s, saVariantLabel(s.name, g.base))); });
                     students.sort((a, b) => (toNum(a.grade) - toNum(b.grade)) || (toNum(a.classNum) - toNum(b.classNum)) || (toNum(a.studentNum) - toNum(b.studentNum)));
-                    out.push({ name: saMergedName(g.base), tpl: g.items.some(s => s.tpl === '8') ? '8' : '4', teacher: teachers.join(', '), students, mergedFrom: g.items.map(s => s.name) });
+                    out.push({ name: saMergedName(g.base), tpl: String(Math.max(...g.items.map(saSessOf))), teacher: teachers.join(', '), students, mergedFrom: g.items.map(s => s.name) }); // ✨ [v19.4] 합친 강좌는 가장 큰 차시로
                 } else {
-                    g.items.forEach(s => out.push({ name: s.name, tpl: s.tpl, teacher: saTeacherFor(s.name), students: mk(s, '') }));
+                    g.items.forEach(s => out.push({ name: s.name, tpl: String(saSessOf(s)), teacher: saTeacherFor(s.name), students: mk(s, '') }));
                 }
             });
             return out;
@@ -15349,7 +15642,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 let safeTitle = (saState.title || '').replace(/[\\\/:*?"<>|]/g, '').trim();
                 let fileName = `${saState.quarter}분기_${saState.cha}차_똑똑한출석부${safeTitle ? '_' + safeTitle : ''}.xlsx`;
                 saState.result = { buffer, report, fileName };
-                saState.step = 3; saRender();
+                saState.step = 4; saRender();
             } catch (err) {
                 console.error(err);
                 alert('출석부를 만드는 중 오류가 발생했습니다: ' + err.message);
