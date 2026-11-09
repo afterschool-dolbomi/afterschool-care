@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.7</title>
+    <title>방과후 지원금 돌보미 V19.8</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.7</span>
+                <span class="brand-version">V19.8</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -2584,7 +2584,7 @@
             </div>
 
             <!-- 표 -->
-            <div style="flex-grow: 1; min-height: 400px; overflow-y: auto; overflow-x: auto; border:1px solid var(--border-color); border-radius:8px; background:white;">
+            <div style="flex-grow: 1; min-height: min(400px, 40vh); overflow-y: auto; overflow-x: auto; border:1px solid var(--border-color); border-radius:8px; background:white;">
                 <table class="detail-inner-table" style="min-width: 800px; text-align:center; background:white;">
                     <thead style="background:#f3f4f6; position: sticky; top: 0; z-index: 10;">
                         <tr>
@@ -2598,6 +2598,9 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- ✨ [v19.8] 자유수강 인원 합계 -->
+            <div id="neisSummary" style="flex-shrink:0; margin-top:12px; padding:10px 16px; background:#f5f3ff; border:1px solid #c084fc; border-radius:6px; font-size:16px; font-weight:800; color:#5b21b6; text-align:right;"></div>
         </div>
     </div> 
 
@@ -8353,7 +8356,7 @@ function updateG3LimitTotal() {
         function sdResetManualAlloc(id, q) {
             let r = db.find(x => x.id == id);
             if (!r || !r[`q${q}`]) return;
-            if (!confirm(`${q}분기의 직접 입력한 결제 출처(빨간 칸)를 모두 지우고 자동 계산으로 되돌릴까요?`)) return;
+            if (!confirm(`${q}분기의 직접 입력한 지원금·수익자 금액(빨간 칸)를 모두 지우고 자동 계산으로 되돌릴까요?`)) return;
             (r[`q${q}`].subs || []).forEach(s => ['mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ'].forEach(k => { delete s[k]; }));
             persistData(); showDetailModal(id); renderGrid();
         }
@@ -8590,7 +8593,7 @@ function updateG3LimitTotal() {
                     <span class="lbl">표시할 항목</span>
                     ${tg('apply', '신청', 'a')}${tg('ref', '환불', 'r')}${tg('net', '최종', 'n')}
                     <span class="sd-sep"></span>
-                    ${tg('src', '결제 출처', 's')}${tg('gs', '강사료·수용비', 'g')}
+                    ${tg('src', '지원금·수익자 금액', 's')}${tg('gs', '강사료·수용비', 'g')}
                     <span style="margin-left:auto; display:flex; gap:6px;">
                         <button type="button" class="sd-btn sm" onclick="sdSetAllQ('${r.id}', true)">모두 펼치기</button>
                         <button type="button" class="sd-btn sm" onclick="sdSetAllQ('${r.id}', false)">모두 접기</button>
@@ -8753,7 +8756,7 @@ function updateG3LimitTotal() {
                     </div>
                     <div class="sd-acc-b">
                         <div class="sd-qbar no-print">
-                            ${S ? `<span class="sd-modeinfo src">💳 <b>결제 출처 편집 중</b> · 회색 숫자 = 자동 계산값 · 숫자를 쓰면 <b style="color:#dc2626;">빨간색(수동 고정)</b>, 칸을 비우면 자동 계산으로 돌아갑니다.</span>`
+                            ${S ? `<span class="sd-modeinfo src">💳 <b>지원금·수익자 금액 편집 중</b> · 회색 숫자 = 자동 계산값 · 숫자를 쓰면 <b style="color:#dc2626;">빨간색(수동 고정)</b>, 칸을 비우면 자동 계산으로 돌아갑니다.</span>`
                               : G ? `<span class="sd-modeinfo gs">🧮 <b>강사료·수용비 펼침</b> · 강사료나 수용비를 입력하면 수강료 = 강사료 + 수용비로 자동 계산되고 🔒잠깁니다. 둘 다 비우면 수강료를 직접 입력할 수 있어요.</span>`
                               : `<span></span>`}
                             <span style="margin-left:auto; display:flex; gap:6px; flex-shrink:0;">
@@ -8838,7 +8841,7 @@ function updateG3LimitTotal() {
             if (r.hasG3) t += trio('g3', sa.g3Su, sa.g3Gy, sa.g3J);
             if (r.hasFree) t += trio('fr', sa.frSu, sa.frGy, sa.frJ);
             t += trio('sk', sa.skSu, sa.skGy, sa.skJ);
-            let t2 = `<td class="sd-name">출처별 소계</td>${k ? `<td colspan="${k}" class="gstart"></td>` : ''}`;
+            let t2 = `<td class="sd-name">지원금·수익자 소계</td>${k ? `<td colspan="${k}" class="gstart"></td>` : ''}`;
             if (r.hasG3) t2 += `<td colspan="3" class="gsrc g3 gstart sub">${getG3Label()} ${M(sa.g3Su + sa.g3Gy + sa.g3J)}</td>`;
             if (r.hasFree) t2 += `<td colspan="3" class="gsrc fr gstart sub">자유수강 ${M(sa.frSu + sa.frGy + sa.frJ)}</td>`;
             t2 += `<td colspan="3" class="gsrc sk gstart sub">수익자 ${M(sa.skSu + sa.skGy + sa.skJ)}</td>`;
@@ -12430,8 +12433,21 @@ function updateG3LimitTotal() {
         }
 
 
+        // ✨ [v19.8] 창 맨 아래 합계: 검색어와 상관없이 명단 전체 기준 (통보X·특수반·명단누락 제외)
+        function renderNeisSummary() {
+            const exNotify = neisList.filter(st => st.status === '통보X').length;
+            const exSpecial = neisList.filter(st => st.status === '특수반').length;
+            const exMissing = neisList.filter(st => st.status === '제외').length;
+            const targets = new Set(neisList
+                .filter(st => st.status !== '특수반' && st.status !== '통보X' && st.status !== '제외')
+                .map(st => `${toNum(st.grade)}-${toNum(st.classNum)}-${toNum(st.studentNum)}`));
+            document.getElementById('neisSummary').innerText =
+                `총 자유수강: ${targets.size}명 ([통보X]:${exNotify}명, 특수학급중복: ${exSpecial}명, 명단누락: ${exMissing}명 제외)`;
+        }
+
         // ✨ [오류 해결] 검색어 변수 위치 수정 (렌더링 시에만 찾도록 분리)
         function renderNeisList() {
+            renderNeisSummary();
             const tbody = document.getElementById('neisListBody');
             const searchInput = document.getElementById('neisSearchInput');
             // 검색창 요소가 화면에 존재할 때만 값을 가져오도록 방어 코드 추가
@@ -15511,7 +15527,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     D.transfers.push({ r, g3Al: r.hasG3 ? getG3AllowanceFor(r) : 0, g3Used: sumG3, frAl: r.hasFree ? getFreeLimitFor(r) : 0, frUsed: sumFree });
                 }
             });
-            // ✨ 자유수강권 대상 인원 = '자유수강권 명단(NEIS)'에서 특수반·[통보X](지원제외)를 뺀 나머지
+            // ✨ 자유수강권 대상 인원 = '자유수강권 명단(NEIS)'에서 특수반·[통보X](지원제외)·명단누락을 뺀 나머지 (v19.8)
             //    (NEIS 명단이 없으면 프로그램에 자유수강으로 등록된 학생 기준)
             const addFree = (al, used) => {
                 let F = D.free;
@@ -15528,7 +15544,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 D.free.exNotify = neisAll.filter(st => st.status === '통보X').length;
                 D.free.missing = neisAll.filter(st => st.status === '제외').length;
                 let seen = new Set();
-                neisAll.filter(st => st.status !== '특수반' && st.status !== '통보X').forEach(st => {
+                neisAll.filter(st => st.status !== '특수반' && st.status !== '통보X' && st.status !== '제외').forEach(st => {
                     let key = `${toNum(st.grade)}-${toNum(st.classNum)}-${toNum(st.studentNum)}`;
                     if (seen.has(key)) return; seen.add(key);
                     let m = recMap[key];
@@ -15808,14 +15824,14 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                 };
                 let F = D.free, G = D.g3;
                 let freeSrc = F.source === 'neis'
-                    ? `자유수강권 명단(NEIS) ${(F.students + F.exSpecial + F.exNotify).toLocaleString()}명 중 특수반 ${F.exSpecial}명·[통보X] ${F.exNotify}명을 뺀 인원`
+                    ? `자유수강권 명단(NEIS) ${(F.students + F.exSpecial + F.exNotify + F.missing).toLocaleString()}명 중 특수반 ${F.exSpecial}명·[통보X] ${F.exNotify}명·명단누락 ${F.missing}명을 뺀 인원`
                     : `자유수강권 명단(NEIS)이 없어 프로그램에 자유수강으로 등록된 학생 기준`;
                 let usageBox = `<div class="rpt-usage">
                     <div class="row"><span class="tag free">자유수강권</span><span>총 자유수강권 대상자 <b>${F.students.toLocaleString()}명</b> 중 <b class="c-free">${F.usedStudents.toLocaleString()}명(${rptPct(F.usedStudents, F.students)})</b>이 자유수강권을 한 번이라도 이용했습니다. <span class="c-sk">(미이용 ${F.none.toLocaleString()}명)</span></span></div>
                     ${G.inputTotal ? `<div class="row"><span class="tag g3">${rptEsc(getG3LabelShort())}</span><span>올해 ${rptEsc(getG3LabelShort())} 전체 학생 <b>${G.students.toLocaleString()}명</b> 중 <b class="c-g3">${G.usedStudents.toLocaleString()}명(${rptPct(G.usedStudents, G.students)})</b>이 ${rptEsc(g3L)}을 한 번이라도 이용했습니다. <span class="c-sk">(미이용 ${G.none.toLocaleString()}명)</span></span></div>`
                         : (G.registered ? `<div class="row"><span class="tag g3">${rptEsc(getG3LabelShort())}</span><span>${rptEsc(g3L)} 이용 학생 <b class="c-g3">${G.usedStudents.toLocaleString()}명</b> <span class="c-mute">(${rptEsc(getG3LabelShort())} 전체 학생 수를 입력하지 않아 이용률은 계산하지 않았습니다)</span></span></div>` : '')}
                     ${G.inputTotal && G.inputTotal < G.registered ? `<div class="src c-sk">※ 입력한 ${rptEsc(getG3LabelShort())} 전체 학생 수(${G.inputTotal}명)가 프로그램 등록 인원(${G.registered}명)보다 적어 등록 인원 기준으로 계산했습니다.</div>` : ''}
-                    <div class="src">※ 자유수강권 대상자: ${freeSrc}${F.source === 'neis' && F.missing ? ` (명단누락 ${F.missing}명 포함)` : ''}</div>
+                    <div class="src">※ 자유수강권 대상자: ${freeSrc}</div>
                 </div>`;
                 parts.push(sec('예산 집행 현황', scopeLabel + ' 집행 기준', `
                     ${usageBox}
