@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.5.1</title>
+    <title>방과후 지원금 돌보미 V19.5.2</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -849,14 +849,17 @@
 		
         /* ✨ 새 기능 알림: 처음 접속 시 5초 동안 업데이트 보기 버튼 반짝임 */
         @keyframes updGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.75), 0 2px 8px rgba(225,29,72,0.45); filter: brightness(1); }
-            50% { box-shadow: 0 0 0 9px rgba(225,29,72,0), 0 0 20px 5px rgba(251,113,133,0.95); filter: brightness(1.18); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(109,40,217,0.75), 0 2px 8px rgba(109,40,217,0.45); filter: brightness(1); }
+            50% { box-shadow: 0 0 0 9px rgba(109,40,217,0), 0 0 20px 5px rgba(167,139,250,0.95); filter: brightness(1.18); }
         }
         body.upd-glow-on .upd-btn { animation: updGlow 0.9s ease-in-out infinite; }
         body.upd-glow-on .upd-btn:active { animation: none; }
         /* ✨ 후원자 전광판 */
-        #sponsorTicker .sponsor-track { display:inline-block; white-space:nowrap; padding-left:100%; animation: sponsorScroll 16s linear infinite; color:#fde68a; font-size:12.5px; font-weight:700; text-shadow:0 0 6px rgba(253,224,71,0.55); }
-        #sponsorTicker .sponsor-track b { color:#ffffff; }
+        #sponsorTicker { align-items:center; flex-shrink:0; box-sizing:border-box; width:100%; height:34px; margin-top:12px; padding-left:10px; overflow:hidden; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); cursor:default; }
+        #sponsorTicker .sponsor-label { flex-shrink:0; display:inline-flex; align-items:center; gap:4px; padding-right:9px; border-right:1px solid rgba(255,255,255,0.14); color:#f5d98b; font-size:11px; font-weight:800; line-height:14px; }
+        #sponsorTicker .sponsor-view { flex:1; min-width:0; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); mask-image:linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
+        #sponsorTicker .sponsor-track { display:inline-block; white-space:nowrap; padding-left:100%; animation: sponsorScroll 18s linear infinite; color:#cbd5e1; font-size:12px; font-weight:500; line-height:32px; }
+        #sponsorTicker .sponsor-track b { color:#ffffff; font-weight:700; }
         #sponsorTicker:hover .sponsor-track { animation-play-state: paused; }
         @keyframes sponsorScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
         @media (prefers-reduced-motion: reduce) { #sponsorTicker .sponsor-track { animation-duration: 30s; } }
@@ -1566,7 +1569,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.5.1</span>
+                <span class="brand-version">V19.5.2</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1618,8 +1621,9 @@
             ⓒ인천갈월초 늘봄행정실무사 <br> <span id="copyrightLine2" style="display:inline-block; white-space:nowrap; letter-spacing:-0.4px;"><무단 복제·재배포 및 상업적 이용 금지></span>
         </div>
        <!-- ✨ 후원자 감사 전광판 (메인 홈에서만 표시) -->
-       <div id="sponsorTicker" title="후원해 주셔서 감사합니다 💝" style="display:none; flex-shrink:0; min-height:30px; box-sizing:border-box; line-height:16px; margin-top:12px; width:100%; overflow:hidden; border-radius:8px; border:1px solid rgba(253,224,71,0.45); background:linear-gradient(90deg, rgba(15,23,42,0.9), rgba(30,58,95,0.9)); box-shadow:inset 0 0 8px rgba(0,0,0,0.5); padding:6px 0; cursor:default;">
-            <div class="sponsor-track"><span>💝 본 프로그램 개발을 후원해 주신 <b>우*명, 최*정</b> 님 감사합니다^^</span></div>
+       <div id="sponsorTicker" title="후원해 주셔서 감사합니다" style="display:none;">
+            <span class="sponsor-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.6C.3 7.9 2.3 4 6.2 4c2.3 0 4.3 1.2 5.8 3.4C13.500 5.200 15.500 4 17.800 4c3.900 0 5.900 3.900 4.200 7.400-2.500 5-10 9.600-10 9.600z"/></svg>감사</span>
+            <div class="sponsor-view"><div class="sponsor-track"><span>본 프로그램 개발을 후원해 주신 <b>우*명, 최*정</b> 님 감사합니다</span></div></div>
        </div>
        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
             <button class="btn-3d btn-side" onclick="toggleDonatePopup()" id="btnDonate" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
@@ -1651,7 +1655,7 @@
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
             <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; width: 110px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
             <!-- ✨ 업데이트 보기 버튼 (이름 검색 오른쪽 고정) -->
-            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #fb7185, #e11d48); border:1px solid #9f1239; color:#ffffff; box-shadow:0 2px 8px rgba(225,29,72,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
+            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #8b5cf6, #6d28d9); border:1px solid #4c1d95; color:#ffffff; box-shadow:0 2px 8px rgba(109,40,217,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
@@ -5410,6 +5414,7 @@ function toggleStatusPanel() {
                 setTimeout(() => {
                     let resetBtn = document.querySelector('button[onclick="openResetModal()"]');
                     if(resetBtn) {
+                        resetBtn.scrollIntoView({ behavior: 'auto', block: 'center' }); // 작은 화면에서 왼쪽 메뉴가 스크롤돼 있어도 버튼이 보이게
                         let rect = resetBtn.getBoundingClientRect();
                         let tip = document.createElement('div');
                         tip.innerHTML = '📌 예제 아동 목록을 삭제하려면<br><b>[모든 데이터 초기화]</b> 버튼을 누르세요!';
@@ -5417,18 +5422,20 @@ function toggleStatusPanel() {
                             position: fixed; z-index: 5500; background: #ef4444; color: white;
                             padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold;
                             box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; line-height: 1.4;
-                            top: ${rect.top - 60}px; left: ${rect.left + (rect.width/2) - 100}px; width: 200px;
+                            left: ${rect.right + 14}px; width: 290px;
                             animation: flash-text 1s infinite alternate; pointer-events: none;
                         `;
-                        // 말풍선 꼬리표
+                        // 말풍선 꼬리표 (버튼 오른쪽에서 왼쪽의 버튼을 가리킴)
                         let arrow = document.createElement('div');
                         arrow.style.cssText = `
-                            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-                            border-width: 8px 8px 0; border-style: solid; border-color: #ef4444 transparent transparent transparent;
+                            position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+                            border-width: 8px 8px 8px 0; border-style: solid; border-color: transparent #ef4444 transparent transparent;
                         `;
                         tip.appendChild(arrow);
                         document.body.appendChild(tip);
-                        
+                        // 말풍선 실제 높이로 버튼과 세로 가운데를 맞춤 (버튼을 가리지 않도록 오른쪽에 표시)
+                        tip.style.top = Math.max(10, Math.min(window.innerHeight - tip.offsetHeight - 10, rect.top + (rect.height / 2) - (tip.offsetHeight / 2))) + 'px';
+
                         // 1.5초 후 말풍선 제거
                         setTimeout(() => tip.remove(), 3000); 
                     }
@@ -14200,9 +14207,11 @@ function updateG3LimitTotal() {
             프로그램이 도움이 되셨다면 더 많은 발전을 위한 개발 프로그램을 후원해 주세요.🖥️<br>(좋으면 500원~ 부터^^)
         </div>
         <img loading="lazy" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://qr.kakaopay.com/Ej7j0jjSz" alt="카카오페이 후원 QR코드" style="width:150px; height:150px; margin:0 auto 10px; display:block; border:1px solid #e2e8f0; border-radius:8px;">
-        <a href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="text-decoration:none;">
+        <!-- ✨ [v19.5.2] 이 링크는 휴대폰에서만 열림 (PC에서는 404) → PC에는 QR 안내를 보여줌 -->
+        <a id="donateKakaoLink" href="https://qr.kakaopay.com/Ej7j0jjSz" target="_blank" style="display:none; text-decoration:none;">
             <button style="background:#fee500; color:#3c1e1e; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; width:100%; font-size:13px;">카카오페이로 후원하기</button>
         </a>
+        <div id="donatePcNote" style="display:none; background:#fee500; color:#3c1e1e; padding:8px 10px; border-radius:8px; font-weight:700; font-size:12.5px; line-height:1.5; text-align:center; word-break:keep-all;">📱 휴대폰 카메라로 위 QR코드를 찍어 후원해 주세요</div>
         <div style="position:absolute; bottom:-8px; left:24px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:8px solid #fffbeb;"></div>
     </div>
 
@@ -14224,7 +14233,11 @@ function updateG3LimitTotal() {
             let p = document.getElementById('donatePopup');
             let isHidden = (p.style.display === 'none' || !p.style.display);
             if (!isHidden) { p.style.display = 'none'; return; }
-            
+
+            let isPhone = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+            document.getElementById('donateKakaoLink').style.display = isPhone ? 'block' : 'none';
+            document.getElementById('donatePcNote').style.display = isPhone ? 'none' : 'block';
+
             let btn = document.getElementById('btnDonate');
             if (btn) {
                 let rect = btn.getBoundingClientRect();
@@ -16335,7 +16348,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 <script>
 // ✨ 이번 버전에서 처음 접속했을 때만 '업데이트 보기' 버튼을 5초 동안 반짝이게
 (function () {
-    var KEY = 'edusync_update_glow_seen', VER = 'v18.0-ops-report';
+    var KEY = 'edusync_update_glow_seen', VER = 'v19.5.2';
     var seen = null; try { seen = localStorage.getItem(KEY); } catch (e) {}
     if (seen === VER) return;
     function start() {
@@ -16352,7 +16365,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
     function updateSponsorTicker() {
         var el = document.getElementById('sponsorTicker'); if (!el) return;
         var onMain = (typeof currentTab !== 'undefined' && currentTab === 'all') && (typeof viewMode === 'undefined' || viewMode === 'summary');
-        el.style.display = onMain ? 'block' : 'none';
+        el.style.display = onMain ? 'flex' : 'none';
     }
     window.updateSponsorTicker = updateSponsorTicker;
     if (typeof renderGrid === 'function') {
