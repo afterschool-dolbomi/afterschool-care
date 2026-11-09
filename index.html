@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.8</title>
+    <title>방과후 지원금 돌보미 V19.8.1</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.8</span>
+                <span class="brand-version">V19.8.1</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -2600,7 +2600,7 @@
             </div>
 
             <!-- ✨ [v19.8] 자유수강 인원 합계 -->
-            <div id="neisSummary" style="flex-shrink:0; margin-top:12px; padding:10px 16px; background:#f5f3ff; border:1px solid #c084fc; border-radius:6px; font-size:16px; font-weight:800; color:#5b21b6; text-align:right;"></div>
+            <div id="neisSummary" style="flex-shrink:0; margin-top:12px; padding:10px 16px; background:#f5f3ff; border:1px solid #c084fc; border-radius:6px; font-size:14px; text-align:right;"></div>
         </div>
     </div> 
 
@@ -12441,8 +12441,9 @@ function updateG3LimitTotal() {
             const targets = new Set(neisList
                 .filter(st => st.status !== '특수반' && st.status !== '통보X' && st.status !== '제외')
                 .map(st => `${toNum(st.grade)}-${toNum(st.classNum)}-${toNum(st.studentNum)}`));
-            document.getElementById('neisSummary').innerText =
-                `총 자유수강: ${targets.size}명 ([통보X]:${exNotify}명, 특수학급중복: ${exSpecial}명, 명단누락: ${exMissing}명 제외)`;
+            document.getElementById('neisSummary').innerHTML =
+                `<span style="color:#6d28d9; font-weight:800;">총 자유수강: ${targets.size}명</span> ` +
+                `<span style="color:#4b5563; font-weight:600;">([통보X]:${exNotify}명, 특수학급중복: ${exSpecial}명, 명단누락: ${exMissing}명 제외)</span>`;
         }
 
         // ✨ [오류 해결] 검색어 변수 위치 수정 (렌더링 시에만 찾도록 분리)
