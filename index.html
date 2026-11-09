@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.5.2</title>
+    <title>방과후 지원금 돌보미 V19.7</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -80,6 +80,13 @@
         }
         .btn-side { background: rgba(255, 255, 255, 0.1); color: white; text-align: left; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
         .btn-side.highlight { background: var(--sidebar-accent); box-shadow: 0 4px 0 #1d4ed8; }
+        .side-sec { font-size: 14px; font-weight: 700; color: #94a3b8; margin: 12px 0 3px 4px; }
+        .side-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: none; border-radius: 7px; background: none; color: #e5e7eb; font-family: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; position: relative; transition: background 0.12s; }
+        .side-item:hover { background: rgba(255,255,255,0.09); color: #fff; }
+        .side-item:active { background: rgba(255,255,255,0.15); }
+        .side-item.danger { color: #fca5a5; }
+        .side-num { width: 22px; height: 22px; flex-shrink: 0; border-radius: 6px; background: rgba(255,255,255,0.1); color: #cbd5e1; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .side-num.ic { background: none; }
 
         /* --- 메인 워크스페이스 --- */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; min-height: 0; }
@@ -1569,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.5.2</span>
+                <span class="brand-version">V19.7</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1578,7 +1585,7 @@
         <div class="action-menu">
           <!-- ⚙️ 학생 개별 입력(폭 줄임) + 메뉴 접기 버튼, 한 줄에 배치 (분기 설정이 빠지면서 비었던 자리) -->
             <div style="display: flex; align-items:center; gap: 8px; margin-bottom: 12px;">
-                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')" style="flex:1; min-width:0; height:34px; padding:0 10px; display:flex; align-items:center; justify-content:center; font-size:13px; white-space:nowrap; text-align:center;">✏️ 학생 개별 추가</button>
+                <button class="btn-3d btn-side highlight" id="btn-add-student" onclick="openPanel('add')" style="box-shadow:none; flex:1; min-width:0; height:34px; padding:0 10px; display:flex; align-items:center; justify-content:center; font-size:13px; white-space:nowrap; text-align:center;">＋ 학생 개별 추가</button>
                 <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="메뉴 접기/펼치기" style="flex-shrink:0; width:34px; height:34px; background:#4b5563; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition: 0.2s;">
                     <span style="display:inline-flex; width:16px; height:12px; border:2px solid #d1d5db; border-radius:2px; overflow:hidden;">
                         <span style="width:5px; height:100%; background:#d1d5db; display:inline-block;"></span>
@@ -1594,42 +1601,40 @@
             <!-- 기존 8개의 메뉴 버튼들은 그대로 유지 (생략) -->
                 
 				<!-- ✨ 버튼 순서 재배치 + gap으로 간격 통일 -->
-                 <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn-3d btn-side" id="btn-snapshot-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSnapshotModal()">⏳ 8.날짜별 과거 기록(백업)</button>
-                <button class="btn-3d btn-side" id="btn-excel-export" style="border:1px solid rgba(255,255,255,0.25);" onclick="exportExcel()">📤 7.전체 명단 백업(엑셀 저장)</button>
-                <button class="btn-3d btn-side" id="btn-subject-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSubjectManager()">⚙️ 6.과목 목록 관리</button>
-                <button class="btn-3d btn-side" id="btn-excel-upload" style="border:1px solid rgba(255,255,255,0.25);" onclick="document.getElementById('excelUpload').click()">📥 5.단체 명단 엑셀 업로드</button>
-			    <button class="btn-3d btn-side" id="btn-sample-excel" style="border:1px solid rgba(255,255,255,0.25);" onclick="downloadSampleExcel()">📄 4.입력 엑셀 다운로드</button>
-                <button class="btn-3d btn-side" id="btn-codimaster-upload" style="border:1px solid #d8b4fe; background:#e9d5ff; color:#6b21a8; text-align:left; line-height:1.3; padding-top:8px; padding-bottom:8px;" onclick="openCodimasterQuarterModal()"><img loading="lazy" src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" style="width:18px; height:auto; float:left; margin-right:8px;">코디마스터-수강료(강좌별)<br><span style="font-size:10.5px; font-weight:500;">오른쪽마우스-엑셀내보내기-업로드</span></button>
-                <button class="btn-3d btn-side" id="btn-neis-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openNeisModal()">🎓 3.자유수강자 관리 (NEIS)</button>
-                <button class="btn-3d btn-side" id="btn-special-manage" style="border:1px solid rgba(255,255,255,0.25);" onclick="openSpecialModal()">🏫 2.특수학급 명단 관리</button>
-				<button class="btn-3d btn-side" id="btnYearSettings" style="border:1px solid rgba(255,255,255,0.25);" onclick="toggleYearSettingsPanel()">⚙️1.학년도 지원금, 분기제 설정</button>
-                <button class="btn-3d btn-side" style="background:transparent; border:1px solid #ef4444; color:#ef4444;" onclick="openResetModal()">🚨데이터 초기화 관리</button>
-                <div style="display: flex; gap: 8px;">
-                   <button class="btn-3d btn-side" style="width: 100%; background:#0ea5e9; color:white; border:none; font-size: 13px; font-weight: bold; padding: 10px 4px;" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')">📞문의사항 & 🖥️실습 유튜브 영상️</button>
-                </div>
+                 <div style="display:flex; flex-direction:column; gap:2px;">
+                <div class="side-sec">기초 설정</div>
+                <button class="side-item" id="btnYearSettings" onclick="toggleYearSettingsPanel()"><span class="side-num">1</span><span class="side-label">학년도 지원금·분기제 설정</span></button>
+                <button class="side-item" id="btn-special-manage" onclick="openSpecialModal()"><span class="side-num">2</span><span class="side-label">특수학급 명단 관리</span></button>
+                <button class="side-item" id="btn-neis-manage" onclick="openNeisModal()"><span class="side-num">3</span><span class="side-label">자유수강자 관리 (NEIS)</span></button>
+                <div class="side-sec">명단·수강료 입력</div>
+                <button class="side-item" id="btn-codimaster-upload" title="코디마스터 강좌별 화면에서 오른쪽 마우스 → 엑셀 내보내기 한 파일을 올려 주세요" onclick="openCodimasterQuarterModal()"><span class="side-num ic"><img loading="lazy" src="https://i.ibb.co/Ck4wQrk/20260811-134828-1.png" alt="" style="width:18px; height:auto;"></span><span class="side-label">코디마스터 수강료 업로드</span></button>
+                <button class="side-item" id="btn-excel-upload" onclick="openUploadWizard()"><span class="side-num">4</span><span class="side-label">단체 명단 엑셀 업로드</span></button>
+                <button class="side-item" id="btn-subject-manage" onclick="openSubjectManager()"><span class="side-num">5</span><span class="side-label">과목 목록 관리</span></button>
+                <div class="side-sec">백업, 복원, 초기화</div>
+                <button class="side-item" id="btn-excel-export" onclick="exportExcel()"><span class="side-num">6</span><span class="side-label">전체 명단 백업 (엑셀)</span></button>
+                <button class="side-item" id="btn-snapshot-manage" onclick="openSnapshotModal()"><span class="side-num">7</span><span class="side-label">날짜별 과거 기록</span></button>
+                <button class="side-item danger" onclick="openResetModal()"><span class="side-num ic">⚠️</span><span class="side-label">데이터 초기화</span></button>
+                <div class="side-sec">기타</div>
+                <button class="side-item" onclick="window.open('https://star-moss-18d.notion.site/36e5d9dc850580b798f8db184cfcf4ba?source=copy_link', '_blank')"><span class="side-num ic">📞</span><span class="side-label">문의 · 실습 영상</span></button>
+                <button class="side-item" onclick="startTutorial()"><span class="side-num ic">💡</span><span class="side-label">튜토리얼</span></button>
+                <button class="side-item" id="btnDonate" onclick="toggleDonatePopup()"><span class="side-num ic">☕</span><span class="side-label">후원하기</span></button>
                 </div>
                 
-                <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="importExcel(event)">
+                <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="uwOnPick(event)">
                 <input type="file" id="codimasterUpload" accept=".xlsx" style="display:none;" onchange="importCodimaster(event)">
 	
 				
             </div>
         </div>
         
-        <div style="color: #ffffff; font-size: 11px; font-weight: bold; text-align: center; margin-top: 20px; text-shadow: 0px 1px 2px rgba(0,0,0,0.5); letter-spacing: 0.5px; opacity: 0.9;">
-            ⓒ인천갈월초 늘봄행정실무사 <br> <span id="copyrightLine2" style="display:inline-block; white-space:nowrap; letter-spacing:-0.4px;"><무단 복제·재배포 및 상업적 이용 금지></span>
-        </div>
        <!-- ✨ 후원자 감사 전광판 (메인 홈에서만 표시) -->
        <div id="sponsorTicker" title="후원해 주셔서 감사합니다" style="display:none;">
             <span class="sponsor-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.6C.3 7.9 2.3 4 6.2 4c2.3 0 4.3 1.2 5.8 3.4C13.500 5.200 15.500 4 17.800 4c3.900 0 5.900 3.900 4.200 7.400-2.500 5-10 9.600-10 9.600z"/></svg>감사</span>
             <div class="sponsor-view"><div class="sponsor-track"><span>본 프로그램 개발을 후원해 주신 <b>우*명, 최*정</b> 님 감사합니다</span></div></div>
        </div>
-       <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
-            <button class="btn-3d btn-side" onclick="toggleDonatePopup()" id="btnDonate" style="flex: 1; background:#fee500; color:#3c1e1e; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">☕ 후원하기</button>
-            
-            <button class="btn-3d btn-side" onclick="startTutorial()" style="flex: 1; background:#8b5cf6; color:white; border:none; font-weight:700; font-size:14px; padding:12px 10px; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">💡 튜토리얼</button>
-     </div>
+        <div style="color: #ffffff; font-size: 11px; font-weight: bold; text-align: center; margin-top: 20px; text-shadow: 0px 1px 2px rgba(0,0,0,0.5); letter-spacing: 0.5px; opacity: 0.9;">
+            ⓒ인천갈월초 늘봄행정실무사 <br> <span id="copyrightLine2" style="display:inline-block; white-space:nowrap; letter-spacing:-0.4px;"><무단 복제·재배포 및 상업적 이용 금지></span>
+        </div>
    </aside>
 
     <main class="main-content">
@@ -1655,7 +1660,7 @@
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
             <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; width: 110px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
             <!-- ✨ 업데이트 보기 버튼 (이름 검색 오른쪽 고정) -->
-            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #8b5cf6, #6d28d9); border:1px solid #4c1d95; color:#ffffff; box-shadow:0 2px 8px rgba(109,40,217,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
+            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #a78bfa 0%, #7c3aed 45%, #5b21b6 100%); border:1px solid #4c1d95; color:#ffffff; box-shadow:0 2px 8px rgba(109,40,217,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
@@ -1673,6 +1678,84 @@
         </div>
     </div>
 </header>
+
+    <!-- ✨ [v19.6] 명단 업로드 마법사 (50대 이상 사용자 고려: 글씨 14px 이상) -->
+    <style>
+        #uploadWizardOverlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:99996; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+        .uw-modal { width:94%; max-width:900px; max-height:92vh; background:#fff; color:#1f2937; border-radius:20px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.3); word-break:keep-all; font-size:16px; }
+        .uw-head { display:flex; align-items:center; padding:22px 28px 6px; }
+        .uw-head h2 { margin:0; font-size:26px; font-weight:900; color:#111827; }
+        .uw-x { margin-left:auto; width:42px; height:42px; border:none; border-radius:10px; background:#f3f4f6; color:#374151; font-size:20px; cursor:pointer; }
+        .uw-sub { padding:0 28px; font-size:16px; color:#4b5563; line-height:1.6; }
+        .uw-steps { display:flex; gap:10px; padding:16px 28px 6px; }
+        .uw-step { flex:1; display:flex; align-items:center; gap:10px; padding:12px 14px; border:none; border-radius:14px; background:#f3f4f8; color:#4b5563; font-family:inherit; font-size:18px; font-weight:800; text-align:left; cursor:pointer; }
+        .uw-step:disabled { cursor:default; }
+        .uw-step.on { background:#e0e7ff; color:#312e81; }
+        .uw-n { width:32px; height:32px; flex-shrink:0; border-radius:50%; background:#d1d5db; color:#374151; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:900; }
+        .uw-step.on .uw-n { background:#4f46e5; color:#fff; }
+        .uw-step.done .uw-n { background:#16a34a; color:#fff; }
+        .uw-body { padding:14px 28px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px; }
+        .uw-card { border:1.5px solid #e5e7eb; border-radius:16px; padding:18px 20px; }
+        .uw-form { display:flex; align-items:center; gap:16px; }
+        .uw-ic { width:60px; height:60px; flex-shrink:0; border-radius:14px; background:#ecfdf5; display:flex; align-items:center; justify-content:center; font-size:30px; }
+        .uw-grow { flex:1; min-width:0; }
+        .uw-h { font-size:19px; font-weight:900; color:#111827; line-height:1.4; }
+        .uw-h.uw-big { font-size:21px; }
+        .uw-p { font-size:16px; color:#374151; line-height:1.65; margin-top:4px; }
+        .uw-reuse { background:#f0fdf4; border-color:#86efac; }
+        .uw-rules { display:flex; flex-direction:column; gap:7px; margin-top:12px; }
+        .uw-rule { display:flex; align-items:flex-start; gap:10px; font-size:16px; line-height:1.55; color:#1f2937; }
+        .uw-warnrule { background:#fff7ed; border:1.5px solid #fdba74; border-radius:10px; padding:10px 12px; margin-top:4px; }
+        .uw-mark { width:26px; height:26px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; color:#fff; }
+        .uw-ok { background:#16a34a; } .uw-same { background:#6b7280; } .uw-no { background:#ea580c; }
+        .uw-tip { padding:12px 16px; border-radius:12px; background:#fffbeb; color:#78350f; font-size:16px; line-height:1.6; }
+        .uw-btn { height:50px; padding:0 22px; border:1.5px solid #d1d5db; border-radius:12px; background:#fff; color:#1f2937; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; white-space:nowrap; }
+        .uw-btn:disabled { opacity:0.6; cursor:default; }
+        .uw-btn.uw-primary { background:#4f46e5; border-color:#4f46e5; color:#fff; }
+        .uw-btn.uw-green { background:#ecfdf5; border-color:#34d399; color:#047857; }
+        .uw-foot { display:flex; align-items:center; gap:10px; padding:16px 28px; border-top:1px solid #eef0f4; background:#fafbfd; }
+        .uw-note { font-size:15px; color:#4b5563; }
+        .uw-drop { border:3px dashed #a5b4fc; border-radius:18px; background:#f8f9ff; padding:44px 24px; text-align:center; cursor:pointer; }
+        .uw-drop.over { background:#e0e7ff; border-color:#4f46e5; }
+        .uw-drop .uw-btn { margin-top:16px; }
+        .uw-dropic { font-size:52px; line-height:1.2; }
+        .uw-error { padding:14px 16px; border-radius:12px; background:#fef2f2; border:1.5px solid #fca5a5; color:#991b1b; font-size:16px; font-weight:700; line-height:1.6; }
+        .uw-file { display:flex; align-items:center; gap:10px; padding:12px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:16px; }
+        .uw-file a { margin-left:auto; color:#4338ca; font-weight:800; cursor:pointer; text-decoration:underline; white-space:nowrap; }
+        .uw-sum { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+        .uw-tile { border-radius:14px; padding:12px 14px; }
+        .uw-tile span { display:block; font-size:15px; font-weight:800; }
+        .uw-tile b { font-size:28px; font-weight:900; }
+        .uw-t-new { background:#dcfce7; color:#166534; } .uw-t-upd { background:#e0e7ff; color:#3730a3; } .uw-t-same { background:#f3f4f6; color:#374151; } .uw-t-warn { background:#ffedd5; color:#9a3412; }
+        .uw-sec { font-size:17px; font-weight:900; color:#111827; margin-top:4px; }
+        .uw-sec-warn { color:#9a3412; }
+        .uw-list { border:1.5px solid #eceef3; border-radius:12px; overflow:hidden; flex-shrink:0; }
+        .uw-row { display:grid; grid-template-columns:150px 110px 1fr; gap:10px; align-items:center; padding:11px 14px; border-bottom:1px solid #f1f2f6; }
+        .uw-row:last-child, .uw-issue:last-child { border-bottom:none; }
+        .uw-who b { display:block; font-size:17px; color:#111827; }
+        .uw-who span { font-size:15px; color:#4b5563; }
+        .uw-chip { justify-self:start; padding:3px 11px; border-radius:999px; font-size:15px; font-weight:800; white-space:nowrap; }
+        .uw-new { background:#dcfce7; color:#166534; } .uw-upd { background:#e0e7ff; color:#3730a3; }
+        .uw-what { font-size:16px; color:#1f2937; line-height:1.5; }
+        .uw-issue { padding:11px 14px; border-bottom:1px solid #f1f2f6; background:#fffaf5; font-size:16px; line-height:1.55; }
+        .uw-issue b { display:block; color:#9a3412; }
+        .uw-issue span { color:#1f2937; }
+        .uw-done { text-align:center; padding:36px 16px; }
+        @media (max-width:760px) { .uw-sum { grid-template-columns:repeat(2, 1fr); } .uw-row { grid-template-columns:1fr; } .uw-form { flex-wrap:wrap; } .uw-steps { flex-direction:column; } }
+    </style>
+    <div id="uploadWizardOverlay">
+        <div class="uw-modal" role="dialog" aria-label="단체 명단 엑셀 업로드">
+            <div class="uw-head"><h2>📥 단체 명단 엑셀 업로드</h2><button class="uw-x" onclick="closeUploadWizard()" aria-label="닫기">✕</button></div>
+            <div class="uw-sub">엑셀에 학생과 수강 과목을 적어 올리면 한 번에 등록됩니다.</div>
+            <div class="uw-steps">
+                <button class="uw-step" data-s="1" onclick="uwGo(1)"><span class="uw-n">1</span>양식 받기</button>
+                <button class="uw-step" data-s="2" onclick="uwGo(2)"><span class="uw-n">2</span>파일 선택</button>
+                <button class="uw-step" data-s="3" onclick="uwGo(3)"><span class="uw-n">3</span>미리보기 후 반영</button>
+            </div>
+            <div class="uw-body" id="uwBody"></div>
+            <div class="uw-foot" id="uwFoot"></div>
+        </div>
+    </div>
 
     <div id="featureUpdatePopupOverlay" onclick="if(event.target===this) closeFeatureUpdatePopup()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.55); z-index:99997; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
         <div style="background:#fffaf3; border-radius:20px; overflow:hidden; width:92%; max-width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 25px 60px -12px rgba(0,0,0,0.35); animation: popIn 0.3s ease-out forwards;">
@@ -3793,7 +3876,7 @@
             let msg = `⚠️ 아래 강좌는 ${q}분기 '표준차시'가 입력되어 있지 않아서 ${whatLabel}${(((whatLabel.charCodeAt(whatLabel.length - 1) - 0xAC00) % 28) ? '을' : '를')} 만들 수 없어요.\n\n` +
                 names.map(n => ' · ' + n).join('\n') +
                 `\n\n👉 이렇게 입력해 주세요\n` +
-                `  1. 왼쪽 메뉴 [⚙️ 6.과목 목록 관리] 클릭\n` +
+                `  1. 왼쪽 메뉴 [5.과목 목록 관리] 클릭\n` +
                 `  2. 왼쪽 목록에서 위 강좌의 과목명 클릭\n` +
                 `  3. ${q}분기 줄의 '표준차시(한달)' 칸에 한 달 수업 횟수 입력\n` +
                 `      (주1회 수업 = 4, 주2회 수업 = 8)\n` +
@@ -5264,10 +5347,9 @@ function toggleStatusPanel() {
         }
 
       const tutorialSteps = [
-            { target: 'btn-sample-excel', text: '샘플 엑셀을 다운로드 하여 지원금 아동 명단을 엑셀에 작성해주세요.', align: 'right' },
             { target: 'btn-neis-manage', text: '나이스(NEIS) 수혜수급자 명단 엑셀을 업로드하여 자유수강 대상자만 쏙쏙 골라내어 자동으로 추가할 수 있습니다!', align: 'right' },
             { target: 'btn-codimaster-upload', text: '코디마스터-수강료(강좌별)-엑셀내보내기 엑셀을 그대로 업로드하면, 자유수강 대상자 자동 인식부터 학생별 과목·금액(교재비·재료비 개인별 차이까지) 등록이 한번에 처리됩니다!', align: 'right' },
-			{ target: 'btn-excel-upload', text: '단체 명단을 업로드 하면 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
+			{ target: 'btn-excel-upload', text: '이 버튼을 누르면 입력 양식을 받아 지원금 아동 명단을 작성하고 그대로 올릴 수 있어요. 신규 학생은 추가되고, 기존 학생은 새로운 과목만 쏙쏙 찾아 업데이트 됩니다!', align: 'right' },
             { target: 'btn-subject-manage', text: '나의 학교에서 진행하는 방과후 과목을 설정해주세요. 신청 안내장에 나간 과목명과, 수강금액을 작성해주세요', align: 'right' },
             { target: 'btn-add-student', text: '학생을 추가로 입력 하고 싶다면 학생 개별 입력 버튼을 누르세요.', align: 'right' },
             { target: 'th-manage', text: '학생의 지원금 금액을 변경하거나 추가 하고 싶으면 수정 버튼을 누르세요', align: 'bottom', type: 'column' },
@@ -11365,7 +11447,8 @@ function updateG3LimitTotal() {
             if(db.length === 0) { alert("출력할 데이터가 없습니다."); return; }
             
             let btn = document.getElementById('btn-excel-export');
-            btn.innerText = "⏳ 백업 중...";
+            let btnLabel = btn.querySelector('.side-label'); // ✨ [v19.7] 번호 배지는 두고 글자만 바꿈
+            btnLabel.innerText = "백업 중...";
             
             setTimeout(async () => {
                 try {
@@ -11577,10 +11660,10 @@ function updateG3LimitTotal() {
                     const buffer = await wb.xlsx.writeBuffer();
                     saveAs(new Blob([buffer]), `방과후세로형정산백업_${todayLocal()}.xlsx`);
                     
-                    btn.innerText = "📤 전체 명단 백업(엑셀 저장)";
+                    btnLabel.innerText = "전체 명단 백업 (엑셀)";
                 } catch (err) {
                     alert("데이터가 너무 많거나 엑셀 생성 중 오류가 발생했습니다.");
-                    btn.innerText = "📤 전체 명단 백업(엑셀 저장)";
+                    btnLabel.innerText = "전체 명단 백업 (엑셀)";
                 }
             }, 100);
         }
@@ -11596,20 +11679,19 @@ function updateG3LimitTotal() {
 
 
 
-         async function importExcel(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-
-            const wb = new ExcelJS.Workbook();
-            await wb.xlsx.load(await file.arrayBuffer());
+         // ✨ [v19.6] 명단 업로드 본체. dry=true면 저장·화면 갱신 없이 결과만 돌려줌 (미리보기용, 복사본 위에서 실행)
+         function runExcelImport(wb, dry) {
             const ws = wb.worksheets[0];
 
             let newCount = 0;
-            let mergeCount = 0; 
-             let blockMsgs = []; 
-            let intraDups = []; 
+            let mergeCount = 0;
+             let blockMsgs = [];
+            let intraDups = [];
             let specialDups = [];
             let isSubUpdated = false;
+            let ignoredChanges = []; // ✨ [v19.6] 이미 있는 과목인데 엑셀 금액이 달라서 반영되지 않는 항목
+            let skippedKeys = new Set(); // ✨ [v19.6] 이름 불일치·특수학급 중복으로 제외된 학번
+            let sawBackup = false; // ✨ [v19.6] 7번 백업 파일 여부
             
             let headerVal8_1 = ws.getCell('H1').value ? String(ws.getCell('H1').value) : '';
             let headerVal8_2 = ws.getCell('H2').value ? String(ws.getCell('H2').value) : '';
@@ -11617,6 +11699,7 @@ function updateG3LimitTotal() {
             let isVerticalFormat = false;
             
             if(headerVal8_1.includes('과목') || headerVal8_2.includes('과목')) isVerticalFormat = true;
+            if(!isVerticalFormat) return { badFormat: true };
 
             let currentStudent = null;
             let currentIsMerge = false;
@@ -11643,6 +11726,7 @@ function updateG3LimitTotal() {
                 if (spHit && currentStudent.hasFree) {
                     let dupMsg = `${currentStudent.grade}-${currentStudent.classNum}-${currentStudent.studentNum} ${currentStudent.name} 학생은 특수학급 아동과 학번이 겹쳐 명단에 추가 하지 않습니다`;
                     if (!specialDups.includes(dupMsg)) specialDups.push(dupMsg);
+                    skippedKeys.add(`${currentStudent.grade}-${currentStudent.classNum}-${currentStudent.studentNum}`);
                     return; // ✨ 병합/신규추가 둘 다 여기서 막음
                 }
                 
@@ -11705,6 +11789,12 @@ function updateG3LimitTotal() {
 
                             // 기존 로직 그대로 (수기 명단 업로드용: 과목명이 이미 있으면 건너뜀)
                             let subExists = currentExStudent[`q${q}`].subs.some(s => s.name === newSub.name);
+                            if(subExists) {
+                                let oldSub = currentExStudent[`q${q}`].subs.find(s => s.name === newSub.name);
+                                let oldAmt = toNum(oldSub.su) + toNum(oldSub.gy) + toNum(oldSub.j);
+                                let newAmt = toNum(newSub.su) + toNum(newSub.gy) + toNum(newSub.j);
+                                if(oldAmt !== newAmt) ignoredChanges.push({ label: `${currentExStudent.grade}-${currentExStudent.classNum}-${currentExStudent.studentNum} ${currentExStudent.name}`, q, name: newSub.name, oldAmt, newAmt });
+                            }
                             if(!subExists) {
                                 let emptyIdx = currentExStudent[`q${q}`].subs.findIndex(s => !s.name || s.name.trim() === '');
                                 if(emptyIdx !== -1) {
@@ -11759,18 +11849,18 @@ function updateG3LimitTotal() {
                         bigBackupData.specialList.forEach(st => {
                             if(!specialList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum)) specialList.push(st);
                         });
-                        persistSpecialList();
+                        if(!dry) persistSpecialList();
                     }
                     if (bigBackupData.neisList) {
                         bigBackupData.neisList.forEach(st => {
                             if(!neisList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum && s.name === st.name)) neisList.push(st);
                         });
-                        persistNeisList();
+                        if(!dry) persistNeisList();
                     }
                    if (bigBackupData.snapshots && bigBackupData.snapshots.length) {
                         snapshots = bigBackupData.snapshots.slice();
                         snapshots.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        persistSnapshots();
+                        if(!dry) persistSnapshots();
                     }
                         if (bigBackupData.savedSubjects) {
                         bigBackupData.savedSubjects.forEach(sub => {
@@ -11784,8 +11874,7 @@ function updateG3LimitTotal() {
                                 ensureSubjectFees(sub);
                             }
                         });
-                        persistSubjects();
-                        renderSubjectList();
+                        if(!dry) { persistSubjects(); renderSubjectList(); }
                     }
                 }
             } catch(e) {}
@@ -11838,18 +11927,18 @@ function updateG3LimitTotal() {
                                     backupData.specialList.forEach(st => {
                                         if(!specialList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum)) specialList.push(st);
                                     });
-                                    persistSpecialList();
+                                    if(!dry) persistSpecialList();
                                 }
                                 if(backupData.neisList) {
                                     backupData.neisList.forEach(st => {
                                         if(!neisList.some(s => s.grade === st.grade && s.classNum === st.classNum && s.studentNum === st.studentNum && s.name === st.name)) neisList.push(st);
                                     });
-                                    persistNeisList();
+                                    if(!dry) persistNeisList();
                                 }
                                 if(backupData.snapshots && backupData.snapshots.length) {
                                     snapshots = backupData.snapshots.slice();
                                     snapshots.sort((a, b) => new Date(b.date) - new Date(a.date));
-                                    persistSnapshots();
+                                    if(!dry) persistSnapshots();
                                 }
 								
                             } catch(e) {}
@@ -11860,6 +11949,7 @@ function updateG3LimitTotal() {
                         // ✨ 학번은 같은데 이름이 다르면 절대 병합하지 않고 경고 후 건너뜀 (수기 입력 실수 방지)
                         if(currentExStudent && currentExStudent.name !== sName) {
                             intraDups.push(`${grade}학년 ${classNum}반 ${studentNum}번 '${sName}' → 이 학번은 이미 '${currentExStudent.name}' 학생으로 등록되어 있습니다. 이름 불일치로 업로드 되지 않았습니다. 학번을 다시 확인해주세요.`);
+                            skippedKeys.add(key);
                             skipCurrentStudent = true;
                             currentStudent = null;
                             return;
@@ -11897,6 +11987,7 @@ function updateG3LimitTotal() {
                             memo: backupData ? (backupData.memo || '') : '',
                             _backupBurdens: backupData ? backupData.b : null
                         };
+						if(backupData) sawBackup = true;
 						currentRowSlot = 0;   // ✅ 추가: 새 학생 시작하면 슬롯 카운터 리셋
                     }
 
@@ -11962,42 +12053,227 @@ function updateG3LimitTotal() {
                     }
 					
 					currentRowSlot++;   // ✅ 추가: 다음 물리적 줄로 이동
-					} else {
-                    // ✨ 구버전(가로형) 엑셀 양식 지원 종료 차단 및 알림
-                    if (rowNumber === 2) {
-                        alert("⚠️ [알림] 구버전(가로형) 엑셀 양식이 감지되었습니다.\n\n현재 버전부터는 가로형 양식 업로드를 지원하지 않습니다. 우측 메뉴의 [입력 엑셀 다운로드] 버튼을 눌러 최신 세로형 빈 양식을 사용해 주세요.");
-                    }
-                    return; // 더 이상 읽지 않고 중단
-                }
+					}
 			});
 
-            if(isVerticalFormat) processCurrentStudent();
-			
-			
-            if(isSubUpdated) {
+            processCurrentStudent();
+
+
+            if(isSubUpdated && !dry) {
                 persistSubjects();
                 renderSubjectList();
             }
 
-            document.getElementById('excelUpload').value = ''; 
-            persistData(); renderGrid();
-            
-            let msg = `총: ${newCount + mergeCount}명(신규 ${newCount}명, 업데이트 ${mergeCount}명)\n`;
-            
-            if(intraDups.length > 0) {
-                msg += `\n[⚠️ 업로드하신 엑셀 파일 "안에서" 같은 학번이 2번 이상 발견되어 아래 학생은 처리되지 않았습니다. (프로그램에 이미 있는 학생과는 무관한 알림입니다 - 그런 학생은 위쪽 '업데이트' 인원수에 정상적으로 포함되어 있습니다)]\n`;
-                msg += intraDups.map(s => `- ${s}`).join('\n');
+            if(!dry) { persistData(); renderGrid(); }
+
+            return { newCount, mergeCount, intraDups, blockMsgs, specialDups, ignoredChanges, isBackup: sawBackup, fileKeys: [...processedKeys], skippedKeys: [...skippedKeys] };
+        }
+
+        // ✨ [v19.6] 명단 업로드 마법사 (1 양식 받기 → 2 파일 선택 → 3 미리보기 후 반영)
+        let uwState = { step: 1, wb: null, fileName: '', report: null, error: '', busy: false, done: false };
+
+        function openUploadWizard() {
+            uwState = { step: 1, wb: null, fileName: '', report: null, error: '', busy: false, done: false };
+            document.getElementById('uploadWizardOverlay').style.display = 'flex';
+            renderUploadWizard();
+        }
+        function closeUploadWizard() {
+            document.getElementById('uploadWizardOverlay').style.display = 'none';
+            uwState.wb = null;
+        }
+        function uwGo(step) {
+            if (step === 3 && !uwState.report) return;
+            uwState.step = step; uwState.error = '';
+            renderUploadWizard();
+        }
+        async function uwDownloadForm(btn) {
+            btn.disabled = true; btn.innerText = '⏳ 양식 만드는 중...';
+            try {
+                await downloadSampleExcel();
+                btn.innerText = '✅ 받았어요 (다운로드 폴더 확인)';
+            } catch (err) {
+                btn.innerText = '⤓ 입력 양식 받기';
+                alert('양식을 만드는 중 오류가 났습니다. 다시 눌러 주세요.');
             }
-            if(blockMsgs.length > 0) {
-                msg += `\n\n[기타 알림]\n`;
-                msg += blockMsgs.map(s => `- ${s}`).join('\n');
+            btn.disabled = false;
+        }
+        function uwOnPick(e) {
+            const file = e.target.files[0];
+            e.target.value = '';
+            if (file) uwReadFile(file);
+        }
+        function uwOnDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('over');
+            const file = e.dataTransfer.files[0];
+            if (file) uwReadFile(file);
+        }
+        async function uwReadFile(file) {
+            if (!/\.xlsx$/i.test(file.name)) {
+                uwState.error = `'${file.name}' 파일은 올릴 수 없어요. 엑셀 파일(.xlsx)을 골라 주세요.`;
+                renderUploadWizard();
+                return;
             }
-            if(specialDups.length > 0) {
-               msg += `\n\n[⚠️ 특수학급 중복으로 명단 추가가 차단된 학생]\n`;
-                msg += specialDups.map(s => `- ${s}`).join('\n');
+            uwState.busy = true; uwState.error = ''; renderUploadWizard();
+            try {
+                const wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(await file.arrayBuffer());
+                const report = uwAnalyze(wb);
+                if (report.badFormat) {
+                    uwState.error = '이 엑셀은 명단 업로드 양식이 아니에요. 1단계에서 입력 양식을 받아 그 양식에 적어 주세요. (옛날 가로형 양식은 더 이상 올릴 수 없어요)';
+                } else {
+                    uwState.wb = wb; uwState.fileName = file.name; uwState.report = report; uwState.step = 3;
+                }
+            } catch (err) {
+                uwState.error = '파일을 읽지 못했어요. 엑셀에서 파일을 닫고 저장한 뒤 다시 올려 주세요.';
             }
-            
-            alert(msg);
+            uwState.busy = false;
+            renderUploadWizard();
+        }
+
+        // 실제 업로드를 복사본에 그대로 실행해 보고, 전후를 비교해서 미리보기를 만듦
+        function uwAnalyze(wb) {
+            const saved = { db, specialList, neisList, snapshots, savedSubjects };
+            let res, after;
+            try {
+                db = JSON.parse(JSON.stringify(db));
+                savedSubjects = JSON.parse(JSON.stringify(savedSubjects));
+                specialList = specialList.slice(); neisList = neisList.slice(); snapshots = snapshots.slice();
+                res = runExcelImport(wb, true);
+                after = db;
+            } finally {
+                db = saved.db; specialList = saved.specialList; neisList = saved.neisList; snapshots = saved.snapshots; savedSubjects = saved.savedSubjects;
+            }
+            if (res.badFormat) return res;
+
+            const added = [], updated = [];
+            const amt = s => toNum(s.su) + toNum(s.gy) + toNum(s.j);
+            after.forEach(st => {
+                const label = `${st.grade}-${st.classNum}-${st.studentNum}`;
+                const old = db.find(x => x.grade === st.grade && x.classNum === st.classNum && x.studentNum === st.studentNum);
+                const items = [];
+                for (let q = 1; q <= maxQuarter; q++) {
+                    (st[`q${q}`].subs || []).forEach((s, i) => {
+                        if (!s.name) return;
+                        if (!old) { items.push(`${q}분기 ${s.name}`); return; }
+                        const prev = (old[`q${q}`].subs || [])[i];
+                        const sameName = (old[`q${q}`].subs || []).some(x => x.name === s.name);
+                        if (!sameName || !prev || !prev.name) items.push(`${q}분기 ${s.name} 추가`);
+                        else if (prev.name !== s.name || amt(prev) !== amt(s)) items.push(`${q}분기 ${s.name} 금액 ${formatMoney(amt(prev))} → ${formatMoney(amt(s))}`);
+                    });
+                }
+                if (!old) { added.push({ label, name: st.name, st, items }); return; }
+                if (st.hasG3 && !old.hasG3) items.unshift(`${getG3LabelShort()} 대상 추가`);
+                if (st.hasFree && !old.hasFree) items.unshift('자유수강권 추가');
+                if (items.length) updated.push({ label, name: st.name, st, items });
+            });
+            const unchanged = res.fileKeys.length - added.length - updated.length - res.skippedKeys.length;
+            return { ...res, added, updated, unchanged: Math.max(0, unchanged) };
+        }
+
+        function uwApply() {
+            const r = uwState.report;
+            if (!r || !uwState.wb) return;
+            if (!r.isBackup) saveCurrentStateAsSnapshot(todayLocal(), `명단 업로드 전 자동 보관 (${uwState.fileName})`, false);
+            runExcelImport(uwState.wb, false);
+            uwState.done = true; uwState.wb = null;
+            renderUploadWizard();
+        }
+
+        function uwChip(type, text) { return `<span class="uw-chip uw-${type}">${escHtmlAttr(text)}</span>`; }
+        function uwStepBody1() {
+            return `
+                <div class="uw-card uw-form">
+                    <div class="uw-ic">📄</div>
+                    <div class="uw-grow">
+                        <div class="uw-h">처음이신가요? 입력 양식을 받아 주세요</div>
+                        <div class="uw-p">학생 명단과 분기별 수강 과목을 적는 엑셀입니다. 예시 학생 2명이 적혀 있으니 지우고 적어 주세요.</div>
+                    </div>
+                    <button class="uw-btn uw-green" onclick="uwDownloadForm(this)">⤓ 입력 양식 받기</button>
+                </div>
+                <div class="uw-card uw-reuse">
+                    <div class="uw-h uw-big">🙆 꼭 새 양식이 아니어도 괜찮아요!</div>
+                    <div class="uw-p">전에 받아서 입력해 둔 엑셀을 <b>그대로 열어 내용을 더 적고 다시 올리셔도 됩니다.</b><br>프로그램이 <b>학번과 이름</b>으로 학생을 찾아서, <b>달라진 내용만 쏙쏙</b> 골라 넣어 드려요.</div>
+                    <div class="uw-rules">
+                        <div class="uw-rule"><span class="uw-mark uw-ok">✔</span><span><b>새로 적은 학생</b>은 명단에 추가돼요.</span></div>
+                        <div class="uw-rule"><span class="uw-mark uw-ok">✔</span><span>이미 있는 학생에게 <b>새로 적은 과목</b>만 그 분기에 추가돼요.</span></div>
+                        <div class="uw-rule"><span class="uw-mark uw-ok">✔</span><span>${escHtmlAttr(getG3LabelShort())}·자유수강권이 <b>X에서 O로 바뀐 학생</b>은 지원 대상이 추가돼요.</span></div>
+                        <div class="uw-rule"><span class="uw-mark uw-same">＝</span><span><b>그대로인 학생과 과목</b>은 건드리지 않아요. 환불·메모도 그대로 남아요.</span></div>
+                        <div class="uw-rule uw-warnrule"><span class="uw-mark uw-no">!</span><span><b>이미 입력된 과목의 금액을 고치거나, 엑셀에서 지운 것은 반영되지 않아요.</b> 이런 건 프로그램에서 학생의 <b>수정</b> 버튼으로 고쳐 주세요.</span></div>
+                    </div>
+                </div>
+                <div class="uw-tip">💡 코디마스터에서 내려받은 강좌별 엑셀은 여기가 아니라 왼쪽의 <b>코디마스터 수강료 업로드</b> 버튼으로 올려 주세요.</div>`;
+        }
+        function uwStepBody2() {
+            return `
+                <div class="uw-drop" onclick="document.getElementById('excelUpload').click()" ondragover="event.preventDefault(); this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="uwOnDrop(event)">
+                    <div class="uw-dropic">${uwState.busy ? '⏳' : '📂'}</div>
+                    <div class="uw-h uw-big">${uwState.busy ? '엑셀을 읽고 있어요...' : '엑셀 파일을 여기로 끌어다 놓으세요'}</div>
+                    <div class="uw-p">새 양식도, 전에 입력해 둔 엑셀도 좋아요. 올려도 바로 저장되지 않고 다음 단계에서 먼저 보여 드려요.</div>
+                    <button class="uw-btn uw-primary" ${uwState.busy ? 'disabled' : ''}>파일 선택</button>
+                </div>
+                ${uwState.error ? `<div class="uw-error">⚠️ ${escHtmlAttr(uwState.error)}</div>` : ''}`;
+        }
+        function uwStepBody3() {
+            const r = uwState.report;
+            const issues = [
+                ...r.ignoredChanges.map(x => ({ t: `${x.label} · ${x.q}분기 ${x.name}`, d: `프로그램 ${formatMoney(x.oldAmt)}, 엑셀 ${formatMoney(x.newAmt)} → 금액은 바뀌지 않아요. 바꾸려면 학생의 수정 버튼으로 고쳐 주세요.` })),
+                ...r.intraDups.map(x => ({ t: '제외된 학생', d: x })),
+                ...r.specialDups.map(x => ({ t: '특수학급 중복', d: x })),
+                ...r.blockMsgs.map(x => ({ t: '일부 누락', d: x }))
+            ];
+            const rows = [
+                ...r.added.map(x => `<div class="uw-row"><div class="uw-who"><b>${escHtmlAttr(x.name)}</b><span>${escHtmlAttr(x.label)}</span></div>${uwChip('new', '신규 추가')}<div class="uw-what">${x.items.length ? escHtmlAttr(x.items.join(', ')) : '과목 없이 명단만 추가'}</div></div>`),
+                ...r.updated.map(x => `<div class="uw-row"><div class="uw-who"><b>${escHtmlAttr(x.name)}</b><span>${escHtmlAttr(x.label)}</span></div>${uwChip('upd', '업데이트')}<div class="uw-what">${escHtmlAttr(x.items.join(', '))}</div></div>`)
+            ].join('');
+            return `
+                <div class="uw-file">📗 <b>${escHtmlAttr(uwState.fileName)}</b><a onclick="uwGo(2)">다른 파일 선택</a></div>
+                ${r.isBackup ? `<div class="uw-tip">💾 <b>전체 명단 백업 파일</b>이에요. 이미 있는 학생의 금액·환불·메모까지 <b>이 파일 내용으로 덮어써서</b> 복원합니다.</div>` : ''}
+                <div class="uw-sum">
+                    <div class="uw-tile uw-t-new"><span>새로 추가</span><b>${r.added.length}명</b></div>
+                    <div class="uw-tile uw-t-upd"><span>달라져서 업데이트</span><b>${r.updated.length}명</b></div>
+                    <div class="uw-tile uw-t-same"><span>그대로 (변경 없음)</span><b>${r.unchanged}명</b></div>
+                    <div class="uw-tile uw-t-warn"><span>확인 필요</span><b>${issues.length}건</b></div>
+                </div>
+                ${rows ? `<div class="uw-sec">이렇게 반영돼요</div><div class="uw-list">${rows}</div>` : `<div class="uw-tip">이 파일에는 새로 반영할 내용이 없어요.</div>`}
+                ${issues.length ? `<div class="uw-sec uw-sec-warn">⚠️ 확인해 주세요 (아래 내용은 반영되지 않아요)</div><div class="uw-list">${issues.map(x => `<div class="uw-issue"><b>${escHtmlAttr(x.t)}</b><span>${escHtmlAttr(x.d)}</span></div>`).join('')}</div>` : ''}`;
+        }
+        function uwBodyDone() {
+            const r = uwState.report;
+            return `
+                <div class="uw-done">
+                    <div class="uw-dropic">✅</div>
+                    <div class="uw-h uw-big">명단 반영을 마쳤어요</div>
+                    <div class="uw-p">신규 ${r.added.length}명 · 업데이트 ${r.updated.length}명 · 변경 없음 ${r.unchanged}명</div>
+                    ${r.isBackup ? '' : `<div class="uw-p">반영 직전 상태는 <b>7. 날짜별 과거 기록</b>에 보관해 두었어요.</div>`}
+                </div>`;
+        }
+        function renderUploadWizard() {
+            const s = uwState.step, r = uwState.report;
+            document.querySelectorAll('#uploadWizardOverlay .uw-step').forEach(b => {
+                const n = Number(b.dataset.s);
+                b.classList.toggle('on', n === s && !uwState.done);
+                b.classList.toggle('done', n < s || uwState.done);
+                b.querySelector('.uw-n').textContent = (n < s || uwState.done) ? '✓' : n;
+                b.disabled = uwState.done || (n === 3 && !r);
+            });
+            const body = document.getElementById('uwBody'), foot = document.getElementById('uwFoot');
+            if (uwState.done) {
+                body.innerHTML = uwBodyDone();
+                foot.innerHTML = `<span class="uw-grow"></span><button class="uw-btn uw-primary" onclick="closeUploadWizard()">닫기</button>`;
+            } else if (s === 1) {
+                body.innerHTML = uwStepBody1();
+                foot.innerHTML = `<span class="uw-note">이미 적어 둔 엑셀이 있으면 바로 다음으로 가세요.</span><span class="uw-grow"></span><button class="uw-btn" onclick="closeUploadWizard()">취소</button><button class="uw-btn uw-primary" onclick="uwGo(2)">다음 · 파일 선택 →</button>`;
+            } else if (s === 2) {
+                body.innerHTML = uwStepBody2();
+                foot.innerHTML = `<button class="uw-btn" onclick="uwGo(1)">← 이전</button><span class="uw-grow"></span><button class="uw-btn" onclick="closeUploadWizard()">취소</button>`;
+            } else {
+                body.innerHTML = uwStepBody3();
+                const count = r.added.length + r.updated.length;
+                const canApply = count > 0 || r.isBackup;
+                foot.innerHTML = `<span class="uw-note">${(r.isBackup || !canApply) ? '' : '반영 직전 상태를 7. 날짜별 과거 기록에 자동 보관해요.'}</span><span class="uw-grow"></span><button class="uw-btn" onclick="closeUploadWizard()">${canApply ? '취소' : '닫기'}</button>${canApply ? `<button class="uw-btn uw-primary" onclick="uwApply()">${r.isBackup ? '백업 파일로 복원하기' : `${count}명 반영하기`}</button>` : ''}`;
+            }
+            body.scrollTop = 0;
         }
 		
 		
@@ -14376,7 +14652,7 @@ document.addEventListener('click', function(e) {
         }
     }
     if (yearPanel && yearPanel.classList.contains('open')) {
-        if (!yearPanel.contains(e.target) && e.target.id !== 'btnYearSettings') {
+        if (!yearPanel.contains(e.target) && !e.target.closest('#btnYearSettings')) {
             yearPanel.classList.remove('open');
         }
     }
@@ -16331,7 +16607,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
             var lo = 180, hi = 320;
             if (ok(lo)) hi = lo;
             else { while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (ok(mid)) hi = mid; else lo = mid; } }
-            var target = (hi + 4) + 'px'; // 4px 여유
+            var target = (hi + 4 + (sb.offsetWidth - sb.clientWidth)) + 'px'; // 4px 여유 + 세로 스크롤바 폭
             if (root.style.getPropertyValue('--sidebar-w') !== target) root.style.setProperty('--sidebar-w', target);
             try { localStorage.setItem('edusync_sidebar_w', target); } catch (e) {}
         } finally {
@@ -16574,7 +16850,7 @@ function showBackupNudge() {
     el.id = 'backupNudge';
     el.style.cssText = 'position:fixed; right:20px; bottom:20px; z-index:99995; width:440px; max-width:calc(100vw - 40px); background:white; border:2px solid #a21caf; border-radius:12px; box-shadow:0 12px 30px rgba(15,23,42,0.25); padding:14px 16px; font-size:13px; color:#334155; line-height:1.6; word-break:keep-all;';
     el.innerHTML = '<div style="font-weight:900; color:#701a75; font-size:14px; margin-bottom:4px;">💾 학생 금액이 바뀌었어요</div>' +
-        '정리가 끝났다면 <b>⏳ 8.날짜별 과거 기록(백업)</b>에서 지금 상태를 저장해 두세요. 나중에 금액이 달라졌을 때 백업과 바로 비교할 수 있어요.' +
+        '정리가 끝났다면 <b>7.날짜별 과거 기록</b>에서 지금 상태를 저장해 두세요. 나중에 금액이 달라졌을 때 백업과 바로 비교할 수 있어요.' +
         '<div style="display:flex; gap:6px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;">' +
         '<button type="button" onclick="document.getElementById(\'backupNudge\').remove()" style="height:32px; padding:0 12px; border-radius:6px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer;">나중에</button>' +
         '<button type="button" onclick="document.getElementById(\'backupNudge\').remove(); openCalcChangeModal(\'backup\');" style="height:32px; padding:0 12px; border-radius:6px; border:1.5px solid #1e3a5f; background:white; color:#1e3a5f; font-weight:800; cursor:pointer;">🔍 백업기록과 비교하기</button>' +
