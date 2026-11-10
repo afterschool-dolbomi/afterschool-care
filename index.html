@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.8.1</title>
+    <title>방과후 지원금 돌보미 V19.9</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.8.1</span>
+                <span class="brand-version">V19.9</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -2739,6 +2739,7 @@
         let isFeeViewOn = false; // ✨ 과목별 보기 - false: 수강료 보기, true: 강사료 보기(강사료·수용비로 분할)
         let chaViewFilter = 'all'; // ✨ [v19.2] 과목별 보기 금액 단위 - 'all': 분기금액(전체), 1·2·3: 그 차의 차시금액
         let chaMissingCount = 0; // ✨ [v19.2] 차시금액 보기에서 차시 미입력으로 제외된 줄 수
+        let chaEvenCount = 0; // ✨ [v19.9] 차시 미입력이라 차마다 똑같이 나눠 보여준 과목 수
 
         let isRefundViewOn = false;
         let isG3RefundOn = false, isFreeRefundOn = false, isSkRefundOn = false; // ✨ 과목별 보기 - 지원금별 환불보기 토글
@@ -3127,7 +3128,8 @@
 
         // ✨ 과거 모드일 때 실데이터 덮어쓰기 방지 (매우 중요)
         function persistData() {
-            if(isTimeTravelMode) return; 
+            stmtFeeCache = {}; // ✨ [v19.9] 금액이 바뀌었으니 청구서 강사료 다시 계산
+            if(isTimeTravelMode) return;
             localStorage.setItem('edusync_db_v3', JSON.stringify(db));
             updateGlobalStats();
             if (typeof scheduleCalcSnapshot === 'function') scheduleCalcSnapshot();
@@ -3498,6 +3500,46 @@
             return { g, s: amount - g };
         }
 
+        // ✨ [v19.9] 청구서 강사료 규칙 (학교 기준: 수용비는 강사료의 5%를 넘지 않고, 5%에 가장 가깝게)
+        //    = 강사료는 '수강료 ÷ 1.05'를 10원 단위로 올림 (참조 엑셀 E열 =ROUNDUP(D/1.05,-1)과 같음)
+        //    예) 23,070 → 21,980 / 1,090   30,760 → 29,300 / 1,460   38,450 → 36,620 / 1,830
+        //    과목 목록관리의 강사료·수용비가 5% 기준이면(분기 강사료가 ÷1.05 값과 차 수×10원 안에서 같음) 이 규칙,
+        //    수용비 비율을 5%가 아닌 다른 값으로 정한 과목이면 예전처럼 그 비율로 계산
+        function isFivePctFee(g0, s0) {
+            g0 = toNum(g0); s0 = toNum(s0);
+            if (g0 <= 0 && s0 <= 0) return true;
+            let exp = Math.ceil(((g0 + s0) / 1.05) / 10 - 1e-6) * 10;
+            return Math.abs(exp - g0) <= 10 * getMonthsPerQuarter();
+        }
+        function stmtTeacherFee(amount, g0, s0) {
+            if (amount <= 0) return 0;
+            if (isFivePctFee(g0, s0)) return Math.min(amount, Math.ceil((amount / 1.05) / 10 - 1e-6) * 10);
+            return computeTeacherFeeSplit(amount, toNum(g0), toNum(s0), true).g;
+        }
+        // ✨ [v19.9] 분기 강사료를 고정할 금액 (청구서·과목별 보기 공용). null이면 고정하지 않고 차마다 규칙대로 올림
+        //    · 환불 없이 분기 수강료 그대로 낸 학생: 학생 기록의 강사료(직접 입력한 금액 포함), 없으면 과목목록관리 강사료
+        //    · 환불 등으로 금액이 줄어든 학생: 고정하지 않음 → 한 달 30,760원은 언제나 29,300원 (로봇과학 3분기 84,590 → 80,580처럼 차별 합계)
+        function getQuarterFeeCap(stSub, msFee, su, quarterNetSu) {
+            if (quarterNetSu !== su || su <= 0) return null;
+            let g0 = stSub ? toNum(stSub.g) : 0, s0 = stSub ? toNum(stSub.s) : 0;
+            if ((g0 > 0 || s0 > 0) && g0 + s0 === su) return g0;
+            if (msFee && toNum(msFee.g) > 0 && su === toNum(msFee.su)) return toNum(msFee.g);
+            return null;
+        }
+        // ✨ [v19.9] 한 학생의 이번 차 강사료(total)를 지원금 몫에 나눔 - 참조 엑셀처럼 큰 몫부터 규칙대로 올림, 가장 작은 몫이 나머지
+        //    예) 30,760원이 24,320 + 6,440으로 나뉘면 강사료 29,300 → 23,170 + 6,130
+        function splitStmtFee(total, amounts, g0, s0) {
+            let out = amounts.map(() => 0), rest = total;
+            let idx = amounts.map((a, i) => i).filter(i => amounts[i] > 0).sort((x, y) => amounts[y] - amounts[x] || x - y);
+            idx.forEach((i, k) => {
+                let g = (k === idx.length - 1) ? rest : Math.min(stmtTeacherFee(amounts[i], g0, s0), rest);
+                g = Math.max(0, Math.min(g, amounts[i]));
+                out[i] = g; rest -= g;
+            });
+            if (rest > 0) idx.forEach(i => { let add = Math.min(rest, amounts[i] - out[i]); out[i] += add; rest -= add; });
+            return out;
+        }
+
         // ✨ [v19.5] 보강관리: 학생별 보강 기록(s.bogangLog)을 이 학생의 차시에 반영
         //    기록 = { id, from, to, n, reason, date } : from차의 n차시를 to차로 옮김 (분기 합계는 그대로)
         //    과목 목록의 차시가 나중에 줄어들어도 음수가 되지 않도록 남은 차시까지만 옮김
@@ -3583,10 +3625,21 @@
         //    - 환불은 청구서와 같은 규칙으로 태그된 차부터 차감하고, 지원금은 1차부터 순서대로 소진
         //    - 강사료는 차별 금액마다 한 번만 계산(강사료 올림·수용비 내림)한 뒤 지원금/수익자 몫 비율로 나눔
         //    pools = { g3, fr, preSk } : 이 과목의 분기 초3·자유수강 수강료 몫과 차시비율 제외분(1차부터 수익자 처리)
-        function computeChaBreakdown(masterSub, q, su, quarterSu, pools, refundLog, isYuka, moves) {
+        //    stSub : 학생의 과목 기록 (직접 입력한 강사료로 분기 강사료를 고정할 때 사용, v19.9)
+        function computeChaBreakdown(masterSub, q, su, quarterSu, pools, refundLog, isYuka, moves, stSub) {
             let months = getMonthsPerQuarter();
             let normals = getTsMonthlyNormals(masterSub, q, su);
             let out = { ok: false, m: {} };
+            // ✨ [v19.9] 과목 목록에 이 분기 차시가 없으면(청구서는 만들 수 없음) 분기 수강료를 차마다 똑같이 나눔
+            //    10원 단위, 마지막 차가 나머지를 가져감 → 과목별 보기 1·2·3차·학생 상세에서도 금액이 보이게
+            if (!Object.keys(normals).length && toNum(su) > 0) {
+                let each = Math.round(toNum(su) / months / 10) * 10, assigned = 0;
+                for (let m = 1; m <= months; m++) {
+                    let amt = (m === months) ? Math.max(0, toNum(su) - assigned) : Math.min(each, Math.max(0, toNum(su) - assigned));
+                    normals[m] = amt; assigned += amt;
+                }
+                out.even = true;
+            }
             if (!Object.keys(normals).length) return out;
             let chargeArr = [];
             for (let m = 1; m <= months; m++) chargeArr[m] = toNum(normals[m]);
@@ -3627,32 +3680,147 @@
             for (let m = 1; m <= months; m++) out.m[m] = Object.assign(chaAlloc.m[m], { feeG: { g3: 0, fr: 0, sk: 0 } });
             out.moves = chaAlloc.moves;
 
-            // 강사료: 차별 금액 기준으로 한 번 계산, 분기 강사료 한도 안에서 마지막 차가 나머지를 가져감
+            // 강사료: 청구서와 같은 규칙 (v19.9) - 차마다 ÷1.05 올림, 마지막 차는 '분기 강사료 − 앞 차', 나뉜 학생은 큰 몫부터 올림
             let msFee = masterSub && masterSub.fees && masterSub.fees[q];
             let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
-            let hasGS = (mG > 0 || mS > 0);
-            let tfOne = (m, chg) => {
-                let sp = computeTeacherFeeSplit(chg, mG, mS, hasGS);
-                if (msFee && mG > 0 && su === toNum(msFee.su) && chg === toNum(normals[m])) {
-                    let gN = toNum(getTsMonthlyNormals(masterSub, q, mG)[m]);
-                    if (gN > 0 && gN <= chg) sp = { g: gN, s: chg - gN };
-                }
-                return sp;
-            };
-            let gCap = (msFee && mG > 0 && su === toNum(msFee.su) && quarterSu === su)
-                ? mG
-                : computeTeacherFeeSplit(quarterSu, mG, mS, hasGS).g;
+            let gCap = getQuarterFeeCap(stSub, msFee, su, quarterSu);
             let lastM = 0, gPrev = 0;
-            for (let m = 1; m <= months; m++) if ((chargeArr[m] || 0) > 0) lastM = m;
+            for (let m = 1; m <= months; m++) if ((out.m[m].charge || 0) > 0) lastM = m;
             for (let m = 1; m <= months; m++) {
                 let o = out.m[m], chg = o.charge;
                 if (chg <= 0) continue;
-                let g = (m === lastM) ? (gCap - gPrev) : Math.min(tfOne(m, chg).g, gCap - gPrev);
+                let g = (gCap === null) ? stmtTeacherFee(chg, mG, mS)
+                    : (m === lastM) ? (gCap - gPrev) : Math.min(stmtTeacherFee(chg, mG, mS), gCap - gPrev);
                 g = Math.max(0, Math.min(g, chg)); gPrev += g;
-                let parts = splitAmountByWeightsIn10Won(g, [o.g3, o.fr, o.sk]);
+                let parts = splitStmtFee(g, [o.g3, o.fr, o.sk], mG, mS);
                 o.feeG = { g3: parts[0], fr: parts[1], sk: parts[2] };
             }
             out.ok = true;
+            return out;
+        }
+
+        // ✨ [v19.9] 청구서(정산파일)에 실제로 찍히는 학생별 강사료
+        //    청구서 엑셀은 같은 과목줄·같은 금액의 학생을 한 줄로 묶고, 1인당 강사료(E열) = 그 줄 학생들 강사료의 평균(10원 단위),
+        //    몫별 강사료(I·M·Q열) = 인원 × E. 그래서 학생 한 명 몫의 청구서 강사료 = 그 줄의 E
+        //    반환: { '학생id|과목칸': { 차: { g3, fr, sk } } }  (부 합치기는 정산파일 창의 체크 상태를 따름, 기본 켜짐)
+        var stmtFeeCache = {};
+        function getStatementFeeMap(q) {
+            let mpEl = document.getElementById('tsMergeParts');
+            let mergeParts = mpEl ? mpEl.checked : true;
+            let key = q + '|' + mergeParts;
+            if (stmtFeeCache[key]) return stmtFeeCache[key];
+            let map = {};
+            for (let m = 1; m <= getMonthsPerQuarter(); m++) {
+                let groups = [];
+                try { groups = buildTuitionStatementGroups(q, m, mergeParts); } catch (e) { continue; }
+                groups.forEach(g => g.rowGroups.forEach(rg => {
+                    let byAmt = {};
+                    (rg.contributions || []).forEach(c => { let k = c.amount + '|' + c.teacherFee; (byAmt[k] = byAmt[k] || []).push(c); }); // 청구서와 같이 금액·강사료가 같은 학생끼리 한 줄
+                    Object.values(byAmt).forEach(list => {
+                        let E = Math.round(list.reduce((t, c) => t + c.teacherFee, 0) / list.length / 10) * 10; // 엑셀 E열과 같은 식
+                        list.forEach(c => {
+                            let o = map[c.sid + '|' + c.sIdx] || (map[c.sid + '|' + c.sIdx] = {});
+                            let mm = o[m] || (o[m] = { g3: 0, fr: 0, sk: 0 });
+                            mm[c.type === 'free' ? 'fr' : c.type] += E;
+                        });
+                    });
+                }));
+            }
+            return (stmtFeeCache[key] = map);
+        }
+
+        // ✨ [v19.9] 분기 강사료 총액 - 청구서(computeChaBreakdown·정산파일)의 분기 강사료 한도와 같은 식
+        //    정상 결제 학생은 과목목록관리 강사료, 환불 등이 있으면 순수강료 기준 강사료(10원 올림)
+        //    (차시가 없어 청구서를 만들 수 없는 과목의 몫별 강사료에만 사용)
+        function getQuarterTeacherFee(masterSub, q, su, quarterSu) {
+            if (quarterSu <= 0) return 0;
+            let msFee = masterSub && masterSub.fees && masterSub.fees[q];
+            let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
+            return (msFee && mG > 0 && su === toNum(msFee.su) && quarterSu === su)
+                ? mG
+                : stmtTeacherFee(quarterSu, mG, mS);
+        }
+
+        // ✨ [v19.9] 강사료를 몫(초3·자유·수익자) 금액 비율로 10원 단위로 나눔. 합계는 항상 total과 같음
+        function splitFeeByFunds(total, funds) {
+            if (total < 0) return splitFeeByFunds(-total, funds).map(v => -v);
+            let parts = splitAmountByWeightsIn10Won(total, funds);
+            let rest = total - parts.reduce((a, b) => a + b, 0);
+            funds.map((f, i) => ({ f, i })).sort((x, y) => y.f - x.f).forEach(({ f, i }) => {
+                let add = Math.max(-parts[i], Math.min(rest, f - parts[i]));
+                parts[i] += add; rest -= add;
+            });
+            if (rest !== 0) { let big = funds.indexOf(Math.max(...funds)); parts[big] += rest; } // 몫 한도를 넘더라도 합계는 맞춤
+            return parts;
+        }
+
+        // ✨ [v19.9] 한 과목(학생·분기)을 청구서와 같은 계산으로 차별로 나눔 (과목별 보기 차시금액·전체, 학생 상세, 엑셀 명단 공용)
+        //   net  : 최종(환불 뒤) 차별 금액·몫별 강사료 (청구서와 같은 값)
+        //   gross: 환불 전 차별 금액·몫별 강사료
+        //   ref  : 차별 환불 강사료 = 환불 전 강사료 − 최종 강사료를 그 차의 환불 몫 비율로 나눔 (분기 합계 = 환불 강사료)
+        function computeSubChaFees(r, q, s, a) {
+            let su = toNum(s.su);
+            let origSub = savedSubjects.find(x => x.name === s.name);
+            let masterSub = bogangSub(origSub, q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
+            if (su <= 0) return { ok: false, masterSub };
+            let moves = getBogangMoves(origSub, q, su, s.bogangLog); // ✨ [v19.5.1] 보강 금액은 재원째로 옮김
+            let isYuka = (r.freeTier === '육아기근로단축');
+            let g3 = toNum(a.g3Su), fr = toNum(a.frSu), sk = toNum(a.skSu);
+            let rg3 = toNum(a.refG3Su), rfr = toNum(a.refFrSu), rsk = toNum(a.refSkSu);
+            let preSk = v => s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), v) : 0;
+            let net = computeChaBreakdown(masterSub, q, su, toNum(a.netSu), { g3, fr, preSk: preSk(sk) }, s.refundLog || [], isYuka, moves, s);
+            if (!net.ok) return { ok: false, masterSub };
+            // 차별 몫별 강사료는 청구서 엑셀에 찍히는 값(E열)으로 (청구서에 들어가는 학생·과목일 때)
+            let sIdx = (r[`q${q}`] && r[`q${q}`].subs || []).indexOf(s);
+            let stmt = sIdx > -1 ? getStatementFeeMap(q)[r.id + '|' + sIdx] : null;
+            if (stmt) Object.keys(net.m).forEach(m => { let v = stmt[m]; net.m[m].feeG = v ? { g3: v.g3, fr: v.fr, sk: v.sk } : { g3: 0, fr: 0, sk: 0 }; });
+            let gross = computeChaBreakdown(masterSub, q, su, su, { g3: g3 + rg3, fr: fr + rfr, preSk: preSk(sk + rsk) }, [], isYuka, moves, s);
+            const zero = { charge: 0, g3: 0, fr: 0, sk: 0, feeG: { g3: 0, fr: 0, sk: 0 } };
+            let ref = {}, rows = [], lost = 0, bigM = 0, bigAmt = 0;
+            for (let m = 1; m <= getMonthsPerQuarter(); m++) {
+                let n = net.m[m] || zero, gr = (gross.ok && gross.m[m]) || zero;
+                let rAmt = [Math.max(0, gr.g3 - n.g3), Math.max(0, gr.fr - n.fr), Math.max(0, gr.sk - n.sk)];
+                let rTot = (gr.feeG.g3 + gr.feeG.fr + gr.feeG.sk) - (n.feeG.g3 + n.feeG.fr + n.feeG.sk);
+                let amtSum = rAmt[0] + rAmt[1] + rAmt[2];
+                if (amtSum <= 0) lost += rTot; // 환불이 없는 차에 생긴 10원 차이는 환불이 가장 큰 차로 모음 (분기 합계 = 환불 강사료)
+                if (amtSum > bigAmt) { bigAmt = amtSum; bigM = m; }
+                rows[m] = { rAmt, rTot, amtSum };
+            }
+            for (let m = 1; m <= getMonthsPerQuarter(); m++) {
+                let x = rows[m];
+                let t = x.rTot + (m === bigM ? lost : 0);
+                let p = x.amtSum > 0 ? splitFeeByFunds(t, x.rAmt) : [0, 0, 0];
+                ref[m] = { g3: p[0], fr: p[1], sk: p[2] };
+            }
+            return { ok: true, net, gross, ref, masterSub };
+        }
+
+        // ✨ [v19.9] 한 과목(학생·분기)의 몫별 강사료·수용비 분기 합계 = 청구서 차별 강사료를 더한 값
+        //   차시가 없어 청구서를 만들 수 없는 과목은 분기 강사료(getQuarterTeacherFee)를 몫 비율로 나눔
+        //   반환: { net: {g3:{g,s}, fr:{g,s}, sk:{g,s}}, ref: {...} }  (s = 그 몫 수강료 − 강사료)
+        function getFundTeacherFees(r, q, s, a) {
+            const K = ['g3', 'fr', 'sk'];
+            a = a || {};
+            let netF = [toNum(a.g3Su), toNum(a.frSu), toNum(a.skSu)];
+            let refF = [toNum(a.refG3Su), toNum(a.refFrSu), toNum(a.refSkSu)];
+            let netG = [0, 0, 0], refG = [0, 0, 0];
+            let cf = computeSubChaFees(r, q, s, a);
+            if (cf.ok) {
+                Object.keys(cf.net.m).forEach(m => K.forEach((k, i) => { netG[i] += toNum(cf.net.m[m].feeG[k]); }));
+                // 분기 환불 강사료 합계(= 환불 강사료)를 이 과목의 몫별 환불 금액 비율로 나눔
+                let refTot = 0;
+                Object.keys(cf.ref).forEach(m => K.forEach(k => { refTot += toNum(cf.ref[m][k]); }));
+                if (refF.some(v => v > 0)) refG = splitFeeByFunds(refTot, refF);
+            } else if (toNum(s.su) > 0) {
+                let su = toNum(s.su);
+                netG = splitFeeByFunds(getQuarterTeacherFee(cf.masterSub, q, su, toNum(a.netSu)), netF);
+                if (refF.some(v => v > 0)) refG = splitFeeByFunds(getQuarterTeacherFee(cf.masterSub, q, su, su) - netG.reduce((x, y) => x + y, 0), refF);
+            }
+            let out = { net: {}, ref: {} };
+            K.forEach((k, i) => {
+                out.net[k] = { g: netG[i], s: netF[i] - netG[i] };
+                out.ref[k] = { g: refG[i], s: refF[i] - refG[i] };
+            });
             return out;
         }
 
@@ -3665,20 +3833,10 @@
                 let s = row.sObj || {}, a = row.alloc || {}, q = row.qNum;
                 let su = toNum(s.su);
                 if (su <= 0) { out.push(Object.assign({}, row, { cha: 1 })); return; }
-                let origSub = savedSubjects.find(x => x.name === row.sName);
-                let masterSub = bogangSub(origSub, q, s); // ✨ [v19.5] 보강 학생은 옮긴 차시로 계산
-                let bgMoves = getBogangMoves(origSub, q, su, s.bogangLog); // ✨ [v19.5.1] 보강 금액은 재원째로 옮김
-                let isYuka = (row.r.freeTier === '육아기근로단축');
-                let net = computeChaBreakdown(masterSub, q, su, toNum(a.netSu),
-                    { g3: row.g3Su, fr: row.freeSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu) : 0 },
-                    s.refundLog || [], isYuka, bgMoves);
-                if (!net.ok) { out.push(Object.assign({}, row, { cha: 0, chaMissing: true })); return; }
-                let gross = computeChaBreakdown(masterSub, q, su, su,
-                    { g3: row.g3Su + row.g3RefundSu, fr: row.freeSu + row.freeRefundSu, preSk: s.sessionRatioEnabled ? Math.min(toNum(a.exclSu), row.skSu + row.skRefundSu) : 0 },
-                    [], isYuka, bgMoves);
-                let msFee = masterSub && masterSub.fees && masterSub.fees[q];
-                let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
-                let hasGS = (mG > 0 || mS > 0);
+                let cf = computeSubChaFees(row.r, q, s, a); // ✨ [v19.9] 청구서·학생 상세와 같은 계산
+                if (!cf.ok) { out.push(Object.assign({}, row, { cha: 0, chaMissing: true })); return; }
+                let chaEven = !!cf.net.even; // ✨ [v19.9] 차시 미입력 → 차마다 똑같이 나눈 금액
+                let net = cf.net, gross = cf.gross;
                 for (let m = 1; m <= months; m++) {
                     let n = net.m[m] || zero, gr = (gross.ok && gross.m[m]) || zero;
                     let f = (m === 1);
@@ -3694,10 +3852,11 @@
                     let realTot = realSu + realGy + realJ;
                     let refTot = g3RSu + frRSu + skRSu + g3RGy + g3RJ + frRGy + frRJ + skRGy + skRJ;
                     if (realTot === 0 && refTot === 0) continue;
-                    let g3RF = computeTeacherFeeSplit(g3RSu, mG, mS, hasGS), frRF = computeTeacherFeeSplit(frRSu, mG, mS, hasGS), skRF = computeTeacherFeeSplit(skRSu, mG, mS, hasGS);
+                    let rf = cf.ref[m] || { g3: 0, fr: 0, sk: 0 };
+                    let g3RF = { g: rf.g3, s: g3RSu - rf.g3 }, frRF = { g: rf.fr, s: frRSu - rf.fr }, skRF = { g: rf.sk, s: skRSu - rf.sk };
                     let netFeeG = n.feeG.g3 + n.feeG.fr, netFeeS = netSu - netFeeG;
                     out.push(Object.assign({}, row, {
-                        cha: m,
+                        cha: m, chaEven,
                         g3Su: n.g3, g3Gy, g3J, g3Tot: n.g3 + g3Gy + g3J,
                         freeSu: n.fr, freeGy, freeJ, freeTot: n.fr + freeGy + freeJ,
                         netSu, netGy, netJ, netTot: netSu + netGy + netJ,
@@ -3718,6 +3877,7 @@
                 }
             });
             chaMissingCount = out.filter(x => x.chaMissing).length;
+            chaEvenCount = new Set(out.filter(x => x.chaEven).map(x => x.r.id + '|' + x.qNum + '|' + x.sName)).size;
             if (chaViewFilter !== 'all') out = out.filter(x => x.cha === chaViewFilter);
             return out;
         }
@@ -3889,18 +4049,9 @@
             if (confirm(msg)) { try { openSubjectManager(); } catch (e) {} }
         }
 
-        async function generateTuitionStatementExcel() {
-            if (!tsState.q || !tsState.month) return alert('분기와 차를 선택해주세요.');
-            let q = tsState.q, month = tsState.month;
-            // ✨ 이번 정산 대상 과목 중 표준차시가 없는 과목이 있으면 먼저 입력하도록 안내
-            let missingStd = savedSubjects.filter(sub => {
-                let has = (month === 'pre') ? getSubjectTotalSessions(sub, q) > 0 : ((sub.sessions && sub.sessions[q]) ? toNum(sub.sessions[q][`m${month}`]) > 0 : false);
-                return has && !(sub.fees && sub.fees[q] && toNum(sub.fees[q].stdSessions) > 0);
-            }).map(sub => sub.name);
-            if (missingStd.length) { closeTuitionStatementModal(); alertMissingStdSessions(q, missingStd, '정산파일'); return; }
-            let mergeParts = document.getElementById('tsMergeParts').checked;
-            closeTuitionStatementModal();
-
+        // ✨ [v19.9] 정산파일(교육비 청구서)의 계산 부분 - generateTuitionStatementExcel에서 그대로 옮겨온 것 (엑셀 금액은 v19.8.1과 같음)
+        //    학생 상세·과목별 보기의 강사료(getStatementFeeMap)도 이 결과를 그대로 씀
+        function buildTuitionStatementGroups(q, month, mergeParts) {
             let baseMap = {}, order = [];
             savedSubjects.forEach(sub => {
                 let sessThisMonth = (month === 'pre')
@@ -4072,42 +4223,46 @@
                             // ✨ 강사료는 "이 학생이 이번에 내야(또는 돌려받아야) 할 전체 금액(thisCharge)" 기준으로 딱 한 번만 계산하고,
                             //    그 결과를 지원금/수익자 몫 비율대로 10원 단위로 정확히 나눠서
                             //    몫별로 따로 올림 계산했을 때 생기던 합계 불일치를 없앤다.
+                            // ✨ [v19.9] 강사료 규칙 (학교 기준, 참조 엑셀과 같음)
+                            //    · 차마다 강사료 = 이번 차 금액 ÷ 1.05를 10원 단위로 올림 (stmtTeacherFee, 수용비 5% 이내·5%에 가장 가깝게)
+                            //    · 환불 없이 다 낸 학생은 분기 강사료 고정: 마지막 차는 '분기 강사료 − 앞 차 강사료' (getQuarterFeeCap)
+                            //      예) 92,280원(강사료 87,900)을 3·4·5차시로 → 21,980 / 29,300 / 36,620
+                            //    · 환불 등으로 줄어든 학생은 고정하지 않고 차마다 규칙대로 (한 달 30,760원은 언제나 29,300원)
+                            //    · 수강전 취소는 분기 남은 금액 전체 → 분기 강사료(고정 금액이 없으면 규칙대로)
+                            //    · 여러 지원금으로 나뉜 학생은 큰 몫부터 규칙대로 올림, 가장 작은 몫이 나머지 (splitStmtFee)
                             let msFee = masterSub && masterSub.fees && masterSub.fees[q];
-                            let tfOne = (m, chg) => {
-                                let sp = computeTeacherFeeSplit(chg, tfMasterG, tfMasterS, tfHasCustomGS);
-                                if (m !== 'pre' && msFee && toNum(msFee.g) > 0 && su === toNum(msFee.su) && chg === toNum(getTsMonthlyNormals(masterSub, q, su)[m])) {
-                                    let gN = toNum(getTsMonthlyNormals(masterSub, q, toNum(msFee.g))[m]);
-                                    if (gN > 0 && gN <= chg) sp = { g: gN, s: chg - gN };
-                                }
-                                return sp;
-                            };
-                            let tfFullSplit = tfOne(month, thisCharge);
-                            if (month !== 'pre') {
-                                // ✨ 분기 강사료 한도: 정상 결제 학생은 과목목록관리 강사료, 환불 등이 있으면 순수강료 기준 강사료
-                                let gCap = (msFee && toNum(msFee.g) > 0 && su === toNum(msFee.su) && quarterNetSu === su)
-                                    ? toNum(msFee.g)
-                                    : computeTeacherFeeSplit(quarterNetSu, tfMasterG, tfMasterS, tfHasCustomGS).g;
+                            let gCap = getQuarterFeeCap(s, msFee, su, quarterNetSu);
+                            let tfFullSplit;
+                            if (month === 'pre') {
+                                let gP = Math.max(0, Math.min(gCap !== null ? gCap : stmtTeacherFee(thisCharge, tfMasterG, tfMasterS), thisCharge));
+                                tfFullSplit = { g: gP, s: thisCharge - gP };
+                            } else if (gCap === null) {
+                                let gT = stmtTeacherFee(thisCharge, tfMasterG, tfMasterS);
+                                tfFullSplit = { g: gT, s: thisCharge - gT };
+                            } else {
                                 let lastM = 0, gPrev = 0;
                                 for (let m = 1; m <= getMonthsPerQuarter(); m++) if ((chargeArrOut[m] || 0) > 0) lastM = m;
                                 for (let m = 1; m < month; m++) {
-                                    if ((chargeArrOut[m] || 0) > 0) gPrev += Math.min(tfOne(m, chargeArrOut[m]).g, Math.max(0, gCap - gPrev));
+                                    let c = chargeArrOut[m] || 0;
+                                    if (c > 0) gPrev += Math.max(0, Math.min(stmtTeacherFee(c, tfMasterG, tfMasterS), gCap - gPrev, c));
                                 }
-                                // ✨ 마지막 차는 남은 강사료 전부, 그 전 차는 한도를 넘지 않게
-                                let gThis = (month === lastM) ? (gCap - gPrev) : Math.min(tfFullSplit.g, gCap - gPrev);
+                                let gThis = (month === lastM) ? (gCap - gPrev) : Math.min(stmtTeacherFee(thisCharge, tfMasterG, tfMasterS), gCap - gPrev);
                                 gThis = Math.max(0, Math.min(gThis, thisCharge));
                                 tfFullSplit = { g: gThis, s: thisCharge - gThis };
                             }
-                            let tfParts = splitAmountByWeightsIn10Won(tfFullSplit.g, parts2.map(p => p.amount));
+                            let tfParts = splitStmtFee(tfFullSplit.g, parts2.map(p => p.amount), tfMasterG, tfMasterS);
                             parts2.forEach((p, pi) => {
-                                rg.contributions.push({ amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, isSplit, refundNote, refundLabel: `${r.grade}-${r.classNum} ${r.name}` });
+                                rg.contributions.push({ sid: r.id, sIdx, amount: p.amount, type: p.type, teacherFee: tfParts[pi], studentLabel, isSplit, refundNote, refundLabel: `${r.grade}-${r.classNum} ${r.name}` });
                             });
                         });
                     });
 
                     let buckets = {}, bucketOrder = [];
                     rg.contributions.forEach(c => {
-                        let key = c.amount;
-                        if (!buckets[key]) { buckets[key] = { amount: c.amount, sk: 0, g3: 0, free: 0, notes: [], skTeacherFee: 0, g3TeacherFee: 0, freeTeacherFee: 0 }; bucketOrder.push(key); }
+                        // ✨ [v19.9] 금액과 1인당 강사료가 모두 같은 학생끼리만 한 줄로 묶음
+                        //    (같은 금액이라도 마지막 차 강사료가 다른 학생을 한 줄에 넣고 평균을 내면 학생별 분기 강사료가 10원씩 어긋남)
+                        let key = c.amount + '|' + c.teacherFee;
+                        if (!buckets[key]) { buckets[key] = { amount: c.amount, teacherFee: c.teacherFee, sk: 0, g3: 0, free: 0, notes: [], skTeacherFee: 0, g3TeacherFee: 0, freeTeacherFee: 0 }; bucketOrder.push(key); }
                         let b = buckets[key];
                         if (c.type === 'g3') { b.g3++; b.g3TeacherFee += c.teacherFee; }
                         else if (c.type === 'free') { b.free++; b.freeTeacherFee += c.teacherFee; }
@@ -4120,7 +4275,7 @@
 
                     // ✨ 기본 금액이 아닌 줄에 학생이 2명 이하이고 환불 때문이면 → 비고에 '학년-반 이름 사유' 표시
                     Object.keys(buckets).forEach(key => {
-                        let cs = rg.contributions.filter(c => c.amount === buckets[key].amount);
+                        let cs = rg.contributions.filter(c => c.amount === buckets[key].amount && c.teacherFee === buckets[key].teacherFee);
                         let students = [...new Set(cs.map(c => c.refundLabel))];
                         if (students.length === 0 || students.length > 2) return;
                         students.forEach(lbl => {
@@ -4140,14 +4295,32 @@
                         }
                     }
                     let ordered = [];
-                    if (baseAmt !== null && buckets[baseAmt]) ordered.push(buckets[baseAmt]);
-                    bucketOrder.forEach(k => { if (Number(k) !== baseAmt) ordered.push(buckets[k]); });
+                    // 기본 금액 줄을 맨 위로 (기본 금액 줄이 둘 이상이면 인원이 많은 줄부터), 나머지는 나온 순서대로
+                    let isBase = k => baseAmt !== null && buckets[k].amount === baseAmt;
+                    bucketOrder.filter(isBase).sort((x, y) => (buckets[y].sk + buckets[y].g3 + buckets[y].free) - (buckets[x].sk + buckets[x].g3 + buckets[x].free)).forEach(k => ordered.push(buckets[k]));
+                    bucketOrder.forEach(k => { if (!isBase(k)) ordered.push(buckets[k]); });
                     rg.rows = ordered;
                 });
             });
 
             groups.forEach(group => { group.rowGroups = group.rowGroups.filter(rg => rg.rows && rg.rows.length > 0); });
             groups = groups.filter(g => g.rowGroups.length > 0);
+            return groups;
+        }
+
+        async function generateTuitionStatementExcel() {
+            if (!tsState.q || !tsState.month) return alert('분기와 차를 선택해주세요.');
+            let q = tsState.q, month = tsState.month;
+            // ✨ 이번 정산 대상 과목 중 표준차시가 없는 과목이 있으면 먼저 입력하도록 안내
+            let missingStd = savedSubjects.filter(sub => {
+                let has = (month === 'pre') ? getSubjectTotalSessions(sub, q) > 0 : ((sub.sessions && sub.sessions[q]) ? toNum(sub.sessions[q][`m${month}`]) > 0 : false);
+                return has && !(sub.fees && sub.fees[q] && toNum(sub.fees[q].stdSessions) > 0);
+            }).map(sub => sub.name);
+            if (missingStd.length) { closeTuitionStatementModal(); alertMissingStdSessions(q, missingStd, '정산파일'); return; }
+            let mergeParts = document.getElementById('tsMergeParts').checked;
+            closeTuitionStatementModal();
+
+            let groups = buildTuitionStatementGroups(q, month, mergeParts); // ✨ [v19.9] 계산 부분은 buildTuitionStatementGroups로 옮김 (내용은 그대로) - 학생 상세·과목별 보기도 같은 계산을 씀
 
             if (groups.length === 0) return alert('선택한 분기·차에 해당하는 수강 내역이 없습니다. (과목 목록 관리에서 해당 달의 차시가 입력되어 있는지 확인해주세요)');
 
@@ -4362,27 +4535,25 @@
 
                     let base = { grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name, subject: subName };
 
-                    // ✨ 강사료/수용비 분할 (학생별 명단·과목별 보기 '강사료 보기'와 같은 기준)
-                    let feeSub = savedSubjects.find(x => x.name === subName);
-                    let feeMaster = feeSub && feeSub.fees && feeSub.fees[q];
-                    let fmG = feeMaster ? toNum(feeMaster.g) : 0, fmS = feeMaster ? toNum(feeMaster.s) : 0;
-                    let fSplit = (amt) => computeTeacherFeeSplit(amt, fmG, fmS, (fmG > 0 || fmS > 0));
+                    // ✨ [v19.9] 강사료/수용비 분할 = 청구서·과목별 보기·학생 상세와 같은 계산 (몫별 합계가 최종 강사료와 같음)
+                    let fundFee = getFundTeacherFees(r, q, s, alloc).net;
+                    let fSplit = (amt, k) => fundFee[k];
 
                    if (hasG3Amt) {
                         let note = hasFreeAmt ? '자유로 넘어감' : (hasSkAmt ? '수익자로 넘어감' : '');
-                        let sp = fSplit(g3Su);
+                        let sp = fSplit(g3Su, 'g3');
                         g3Rows.push({ ...base, amount: g3Su + g3Gy + g3J, su: g3Su, g: sp.g, s: sp.s, gy: g3Gy, j: g3J, note });
                     }
                     if (hasFreeAmt) {
                         let notes = [];
                         if (hasG3Amt) notes.push(`${getG3LabelShort()}에서 넘어옴`);
                         if (hasSkAmt) notes.push('수익자로 넘어감');
-                        let sp = fSplit(frSu);
+                        let sp = fSplit(frSu, 'fr');
                         freeRows.push({ ...base, amount: frSu + frGy + frJ, su: frSu, g: sp.g, s: sp.s, gy: frGy, j: frJ, note: notes.join(', ') });
                     }
                     if (hasSkAmt) {
                         let note = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
-                        let sp = fSplit(skSu);
+                        let sp = fSplit(skSu, 'sk');
                         skRows.push({ ...base, amount: skSu + skGy + skJ, su: skSu, g: sp.g, s: sp.s, gy: skGy, j: skJ, note });
 
                         let detailNote = (hasG3Amt || hasFreeAmt) ? '지원금부족' : '';
@@ -4660,17 +4831,14 @@ function addRosterDataRows(ws, rows, themeColor) {
                     if (hasFr) courseCounts[courseKey].free++;
                     if (hasSk) courseCounts[courseKey].sk++;
 
-                    // 강사료/수용비 분할 (과목별 보기 '강사료 보기'와 같은 기준)
-                    let feeSub = savedSubjects.find(x => x.name === subName);
-                    let feeMaster = feeSub && feeSub.fees && feeSub.fees[q];
-                    let mG = feeMaster ? toNum(feeMaster.g) : 0, mS = feeMaster ? toNum(feeMaster.s) : 0;
-                    let hasCustom = (mG > 0 || mS > 0);
+                    // ✨ [v19.9] 강사료/수용비 분할 = 청구서·과목별 보기·학생 상세와 같은 계산
+                    let fundFee = getFundTeacherFees(r, q, s, alloc).net;
 
                     let isSplitSub = [hasG3, hasFr, hasSk].filter(Boolean).length >= 2; // ✨ 지원금 부족으로 다른 명단에 나뉘어 들어간 과목
                     ['g3', 'fr', 'sk'].forEach(k => {
                         if (!has(k)) return;
                         let p = part[k];
-                        let split = computeTeacherFeeSplit(p.su, mG, mS, hasCustom);
+                        let split = fundFee[k];
                         buckets[k].push({ name: subName, su: p.su, gy: p.gy, j: p.j, g: split.g, s: split.s, isSplit: isSplitSub });
                     });
 
@@ -5538,6 +5706,7 @@ function toggleStatusPanel() {
         function persistSubjects() {
 		 if(isTimeTravelMode) return;
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
+            stmtFeeCache = {}; // ✨ [v19.9] 과목 단가·차시가 바뀌었으니 청구서 강사료 다시 계산
             if (typeof scheduleCalcSnapshot === 'function') scheduleCalcSnapshot();
         }
 
@@ -6998,21 +7167,14 @@ function toggleStatusPanel() {
                                 let skRefundGy = alloc.refSkGy || 0;
                                 let skRefundJ  = alloc.refSkJ || 0;
 
-                                // ✨ 강사료 보기용 - 이 과목의 강사료/수용비 비율로 각 몫의 수강료(su)를 분할
-                                let feeSub = savedSubjects.find(x => x.name === subName);
-                                let feeMaster = feeSub && feeSub.fees && feeSub.fees[qIdx + 1];
-                                let feeMasterG = feeMaster ? toNum(feeMaster.g) : 0;
-                                let feeMasterS = feeMaster ? toNum(feeMaster.s) : 0;
-                                let feeHasCustomGS = (feeMasterG > 0 || feeMasterS > 0);
-                                let g3FeeSplit = computeTeacherFeeSplit(g3Su, feeMasterG, feeMasterS, feeHasCustomGS);
-                                let freeFeeSplit = computeTeacherFeeSplit(freeSu, feeMasterG, feeMasterS, feeHasCustomGS);
-                                let skFeeSplit = computeTeacherFeeSplit(skSu, feeMasterG, feeMasterS, feeHasCustomGS);
+                                // ✨ [v19.9] 강사료 보기용 - 청구서와 같은 계산(차별 강사료를 몫 비율로 나눈 값의 분기 합계)
+                                //    → 학생 상세 강사료·수용비, 청구서, 차시금액 보기와 항상 같은 금액. 몫별 합계 = 최종 강사료
+                                let fundFee = getFundTeacherFees(r, qIdx + 1, s, alloc);
+                                let g3FeeSplit = fundFee.net.g3, freeFeeSplit = fundFee.net.fr, skFeeSplit = fundFee.net.sk;
                                 let netFeeG = g3FeeSplit.g + freeFeeSplit.g, netFeeS = g3FeeSplit.s + freeFeeSplit.s;
                                 let realFeeG = netFeeG + skFeeSplit.g, realFeeS = netFeeS + skFeeSplit.s;
-                                // ✨ 환불 보기용 - 환불액도 같은 비율로 강사료/수용비 분할
-                                let g3RefundFeeSplit = computeTeacherFeeSplit(g3RefundSu, feeMasterG, feeMasterS, feeHasCustomGS);
-                                let freeRefundFeeSplit = computeTeacherFeeSplit(freeRefundSu, feeMasterG, feeMasterS, feeHasCustomGS);
-                                let skRefundFeeSplit = computeTeacherFeeSplit(skRefundSu, feeMasterG, feeMasterS, feeHasCustomGS);
+                                // ✨ 환불 보기용 - 몫별 환불 강사료 합계 = 환불 강사료
+                                let g3RefundFeeSplit = fundFee.ref.g3, freeRefundFeeSplit = fundFee.ref.fr, skRefundFeeSplit = fundFee.ref.sk;
 
                                 subjectRows.push({
                                     r, c, qStr: q, qNum: qIdx + 1, sName: subName, isNew: s.isNew,
@@ -7081,7 +7243,7 @@ function toggleStatusPanel() {
                     <div style="position:relative; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황${chaViewFilter !== 'all' ? ` <span style="color:#7c3aed;">· ${chaViewFilter}차 차시금액</span>` : ''}</span>
-                            ${chaViewFilter !== 'all' && chaMissingCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 차별로 나눌 수 없어 '전체'에서만 보입니다.">⚠️차시 미입력 ${chaMissingCount}건 제외</span>` : ''}
+                            ${chaViewFilter !== 'all' && chaMissingCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 차별로 나눌 수 없어 '전체'에서만 보입니다.">⚠️차시 미입력 ${chaMissingCount}건 제외</span>` : ''}${chaViewFilter !== 'all' && chaEvenCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 분기 수강료를 차마다 똑같이 나눠(10원 단위) 보여줘요. 이 과목들은 청구서에는 나오지 않아요. 차시를 입력하면 청구서와 같은 금액으로 바뀌어요.">⚠️차시 미입력 ${chaEvenCount}건: 똑같이 나눠 표시</span>` : ''}
                             <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
@@ -7237,7 +7399,7 @@ function toggleStatusPanel() {
                                                         <td style="${br} position:sticky; left:${currentTab === 'all' ? 150 : 95}px; z-index:1; background:var(--card-bg);">
                                <a class="student-name" onclick="showDetailModal('${row.r.id}')" title="상세 내역 보기">${row.r.name}</a>
                             </td>
-                           <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}${row.chaMissing ? '<br><span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않아 차별로 나눌 수 없어요. 분기금액 그대로 표시합니다.">⚠️차시 미입력</span>' : (row.cha ? `<br><span class="cha-badge c${row.cha}">${row.cha}차</span>` : '')}</td>
+                           <td style="${br} font-weight:700; position:sticky; left:${currentTab === 'all' ? 205 : 150}px; z-index:1; background:var(--card-bg); border-right:2px solid var(--border-color);">${row.sName}${newBadge}${row.chaMissing ? '<br><span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않아 차별로 나눌 수 없어요. 분기금액 그대로 표시합니다.">⚠️차시 미입력</span>' : (row.cha ? `<br><span class="cha-badge c${row.cha}">${row.cha}차</span>${row.chaEven ? ' <span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않아 분기 수강료를 차마다 똑같이 나눠(10원 단위) 보여줘요. 청구서에는 나오지 않아요.">차시 미입력</span>' : ''}` : '')}</td>
                            <td style="${br} width:52px; max-width:52px; padding:6px 2px;">${badge}</td>
                             
                             ${isFeeViewOn
@@ -8328,17 +8490,13 @@ function updateG3LimitTotal() {
         let sdView = (() => {
             let d = { apply: true, ref: true, net: true, src: false, gs: false };
             try { let v = JSON.parse(localStorage.getItem('dolbomi_ui_detail_view') || 'null'); if (v) Object.assign(d, v); } catch (e) {}
-            if (d.src && d.gs) d.gs = false;
             return d;
         })();
         let sdOpenQ = {};
         let sdCurrentId = null;
 
         function sdToggleView(key) {
-            sdView[key] = !sdView[key];
-            // 결제 출처와 강사료·수용비를 같이 켜면 표가 너무 넓어지므로 한쪽만
-            if (key === 'src' && sdView.src) sdView.gs = false;
-            if (key === 'gs' && sdView.gs) sdView.src = false;
+            sdView[key] = !sdView[key]; // ✨ [v19.9] 지원금·수익자 금액과 강사료·수용비를 같이 켤 수 있음
             try { localStorage.setItem('dolbomi_ui_detail_view', JSON.stringify(sdView)); } catch (e) {}
             if (sdCurrentId) showDetailModal(sdCurrentId);
         }
@@ -8442,6 +8600,10 @@ function updateG3LimitTotal() {
                 .sd-table-wrap, .sd-rlog-scroll { overflow: visible !important; }
                 .sd-table, .sd-rlog { min-width: 0 !important; width: 100% !important; }
                 .sd-table .sd-name { min-width: 0; }
+                /* ✨ [v19.9] 지원금·수익자 + 강사료·수용비는 칸이 많아 A4 가로 폭에 맞게 조금 작게 */
+                .sd-table.sg th, .sd-table.sg td { font-size: 11px; padding: 5px 4px; }
+                .sd-table.sg thead tr:first-child th.grp { font-size: 11.5px; padding: 5px 4px; }
+                .sd-table.sg tr.sd-subtotal td.sub { font-size: 11.5px; }
                 .sd-subj .nm { font-size: 11px; } .sd-subj .meta { font-size: 9.5px; } .sd-tag { font-size: 9px; }
                 .sd-rlog-wrap { padding: 6px 10px 10px; } .sd-rlog-title { font-size: 12px; margin-bottom: 4px; }
                 .sd-rlog td.su .hint { font-size: 9px; }
@@ -8492,7 +8654,8 @@ function updateG3LimitTotal() {
 
             const V = sdView;
             const S = V.src;              // 결제 출처 모드
-            const G = V.gs && !S;         // 강사료·수용비 펼침
+            const G = V.gs && !S;         // 강사료·수용비 펼침 (신청·환불·최종 금액)
+            const SG = S && V.gs;         // ✨ [v19.9] 지원금·수익자 금액을 강사료·수용비로 펼침
             const m0 = v => toNum(v) ? formatMoney(toNum(v)) : '<span class="sd-zero">0</span>';
             const fmtFee = v => v ? v.toLocaleString() : '';
             const fmt = v => v !== undefined ? v.toLocaleString() : '';
@@ -8619,6 +8782,9 @@ function updateG3LimitTotal() {
 
                 let sum = { g:0, s:0, su:0, gy:0, j:0, rG:0, rS:0, rSu:0, rGy:0, rJ:0, netG:0, netS:0, netSu:0, netGy:0, netJ:0, app:0, ref:0, net:0 };
                 let sa = { g3Su:0, g3Gy:0, g3J:0, frSu:0, frGy:0, frJ:0, skSu:0, skGy:0, skJ:0 };
+                let fee = { g3:{g:0,s:0}, fr:{g:0,s:0}, sk:{g:0,s:0} }; // ✨ [v19.9] 몫별 강사료·수용비 합계
+                let hasUnsplit = false;
+                let feeGap = 0; // ✨ [v19.9] 청구서 강사료 합계 − 최종 사용금액 강사료
                 let ratioNotes = [];
                 let manualCnt = 0;
                 let qKey = `q${q}`;
@@ -8642,6 +8808,16 @@ function updateG3LimitTotal() {
 
                     let alloc = c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx] ? c.allocs[qKey][sIdx] : {g3Su:0, g3Gy:0, g3J:0, frSu:0, frGy:0, frJ:0, skSu:0, skGy:0, skJ:0};
                     Object.keys(sa).forEach(k => sa[k] += alloc[k] || 0);
+
+                    // ✨ [v19.9] 이 과목의 몫별 강사료·수용비 (청구서·과목별 보기와 같은 계산)
+                    let fundFee = null;
+                    if (SG) {
+                        let ff = getFundTeacherFees(r, q, s, alloc).net;
+                        fundFee = [ff.g3, ff.fr, ff.sk];
+                        fundFee.forEach((x, i) => { let k = ['g3', 'fr', 'sk'][i]; fee[k].g += x.g; fee[k].s += x.s; });
+                        if (!hasGS && toNum(s.su) > 0) hasUnsplit = true;
+                        if (hasGS) feeGap += ff.g3.g + ff.fr.g + ff.sk.g - netG;
+                    }
 
                     let isNewValid = (s.isNew && (Date.now() - s.isNew < 7 * 24 * 60 * 60 * 1000));
                     let tags = '';
@@ -8695,9 +8871,16 @@ function updateG3LimitTotal() {
                             if (manual) manualCnt++;
                             return `<input type="text" id="alloc_${field}_${q}_${sIdx}" class="sd-cell ${cls}${manual ? ' manual' : ''}" placeholder="${formatAlloc(alloc[key])}" value="${manual ? fmt(alloc[key]) : ''}" oninput="${onInputCode}" onchange="updateManualAlloc('${r.id}', '${q}', ${sIdx}, '${field}', this.value)">${note || ''}`;
                         };
-                        if (r.hasG3) cells += `<td class="gsrc g3 gstart">${allocIn('mG3Su', 'g3Su', 'g3')}</td><td class="gsrc g3">${allocIn('mG3Gy', 'g3Gy', 'g3')}</td><td class="gsrc g3">${allocIn('mG3J', 'g3J', 'g3')}</td>`;
-                        if (r.hasFree) cells += `<td class="gsrc fr gstart">${allocIn('mFreeSu', 'frSu', 'fr', s.sessionRatioEnabled ? '<div class="sd-round-note">10의자리올림</div>' : '')}</td><td class="gsrc fr">${allocIn('mFreeGy', 'frGy', 'fr')}</td><td class="gsrc fr">${allocIn('mFreeJ', 'frJ', 'fr')}</td>`;
-                        cells += `<td class="gsrc sk gstart">${allocIn('mSuikSu', 'skSu', 'sk')}</td><td class="gsrc sk">${allocIn('mSuikGy', 'skGy', 'sk')}</td><td class="gsrc sk">${allocIn('mSuikJ', 'skJ', 'sk')}</td>`;
+                        // ✨ [v19.9] 강사료·수용비 칸은 '수강' 금액을 나눠 보여주는 자동 계산값 (입력 칸 아님)
+                        const feeCells = i => {
+                            if (!SG) return '';
+                            const v = key => m0(fundFee[i][key]);
+                            return `<td class="gs gstart">${v('g')}</td><td class="gs">${v('s')}</td>`;
+                        };
+                        const suStart = SG ? '' : ' gstart';
+                        if (r.hasG3) cells += `${feeCells(0)}<td class="gsrc g3${suStart}">${allocIn('mG3Su', 'g3Su', 'g3')}</td><td class="gsrc g3">${allocIn('mG3Gy', 'g3Gy', 'g3')}</td><td class="gsrc g3">${allocIn('mG3J', 'g3J', 'g3')}</td>`;
+                        if (r.hasFree) cells += `${feeCells(1)}<td class="gsrc fr${suStart}">${allocIn('mFreeSu', 'frSu', 'fr', s.sessionRatioEnabled ? '<div class="sd-round-note">10의자리올림</div>' : '')}</td><td class="gsrc fr">${allocIn('mFreeGy', 'frGy', 'fr')}</td><td class="gsrc fr">${allocIn('mFreeJ', 'frJ', 'fr')}</td>`;
+                        cells += `${feeCells(2)}<td class="gsrc sk${suStart}">${allocIn('mSuikSu', 'skSu', 'sk')}</td><td class="gsrc sk">${allocIn('mSuikGy', 'skGy', 'sk')}</td><td class="gsrc sk">${allocIn('mSuikJ', 'skJ', 'sk')}</td>`;
                     }
                     return `<tr>${nameCell}${cells}</tr>`;
                 }).join('');
@@ -8756,7 +8939,7 @@ function updateG3LimitTotal() {
                     </div>
                     <div class="sd-acc-b">
                         <div class="sd-qbar no-print">
-                            ${S ? `<span class="sd-modeinfo src">💳 <b>지원금·수익자 금액 편집 중</b> · 회색 숫자 = 자동 계산값 · 숫자를 쓰면 <b style="color:#dc2626;">빨간색(수동 고정)</b>, 칸을 비우면 자동 계산으로 돌아갑니다.</span>`
+                            ${S ? `<span class="sd-modeinfo src">💳 <b>지원금·수익자 금액 편집 중</b> · 회색 숫자 = 자동 계산값 · 숫자를 쓰면 <b style="color:#dc2626;">빨간색(수동 고정)</b>, 칸을 비우면 자동 계산으로 돌아갑니다.${SG ? `<br>🧮 <b>강사료·수용비</b>는 <b>교육비 청구서에 찍히는 금액</b> 그대로예요.${hasUnsplit ? ' (강사료·수용비가 입력되지 않은 과목은 청구서처럼 과목 목록 기준으로 나눴어요.)' : ''}${feeGap ? `<br>※ 청구서 강사료 합계가 최종 사용금액의 강사료와 <b>${formatMoney(Math.abs(feeGap))}</b> 달라요. 청구서는 차마다 강사료를 10원 단위로 올려서 계산하기 때문에 생기는 차이예요.` : ''}` : ''}</span>`
                               : G ? `<span class="sd-modeinfo gs">🧮 <b>강사료·수용비 펼침</b> · 강사료나 수용비를 입력하면 수강료 = 강사료 + 수용비로 자동 계산되고 🔒잠깁니다. 둘 다 비우면 수강료를 직접 입력할 수 있어요.</span>`
                               : `<span></span>`}
                             <span style="margin-left:auto; display:flex; gap:6px; flex-shrink:0;">
@@ -8767,7 +8950,7 @@ function updateG3LimitTotal() {
                             </span>
                         </div>
                         <div class="sd-table-wrap" id="receiptScrollWrap_${q}">
-                            <table class="sd-table">${sdBuildHead(r, V, S, G)}<tbody>${rows}</tbody>${sdBuildFoot(r, V, S, G, sum, sa)}</table>
+                            <table class="sd-table${SG ? ' sg' : ''}">${sdBuildHead(r, V, S, G)}<tbody>${rows}</tbody>${sdBuildFoot(r, V, S, G, sum, sa, fee)}</table>
                         </div>
                         ${ratioNotes.length ? `<div class="sd-ratio-notes">${ratioNotes.map(note => `<div>🍼 ${note}</div>`).join('')}</div>` : ''}
                         ${sdBuildRefundLog(r, c, q, subs, validSubs, refundHistoryItems)}
@@ -8812,16 +8995,19 @@ function updateG3LimitTotal() {
                     if (V.ref) row2 += `<th class="gr${gs0()}">환불</th>`;
                     if (V.net) row2 += `<th class="gn${gs0()}">최종</th>`;
                 }
-                const trio = cls => `<th class="gsrc ${cls} gstart">수강</th><th class="gsrc ${cls}">교재</th><th class="gsrc ${cls}">재료</th>`;
-                if (r.hasG3) { row1 += `<th colspan="3" class="gsrc g3 gstart grp"><span class="sd-dot g3"></span>${getG3Label()}</th>`; row2 += trio('g3'); }
-                if (r.hasFree) { row1 += `<th colspan="3" class="gsrc fr gstart grp"><span class="sd-dot fr"></span>자유수강</th>`; row2 += trio('fr'); }
-                row1 += `<th colspan="3" class="gsrc sk gstart grp"><span class="sd-dot sk"></span>수익자</th>`; row2 += trio('sk');
+                const SG = V.gs; // ✨ [v19.9] 몫마다 강사료·수용비 칸 추가
+                const span = SG ? 5 : 3;
+                const trio = cls => (SG ? `<th class="gs gstart">강사료</th><th class="gs">수용비</th>` : '')
+                    + `<th class="gsrc ${cls}${SG ? '' : ' gstart'}">수강</th><th class="gsrc ${cls}">교재</th><th class="gsrc ${cls}">재료</th>`;
+                if (r.hasG3) { row1 += `<th colspan="${span}" class="gsrc g3 gstart grp"><span class="sd-dot g3"></span>${getG3Label()}</th>`; row2 += trio('g3'); }
+                if (r.hasFree) { row1 += `<th colspan="${span}" class="gsrc fr gstart grp"><span class="sd-dot fr"></span>자유수강</th>`; row2 += trio('fr'); }
+                row1 += `<th colspan="${span}" class="gsrc sk gstart grp"><span class="sd-dot sk"></span>수익자</th>`; row2 += trio('sk');
             }
             return `<thead><tr>${row1}</tr><tr>${row2}</tr></thead>`;
         }
 
         // ✨ [v19.0] 상세표 합계줄
-        function sdBuildFoot(r, V, S, G, sum, sa) {
+        function sdBuildFoot(r, V, S, G, sum, sa, fee) {
             const M = v => formatMoney(v);
             let t = `<td class="sd-name">총합</td>`;
             if (!S) {
@@ -8837,14 +9023,17 @@ function updateG3LimitTotal() {
             if (V.apply) { t += `<td class="ga tot${gs0()}">${M(sum.app)}</td>`; k++; }
             if (V.ref) { t += `<td class="gr tot${gs0()}">${sum.ref ? '−' + M(sum.ref) : M(0)}</td>`; k++; }
             if (V.net) { t += `<td class="gn tot${gs0()}">${M(sum.net)}</td>`; k++; }
-            const trio = (cls, a, b, cc) => `<td class="gsrc ${cls} gstart">${M(a)}</td><td class="gsrc ${cls}">${M(b)}</td><td class="gsrc ${cls}">${M(cc)}</td>`;
+            const SG = V.gs; // ✨ [v19.9] 몫마다 강사료·수용비 칸 추가
+            const span = SG ? 5 : 3;
+            const trio = (cls, a, b, cc) => (SG ? `<td class="gsrc ${cls} gstart">${M(fee[cls].g)}</td><td class="gsrc ${cls}">${M(fee[cls].s)}</td>` : '')
+                + `<td class="gsrc ${cls}${SG ? '' : ' gstart'}">${M(a)}</td><td class="gsrc ${cls}">${M(b)}</td><td class="gsrc ${cls}">${M(cc)}</td>`;
             if (r.hasG3) t += trio('g3', sa.g3Su, sa.g3Gy, sa.g3J);
             if (r.hasFree) t += trio('fr', sa.frSu, sa.frGy, sa.frJ);
             t += trio('sk', sa.skSu, sa.skGy, sa.skJ);
             let t2 = `<td class="sd-name">지원금·수익자 소계</td>${k ? `<td colspan="${k}" class="gstart"></td>` : ''}`;
-            if (r.hasG3) t2 += `<td colspan="3" class="gsrc g3 gstart sub">${getG3Label()} ${M(sa.g3Su + sa.g3Gy + sa.g3J)}</td>`;
-            if (r.hasFree) t2 += `<td colspan="3" class="gsrc fr gstart sub">자유수강 ${M(sa.frSu + sa.frGy + sa.frJ)}</td>`;
-            t2 += `<td colspan="3" class="gsrc sk gstart sub">수익자 ${M(sa.skSu + sa.skGy + sa.skJ)}</td>`;
+            if (r.hasG3) t2 += `<td colspan="${span}" class="gsrc g3 gstart sub">${getG3Label()} ${M(sa.g3Su + sa.g3Gy + sa.g3J)}</td>`;
+            if (r.hasFree) t2 += `<td colspan="${span}" class="gsrc fr gstart sub">자유수강 ${M(sa.frSu + sa.frGy + sa.frJ)}</td>`;
+            t2 += `<td colspan="${span}" class="gsrc sk gstart sub">수익자 ${M(sa.skSu + sa.skGy + sa.skJ)}</td>`;
             return `<tfoot><tr>${t}</tr><tr class="sd-subtotal">${t2}</tr></tfoot>`;
         }
 
