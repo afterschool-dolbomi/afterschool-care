@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.9.1</title>
+    <title>방과후 지원금 돌보미 V19.9.2</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.9.1</span>
+                <span class="brand-version">V19.9.2</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -7582,7 +7582,7 @@ function toggleStatusPanel() {
                                 <div style="line-height: 1.0; ${isBeneficiary ? 'color:#0369a1;' : ''}">${formatMoney(c[`q${i}`].exp)}</div>
                                 ${mBadge}
                                 ${qOverHtml}
-                                ${hasRatioQ ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">차시비율적용</div>` : ''}
+                                ${hasRatioQ ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">🍼 중간부터 지원</div>` : ''}
                             </td>`;
                         }
 
@@ -7838,7 +7838,7 @@ function toggleStatusPanel() {
 								<td class="text-right" style="font-weight: 800; color: ${(!r.hasG3 && !r.hasFree) ? '#0369a1' : '#111827'};">
                                     <div style="line-height: 1.0;">${formatMoney(c[q].exp)}</div>
                                     ${((r.hasG3 || r.hasFree) && c[q].over > 0 && (c[q].usedG3 + c[q].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">${c[q].status === '일부 수익자' ? '수익자부담' : '초과'}: ${formatMoney(c[q].over)}</div>` : ''}
-                                    ${((r[q] && r[q].subs) || []).some(s => s.sessionRatioEnabled) ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">차시비율적용</div>` : ''}
+                                    ${((r[q] && r[q].subs) || []).some(s => s.sessionRatioEnabled) ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">🍼 중간부터 지원</div>` : ''}
                                 </td>
                                 
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
@@ -10387,7 +10387,7 @@ function updateG3LimitTotal() {
                 <label style="display:flex; align-items:center; gap:8px; padding:4px; cursor:pointer; border-bottom:1px solid #f1f5f9;">
                     <input type="checkbox" class="rqa-student-chk" value="${t.r.id}|${t.sIdx}" checked onchange="updateRqaCheckedCount()">
                     <span>${t.r.grade}학년 ${t.r.classNum}반 ${t.r.studentNum}번 ${t.r.name}</span>
-                    ${t.s.sessionRatioEnabled ? `<span style="color:#2563eb; font-size:10.5px; font-weight:700; margin-left:auto;">🍼차시비율</span>` : ''}
+                    ${t.s.sessionRatioEnabled ? `<span style="color:#2563eb; font-size:10.5px; font-weight:700; margin-left:auto;">🍼 중간부터 지원</span>` : ''}
                 </label>
             `).join('');
             updateRqaCheckedCount();
@@ -10551,7 +10551,7 @@ function updateG3LimitTotal() {
             if (!riaState.studentId || !riaState.q) { sel.innerHTML = '<option value="">학생과 분기를 먼저 선택하세요</option>'; return; }
             let r = db.find(x => x.id == riaState.studentId);
             let subs = (r && r[`q${riaState.q}`] && r[`q${riaState.q}`].subs) || [];
-            let opts = subs.map((s, sIdx) => s.name ? `<option value="${sIdx}">${s.name}${s.sessionRatioEnabled ? ' (🍼차시비율)' : ''}</option>` : '').join('');
+            let opts = subs.map((s, sIdx) => s.name ? `<option value="${sIdx}">${s.name}${s.sessionRatioEnabled ? ' (🍼 중간부터 지원)' : ''}</option>` : '').join('');
             sel.innerHTML = '<option value="">과목을 선택하세요</option>' + opts;
         }
             function addRiaToCart() {
@@ -10615,7 +10615,7 @@ function updateG3LimitTotal() {
                             let warn = '';
                             if (!preview || !preview.ok) warn = '<div style="color:#dc2626; font-size:10.5px;">⚠️총차시 미설정</div>';
                             else {
-                                if (preview.hasSessionRatio) warn += '<div style="color:#2563eb; font-size:10.5px;">🍼차시비율 적용학생</div>';
+                                if (preview.hasSessionRatio) warn += '<div style="color:#2563eb; font-size:10.5px;">🍼 중간부터 지원 학생</div>';
                                 if (preview.existingRSu > 0) warn += `<div style="color:#dc2626; font-size:10.5px;">기존환불 ${formatMoney(preview.existingRSu)}</div>`;
                             }
                             let rowTotal = (preview && preview.ok ? preview.amount : 0) + toNum(item.gy) + toNum(item.j);
@@ -16000,7 +16000,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
                     <table class="rpt-t" style="margin-top:8px;"><thead><tr><th style="text-align:left">${byCourse ? '강좌명' : '강좌(1부·2부 합침)'}</th><th>교재 건수</th><th>교재비</th><th>재료 건수</th><th>재료비</th><th>합계</th><th>지원금</th><th>수익자</th><th>환불액</th></tr></thead>
                     <tbody>${cRows}</tbody>
                     <tfoot><tr><td class="c">합계</td><td class="n">${t.cntGy}</td><td class="n">${rptWon(ct.gy)}</td><td class="n">${t.cntJ}</td><td class="n">${rptWon(ct.j)}</td><td class="n">${rptWon(ct.gy + ct.j)}</td><td class="n">${rptWon(ct.sup)}</td><td class="n">${rptWon(ct.sk)}</td><td class="n">${rptWon(ct.r)}</td></tr></tfoot></table>
-                    <div class="rpt-note">※ 금액은 환불 반영 후 순액이며, 건수는 교재비·재료비를 낸 학생-강좌 수입니다. 교재비·재료비는 실비 집행 확인 대상이므로 업체 정산·구입 증빙 금액과 대조해 주세요. 차시비율 적용 학생의 교재·재료비는 직접 입력한 지원분 외에는 수익자부담으로 집계됩니다.</div>`));
+                    <div class="rpt-note">※ 금액은 환불 반영 후 순액이며, 건수는 교재비·재료비를 낸 학생-강좌 수입니다. 교재비·재료비는 실비 집행 확인 대상이므로 업체 정산·구입 증빙 금액과 대조해 주세요. '중간부터 지원' 학생의 교재·재료비는 직접 입력한 지원분 외에는 수익자부담으로 집계됩니다.</div>`));
             }
 
             // 5. 예산 집행 현황
