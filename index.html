@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.9</title>
+    <title>방과후 지원금 돌보미 V19.9.1</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1464,7 +1464,7 @@
 
     <div id="sessionRatioModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99998; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:16px; padding:24px; width:90%; max-width:340px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
-                           <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 차시 비율 적용</div>
+                           <div style="font-weight:800; font-size:16px; margin-bottom:10px; color:#1d4ed8;">🍼 지원 시작 시점</div>
             <div style="font-size:12.5px; color:#4b5563; line-height:1.6; margin-bottom:16px; background:#eff6ff; border-radius:8px; padding:10px;">
                 <b>분기 중간에 지원자로 선정된 경우</b><br>이번 분기에 이 과목이 실제로 진행되는 <b>총 수업 횟수(차시)</b>와, 그중 <b>지원 대상 기간에 해당하는 차시 수</b>를 입력하세요.<br><br>
                 예) 이번 분기 총 12차시 중, 지원기간은 8차시만 해당된다면 → 총차시 12, 지원차시 8<br><br>
@@ -1482,7 +1482,7 @@
                 <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">지원 대상 차시</label>
                 <input type="number" min="0" id="sr_covered" placeholder="예: 8" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; box-sizing:border-box;">
             </div>
-            <div style="font-size:11px; color:#9ca3af; margin-bottom:16px;">※ 총 차시를 비우고 확인을 누르면 비율 적용이 해제되고 100% 정상 지원으로 돌아갑니다.</div>
+            <div style="font-size:11px; color:#9ca3af; margin-bottom:16px;">※ 총 차시를 비우고 확인을 누르면 지원 시작 시점 설정이 해제되고 100% 정상 지원으로 돌아갑니다.</div>
             <div style="display:flex; gap:8px;">
                 <button onclick="closeSessionRatioModal()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db; background:white; color:#374151; font-weight:700; cursor:pointer;">취소</button>
                 <button onclick="confirmSessionRatio()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">확인</button>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.9</span>
+                <span class="brand-version">V19.9.1</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -8841,7 +8841,7 @@ function updateG3LimitTotal() {
                             <div>
                                 <div class="nm">${s.name || '(과목명 미상)'}${tags}</div>
                                 ${(!G && hasGS) ? `<div class="meta">강사료 ${toNum(s.g).toLocaleString()} + 수용비 ${toNum(s.s).toLocaleString()}</div>` : ''}
-                                ${r.hasFree ? `<button type="button" class="sd-ratio-btn no-print${s.sessionRatioEnabled ? ' on' : ''}" title="분기 중간에 자유수강자로 선정된 경우 일부만 지원금액 자동 계산" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})">🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 적용중` : '차시 비율 적용'}</button>` : ''}
+                                ${r.hasFree ? `<button type="button" class="sd-ratio-btn no-print${s.sessionRatioEnabled ? ' on' : ''}" title="분기 중간에 자유수강자로 선정된 경우 일부만 지원금액 자동 계산" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})">🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 지원중` : '지원 시작 시점'}</button>` : ''}
                             </div>
                         </div>
                     </td>`;
@@ -10670,7 +10670,7 @@ function updateG3LimitTotal() {
                 if (!preview || !preview.ok) { skippedNoSession++; return; }
 
                 if (s.sessionRatioEnabled) {
-                    let ok = confirm(`${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생은 '차시 비율 적용'이 되어있는 학생입니다.\n이 학생에게도 지금 입력한 환불(${item.subjectName}, ${item.sessionCount}차시, ${formatMoney(preview.amount)})을 적용할까요?`);
+                    let ok = confirm(`${r.grade}-${r.classNum}-${r.studentNum} ${r.name} 학생은 '지원 시작 시점'이 설정된 학생입니다.\n이 학생에게도 지금 입력한 환불(${item.subjectName}, ${item.sessionCount}차시, ${formatMoney(preview.amount)})을 적용할까요?`);
                     if (!ok) { skippedConfirmDeclined++; return; }
                 }
 
