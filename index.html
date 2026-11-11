@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.9.2</title>
+    <title>방과후 지원금 돌보미 V19.9.3</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.9.2</span>
+                <span class="brand-version">V19.9.3</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1681,72 +1681,80 @@
 
     <!-- ✨ [v19.6] 명단 업로드 마법사 (50대 이상 사용자 고려: 글씨 14px 이상) -->
     <style>
-        #uploadWizardOverlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:99996; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
-        .uw-modal { width:94%; max-width:900px; max-height:92vh; background:#fff; color:#1f2937; border-radius:20px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.3); word-break:keep-all; font-size:16px; }
-        .uw-head { display:flex; align-items:center; padding:22px 28px 6px; }
-        .uw-head h2 { margin:0; font-size:26px; font-weight:900; color:#111827; }
-        .uw-x { margin-left:auto; width:42px; height:42px; border:none; border-radius:10px; background:#f3f4f6; color:#374151; font-size:20px; cursor:pointer; }
-        .uw-sub { padding:0 28px; font-size:16px; color:#4b5563; line-height:1.6; }
-        .uw-steps { display:flex; gap:10px; padding:16px 28px 6px; }
-        .uw-step { flex:1; display:flex; align-items:center; gap:10px; padding:12px 14px; border:none; border-radius:14px; background:#f3f4f8; color:#4b5563; font-family:inherit; font-size:18px; font-weight:800; text-align:left; cursor:pointer; }
+        /* ✨ [v19.9.3] 코디마스터 수강료 업로드 창처럼 남색·금색 테마, 글씨 1px 줄임 */
+        #uploadWizardOverlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:99996; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+        .uw-modal { width:94%; max-width:900px; max-height:92vh; background:#fff; color:#1f2937; border-radius:16px; border:1px solid #cbd5e1; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); word-break:keep-all; font-size:15px; }
+        .uw-head { position:relative; display:flex; align-items:center; gap:16px; padding:24px 28px 22px; background:linear-gradient(135deg, #1e3a5f, #0f172a); }
+        .uw-badge { width:54px; height:54px; flex-shrink:0; border-radius:50%; background:rgba(212,175,55,0.15); border:2px solid #d4af37; display:flex; align-items:center; justify-content:center; font-size:27px; }
+        .uw-head h2 { margin:0; font-size:23px; font-weight:800; color:#fff; letter-spacing:-0.2px; }
+        .uw-sub { margin-top:4px; font-size:14px; color:#94a3b8; line-height:1.5; letter-spacing:0.2px; }
+        .uw-x { position:absolute; top:18px; right:20px; width:40px; height:40px; border:1px solid rgba(255,255,255,0.18); border-radius:10px; background:rgba(255,255,255,0.08); color:#e2e8f0; font-size:19px; cursor:pointer; transition:0.15s; }
+        .uw-x:hover { background:rgba(255,255,255,0.18); color:#fff; }
+        .uw-steps { display:flex; gap:10px; padding:18px 28px 6px; }
+        .uw-step { flex:1; display:flex; align-items:center; gap:10px; padding:11px 14px; border:2px solid #e2e8f0; border-radius:10px; background:#fff; color:#64748b; font-family:inherit; font-size:16px; font-weight:800; text-align:left; cursor:pointer; transition:0.15s; }
         .uw-step:disabled { cursor:default; }
-        .uw-step.on { background:#e0e7ff; color:#312e81; }
-        .uw-n { width:32px; height:32px; flex-shrink:0; border-radius:50%; background:#d1d5db; color:#374151; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:900; }
-        .uw-step.on .uw-n { background:#4f46e5; color:#fff; }
-        .uw-step.done .uw-n { background:#16a34a; color:#fff; }
+        .uw-step.on { background:#1e3a5f; border-color:#d4af37; color:#fff; box-shadow:0 4px 10px rgba(30,58,95,0.25); }
+        .uw-step.done { color:#1e3a5f; border-color:#cbd5e1; }
+        .uw-n { width:30px; height:30px; flex-shrink:0; border-radius:50%; background:#e2e8f0; color:#475569; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; }
+        .uw-step.on .uw-n { background:#d4af37; color:#0f172a; }
+        .uw-step.done .uw-n { background:#1e3a5f; color:#fff; }
         .uw-body { padding:14px 28px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px; }
-        .uw-card { border:1.5px solid #e5e7eb; border-radius:16px; padding:18px 20px; }
+        .uw-card { border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; background:#fff; box-shadow:0 1px 3px rgba(15,23,42,0.05); }
         .uw-form { display:flex; align-items:center; gap:16px; }
-        .uw-ic { width:60px; height:60px; flex-shrink:0; border-radius:14px; background:#ecfdf5; display:flex; align-items:center; justify-content:center; font-size:30px; }
+        .uw-ic { width:56px; height:56px; flex-shrink:0; border-radius:50%; background:#f8fafc; border:2px solid #d4af37; display:flex; align-items:center; justify-content:center; font-size:27px; }
         .uw-grow { flex:1; min-width:0; }
-        .uw-h { font-size:19px; font-weight:900; color:#111827; line-height:1.4; }
-        .uw-h.uw-big { font-size:21px; }
-        .uw-p { font-size:16px; color:#374151; line-height:1.65; margin-top:4px; }
-        .uw-reuse { background:#f0fdf4; border-color:#86efac; }
+        .uw-h { font-size:18px; font-weight:800; color:#0f172a; line-height:1.4; }
+        .uw-h.uw-big { font-size:20px; }
+        .uw-p { font-size:15px; color:#475569; line-height:1.65; margin-top:4px; }
+        .uw-p b { color:#1e3a5f; }
+        .uw-reuse { background:#f8fafc; border-color:#e2e8f0; border-left:4px solid #d4af37; }
         .uw-rules { display:flex; flex-direction:column; gap:7px; margin-top:12px; }
-        .uw-rule { display:flex; align-items:flex-start; gap:10px; font-size:16px; line-height:1.55; color:#1f2937; }
-        .uw-warnrule { background:#fff7ed; border:1.5px solid #fdba74; border-radius:10px; padding:10px 12px; margin-top:4px; }
-        .uw-mark { width:26px; height:26px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; color:#fff; }
-        .uw-ok { background:#16a34a; } .uw-same { background:#6b7280; } .uw-no { background:#ea580c; }
-        .uw-tip { padding:12px 16px; border-radius:12px; background:#fffbeb; color:#78350f; font-size:16px; line-height:1.6; }
-        .uw-btn { height:50px; padding:0 22px; border:1.5px solid #d1d5db; border-radius:12px; background:#fff; color:#1f2937; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; white-space:nowrap; }
+        .uw-rule { display:flex; align-items:flex-start; gap:10px; font-size:15px; line-height:1.55; color:#1f2937; }
+        .uw-warnrule { background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:10px 12px; margin-top:4px; }
+        .uw-mark { width:25px; height:25px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; color:#fff; }
+        .uw-ok { background:#1e3a5f; } .uw-same { background:#94a3b8; } .uw-no { background:#ea580c; }
+        .uw-tip { padding:12px 16px; border-radius:10px; background:#fdfaf0; border:1px solid #ecdca8; color:#6b5313; font-size:15px; line-height:1.6; }
+        .uw-btn { height:48px; padding:0 22px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#475569; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer; white-space:nowrap; transition:0.15s; }
+        .uw-btn:hover { background:#f8fafc; }
         .uw-btn:disabled { opacity:0.6; cursor:default; }
-        .uw-btn.uw-primary { background:#4f46e5; border-color:#4f46e5; color:#fff; }
-        .uw-btn.uw-green { background:#ecfdf5; border-color:#34d399; color:#047857; }
-        .uw-foot { display:flex; align-items:center; gap:10px; padding:16px 28px; border-top:1px solid #eef0f4; background:#fafbfd; }
-        .uw-note { font-size:15px; color:#4b5563; }
-        .uw-drop { border:3px dashed #a5b4fc; border-radius:18px; background:#f8f9ff; padding:44px 24px; text-align:center; cursor:pointer; }
-        .uw-drop.over { background:#e0e7ff; border-color:#4f46e5; }
+        .uw-btn.uw-primary { background:#1e3a5f; border-color:#1e3a5f; color:#fff; box-shadow:0 4px 10px rgba(30,58,95,0.35); }
+        .uw-btn.uw-primary:hover { background:#0f172a; }
+        .uw-btn.uw-green { background:#fff; border:2px solid #d4af37; color:#1e3a5f; }
+        .uw-btn.uw-green:hover { background:#fdfaf0; }
+        .uw-foot { display:flex; align-items:center; gap:10px; padding:16px 28px; border-top:1px solid #e2e8f0; background:#f8fafc; }
+        .uw-note { font-size:14px; color:#64748b; }
+        .uw-drop { border:2px dashed #94a3b8; border-radius:14px; background:#f8fafc; padding:44px 24px; text-align:center; cursor:pointer; transition:0.15s; }
+        .uw-drop:hover { border-color:#1e3a5f; }
+        .uw-drop.over { background:#fdfaf0; border-color:#d4af37; }
         .uw-drop .uw-btn { margin-top:16px; }
-        .uw-dropic { font-size:52px; line-height:1.2; }
-        .uw-error { padding:14px 16px; border-radius:12px; background:#fef2f2; border:1.5px solid #fca5a5; color:#991b1b; font-size:16px; font-weight:700; line-height:1.6; }
-        .uw-file { display:flex; align-items:center; gap:10px; padding:12px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:16px; }
-        .uw-file a { margin-left:auto; color:#4338ca; font-weight:800; cursor:pointer; text-decoration:underline; white-space:nowrap; }
+        .uw-dropic { font-size:51px; line-height:1.2; }
+        .uw-error { padding:14px 16px; border-radius:10px; background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; font-size:15px; font-weight:700; line-height:1.6; }
+        .uw-file { display:flex; align-items:center; gap:10px; padding:12px 16px; border:1px solid #e2e8f0; border-radius:10px; font-size:15px; background:#f8fafc; }
+        .uw-file a { margin-left:auto; color:#1e3a5f; font-weight:800; cursor:pointer; text-decoration:underline; white-space:nowrap; }
         .uw-sum { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
-        .uw-tile { border-radius:14px; padding:12px 14px; }
-        .uw-tile span { display:block; font-size:15px; font-weight:800; }
-        .uw-tile b { font-size:28px; font-weight:900; }
-        .uw-t-new { background:#dcfce7; color:#166534; } .uw-t-upd { background:#e0e7ff; color:#3730a3; } .uw-t-same { background:#f3f4f6; color:#374151; } .uw-t-warn { background:#ffedd5; color:#9a3412; }
-        .uw-sec { font-size:17px; font-weight:900; color:#111827; margin-top:4px; }
+        .uw-tile { border-radius:12px; padding:12px 14px; border:1px solid transparent; }
+        .uw-tile span { display:block; font-size:14px; font-weight:800; }
+        .uw-tile b { font-size:27px; font-weight:900; }
+        .uw-t-new { background:#f0fdf4; border-color:#bbf7d0; color:#166534; } .uw-t-upd { background:#eff4fa; border-color:#c7d5e8; color:#1e3a5f; } .uw-t-same { background:#f8fafc; border-color:#e2e8f0; color:#475569; } .uw-t-warn { background:#fff7ed; border-color:#fed7aa; color:#9a3412; }
+        .uw-sec { font-size:16px; font-weight:900; color:#0f172a; margin-top:4px; }
         .uw-sec-warn { color:#9a3412; }
-        .uw-list { border:1.5px solid #eceef3; border-radius:12px; overflow:hidden; flex-shrink:0; }
-        .uw-row { display:grid; grid-template-columns:150px 110px 1fr; gap:10px; align-items:center; padding:11px 14px; border-bottom:1px solid #f1f2f6; }
+        .uw-list { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; flex-shrink:0; }
+        .uw-row { display:grid; grid-template-columns:150px 110px 1fr; gap:10px; align-items:center; padding:11px 14px; border-bottom:1px solid #f1f5f9; }
         .uw-row:last-child, .uw-issue:last-child { border-bottom:none; }
-        .uw-who b { display:block; font-size:17px; color:#111827; }
-        .uw-who span { font-size:15px; color:#4b5563; }
-        .uw-chip { justify-self:start; padding:3px 11px; border-radius:999px; font-size:15px; font-weight:800; white-space:nowrap; }
-        .uw-new { background:#dcfce7; color:#166534; } .uw-upd { background:#e0e7ff; color:#3730a3; }
-        .uw-what { font-size:16px; color:#1f2937; line-height:1.5; }
-        .uw-issue { padding:11px 14px; border-bottom:1px solid #f1f2f6; background:#fffaf5; font-size:16px; line-height:1.55; }
+        .uw-who b { display:block; font-size:16px; color:#0f172a; }
+        .uw-who span { font-size:14px; color:#64748b; }
+        .uw-chip { justify-self:start; padding:3px 11px; border-radius:999px; font-size:14px; font-weight:800; white-space:nowrap; }
+        .uw-new { background:#dcfce7; color:#166534; } .uw-upd { background:#1e3a5f; color:#fff; }
+        .uw-what { font-size:15px; color:#1f2937; line-height:1.5; }
+        .uw-issue { padding:11px 14px; border-bottom:1px solid #f1f5f9; background:#fffaf5; font-size:15px; line-height:1.55; }
         .uw-issue b { display:block; color:#9a3412; }
         .uw-issue span { color:#1f2937; }
         .uw-done { text-align:center; padding:36px 16px; }
-        @media (max-width:760px) { .uw-sum { grid-template-columns:repeat(2, 1fr); } .uw-row { grid-template-columns:1fr; } .uw-form { flex-wrap:wrap; } .uw-steps { flex-direction:column; } }
+        @media (max-width:760px) { .uw-sum { grid-template-columns:repeat(2, 1fr); } .uw-row { grid-template-columns:1fr; } .uw-form { flex-wrap:wrap; } .uw-steps { flex-direction:column; } .uw-head { padding-right:72px; } }
     </style>
     <div id="uploadWizardOverlay">
         <div class="uw-modal" role="dialog" aria-label="단체 명단 엑셀 업로드">
-            <div class="uw-head"><h2>📥 단체 명단 엑셀 업로드</h2><button class="uw-x" onclick="closeUploadWizard()" aria-label="닫기">✕</button></div>
-            <div class="uw-sub">엑셀에 학생과 수강 과목을 적어 올리면 한 번에 등록됩니다.</div>
+            <div class="uw-head"><div class="uw-badge">📥</div><div><h2>단체 명단 엑셀 업로드</h2><div class="uw-sub">엑셀에 학생과 수강 과목을 적어 올리면 한 번에 등록됩니다.</div></div><button class="uw-x" onclick="closeUploadWizard()" aria-label="닫기">✕</button></div>
             <div class="uw-steps">
                 <button class="uw-step" data-s="1" onclick="uwGo(1)"><span class="uw-n">1</span>양식 받기</button>
                 <button class="uw-step" data-s="2" onclick="uwGo(2)"><span class="uw-n">2</span>파일 선택</button>
