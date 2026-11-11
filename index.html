@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V19.9.3</title>
+    <title>방과후 지원금 돌보미 V19.9.6</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V19.9.3</span>
+                <span class="brand-version">V19.9.6</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -3524,6 +3524,19 @@
             if (isFivePctFee(g0, s0)) return Math.min(amount, Math.ceil((amount / 1.05) / 10 - 1e-6) * 10);
             return computeTeacherFeeSplit(amount, toNum(g0), toNum(s0), true).g;
         }
+        // ✨ [v19.9.5] 이 차가 '한 달 정상 차시'(표준차시, 없으면 그 분기에서 가장 많은 차시)인지
+        //    정상 달 금액(예: 30,760원)은 강사료가 언제나 같아야 하므로(29,300원), 분기 강사료를 맞추는 차이는 정상 달이 아닌 차에서 맞춤 (capQuarterFees)
+        function isStdMonthCha(masterSub, q, m, chg, su) {
+            let sq = (masterSub && masterSub.sessions) ? masterSub.sessions[q] : null;
+            if (!sq || !(chg > 0) || !(su > 0)) return false;
+            let n = toNum(sq[`m${m}`]), total = 0, maxN = 0;
+            for (let k = 1; k <= getMonthsPerQuarter(); k++) { let v = toNum(sq[`m${k}`]); total += v; maxN = Math.max(maxN, v); }
+            if (n <= 0 || total <= 0) return false;
+            let std = (masterSub.fees && masterSub.fees[q]) ? toNum(masterSub.fees[q].stdSessions) : 0;
+            if (std <= 0) std = maxN;
+            // 차시가 정상 달과 같고, 금액도 정상 한 달 금액(분기 수강료 × 표준차시 ÷ 총차시, 10원 단위)과 같을 때만
+            return n === std && chg === Math.round((su * std / total) / 10) * 10;
+        }
         // ✨ [v19.9] 분기 강사료를 고정할 금액 (청구서·과목별 보기 공용). null이면 고정하지 않고 차마다 규칙대로 올림
         //    · 환불 없이 분기 수강료 그대로 낸 학생: 학생 기록의 강사료(직접 입력한 금액 포함), 없으면 과목목록관리 강사료
         //    · 환불 등으로 금액이 줄어든 학생: 고정하지 않음 → 한 달 30,760원은 언제나 29,300원 (로봇과학 3분기 84,590 → 80,580처럼 차별 합계)
@@ -3533,6 +3546,33 @@
             if ((g0 > 0 || s0 > 0) && g0 + s0 === su) return g0;
             if (msFee && toNum(msFee.g) > 0 && su === toNum(msFee.su)) return toNum(msFee.g);
             return null;
+        }
+        // ✨ [v19.9.6] 분기 강사료를 고정할 때 차별 강사료 (청구서·과목별 보기 공용)
+        //    · 차마다 규칙대로(÷1.05 올림) 계산한 뒤, 합계가 고정 금액(과목목록관리 강사료)과 다르면
+        //      그 차이를 '정상 달이 아닌 차' 중 마지막 차에서 맞춤 (정상 달 30,760원은 언제나 29,300원)
+        //      예) 댄스 2분기 4·2·4차시(76,900원, 강사료 73,240원) → 29,300 / 14,640 / 29,300
+        //          92,280원 6·3·3차시 → 43,950 / 21,980 / 21,970
+        //    · 모든 차가 정상 달이면 마지막 차에서 맞춤
+        //    charges: [ , 1차 금액, 2차 금액, ...]  isStd(m, 금액): 정상 달인지
+        function capQuarterFees(charges, months, gCap, isStd, mG, mS) {
+            let fees = [], sum = 0, target = 0, lastM = 0;
+            for (let m = 1; m <= months; m++) {
+                let c = toNum(charges[m]);
+                fees[m] = c > 0 ? Math.min(c, stmtTeacherFee(c, mG, mS)) : 0;
+                sum += fees[m];
+                if (c > 0) { lastM = m; if (!isStd(m, c)) target = m; }
+            }
+            if (!lastM) return fees;
+            let diff = gCap - sum;
+            let order = [target || lastM];
+            for (let m = months; m >= 1; m--) if (toNum(charges[m]) > 0 && order.indexOf(m) < 0) order.push(m);
+            order.forEach(m => {
+                if (diff === 0) return;
+                let c = toNum(charges[m]);
+                let nv = Math.max(0, Math.min(c, fees[m] + diff));
+                diff -= (nv - fees[m]); fees[m] = nv;
+            });
+            return fees;
         }
         // ✨ [v19.9] 한 학생의 이번 차 강사료(total)를 지원금 몫에 나눔 - 참조 엑셀처럼 큰 몫부터 규칙대로 올림, 가장 작은 몫이 나머지
         //    예) 30,760원이 24,320 + 6,440으로 나뉘면 강사료 29,300 → 23,170 + 6,130
@@ -3692,14 +3732,15 @@
             let msFee = masterSub && masterSub.fees && masterSub.fees[q];
             let mG = msFee ? toNum(msFee.g) : 0, mS = msFee ? toNum(msFee.s) : 0;
             let gCap = getQuarterFeeCap(stSub, msFee, su, quarterSu);
-            let lastM = 0, gPrev = 0;
-            for (let m = 1; m <= months; m++) if ((out.m[m].charge || 0) > 0) lastM = m;
+            // ✨ [v19.9.6] 분기 강사료 고정은 capQuarterFees (차이는 정상 달이 아닌 차에서 맞춤)
+            let chgArr = [];
+            for (let m = 1; m <= months; m++) chgArr[m] = out.m[m].charge || 0;
+            let capFees = (gCap === null) ? null : capQuarterFees(chgArr, months, gCap, (m, c) => isStdMonthCha(masterSub, q, m, c, su), mG, mS);
             for (let m = 1; m <= months; m++) {
                 let o = out.m[m], chg = o.charge;
                 if (chg <= 0) continue;
-                let g = (gCap === null) ? stmtTeacherFee(chg, mG, mS)
-                    : (m === lastM) ? (gCap - gPrev) : Math.min(stmtTeacherFee(chg, mG, mS), gCap - gPrev);
-                g = Math.max(0, Math.min(g, chg)); gPrev += g;
+                let g = (gCap === null) ? stmtTeacherFee(chg, mG, mS) : capFees[m];
+                g = Math.max(0, Math.min(g, chg));
                 let parts = splitStmtFee(g, [o.g3, o.fr, o.sk], mG, mS);
                 o.feeG = { g3: parts[0], fr: parts[1], sk: parts[2] };
             }
@@ -4248,13 +4289,8 @@
                                 let gT = stmtTeacherFee(thisCharge, tfMasterG, tfMasterS);
                                 tfFullSplit = { g: gT, s: thisCharge - gT };
                             } else {
-                                let lastM = 0, gPrev = 0;
-                                for (let m = 1; m <= getMonthsPerQuarter(); m++) if ((chargeArrOut[m] || 0) > 0) lastM = m;
-                                for (let m = 1; m < month; m++) {
-                                    let c = chargeArrOut[m] || 0;
-                                    if (c > 0) gPrev += Math.max(0, Math.min(stmtTeacherFee(c, tfMasterG, tfMasterS), gCap - gPrev, c));
-                                }
-                                let gThis = (month === lastM) ? (gCap - gPrev) : Math.min(stmtTeacherFee(thisCharge, tfMasterG, tfMasterS), gCap - gPrev);
+                                // ✨ [v19.9.6] 분기 강사료 고정: 차이는 정상 달이 아닌 차에서 맞춤 (capQuarterFees)
+                                let gThis = capQuarterFees(chargeArrOut, getMonthsPerQuarter(), gCap, (m, c) => isStdMonthCha(masterSub, q, m, c, su), tfMasterG, tfMasterS)[month] || 0;
                                 gThis = Math.max(0, Math.min(gThis, thisCharge));
                                 tfFullSplit = { g: gThis, s: thisCharge - gThis };
                             }
@@ -11027,6 +11063,61 @@ function updateG3LimitTotal() {
             closeSessionRatioModal();
             showDetailModal(id);
             renderGrid();
+            if (s.sessionRatioEnabled) offerEarlierQuarterSuik(id, q); // ✨ [v19.9.4] 앞 분기 자유수강 → 수익자 전환 묻기
+        }
+
+        // ✨ [v19.9.4] 2분기 이후에 '지원 시작 시점'을 정하면, 그 앞 분기에 쓴 자유수강 금액을 수익자로 바꿀지 묻기
+        //    바꾸면 앞 분기 과목의 자유수강 칸을 0원으로 직접 입력한 것과 같아짐 (초3지원금은 그대로, 나머지는 수익자)
+        function offerEarlierQuarterSuik(id, q) {
+            let r = db.find(x => x.id == id);
+            if (!r || !r.hasFree || q <= 1) return;
+            let res = calcStudent(r);
+            let list = [];
+            for (let k = 1; k < q; k++) {
+                let used = res['q' + k] ? toNum(res['q' + k].usedFree) : 0;
+                if (used > 0) list.push({ k, used });
+            }
+            if (!list.length) return;
+            let qNames = list.map(o => o.k).join('·') + '분기';
+            let old = document.getElementById('earlySuikModal'); if (old) old.remove();
+            let el = document.createElement('div');
+            el.id = 'earlySuikModal';
+            el.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:100000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
+            el.innerHTML = `
+                <div style="background:white; border-radius:14px; overflow:hidden; width:92%; max-width:440px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1; word-break:keep-all;">
+                    <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:24px 24px 20px; text-align:center;">
+                        <div style="width:52px; height:52px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">🍼</div>
+                        <div style="color:white; font-size:18px; font-weight:800; line-height:1.45;">지원 시작 시점에 따라<br>${qNames} 금액은 수익자로 전환할까요?</div>
+                        <div style="color:#94a3b8; font-size:14px; margin-top:6px;">${escHtmlAttr(r.name)} 학생 · ${q}분기부터 자유수강 지원</div>
+                    </div>
+                    <div style="padding:20px 24px 22px;">
+                        <div style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:12px;">
+                            ${list.map(o => `<div style="display:flex; align-items:center; padding:11px 14px; border-bottom:1px solid #f1f5f9; font-size:15px; color:#1f2937;"><b style="color:#1e3a5f; min-width:56px;">${o.k}분기</b><span>자유수강 ${formatMoney(o.used)}</span><span style="margin-left:auto; color:#b91c1c; font-weight:800;">→ 수익자</span></div>`).join('')}
+                        </div>
+                        <div style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:18px; background:#f8fafc; border-radius:8px; padding:10px 12px;">
+                            ${r.hasG3 ? `${escHtmlAttr(getG3LabelShort())}지원금으로 낸 금액은 그대로 두고, ` : ''}자유수강으로 낸 금액만 수익자로 바뀌어요.<br>나중에 다시 바꾸려면 그 분기 과목의 자유수강 칸에 금액을 직접 적어 주세요.
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" id="earlySuikNo" style="flex:1; padding:12px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:15px;">안함</button>
+                            <button type="button" id="earlySuikYes" style="flex:1.4; padding:12px; border-radius:8px; border:none; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:15px; box-shadow:0 4px 10px rgba(30,58,95,0.35);">수익자로 전환함</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(el);
+            el.querySelector('#earlySuikNo').onclick = () => el.remove();
+            el.querySelector('#earlySuikYes').onclick = () => {
+                list.forEach(o => {
+                    let sq = r['q' + o.k];
+                    ((sq && sq.subs) || []).forEach(s => {
+                        if (!s || !String(s.name || '').trim()) return;
+                        s.mFreeSu = 0; s.mFreeGy = 0; s.mFreeJ = 0;
+                    });
+                });
+                persistData();
+                el.remove();
+                showDetailModal(id);
+                renderGrid();
+            };
         }
 
 
