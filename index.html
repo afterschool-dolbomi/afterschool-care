@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.2</title>
+    <title>방과후 지원금 돌보미 V20.3</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -705,6 +705,131 @@
         .sd-tag.new { background: #fee2e2; color: #dc2626; } .sd-tag.off { background: #f1f5f9; color: #94a3b8; font-style: italic; font-weight: 600; }
         .sd-ratio-btn { margin-top: 5px; font-size: 12px; padding: 3px 9px; border-radius: 5px; border: none; background: #1e3a8a; color: #fff; cursor: pointer; font-weight: 700; white-space: nowrap; }
         .sd-ratio-btn.on { background: #7c3aed; }
+        /* ✨ [v20.3] 환불 관리 전체 화면 (rf-) */
+        .rf-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 950; background: #f1f5f9; flex-direction: column; color: #1f2937; }
+        .rf-sp { flex: 1; }
+        .rf-top { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 60px; background: linear-gradient(135deg, #1e3a5f, #0f172a); flex-shrink: 0; }
+        .rf-title { color: #fff; font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 9px; white-space: nowrap; margin-right: 12px; }
+        .rf-title .ic { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #d4af37; background: rgba(212,175,55,0.15); display: flex; align-items: center; justify-content: center; font-size: 17px; color: #fde68a; }
+        .rf-tabs { display: flex; gap: 4px; align-self: flex-end; }
+        .rf-tab { border: 0; background: rgba(255,255,255,0.10); color: #cbd5e1; font-size: 13px; font-weight: 700; padding: 11px 16px 12px; border-radius: 10px 10px 0 0; cursor: pointer; white-space: nowrap; }
+        .rf-tab:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .rf-tab.on { background: #fff; color: #1e3a5f; font-weight: 800; }
+        .rf-tab .n { font-size: 11px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: rgba(255,255,255,0.18); font-weight: 800; }
+        .rf-tab.on .n { background: #fee2e2; color: #b91c1c; }
+        .rf-topbtn { height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.08); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .rf-topbtn:hover { background: rgba(255,255,255,0.2); }
+        .rf-topbtn.rf-gold { border: 2px solid #d4af37; background: rgba(212,175,55,0.16); color: #fde68a; font-weight: 800; box-shadow: 0 0 0 1px rgba(212,175,55,0.25), 0 2px 8px rgba(212,175,55,0.3); }
+        .rf-topbtn.rf-gold:hover { background: #d4af37; color: #0f172a; }
+        .rf-chagrp { align-items: center; gap: 8px; }
+        .rf-bar .rf-chip { padding: 6px 10px; }
+        .rf-bar .rf-search { width: 210px; }
+        .rf-chk { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 12px; font-weight: 700; padding: 5px 10px 5px 8px; border-radius: 8px; cursor: pointer; white-space: nowrap; user-select: none; }
+        .rf-chk:hover { background: #f1f5f9; }
+        .rf-chk input { width: 15px; height: 15px; margin: 0; accent-color: #2563eb; cursor: pointer; }
+        .rf-chk b { font-weight: 800; }
+        .rf-chk.on { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; }
+        .rf-chk.pre input { accent-color: #92400e; }
+        .rf-chk.pre.on { background: #fffbeb; border-color: #b45309; color: #92400e; }
+        .rf-chk.all input { accent-color: #1e3a5f; }
+        .rf-chk.all.on { background: #e2e8f0; border-color: #1e3a5f; color: #1e3a5f; }
+        .rf-topbtn.rf-close { background: #fff; color: #1e3a5f; border-color: #fff; font-weight: 800; }
+        .rf-topbtn.rf-close:hover { background: #fde68a; }
+        .rf-bar { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap; }
+        .rf-barlb { font-size: 11.5px; color: #64748b; font-weight: 700; }
+        .rf-bardiv { width: 1px; height: 22px; background: #e2e8f0; margin: 0 6px; }
+        .rf-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+        .rf-chip { border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 12px; font-weight: 700; padding: 6px 13px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+        .rf-chip:hover { background: #f1f5f9; }
+        .rf-chip b { font-weight: 800; margin-left: 3px; }
+        .rf-chip.on { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+        .rf-chip.f-free.on { background: #7c3aed; border-color: #7c3aed; }
+        .rf-chip.f-g3.on { background: #0369a1; border-color: #0369a1; }
+        .rf-chip.f-sk.on { background: #b45309; border-color: #b45309; }
+        .rf-search { width: 250px; height: 36px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 12px; background: #fff; }
+        .rf-search:focus, .rf-in:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
+        .rf-split { flex: 1; display: flex; min-height: 0; }
+        .rf-grid { flex: 1; min-width: 0; overflow: auto; background: #fff; }
+        .rf-tbl { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 14px; white-space: nowrap; }
+        .rf-tbl th { position: sticky; top: 0; z-index: 2; background: #f1f5f9; color: #334155; font-weight: 800; font-size: 13.5px; padding: 9px 8px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0; text-align: center; }
+        .rf-tbl td { padding: 7px 8px; border-bottom: 1px solid #eef2f7; border-right: 1px solid #f1f5f9; vertical-align: middle; }
+        .rf-tbl td.rn, .rf-tbl th.rn { width: 34px; text-align: center; color: #94a3b8; background: #f8fafc; font-size: 12.5px; }
+        .rf-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .rf-tbl td.c { text-align: center; }
+        .rf-tbl .zero { color: #cbd5e1; }
+        .rf-tbl th.rfh { background: #fee2e2; color: #b91c1c; }
+        .rf-tbl td.rfc { background: #fff5f5; color: #b91c1c; font-weight: 800; }
+        .rf-tbl tr.wait td { background: #fffbeb; }
+        .rf-tbl tr.wait td.rfc { background: #fef3c7; }
+        .rf-tbl tr.conv td { background: #fff7ed; }
+        .rf-tbl tbody tr:hover td { background: #eff6ff; }
+        .rf-tbl tr.tot td { position: sticky; bottom: 0; z-index: 1; background: #f1f5f9; font-weight: 800; border-top: 2px solid #cbd5e1; }
+        .rf-tbl tr.tot td.rfc { background: #fee2e2; }
+        .rf-name { color: #1d4ed8; font-weight: 800; cursor: pointer; text-decoration: none; }
+        .rf-name:hover { text-decoration: underline; }
+        .rf-tbl .st { width: 1px; padding-left: 2px; padding-right: 2px; }
+        .rf-stat { font-size: 11px; font-weight: 800; padding: 2px 4px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+        .rf-st-wait { background: #fde68a; color: #92400e; }
+        .rf-st-done { background: #dcfce7; color: #15803d; }
+        .rf-st-conv { background: #fed7aa; color: #9a3412; }
+        .rf-src { font-size: 13px; font-weight: 700; padding: 3px 9px; border-radius: 6px; display: inline-block; margin: 1px 3px 1px 0; }
+        .rf-src.s-free { background: #f3e8ff; color: #7c3aed; }
+        .rf-src.s-g3 { background: #e0f2fe; color: #0369a1; }
+        .rf-src.s-sk { background: #fef3c7; color: #b45309; }
+        .rf-src.s-none { background: #f1f5f9; color: #64748b; }
+        .rf-note { font-size: 12.5px; font-weight: 700; margin-top: 2px; white-space: normal; }
+        .rf-note.r { color: #dc2626; } .rf-note.b { color: #2563eb; } .rf-note.o { color: #c2410c; }
+        .rf-cin { width: 64px; height: 30px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 6px; font-size: 14px; text-align: right; background: #fff; }
+        .rf-cin.t { width: 104px; text-align: left; }
+        .rf-act { border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+        .rf-act:hover { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+        .rf-empty { text-align: center; color: #94a3b8; font-size: 15px; padding: 70px 20px !important; line-height: 1.8; white-space: normal; }
+        .rf-side { width: 345px; flex-shrink: 0; border-left: 1px solid #cbd5e1; background: #f8fafc; overflow-y: auto; padding-bottom: 16px; }
+        .rf-side-h { font-size: 14px; font-weight: 800; color: #1e3a5f; padding: 14px 16px 6px; }
+        .rf-mode { display: flex; margin: 4px 16px 2px; border: 1px solid #1e3a5f; border-radius: 8px; overflow: hidden; }
+        .rf-mode button { flex: 1; border: 0; background: #fff; height: 38px; font-size: 12.5px; font-weight: 700; color: #475569; cursor: pointer; }
+        .rf-mode button.on { background: #1e3a5f; color: #fff; font-weight: 800; }
+        .rf-fm { padding: 2px 16px 0; }
+        .rf-lb { font-size: 11.5px; color: #475569; font-weight: 700; margin: 12px 0 5px; }
+        .rf-lb-row { display: flex; justify-content: space-between; align-items: center; }
+        .rf-req { color: #b91c1c; font-weight: 800; }
+        .rf-link { color: #2563eb; text-decoration: underline; font-size: 11px; margin-left: 8px; }
+        .rf-link-g { color: #64748b; }
+        .rf-seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
+        .rf-seg button { border: 0; border-right: 1px solid #e2e8f0; background: #fff; height: 36px; font-size: 12px; font-weight: 700; color: #475569; cursor: pointer; padding: 0 2px; white-space: nowrap; }
+        .rf-seg button:last-child { border-right: 0; }
+        .rf-seg button:hover { background: #eff6ff; }
+        .rf-seg button.on { background: #2563eb; color: #fff; font-weight: 800; }
+        .rf-seg button.pre { font-size: 11px; }
+        .rf-seg button.pre.on { background: #92400e; }
+        .rf-in { width: 100%; height: 38px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 12px; background: #fff; color: #1f2937; box-sizing: border-box; }
+        .rf-g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .rf-stu { max-height: 190px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font-size: 12px; }
+        .rf-stu label { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+        .rf-stu label:last-child { border-bottom: 0; }
+        .rf-stu input { width: 16px; height: 16px; accent-color: #2563eb; }
+        .rf-stu .tg { font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
+        .rf-stu .tg.free { background: #f3e8ff; color: #7c3aed; } .rf-stu .tg.g3 { background: #e0f2fe; color: #0369a1; } .rf-stu .tg.mid { background: #dbeafe; color: #1d4ed8; margin-left: auto; }
+        .rf-empty-s { color: #94a3b8; text-align: center; padding: 18px 8px; font-size: 11.5px; }
+        .rf-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 2px; max-height: 220px; overflow-y: auto; z-index: 5; box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+        .rf-results div { font-size: 12px !important; padding: 9px 12px !important; }
+        .rf-prev { margin-top: 10px; font-size: 11.5px; line-height: 1.6; font-weight: 700; }
+        .rf-prev:empty { display: none; }
+        .rf-mf { width: 100%; margin-top: 10px; height: 36px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 11.5px; cursor: pointer; }
+        .rf-add { width: 100%; margin-top: 10px; height: 46px; border: 0; border-radius: 8px; background: #1e3a5f; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+        .rf-add:hover { background: #0f172a; }
+        .rf-help { margin: 12px 16px 0; font-size: 11px; color: #64748b; line-height: 1.6; }
+        .rf-help details { margin-top: 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; color: #92400e; }
+        .rf-help summary { cursor: pointer; font-weight: 800; }
+        .rf-status { display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 16px; background: #fff; border-top: 1px solid #cbd5e1; font-size: 14px; color: #475569; flex-shrink: 0; white-space: nowrap; overflow-x: auto; }
+        .rf-status b { color: #0f172a; font-weight: 800; }
+        .rf-status .sep { width: 1px; height: 22px; background: #e2e8f0; flex-shrink: 0; }
+        .rf-status .ok { color: #15803d; font-weight: 700; }
+        .rf-apply { height: 38px; padding: 0 20px; border: 0; border-radius: 8px; background: #b91c1c; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 3px 8px rgba(185,28,28,0.3); }
+        .rf-apply:disabled { background: #e2e8f0; color: #94a3b8; box-shadow: none; cursor: default; }
+        .rf-clear { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+        @media (max-width: 1280px) { .rf-side { width: 320px; } .rf-search { width: 190px; } .rf-tab { padding: 11px 11px 12px; } }
+        @media print { .rf-page { display: none !important; } }
         /* ✨ [v20.2] 전환 환불 표시 + 지원 시작 시점 3단계 마법사 */
         .sd-conv-btn { margin-top: 5px; font-size: 12px; padding: 3px 9px; border-radius: 5px; border: 1.5px solid #ea580c; background: #fff7ed; color: #c2410c; cursor: pointer; font-weight: 800; white-space: nowrap; display: block; }
         .sw-modal { background:#fff; border-radius:14px; overflow:hidden; width:94%; max-width:660px; max-height:92vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,.5); border:1px solid #cbd5e1; word-break:keep-all; font-size:15px; color:#1f2937; }
@@ -911,8 +1036,8 @@
 		
         /* ✨ 새 기능 알림: 처음 접속 시 5초 동안 업데이트 보기 버튼 반짝임 */
         @keyframes updGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(109,40,217,0.75), 0 2px 8px rgba(109,40,217,0.45); filter: brightness(1); }
-            50% { box-shadow: 0 0 0 9px rgba(109,40,217,0), 0 0 20px 5px rgba(167,139,250,0.95); filter: brightness(1.18); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.75), 0 2px 8px rgba(244,63,94,0.45); filter: brightness(1); }
+            50% { box-shadow: 0 0 0 9px rgba(244,63,94,0), 0 0 20px 5px rgba(251,146,60,0.95); filter: brightness(1.18); }
         }
         body.upd-glow-on .upd-btn { animation: updGlow 0.9s ease-in-out infinite; }
         body.upd-glow-on .upd-btn:active { animation: none; }
@@ -1365,106 +1490,107 @@
         </div>
     </div>
 
-       <div id="refundManagerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:99998; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-        <div style="background:white; border-radius:14px; overflow:hidden; width:96%; max-width:980px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border:1px solid #cbd5e1;" onclick="event.stopPropagation();">
-            <div style="background:linear-gradient(135deg, #1e3a5f, #0f172a); padding:20px 24px 16px; text-align:center; flex-shrink:0; position:relative;">
-                <button onclick="closeRefundManagerModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
-                <div style="width:48px; height:48px; background:rgba(212,175,55,0.15); border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-size:22px;">🔄</div>
-                <div style="color:white; font-size:16.5px; font-weight:800;">환불 관리</div>
-                <div style="color:#94a3b8; font-size:11.5px; margin-top:4px;">같은 과목 수강생을 한번에 환불하거나, 과목·학생이 서로 달라도 하나씩 담아서 한 번에 차시 환불을 적용할 수 있습니다</div>
-            </div>
-                       <div style="padding:20px 24px; overflow-y:auto;">
+    <!-- ✨ [v20.3] 환불 관리 전체 화면 (왼쪽 메뉴까지 덮음). 왼쪽 표 = 담은 환불(적용 전) + 적용된 환불, 오른쪽 = 환불 담기 -->
+    <div id="refundManagerModal" class="rf-page" style="display:none;">
+        <div class="rf-top">
+            <div class="rf-title"><span class="ic">↩</span>환불 관리</div>
+            <div class="rf-tabs" id="rfTabs"></div>
+            <div class="rf-sp"></div>
+            <button type="button" class="rf-topbtn rf-gold" onclick="openRefundRosterModal()">🧾 환불 내역 행정실 제출 명단</button>
+            <button type="button" class="rf-topbtn rf-close" onclick="closeRefundManagerModal()">✕ 닫기</button>
+        </div>
+        <div class="rf-bar">
+            <input type="text" id="rfSearch" class="rf-search" placeholder="🔍 학생 이름·학번·과목 검색" oninput="rfRender()">
+            <span class="rf-bardiv"></span>
+            <div class="rf-chagrp" id="rfChaBar" style="display:none;"></div>
+            <span class="rf-barlb">상태</span>
+            <div class="rf-chips" id="rfStatChips"></div>
+            <span class="rf-bardiv"></span>
+            <span class="rf-barlb">돌려받는 곳</span>
+            <div class="rf-chips" id="rfFundChips"></div>
+        </div>
+        <div class="rf-split">
+            <div class="rf-grid"><table class="rf-tbl" id="rfTbl"></table></div>
+            <aside class="rf-side" id="rfSide">
+                <div class="rf-side-h">↩ 환불 담기</div>
+                <div class="rf-mode" id="rfModeTabs">
+                    <button type="button" id="rfModeRqa" class="on" onclick="rfSetMode('rqa')">같은 과목 여러 명</button>
+                    <button type="button" id="rfModeRia" onclick="rfSetMode('ria')">한 명씩 환불</button>
+                </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; align-items:start;">
-                    <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px;">
-                        <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">📦 빠른 담기 (같은 과목 수강생 전체 환불)</div>
-                        <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">분기 선택</div>
-                        <div id="rqaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
-                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
-                        <div id="rqaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
-                        <div style="margin-bottom:10px;">
-                            <button type="button" id="rqaMonthFirstBtn" onclick="toggleMonthFirst('rqa')" style="width:100%; padding:7px 8px; border-radius:6px; border:2px solid #cbd5e1; background:white; color:#475569; font-weight:800; cursor:pointer; font-size:12px;">⬜ 선택한 차에서 우선 환불,(꺼짐:중도환불 적용)</button>
-                            <div style="font-size:10.5px; color:#92400e; line-height:1.55; margin-top:5px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 8px;">
-                                <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
-                                <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
-                                <span style="color:#78716c;">예) 차당 수강료 30,000원, 2차에서 35,000원 환불 → 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불</span>
-                            </div>
-                        </div>
-                        <div style="font-size:11.5px; color:#64748b; margin-bottom:8px;">과목 선택</div>
-                        <select id="rqaSubjectSelect" onchange="onRqaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
-                            <option value="">과목을 선택하세요</option>
-                        </select>
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                            <span style="font-size:11.5px; color:#64748b;">대상 학생 (체크 해제로 제외) <span id="rqaCheckedCount" style="color:#b91c1c; font-weight:800;">0명 선택됨</span></span>
-                            <span style="font-size:11px;">
-                                <a href="javascript:void(0)" onclick="toggleAllRqaStudents(true)" style="color:#2563eb; text-decoration:underline; margin-right:6px;">전체선택</a>
-                                <a href="javascript:void(0)" onclick="toggleAllRqaStudents(false)" style="color:#94a3b8; text-decoration:underline;">전체해제</a>
-                            </span>
-                        </div>
-                        <div id="rqaStudentList" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; padding:8px; background:white; margin-bottom:10px; font-size:12px;">
-                            <div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="rqaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                            <input type="number" id="rqaJ" placeholder="재료비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                        </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="rqaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onRqaSessionCountInput()">
-                            <input type="text" id="rqaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                        </div>
-                        <div id="rqaAutoPreview" style="margin-bottom:8px; font-size:11px; color:#9ca3af; line-height:1.5;"></div>
-                        <button type="button" onclick="addRqaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">전체 담기</button>
+                <!-- 같은 과목 여러 명 -->
+                <div class="rf-fm" id="rfFormRqa">
+                    <div class="rf-lb">분기</div>
+                    <div id="rqaQuarterBtns" class="rf-seg"></div>
+                    <div class="rf-lb">몇 차 환불인가요? <span class="rf-req">필수</span></div>
+                    <div id="rqaMonthBtns" class="rf-seg"></div>
+                    <div class="rf-lb">과목</div>
+                    <select id="rqaSubjectSelect" class="rf-in" onchange="onRqaSubjectChange()">
+                        <option value="">과목을 선택하세요</option>
+                    </select>
+                    <div class="rf-lb rf-lb-row">
+                        <span>대상 학생 · <span id="rqaCheckedCount" class="rf-req">0명 선택됨</span></span>
+                        <span>
+                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(true)" class="rf-link">전체선택</a>
+                            <a href="javascript:void(0)" onclick="toggleAllRqaStudents(false)" class="rf-link rf-link-g">전체해제</a>
+                        </span>
                     </div>
-
-                    <div style="background:#f8fafc; border:2px solid #d4af37; border-radius:10px; padding:14px;">
-                        <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px;">✏️ 개별 담기 (학생마다 과목·차시가 달라도 OK)</div>
-                        <div style="position:relative; margin-bottom:10px;">
-                            <input type="text" id="riaStudentSearch" oninput="searchRiaStudent()" placeholder="학생 이름 또는 학년반번호 검색" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                            <div style="font-size:10.5px; color:#94a3b8; margin-top:4px;">예: 3학년 1반 5번 → <b>315</b> 검색</div>
-                            <div id="riaStudentResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #cbd5e1; border-radius:6px; margin-top:2px; max-height:160px; overflow-y:auto; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
-                        </div>
-                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">분기 선택</div>
-                        <div id="riaQuarterBtns" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;"></div>
-                        <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">몇 차 환불인지 선택 <span style="color:#b91c1c; font-weight:800;">(필수·정산서용)</span></div>
-                        <div id="riaMonthBtns" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
-                        <div style="margin-bottom:10px;">
-                            <button type="button" id="riaMonthFirstBtn" onclick="toggleMonthFirst('ria')" style="width:100%; padding:7px 8px; border-radius:6px; border:2px solid #cbd5e1; background:white; color:#475569; font-weight:800; cursor:pointer; font-size:12px;">⬜ 선택한 차에서 우선 환불 (꺼짐)</button>
-                            <div style="font-size:10.5px; color:#92400e; line-height:1.55; margin-top:5px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 8px;">
-                                <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
-                                <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
-                                <span style="color:#78716c;">예) 차당 수강료 30,000원, 2차에서 35,000원 환불 -> 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불</span>
-                            </div>
-                        </div>
-                        <select id="riaSubjectSelect" onchange="onRiaSubjectChange()" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:13px;">
-                            <option value="">학생과 분기를 먼저 선택하세요</option>
-                        </select>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="riaGy" placeholder="교재비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                            <input type="number" id="riaJ" placeholder="재료비 환불 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                        </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                            <input type="number" id="riaSessionCount" placeholder="환불 차시 수" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;" oninput="onRiaSessionCountInput()">
-                            <input type="text" id="riaReason" placeholder="환불 사유 (선택 입력)" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
-                        </div>
-                        <div id="riaAutoPreview" style="margin-bottom:8px; font-size:11px; color:#9ca3af; line-height:1.5;"></div>
-                        <button type="button" onclick="addRiaToCart()" style="width:100%; padding:10px; border-radius:6px; border:none; background:#1e3a5f; color:white; font-weight:700; cursor:pointer; font-size:12.5px;">한 명 담기</button>
+                    <div id="rqaStudentList" class="rf-stu">
+                        <div class="rf-empty-s">분기와 과목을 먼저 선택하세요.</div>
                     </div>
+                    <div class="rf-g2">
+                        <div><div class="rf-lb">환불 차시</div><input type="number" id="rqaSessionCount" class="rf-in" placeholder="차시 수" oninput="onRqaSessionCountInput()"></div>
+                        <div><div class="rf-lb">사유</div><input type="text" id="rqaReason" class="rf-in" placeholder="선택 입력"></div>
+                    </div>
+                    <div class="rf-g2">
+                        <div><div class="rf-lb">교재비 환불</div><input type="number" id="rqaGy" class="rf-in" placeholder="0"></div>
+                        <div><div class="rf-lb">재료비 환불</div><input type="number" id="rqaJ" class="rf-in" placeholder="0"></div>
+                    </div>
+                    <div id="rqaAutoPreview" class="rf-prev"></div>
+                    <button type="button" id="rqaMonthFirstBtn" class="rf-mf" onclick="toggleMonthFirst('rqa')">⬜ 선택한 차에서 우선 환불 (꺼짐)</button>
+                    <button type="button" class="rf-add" onclick="addRqaToCart()">담기 ←</button>
                 </div>
 
-                              <div style="font-weight:800; font-size:13px; color:#1e3a5f; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>🧾 담은 환불 목록 <span id="refundCartCount" style="font-size:12px; color:#b91c1c; font-weight:800;"></span></span>
-                    <button type="button" onclick="clearRefundCart()" style="padding:5px 10px; border-radius:6px; border:1px solid #cbd5e1; background:white; color:#64748b; font-weight:700; cursor:pointer; font-size:11.5px;">🧹 카트 비우기</button>
-                </div>
-                <div id="refundCartTable" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:16px; overflow-x:auto;">
-                    <div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>
+                <!-- 한 명씩 -->
+                <div class="rf-fm" id="rfFormRia" style="display:none;">
+                    <div class="rf-lb">학생</div>
+                    <div style="position:relative;">
+                        <input type="text" id="riaStudentSearch" class="rf-in" oninput="searchRiaStudent()" placeholder="이름 또는 학년반번호 (예: 315)">
+                        <div id="riaStudentResults" class="rf-results" style="display:none;"></div>
+                    </div>
+                    <div class="rf-lb">분기</div>
+                    <div id="riaQuarterBtns" class="rf-seg"></div>
+                    <div class="rf-lb">몇 차 환불인가요? <span class="rf-req">필수</span></div>
+                    <div id="riaMonthBtns" class="rf-seg"></div>
+                    <div class="rf-lb">과목</div>
+                    <select id="riaSubjectSelect" class="rf-in" onchange="onRiaSubjectChange()">
+                        <option value="">학생과 분기를 먼저 선택하세요</option>
+                    </select>
+                    <div class="rf-g2">
+                        <div><div class="rf-lb">환불 차시</div><input type="number" id="riaSessionCount" class="rf-in" placeholder="차시 수" oninput="onRiaSessionCountInput()"></div>
+                        <div><div class="rf-lb">사유</div><input type="text" id="riaReason" class="rf-in" placeholder="선택 입력"></div>
+                    </div>
+                    <div class="rf-g2">
+                        <div><div class="rf-lb">교재비 환불</div><input type="number" id="riaGy" class="rf-in" placeholder="0"></div>
+                        <div><div class="rf-lb">재료비 환불</div><input type="number" id="riaJ" class="rf-in" placeholder="0"></div>
+                    </div>
+                    <div id="riaAutoPreview" class="rf-prev"></div>
+                    <button type="button" id="riaMonthFirstBtn" class="rf-mf" onclick="toggleMonthFirst('ria')">⬜ 선택한 차에서 우선 환불 (꺼짐)</button>
+                    <button type="button" class="rf-add" onclick="addRiaToCart()">담기 ←</button>
                 </div>
 
-                               <div style="display:flex; gap:8px;">
-                    <button onclick="closeRefundManagerModal()" style="flex:1; padding:11px; border-radius:8px; border:1px solid #cbd5e1; background:white; color:#475569; font-weight:700; cursor:pointer; font-size:13.5px;">닫기</button>
-                    <button onclick="applyRefundCart()" style="flex:1.4; padding:11px; border-radius:8px; border:none; background:#b91c1c; color:white; font-weight:800; cursor:pointer; font-size:13.5px; box-shadow:0 4px 10px rgba(185,28,28,0.35);">전체 적용</button>
+                <div class="rf-help">
+                    담은 항목은 왼쪽 표 맨 위에 <b>'적용 전'</b>으로 쌓이고, 아래 <b>[전체 적용]</b>을 눌러야 반영돼요.
+                    <details>
+                        <summary>'선택한 차에서 우선 환불'이 뭔가요?</summary>
+                        <b>꺼짐(기본·중도환불)</b>: 환불이 그 차 금액을 넘으면 뒤 차는 전부 환불하고, 그 차는 <b>다닌 만큼만 청구</b>합니다.<br>
+                        <b>켜짐(우선 환불)</b>: 선택한 차에서 먼저 환불하고, 남은 금액은 다음 차에서 환불합니다. (예: 입원했다가 3차에 다시 다니는 경우)<br>
+                        예) 차당 수강료 30,000원, 2차에서 35,000원 환불 → 꺼짐: 2차 5,000원·3차 30,000원 환불 / 켜짐: 2차 30,000원·3차 5,000원 환불
+                    </details>
                 </div>
-            </div>
-               </div>
+            </aside>
+        </div>
+        <div class="rf-status" id="rfStatus"></div>
     </div>
 
     <!-- ✨ [v19.5] 보강 관리 창 -->
@@ -1596,6 +1722,9 @@
                     closeModal('subject');
                 } else if (document.getElementById('detailOverlay') && document.getElementById('detailOverlay').classList.contains('active')) {
                     closeModal('detail');
+                } else if (document.getElementById('refundManagerModal') && document.getElementById('refundManagerModal').style.display === 'flex'
+                    && !['refundRosterModal', 'manualRefundModal', 'refundLogMonthModal'].some(function (id) { var m = document.getElementById(id); return m && m.style.display === 'flex'; })) {
+                    closeRefundManagerModal(); // ✨ [v20.3] 환불 관리 전체 화면
                 } else if (document.getElementById('panelOverlay') && document.getElementById('panelOverlay').classList.contains('active')) {
                     closePanel();
                 } else if (document.getElementById('tutorialClickBlocker') && document.getElementById('tutorialClickBlocker').style.display === 'block') {
@@ -1631,7 +1760,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.2</span>
+                <span class="brand-version">V20.3</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1716,7 +1845,7 @@
             <!-- 🔍 이름 검색창 이동 (탭 바로 옆) -->
             <input type="text" id="filterName" placeholder="🔍 이름 검색" onkeyup="renderGrid()" style="margin-left: 12px; width: 110px; height: 32px; padding: 0 16px; border: 2px solid #d4af37; border-radius: 16px; font-size: 13px; outline: none; transition: 0.3s; background: var(--card-bg); color: var(--text-dark); box-shadow: 0 0 0 1px rgba(212,175,55,0.2);">
             <!-- ✨ 업데이트 보기 버튼 (이름 검색 오른쪽 고정) -->
-            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(135deg, #a78bfa 0%, #7c3aed 45%, #5b21b6 100%); border:1px solid #4c1d95; color:#ffffff; box-shadow:0 2px 8px rgba(109,40,217,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.15); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
+            <button class="upd-btn" onclick="openFeatureUpdatePopup()" style="margin-left: 8px; height: 32px; background:linear-gradient(120deg, #fb923c 0%, #f43f5e 50%, #db2777 100%); border:1px solid #be123c; color:#ffffff; box-shadow:0 2px 8px rgba(244,63,94,0.45); text-shadow:0 1px 1px rgba(0,0,0,0.25); font-weight:800; padding:0 16px; border-radius:16px; font-size:13px; cursor:pointer; white-space:nowrap;">✨ 업데이트 보기</button>
         </div>
         
         <!-- 우측 툴 버튼 영역 -->
@@ -1832,6 +1961,17 @@
             </div>
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
+
+                <div style="background:linear-gradient(135deg, #fef2f2, #fee2e2); border:2.5px solid #b91c1c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(185,28,28,0.22); word-break:keep-all;">
+                    <div style="margin-bottom:6px;"><span style="background:#b91c1c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.3</span></div>
+                    <div style="font-size:20px; font-weight:900; color:#991b1b; line-height:1.3; margin-bottom:6px;">↩ 환불 관리가 큰 화면으로 바뀌었어요</div>
+                    <div style="font-size:14px; color:#334155; line-height:1.75;">
+                        위쪽 <b>환불관리</b>를 누르면 화면 가득 새 창이 열려요.<br>
+                        <b>왼쪽 표</b>에서 지금까지 환불한 학생을 한눈에 보고, <b>분기 탭</b>(전체·1~4분기)과 <b>자유수강·초3·수익자 환불</b> 버튼으로 골라 볼 수 있어요.<br>
+                        <b>오른쪽 환불 담기</b>에서 <b>같은 과목 여러 명</b> 또는 <b>한 명씩 환불</b> 담으면 표 맨 위에 <b>적용 전</b>으로 쌓이고, 아래 빨간 <b>전체 적용</b>을 누르면 반영돼요.<br>
+                        잘못 넣은 환불은 그 줄의 <b>↩ 되돌리기</b>로 바로 취소할 수 있어요.
+                    </div>
+                </div>
 
                 <div style="background:linear-gradient(135deg, #fff7ed, #ffedd5); border:2.5px solid #c2410c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(194,65,12,0.22); word-break:keep-all;">
                     <div style="margin-bottom:6px;"><span style="background:#c2410c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.2</span></div>
@@ -9366,37 +9506,302 @@ function updateG3LimitTotal() {
         let rqaState = { q: null, subject: '', month: null };
         let riaState = { studentId: null, q: null, month: null };
 
-        function openRefundManagerModal() {
-            refundCart = [];
-            rqaState = { q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, subject: '', month: null };
-            riaState = { studentId: null, q: (currentTab !== 'all') ? Number(String(currentTab).replace('q','')) : 1, month: null };
+        // ===== ✨ [v20.3] 환불 관리 전체 화면 =====
+        // 왼쪽 표: 담아 둔 환불(적용 전, refundCart) + 이미 적용된 환불(refundLog·기록 없는 환불·지원금 전환 환불)
+        // 오른쪽: 환불 담기 (같은 과목 여러 명 = rqa / 한 명씩 = ria — 담기·적용 계산은 예전 함수 그대로)
+        let rfState = { q: 'all', cha: [], st: 'all', fund: 'all', mode: 'rqa' };
+        let rfRows = [];
+        function rfIsOpen() { let m = document.getElementById('refundManagerModal'); return !!(m && m.style.display !== 'none'); }
+        function rfEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function rfFundDefs() {
+            return [
+                { k: 'free', chip: '자유수강', label: '자유수강권으로 복원', sum: '자유수강 복원' },
+                { k: 'g3', chip: getG3Label(), label: getG3Label() + '으로 복원', sum: getG3Label() + ' 복원' },
+                { k: 'sk', chip: '수익자', label: '학부모 반환', sum: '학부모 반환' }
+            ];
+        }
+        function rfZeroParts() { const z = () => ({ Su: 0, Gy: 0, J: 0 }); return { free: z(), g3: z(), sk: z() }; }
+        function rfFundAmt(row, k) { let p = row.parts && row.parts[k]; return p ? p.Su + p.Gy + p.J : 0; }
+        function rfMonthLabel(row) {
+            let m = row.month;
+            if (row.st === 'conv') return m === 'pre' ? '분기 전체' : m + '차';
+            return m === 'pre' ? '수강전취소' : ((m === undefined || m === null || m === '') ? '차 미지정' : m + '차');
+        }
 
-                       renderRqaQuarterBtns();
+        function openRefundManagerModal() {
+            let curQ = (currentTab !== 'all') ? Number(String(currentTab).replace('q', '')) : 0;
+            if (!(curQ >= 1 && curQ <= maxQuarter)) curQ = 0;
+            rfState = { q: curQ || 'all', cha: [], st: 'all', fund: 'all', mode: rfState.mode || 'rqa' };
+            rqaState = { q: curQ || 1, subject: '', month: null };
+            riaState = { studentId: null, q: curQ || 1, month: null };
+
+            renderRqaQuarterBtns();
             renderRqaMonthBtns();
             renderRqaSubjectOptions();
-                        document.getElementById('rqaSessionCount').value = '';
-            document.getElementById('rqaGy').value = '';
-            document.getElementById('rqaJ').value = '';
-            document.getElementById('rqaReason').value = '';
-            document.getElementById('rqaStudentList').innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
-
-            document.getElementById('riaStudentSearch').value = '';
+            ['rqaSessionCount', 'rqaGy', 'rqaJ', 'rqaReason', 'riaStudentSearch', 'riaSessionCount', 'riaGy', 'riaJ', 'riaReason', 'rfSearch'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('rqaStudentList').innerHTML = '<div class="rf-empty-s">분기와 과목을 먼저 선택하세요.</div>';
+            updateRqaCheckedCount();
+            document.getElementById('rqaAutoPreview').innerText = '';
             document.getElementById('riaStudentResults').style.display = 'none';
-            document.getElementById('riaSessionCount').value = '';
-            document.getElementById('riaGy').value = '';
-            document.getElementById('riaJ').value = '';
-            document.getElementById('riaReason').value = '';
             document.getElementById('riaAutoPreview').innerText = '';
             renderRiaQuarterBtns();
             renderRiaMonthBtns();
             renderRiaSubjectSelect();
+            resetMonthFirst('rqa');
+            resetMonthFirst('ria');
+            rfSetMode(rfState.mode);
 
-            renderRefundCartTable();
             document.getElementById('refundManagerModal').style.display = 'flex';
+            rfRefresh();
         }
         function closeRefundManagerModal() {
+            if (refundCart.length > 0 && !confirm(`아직 반영하지 않은 '적용 전' 환불이 ${refundCart.length}건 있어요.\n[전체 적용]을 누르지 않고 닫을까요?\n\n(프로그램을 끄기 전까지는 목록에 그대로 남아 있어요)`)) return;
             document.getElementById('refundManagerModal').style.display = 'none';
         }
+        function rfSetMode(mode) {
+            rfState.mode = mode === 'ria' ? 'ria' : 'rqa';
+            document.getElementById('rfFormRqa').style.display = rfState.mode === 'rqa' ? '' : 'none';
+            document.getElementById('rfFormRia').style.display = rfState.mode === 'ria' ? '' : 'none';
+            document.getElementById('rfModeRqa').classList.toggle('on', rfState.mode === 'rqa');
+            document.getElementById('rfModeRia').classList.toggle('on', rfState.mode === 'ria');
+        }
+        // 위쪽 분기 탭: 표를 그 분기로 걸러 보고, 오른쪽 담기 창의 분기도 같이 맞춤
+        function rfPickQ(q) {
+            rfState.q = q;
+            rfState.cha = [];
+            if (q !== 'all') { selectRqaQuarter(q); selectRiaQuarter(q); }
+            rfRender();
+        }
+        function rfPick(key, v) { rfState[key] = v; rfRender(); }
+        // 차별 체크: 누를 때마다 넣었다 뺐다, '전체'를 누르면 모두 해제
+        function rfToggleCha(k) {
+            if (k === 'all') rfState.cha = [];
+            else rfState.cha = rfState.cha.includes(k) ? rfState.cha.filter(x => x !== k) : rfState.cha.concat([k]);
+            rfRender();
+        }
+        // 새로 담은 줄이 바로 보이게 탭·필터를 맞춤
+        function rfShowPending(q) {
+            if (rfState.q !== 'all' && rfState.q !== q) rfState.q = q;
+            rfState.cha = [];
+            if (rfState.st === 'done') rfState.st = 'all';
+            rfState.fund = 'all';
+            let se = document.getElementById('rfSearch'); if (se) se.value = '';
+            let g = document.querySelector('#refundManagerModal .rf-grid'); if (g) g.scrollTop = 0;
+        }
+
+        // 표에 보일 줄 모으기 (적용 전 + 적용됨)
+        function rfCollect() {
+            let rows = [], pend = [];
+            refundCart.forEach((item, idx) => {
+                let r = db.find(x => x.id == item.studentId);
+                let s = r && r[`q${item.q}`] && r[`q${item.q}`].subs && r[`q${item.q}`].subs[item.sIdx];
+                if (!r || !s) return;
+                let p = computeSessionRefund(item.studentId, item.q, item.sIdx, item.sessionCount);
+                let ok = !!(p && p.ok), su = ok ? p.amount : 0;
+                let sp = splitSuByRatio(su, getSubjectGSRatioSource(s, item.q));
+                let gy = toNum(item.gy), j = toNum(item.j), notes = [];
+                if (!ok) notes.push(['r', '⚠️ 총 차시가 없어 적용할 수 없어요 (과목 목록 관리에서 차시 입력)']);
+                else {
+                    if (gy > 0 && toNum(s.rGy) + gy > toNum(s.gy)) { notes.push(['r', '⚠️ 교재비 환불이 낸 금액보다 많아요']); ok = false; }
+                    if (j > 0 && toNum(s.rJ) + j > toNum(s.j)) { notes.push(['r', '⚠️ 재료비 환불이 낸 금액보다 많아요']); ok = false; }
+                    if (p.existingRSu > 0) notes.push(['r', `기존 환불 ${formatMoney(p.existingRSu)} 있음`]);
+                    if (p.hasSessionRatio) notes.push(['b', '🍼 중간부터 지원 학생']);
+                }
+                let row = { st: 'wait', idx, r, sub: s, q: item.q, sIdx: item.sIdx, month: item.month, monthFirst: !!item.monthFirst, sessions: toNum(item.sessionCount), fg: sp.g, fs: sp.s, su, gy, j, parts: null, reason: item.reason || '', date: '', ok, notes };
+                rows.push(row); pend.push({ row, item });
+            });
+            // 적용 전 줄의 '돌려받는 곳' 미리 보기: 학생 사본에 환불을 넣어 보고 calcStudent로 계산 (실제 자료는 건드리지 않음)
+            let clones = {};
+            pend.forEach(p => {
+                if (!p.row.ok) return;
+                try {
+                    let it = p.item, r = p.row.r;
+                    let cl = clones[r.id] || (clones[r.id] = { c: JSON.parse(JSON.stringify(r)), list: [] });
+                    let cs = cl.c[`q${it.q}`].subs[it.sIdx];
+                    cs.rG = toNum(cs.rG) + p.row.fg; cs.rS = toNum(cs.rS) + p.row.fs; cs.rSu = toNum(cs.rSu) + p.row.su;
+                    cs.rGy = toNum(cs.rGy) + p.row.gy; cs.rJ = toNum(cs.rJ) + p.row.j;
+                    if (!Array.isArray(cs.refundLog)) cs.refundLog = [];
+                    cs.refundLog.push({ sessions: p.row.sessions, amount: p.row.su, month: it.month, g: p.row.fg, s: p.row.fs, gy: p.row.gy, j: p.row.j, source: 'cart', monthFirst: !!it.monthFirst });
+                    cl.list.push({ p, cs, li: cs.refundLog.length - 1 });
+                } catch (e) {}
+            });
+            Object.keys(clones).forEach(id => {
+                let cl = clones[id];
+                try {
+                    let c = calcStudent(cl.c);
+                    cl.list.forEach(x => {
+                        let qKey = `q${x.p.item.q}`;
+                        let alloc = c.allocs && c.allocs[qKey] && c.allocs[qKey][x.p.item.sIdx];
+                        if (!alloc) return;
+                        let sp = getRefundEntrySplit(x.cs, alloc, x.cs.refundLog[x.li]);
+                        x.p.row.parts = { free: sp.fr, g3: sp.g3, sk: sp.sk };
+                    });
+                } catch (e) {}
+            });
+
+            let done = [];
+            db.forEach(r => {
+                let c = null;
+                for (let q = 1; q <= maxQuarter; q++) {
+                    let qKey = `q${q}`, subs = (r[qKey] && r[qKey].subs) || [];
+                    subs.forEach((s, sIdx) => {
+                        if (!s || !String(s.name || '').trim()) return;
+                        let logs = Array.isArray(s.refundLog) ? s.refundLog : [];
+                        let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
+                        let hasRef = rSu > 0 || rGy > 0 || rJ > 0 || logs.length > 0;
+                        let hasConv = !!(s.convRefund && Array.isArray(s.convRefund.items) && s.convRefund.items.length);
+                        if (!hasRef && !hasConv) return;
+                        if (hasRef) {
+                            if (!c) { try { c = calcStudent(r); } catch (e) { c = {}; } }
+                            let alloc = (c.allocs && c.allocs[qKey] && c.allocs[qKey][sIdx]) || {};
+                            let used = rfZeroParts(), lg = { su: 0, g: 0, s: 0, gy: 0, j: 0 };
+                            logs.forEach((l, li) => {
+                                let sp = getRefundEntrySplit(s, alloc, l);
+                                let parts = { free: sp.fr, g3: sp.g3, sk: sp.sk };
+                                ['free', 'g3', 'sk'].forEach(k => ['Su', 'Gy', 'J'].forEach(x => { used[k][x] += toNum(parts[k][x]); }));
+                                lg.su += toNum(l.amount); lg.g += toNum(l.g); lg.s += toNum(l.s); lg.gy += toNum(l.gy); lg.j += toNum(l.j);
+                                done.push({ st: 'done', r, sub: s, q, sIdx, li, month: l.month, monthFirst: !!l.monthFirst, sessions: toNum(l.sessions), fg: toNum(l.g), fs: toNum(l.s), su: toNum(l.amount), gy: toNum(l.gy), j: toNum(l.j), parts, reason: l.reason || '', date: l.date || '', notes: [] });
+                            });
+                            // 환불 기록(refundLog) 없이 금액만 들어 있는 옛 환불
+                            let rest = { su: Math.max(0, rSu - lg.su), gy: Math.max(0, rGy - lg.gy), j: Math.max(0, rJ - lg.j) };
+                            if (rest.su + rest.gy + rest.j > 0) {
+                                let parts = rfZeroParts();
+                                [['free', 'Fr'], ['g3', 'G3'], ['sk', 'Sk']].forEach(([k, cap]) => ['Su', 'Gy', 'J'].forEach(x => { parts[k][x] = Math.max(0, toNum(alloc['ref' + cap + x]) - used[k][x]); }));
+                                done.push({ st: 'done', r, sub: s, q, sIdx, li: -1, month: null, monthFirst: false, sessions: 0, fg: Math.max(0, toNum(s.rG) - lg.g), fs: Math.max(0, toNum(s.rS) - lg.s), su: rest.su, gy: rest.gy, j: rest.j, parts, reason: '', date: '', notes: [['o', '기록 없이 직접 입력한 환불']] });
+                            }
+                        }
+                        // 지원금 전환 환불 (수강 금액은 그대로, 수익자로 낸 돈만 돌려줌)
+                        if (hasConv) s.convRefund.items.forEach(it => {
+                            let su = toNum(it.su), gy = toNum(it.gy), j = toNum(it.j);
+                            if (su + gy + j <= 0) return;
+                            let parts = rfZeroParts(); parts.sk = { Su: su, Gy: gy, J: j };
+                            done.push({ st: 'conv', r, sub: s, q, sIdx, li: -1, month: it.month, monthFirst: false, sessions: 0, fg: 0, fs: 0, su, gy, j, parts, reason: '자유수강 전환' + (s.convRefund.since ? ` (${s.convRefund.since})` : ''), date: s.convRefund.date || '', notes: [['o', '수강료 변동 없음']] });
+                        });
+                    });
+                }
+            });
+            done.sort((a, b) => (a.q - b.q) || (toNum(a.r.grade) - toNum(b.r.grade)) || (toNum(a.r.classNum) - toNum(b.r.classNum)) || (toNum(a.r.studentNum) - toNum(b.r.studentNum)) || (a.sIdx - b.sIdx) || (a.li - b.li));
+            return rows.concat(done);
+        }
+        function rfRefresh() {
+            if (!refundCart.length && rfState.st === 'wait') rfState.st = 'all';
+            rfRows = rfCollect();
+            rfRender();
+        }
+        // 지원금 종류로 걸러 볼 때는 그 지원금 몫만 보여 줌 (한 환불이 두 지원금에 걸친 경우)
+        function rfView(row, fund) {
+            if (fund === 'all' || !row.parts) return { fg: row.fg, fs: row.fs, su: row.su, gy: row.gy, j: row.j };
+            let p = row.parts[fund], fg = row.fg, fs = row.fs;
+            if (p.Su !== row.su) {
+                let sp = (row.fg + row.fs > 0) ? splitSuByRatio(p.Su, { g: row.fg, s: row.fs }) : { g: 0, s: 0 };
+                fg = sp.g; fs = sp.s;
+            }
+            return { fg, fs, su: p.Su, gy: p.Gy, j: p.J };
+        }
+        function rfRender() {
+            if (!rfIsOpen()) return;
+            let defs = rfFundDefs(), S = rfState;
+            const num = v => v ? v.toLocaleString() : '<span class="zero">0</span>';
+
+            // 분기 탭
+            let tabs = [['all', '전체 분기']];
+            for (let q = 1; q <= maxQuarter; q++) tabs.push([q, q + '분기']);
+            document.getElementById('rfTabs').innerHTML = tabs.map(([k, label]) => {
+                let n = rfRows.filter(x => k === 'all' || x.q === k).length; // 환불 건수
+                return `<button type="button" class="rf-tab${S.q === k ? ' on' : ''}" onclick="rfPickQ(${k === 'all' ? "'all'" : k})">${label}${n ? `<span class="n">${n}건</span>` : ''}</button>`;
+            }).join('');
+
+            // 상태·지원금 필터
+            // ✨ 분기 탭을 고르면 바로 아래 줄에서 수강전취소·1차·2차·3차로 나눠 볼 수 있음 (전체 분기에서는 숨김)
+            let inQ = rfRows.filter(x => S.q === 'all' || x.q === S.q);
+            const chaKey = x => (x.st === 'conv' && x.month === 'pre') ? 'none' : (x.month === 'pre' ? 'pre' : ((x.month === undefined || x.month === null || x.month === '') ? 'none' : Number(x.month)));
+            let chaBar = document.getElementById('rfChaBar');
+            if (S.q === 'all') { S.cha = []; chaBar.style.display = 'none'; }
+            else {
+                // ✨ 체크 형식: 여러 차를 같이 골라 섞어 볼 수 있음. 아무것도 안 고르면 '전체'
+                let chas = [['pre', '수강전취소']];
+                for (let m = 1; m <= getMonthsPerQuarter(); m++) chas.push([m, m + '차']);
+                if (inQ.some(x => chaKey(x) === 'none')) chas.push(['none', '차 미지정·분기 전체']);
+                S.cha = S.cha.filter(k => chas.some(c => c[0] === k));
+                const arg = k => typeof k === 'number' ? k : "'" + k + "'";
+                chaBar.innerHTML = `<span class="rf-barlb">${S.q}분기 차별</span><div class="rf-chips">`
+                    + `<label class="rf-chk all${S.cha.length ? '' : ' on'}"><input type="checkbox"${S.cha.length ? '' : ' checked'} onchange="rfToggleCha('all')">전체<b>${inQ.length}</b></label>`
+                    + chas.map(([k, label]) => `<label class="rf-chk${k === 'pre' ? ' pre' : ''}${S.cha.includes(k) ? ' on' : ''}"><input type="checkbox"${S.cha.includes(k) ? ' checked' : ''} onchange="rfToggleCha(${arg(k)})">${label}<b>${inQ.filter(x => chaKey(x) === k).length}</b></label>`).join('')
+                    + '</div><span class="rf-bardiv"></span>';
+                chaBar.style.display = 'flex';
+            }
+            let byQ = inQ.filter(x => !S.cha.length || S.cha.includes(chaKey(x)));
+            const stOk = (x, st) => st === 'all' || (st === 'wait' ? x.st === 'wait' : x.st !== 'wait');
+            document.getElementById('rfStatChips').innerHTML = [['all', '전체'], ['wait', '적용 전'], ['done', '적용됨']].map(([k, label]) =>
+                `<button type="button" class="rf-chip${S.st === k ? ' on' : ''}" onclick="rfPick('st','${k}')">${label}<b>${byQ.filter(x => stOk(x, k)).length}</b></button>`).join('');
+            let bySt = byQ.filter(x => stOk(x, S.st));
+            document.getElementById('rfFundChips').innerHTML = `<button type="button" class="rf-chip${S.fund === 'all' ? ' on' : ''}" onclick="rfPick('fund','all')">전체<b>${bySt.length}</b></button>`
+                + defs.map(d => `<button type="button" class="rf-chip f-${d.k}${S.fund === d.k ? ' on' : ''}" onclick="rfPick('fund','${d.k}')">${d.chip} 환불<b>${bySt.filter(x => rfFundAmt(x, d.k) > 0).length}</b></button>`).join('');
+            let rows = bySt.filter(x => S.fund === 'all' || rfFundAmt(x, S.fund) > 0);
+            let kw = (document.getElementById('rfSearch').value || '').trim();
+            if (kw) rows = rows.filter(x => {
+                let r = x.r;
+                return String(r.name || '').includes(kw) || `${r.grade}-${r.classNum}-${r.studentNum}`.includes(kw) || `${r.grade}${r.classNum}${r.studentNum}`.includes(kw) || String(x.sub.name || '').includes(kw);
+            });
+
+            // 표
+            let h = '<thead><tr><th class="rn"></th><th class="st">상태</th><th>학번</th><th>이름</th><th>과목</th><th>' + (S.q === 'all' ? '분기·차' : '차') + '</th><th>환불 차시</th><th>강사료</th><th>수용비</th><th>수강료</th><th>교재비</th><th>재료비</th><th class="rfh">환불 합계</th><th>돌려받는 곳</th><th>사유</th><th>적용일</th><th>관리</th></tr></thead><tbody>';
+            let T = { fg: 0, fs: 0, su: 0, gy: 0, j: 0 };
+            rows.forEach((x, i) => {
+                let r = x.r, v = rfView(x, S.fund), total = v.su + v.gy + v.j, wait = x.st === 'wait';
+                T.fg += v.fg; T.fs += v.fs; T.su += v.su; T.gy += v.gy; T.j += v.j;
+                let stat = wait ? '<span class="rf-stat rf-st-wait">담음 · 적용 전</span>' : (x.st === 'conv' ? '<span class="rf-stat rf-st-conv">지원금 전환</span>' : '<span class="rf-stat rf-st-done">적용됨</span>');
+                let notes = x.notes.map(n => `<div class="rf-note ${n[0]}">${n[1]}</div>`).join('');
+                let split = (v.fg + v.fs > 0);
+                let srcList = defs.filter(d => rfFundAmt(x, d.k) > 0 && (S.fund === 'all' || S.fund === d.k));
+                let src = srcList.map(d => `<span class="rf-src s-${d.k}">${wait ? '예상 · ' : ''}${d.label}${srcList.length > 1 ? ' ' + rfFundAmt(x, d.k).toLocaleString() : ''}</span>`).join('');
+                if (!src) src = wait ? '<span class="rf-src s-none">적용하면 정해져요</span>' : '<span class="zero">—</span>';
+                let sess = wait ? `<input type="number" class="rf-cin" style="width:56px;" value="${x.sessions || ''}" onchange="updateRefundCartSessionCount(${x.idx}, this.value)" title="환불 차시 고치기"> 차시` : (x.sessions ? x.sessions + '차시' : '<span class="zero">—</span>');
+                let gyCell = wait ? `<input type="number" class="rf-cin" value="${x.gy || ''}" placeholder="0" onchange="updateRefundCartGy(${x.idx}, this.value)">` : num(v.gy);
+                let jCell = wait ? `<input type="number" class="rf-cin" value="${x.j || ''}" placeholder="0" onchange="updateRefundCartJ(${x.idx}, this.value)">` : num(v.j);
+                let reason = wait ? `<input type="text" class="rf-cin t" value="${rfEsc(x.reason)}" placeholder="사유" onchange="updateRefundCartReason(${x.idx}, this.value)">` : (rfEsc(x.reason) || '<span class="zero">—</span>');
+                let act = wait ? `<button type="button" class="rf-act" onclick="removeRefundCartItem(${x.idx})">✕ 빼기</button>`
+                    : (x.st === 'done' && x.li >= 0 ? `<button type="button" class="rf-act" onclick="rfUndo('${r.id}', ${x.q}, ${x.sIdx}, ${x.li})">↩ 되돌리기</button>`
+                        : `<button type="button" class="rf-act" onclick="showDetailModal('${r.id}')">상세창에서</button>`);
+                h += `<tr class="${wait ? 'wait' : (x.st === 'conv' ? 'conv' : '')}"><td class="rn">${i + 1}</td><td class="c st">${stat}</td><td class="c">${r.grade}-${r.classNum}-${r.studentNum}</td>`
+                    + `<td><a class="rf-name" onclick="showDetailModal('${r.id}')" title="학생 상세창 열기">${rfEsc(r.name)}</a></td>`
+                    + `<td>${rfEsc(x.sub.name)}${notes}</td>`
+                    + `<td class="c">${S.q === 'all' ? x.q + '분기 ' : ''}${rfMonthLabel(x)}${x.monthFirst ? '<div class="rf-note o">차 우선환불</div>' : ''}</td>`
+                    + `<td class="num">${sess}</td>`
+                    + `<td class="num">${split ? num(v.fg) : '<span class="zero">—</span>'}</td><td class="num">${split ? num(v.fs) : '<span class="zero">—</span>'}</td><td class="num">${num(v.su)}</td>`
+                    + `<td class="num">${gyCell}</td><td class="num">${jCell}</td><td class="num rfc">${total.toLocaleString()}</td>`
+                    + `<td>${src}</td><td>${reason}</td><td class="c" style="color:#64748b;">${rfEsc(x.date) || '—'}</td><td class="c">${act}</td></tr>`;
+            });
+            if (!rows.length) {
+                h += `<tr><td colspan="17" class="rf-empty">${rfRows.length ? '이 조건에 맞는 환불이 없어요.<br>위쪽 분기 탭이나 필터를 바꿔 보세요.' : '아직 환불 내역이 없어요.<br>오른쪽 <b>환불 담기</b>에서 분기·차·과목을 골라 담아 보세요.'}</td></tr>`;
+            } else {
+                h += `<tr class="tot"><td class="rn">Σ</td><td colspan="6" class="c">합계 ${rows.length}건</td><td class="num">${num(T.fg)}</td><td class="num">${num(T.fs)}</td><td class="num">${num(T.su)}</td><td class="num">${num(T.gy)}</td><td class="num">${num(T.j)}</td><td class="num rfc">${(T.su + T.gy + T.j).toLocaleString()}</td><td colspan="4"></td></tr>`;
+            }
+            document.getElementById('rfTbl').innerHTML = h + '</tbody>';
+
+            // 아래 상태 줄
+            let waits = rfRows.filter(x => x.st === 'wait'), dones = byQ.filter(x => x.st !== 'wait');
+            const sumOf = arr => arr.reduce((t, x) => t + x.su + x.gy + x.j, 0);
+            let fundSum = defs.map(d => `${d.sum} <b>${dones.reduce((t, x) => t + rfFundAmt(x, d.k), 0).toLocaleString()}</b>`).join(' · ');
+            document.getElementById('rfStatus').innerHTML =
+                `<span>적용 전 <b>${waits.length}</b>건 · <b>${sumOf(waits).toLocaleString()}</b>원</span>`
+                + `<button type="button" class="rf-apply" id="rfApplyBtn" onclick="applyRefundCart()"${refundCart.length ? '' : ' disabled'}>전체 적용</button>`
+                + (refundCart.length ? '<button type="button" class="rf-clear" onclick="clearRefundCart()">🧹 담은 것 비우기</button>' : '')
+                + `<span class="sep"></span><span>${S.q === 'all' ? '전체 분기' : S.q + '분기' + (S.cha.length ? ' ' + S.cha.slice().sort((a, b) => String(a === 'pre' ? 0 : (a === 'none' ? 9 : a)).localeCompare(String(b === 'pre' ? 0 : (b === 'none' ? 9 : b)))).map(k => k === 'pre' ? '수강전취소' : (k === 'none' ? '차 미지정' : k + '차')).join('·') : '')} 적용됨 <b>${dones.length}</b>건 · <b>${sumOf(dones).toLocaleString()}</b>원</span>`
+                + `<span>${fundSum}</span><div class="rf-sp"></div><span class="ok">● 자동 저장됨</span>`;
+        }
+        // 적용된 환불 한 건 되돌리기 (학생 상세창의 🗑️ 와 같은 처리)
+        function rfUndo(id, q, sIdx, li) {
+            window._rfNoDetail = true;
+            try { deleteRefundLogEntry(id, q, sIdx, li); } finally { window._rfNoDetail = false; }
+        }
+        // 학생 상세창 등에서 자료가 바뀌면(메인 표를 다시 그릴 때) 환불 관리 표도 같이 새로 고침
+        const rfRenderGridOrig = renderGrid;
+        renderGrid = function () {
+            let out = rfRenderGridOrig.apply(this, arguments);
+            try { if (rfIsOpen()) rfRefresh(); } catch (e) {}
+            return out;
+        };
 
         // ===== ✨ [v19.5] 보강 관리 =====
         // 일부 학생만 앞 차의 차시를 뒤 차로 옮김. 분기 수강료·지원금은 그대로이고 차별 청구 금액만 바뀜.
@@ -10433,7 +10838,7 @@ function updateG3LimitTotal() {
                function showRefundToast(count) {
             let el = document.getElementById('refundToast');
             if (!el) return;
-            el.innerText = `학생 ${count}명이 맨 아래 환불 목록에 담아졌습니다`;
+            el.innerText = `학생 ${count}명을 담았어요.\n왼쪽 표의 '적용 전' 줄을 확인하고 [전체 적용]을 눌러 주세요`;
             el.style.transition = '';
             el.style.display = 'block';
             el.style.opacity = '1';
@@ -10448,13 +10853,11 @@ function updateG3LimitTotal() {
         // ===== 빠른 담기 (과목 전체 학생) =====
         function renderRqaQuarterBtns() {
             let wrap = document.getElementById('rqaQuarterBtns');
+            wrap.style.gridTemplateColumns = `repeat(${maxQuarter}, 1fr)`;
             let html = '';
             for (let q = 1; q <= maxQuarter; q++) {
                 let isOn = (rqaState.q === q);
-                let style = isOn
-                    ? 'padding:9px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
-                    : 'padding:9px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
-                html += `<button type="button" style="${style}" onclick="selectRqaQuarter(${q})">${q}분기</button>`;
+                html += `<button type="button" class="${isOn ? 'on' : ''}" onclick="selectRqaQuarter(${q})">${q}분기</button>`;
             }
             wrap.innerHTML = html;
         }
@@ -10468,20 +10871,10 @@ function updateG3LimitTotal() {
             let wrap = document.getElementById('rqaMonthBtns');
             if (!wrap) return;
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
+            wrap.style.gridTemplateColumns = `1.5fr repeat(${months}, 1fr)`;
             let html = '';
-            let preOn = (rqaState.month === 'pre');
-            let preStyle = preOn
-                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
-                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
-            html += `<button type="button" style="${preStyle}" onclick="selectRqaMonth('pre')">수강전취소</button>`;
-            for (let m = 1; m <= months; m++) {
-                let isOn = (rqaState.month === m);
-                let style = isOn
-                    ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
-                    : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
-                html += `<button type="button" style="${style}" onclick="selectRqaMonth(${m})">${m}차</button>`;
-            }
+            html += `<button type="button" class="pre${rqaState.month === 'pre' ? ' on' : ''}" onclick="selectRqaMonth('pre')">수강전취소</button>`;
+            for (let m = 1; m <= months; m++) html += `<button type="button" class="${rqaState.month === m ? 'on' : ''}" onclick="selectRqaMonth(${m})">${m}차</button>`;
             wrap.innerHTML = html;
         }
         function selectRqaMonth(m) {
@@ -10535,21 +10928,22 @@ function updateG3LimitTotal() {
         function renderRqaStudentList() {
             let wrap = document.getElementById('rqaStudentList');
                 if (!rqaState.q || !rqaState.subject) {
-                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">분기와 과목을 먼저 선택하세요.</div>';
+                wrap.innerHTML = '<div class="rf-empty-s">분기와 과목을 먼저 선택하세요.</div>';
                 updateRqaCheckedCount();
                 return;
             }
             let targets = findRqaTargets();
             if (targets.length === 0) {
-                wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">해당 분기에 이 과목을 수강 중인 학생이 없습니다.</div>';
+                wrap.innerHTML = '<div class="rf-empty-s">해당 분기에 이 과목을 수강 중인 학생이 없습니다.</div>';
                 updateRqaCheckedCount();
                 return;
             }
                         wrap.innerHTML = targets.map(t => `
-                <label style="display:flex; align-items:center; gap:8px; padding:4px; cursor:pointer; border-bottom:1px solid #f1f5f9;">
+                <label>
                     <input type="checkbox" class="rqa-student-chk" value="${t.r.id}|${t.sIdx}" checked onchange="updateRqaCheckedCount()">
-                    <span>${t.r.grade}학년 ${t.r.classNum}반 ${t.r.studentNum}번 ${t.r.name}</span>
-                    ${t.s.sessionRatioEnabled ? `<span style="color:#2563eb; font-size:10.5px; font-weight:700; margin-left:auto;">🍼 중간부터 지원</span>` : ''}
+                    <span>${t.r.grade}-${t.r.classNum}-${t.r.studentNum} <b>${t.r.name}</b></span>
+                    ${t.r.hasFree ? '<span class="tg free">자유</span>' : ''}${t.r.hasG3 ? `<span class="tg g3">${getG3LabelShort()}</span>` : ''}
+                    ${t.s.sessionRatioEnabled ? `<span class="tg mid">🍼 중간부터 지원</span>` : ''}
                 </label>
             `).join('');
             updateRqaCheckedCount();
@@ -10596,6 +10990,7 @@ function updateG3LimitTotal() {
                 if (!r) return;
             refundCart.push({ studentId: rid, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: rqaState.q, month: rqaState.month, sIdx, subjectName: rqaState.subject, sessionCount, gy, j, reason, monthFirst: monthFirstState.rqa });
             });
+            rfShowPending(rqaState.q);
             renderRefundCartTable();
             showRefundToast(checked.length);
             resetMonthFirst('rqa');
@@ -10626,20 +11021,10 @@ function updateG3LimitTotal() {
             let wrap = document.getElementById('riaMonthBtns');
             if (!wrap) return;
             let months = getMonthsPerQuarter();
-            wrap.style.gridTemplateColumns = `repeat(${months + 1}, 1fr)`;
+            wrap.style.gridTemplateColumns = `1.5fr repeat(${months}, 1fr)`;
             let html = '';
-            let preOn = (riaState.month === 'pre');
-            let preStyle = preOn
-                ? 'padding:8px 0; border-radius:8px; border:2px solid #b45309; background:#92400e; color:white; font-weight:800; cursor:pointer; font-size:11px;'
-                : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:11px;';
-            html += `<button type="button" style="${preStyle}" onclick="selectRiaMonth('pre')">수강전취소</button>`;
-            for (let m = 1; m <= months; m++) {
-                let isOn = (riaState.month === m);
-                let style = isOn
-                    ? 'padding:8px 0; border-radius:8px; border:2px solid #2563eb; background:#1e40af; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
-                    : 'padding:8px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
-                html += `<button type="button" style="${style}" onclick="selectRiaMonth(${m})">${m}차</button>`;
-            }
+            html += `<button type="button" class="pre${riaState.month === 'pre' ? ' on' : ''}" onclick="selectRiaMonth('pre')">수강전취소</button>`;
+            for (let m = 1; m <= months; m++) html += `<button type="button" class="${riaState.month === m ? 'on' : ''}" onclick="selectRiaMonth(${m})">${m}차</button>`;
             wrap.innerHTML = html;
         }
         function selectRiaMonth(m) {
@@ -10693,13 +11078,11 @@ function updateG3LimitTotal() {
         }
         function renderRiaQuarterBtns() {
             let wrap = document.getElementById('riaQuarterBtns');
+            wrap.style.gridTemplateColumns = `repeat(${maxQuarter}, 1fr)`;
             let html = '';
             for (let q = 1; q <= maxQuarter; q++) {
                 let isOn = (riaState.q === q);
-                let style = isOn
-                    ? 'padding:9px 0; border-radius:8px; border:2px solid #d4af37; background:#1e3a5f; color:white; font-weight:800; cursor:pointer; font-size:12.5px;'
-                    : 'padding:9px 0; border-radius:8px; border:2px solid #cbd5e1; background:white; color:#334155; font-weight:700; cursor:pointer; font-size:12.5px;';
-                html += `<button type="button" style="${style}" onclick="selectRiaQuarter(${q})">${q}분기</button>`;
+                html += `<button type="button" class="${isOn ? 'on' : ''}" onclick="selectRiaQuarter(${q})">${q}분기</button>`;
             }
             wrap.innerHTML = html;
         }
@@ -10732,6 +11115,7 @@ function updateG3LimitTotal() {
             let s = r[`q${riaState.q}`].subs[sIdx];
             let reason = (document.getElementById('riaReason').value || '').trim();
             refundCart.push({ studentId: riaState.studentId, studentLabel: `${r.grade}-${r.classNum}-${r.studentNum} ${r.name}`, q: riaState.q, month: riaState.month, sIdx, subjectName: s.name, sessionCount, gy, j, reason, monthFirst: monthFirstState.ria });
+            rfShowPending(riaState.q);
             renderRefundCartTable();
             document.getElementById('riaSessionCount').value = '';
             document.getElementById('riaGy').value = '';
@@ -10752,6 +11136,7 @@ function updateG3LimitTotal() {
             function renderRefundCartTable() {
             let wrap = document.getElementById('refundCartTable');
             let countEl = document.getElementById('refundCartCount');
+            if (!wrap) { rfRefresh(); return; } // ✨ [v20.3] 담은 목록은 환불 관리 화면의 왼쪽 표(적용 전 줄)로 옮김
             if (refundCart.length === 0) {
                 wrap.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:16px;">담은 환불 항목이 없습니다.</div>';
                 if (countEl) countEl.innerText = '';
@@ -10898,7 +11283,7 @@ function updateG3LimitTotal() {
 
             s.refundLog.splice(logIdx, 1);
             persistData();
-            showDetailModal(id);
+            if (!window._rfNoDetail) showDetailModal(id); // ✨ [v20.3] 환불 관리 화면에서 되돌릴 때는 상세창을 띄우지 않음
             if (typeof renderGrid === 'function') renderGrid();
         }
 
@@ -17398,7 +17783,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 <script>
 // ✨ 이번 버전에서 처음 접속했을 때만 '업데이트 보기' 버튼을 5초 동안 반짝이게
 (function () {
-    var KEY = 'edusync_update_glow_seen', VER = 'v20.2';
+    var KEY = 'edusync_update_glow_seen', VER = 'v20.3';
     var seen = null; try { seen = localStorage.getItem(KEY); } catch (e) {}
     if (seen === VER) return;
     function start() {
@@ -17781,11 +18166,8 @@ function showBackupNudge() {
         yearSet: [{ sel: '#btnYearSettings', text: '여기 <b>1. 학년도 지원금·분기제 설정</b>을 눌러 주세요.' }],
         refund: [
             { sel: '#btn-refund-manage', text: '먼저 여기 <b>환불관리</b>를 눌러 주세요.', skipIf: function () { var m = document.getElementById('refundManagerModal'); return !!(m && m.style.display !== 'none' && m.getClientRects().length); } },
-            // 환불관리 창이 뜨면 단체(빠른 담기)와 개별(이름 검색) 두 곳을 한 번에 알려 줌
-            { sel: function () { var q = document.getElementById('rqaQuarterBtns'); return q && q.parentElement; }, clip: '#refundManagerModal > div', pos: ['left', 'top'], slack: 100, force: true, noScroll: true,
-              hint: '👆 쓰려는 쪽을 눌러서 시작하세요',
-              text: '<b>여러 명을 단체로</b> 환불하려면 <b>이쪽</b>을 이용하세요.<br>분기·차·과목을 고르면 그 과목 수강생이 모두 나와요.',
-              also: { sel: '#riaStudentSearch', pos: ['right', 'top'], force: true, text: '<b>한 명씩 개별로</b> 환불하고 싶다면 <b>여기에 학생 이름</b>을 적어 주세요.' } }
+            // ✨ [v20.3] 환불 관리 화면이 뜨면 오른쪽 '환불 담기'의 두 가지 방법(여러 명 / 한 명씩)을 알려 줌
+            { sel: '#rfModeTabs', text: '오른쪽 <b>환불 담기</b>에서 방법을 골라 주세요.<br>· <b>같은 과목 여러 명</b>: 분기·차·과목을 고르면 그 과목 수강생이 모두 나와요.<br>· <b>한 명씩 환불</b>: 학생 이름을 적어서 찾아요.<br>담은 뒤 맨 아래 빨간 <b>전체 적용</b>을 눌러야 반영돼요.' }
         ],
         bogang: [{ sel: '#btn-bogang-manage', text: '여기 <b>보강관리</b>를 눌러 과목·차·학생을 골라 주세요.' }],
         backup: [{ sel: '#btn-excel-export', text: '여기 <b>6. 전체 명단 백업 (엑셀)</b>을 누르면 지금까지 입력한 내용이 엑셀 파일로 저장돼요.' }],
@@ -17838,7 +18220,7 @@ function showBackupNudge() {
           opts: [{ label: '👉 자유수강자 등록은 어디서 해?', guide: 'neis' }],
           a: '분기 중간에 자유수강자로 추가된 학생은, 먼저 <b>자유수강자로 등록</b>한 다음 <b>언제부터 지원하는지</b>를 알려 주면 돼요.<br><br>아동 이름을 눌러 상세창을 열고, 그 분기 표의 <b>과목명 글자 옆 🍼 지원 시작 시점</b>을 눌러요. 3단계로 진행돼요.<br>· <b>1단계</b>: 지원 시작일을 한 번 고르고, 그 분기 과목마다 지원 대상 차시(뒤에서부터)를 적어요.<br>· <b>2단계</b>: 앞 분기에 쓴 자유수강 금액을 수익자로 바꿀지 골라요.<br>· <b>3단계</b>: 수익자로 낸 돈을 <b>환불 명단</b>에 넣을 분기를 골라요. 교재비·재료비는 바꿀 금액만 적어요.<br>학생의 수강 금액은 그대로이고, 환불 명단에는 <b>전환</b> 꼬리표가 붙어요.<br>잘못 넣었으면 같은 창 1단계의 <b>🗑 지원 시작 시점 지우기</b>를 누르면 한 번에 되돌아가요.' },
         { id: 'refund', q: '환불은 어떻게 처리해?', kw: ['환불', '반환', '돌려', '중도포기', '취소', '그만'],
-          a: '위쪽 <b>환불관리</b>에서 환불을 기록해요.<br>· <b>여러 명을 단체로</b> 환불: 왼쪽 <b>빠른 담기</b>에서 분기·차·과목을 골라요.<br>· <b>한 명씩 개별로</b> 환불: 오른쪽 <b>개별 담기</b>에 학생 이름을 적어요.<br>담은 뒤 맨 아래 <b>전체 적용</b>을 눌러야 반영돼요.<br>환불한 학생 명단은 <b>업무,저장,인쇄 → 환불 내역 행정실 제출 명단</b>으로 받을 수 있어요.',
+          a: '위쪽 <b>환불관리</b>에서 환불을 기록해요.<br>화면 가득 환불 관리 창이 열리면 오른쪽 <b>환불 담기</b>를 써요.<br>· <b>여러 명을 단체로</b> 환불: <b>같은 과목 여러 명</b>에서 분기·차·과목을 골라요.<br>· <b>한 명씩 개별로</b> 환불: <b>한 명씩 환불</b>을 누르고 학생 이름을 적어요.<br>담으면 왼쪽 표에 <b>적용 전</b>으로 쌓이고, 맨 아래 <b>전체 적용</b>을 눌러야 반영돼요.<br>위쪽 <b>분기 탭</b>과 <b>자유수강·초3·수익자 환불</b> 버튼으로 환불한 학생을 골라 볼 수 있어요.<br>환불한 학생 명단은 <b>업무,저장,인쇄 → 환불 내역 행정실 제출 명단</b>으로 받을 수 있어요.',
           opts: [{ label: '🧭 환불하는 방법 따라하기', guide: 'refund' }, { label: '🧾 환불 내역 행정실 제출 명단 받기', guide: 'refundRoster' }] },
         { id: 'bogang', q: '일부 학생만 수업이 빠졌어. 보강은 어떻게 해?', kw: ['보강', '차시', '옮기', '현장체험', '빠졌', '결강', '휴강'],
           a: '위쪽 <b>보강관리</b>에서 과목·차·학생을 고르면, 그 학생들의 차시만 뒤 차로 옮겨요. 분기 수강료와 지원금은 그대로이고 차별 청구 금액만 바뀌어요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'bogang' }] },
@@ -17888,7 +18270,7 @@ function showBackupNudge() {
           a: '왼쪽 <b>튜토리얼</b>을 누르면 화면 안내를 차례로 볼 수 있어요. 사용 방법을 설명하는 유튜브 영상은 <b>문의 · 실습 영상</b>을 누르면 볼 수 있어요.',
           opts: [{ label: '👉 튜토리얼 어디 있어?', guide: 'tutorial' }, { label: '🎬 사용 방법 영상 보기 (새 창)', url: 'https://youtu.be/tHAhCjcMA2s' }] },
         { id: 'updates', q: '새로 생긴 기능은 어디서 봐?', kw: ['업데이트', '새기능', '신기능', '새로', '버전'],
-          a: '위쪽 보라색 <b>업데이트 보기</b>에서 새로 생긴 기능을 볼 수 있어요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'updates' }] },
+          a: '위쪽 주황·분홍색 <b>업데이트 보기</b>에서 새로 생긴 기능을 볼 수 있어요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'updates' }] },
         { id: 'contact', q: '문의는 어디로 해?', kw: ['문의', '연락', '오류', '에러', '버그', '고장', '안돼', '안되', '전화', '질문'],
           a: '왼쪽 <b>문의 · 실습 영상</b>을 누르면 돌보미 사용 방법을 설명하는 유튜브 영상이 열려요.<br>궁금한 점은 그 영상에 <b>댓글</b>로 남겨 주세요. 개발자가 답글을 달아 드려요.<br><span style="color:#b91c1c;">※ 댓글은 누구나 볼 수 있으니 학생 이름 같은 개인정보는 적지 마세요.</span>', opts: [{ label: '🎬 영상 보고 댓글로 문의하기 (새 창)', url: 'https://youtu.be/tHAhCjcMA2s' }] }
     ];
