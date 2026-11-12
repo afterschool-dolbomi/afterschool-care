@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.1</title>
+    <title>방과후 지원금 돌보미 V20.2</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -705,6 +705,59 @@
         .sd-tag.new { background: #fee2e2; color: #dc2626; } .sd-tag.off { background: #f1f5f9; color: #94a3b8; font-style: italic; font-weight: 600; }
         .sd-ratio-btn { margin-top: 5px; font-size: 12px; padding: 3px 9px; border-radius: 5px; border: none; background: #1e3a8a; color: #fff; cursor: pointer; font-weight: 700; white-space: nowrap; }
         .sd-ratio-btn.on { background: #7c3aed; }
+        /* ✨ [v20.2] 전환 환불 표시 + 지원 시작 시점 3단계 마법사 */
+        .sd-conv-btn { margin-top: 5px; font-size: 12px; padding: 3px 9px; border-radius: 5px; border: 1.5px solid #ea580c; background: #fff7ed; color: #c2410c; cursor: pointer; font-weight: 800; white-space: nowrap; display: block; }
+        .sw-modal { background:#fff; border-radius:14px; overflow:hidden; width:94%; max-width:660px; max-height:92vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,.5); border:1px solid #cbd5e1; word-break:keep-all; font-size:15px; color:#1f2937; }
+        .sw-head { background:linear-gradient(135deg,#1e3a5f,#0f172a); padding:20px 22px 14px; text-align:center; }
+        .sw-head .t { color:#fff; font-size:18px; font-weight:800; }
+        .sw-head .s { color:#94a3b8; font-size:14px; margin-top:5px; }
+        .sw-steps { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap; }
+        .sw-st { display:flex; align-items:center; gap:7px; color:#94a3b8; font-weight:700; font-size:14.5px; padding:6px 12px; border-radius:999px; border:1.5px solid #475569; }
+        .sw-st .n { width:22px; height:22px; border-radius:50%; background:#475569; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; }
+        .sw-st.on { color:#0f172a; background:#fde68a; border-color:#d4af37; font-weight:800; }
+        .sw-st.on .n { background:#1e3a5f; }
+        .sw-st.done { color:#bbf7d0; border-color:#22c55e; }
+        .sw-st.done .n { background:#16a34a; }
+        .sw-st.skip { opacity:.45; text-decoration:line-through; }
+        .sw-steps .ln { width:22px; height:2px; background:#475569; }
+        .sw-body { padding:18px 20px 20px; overflow-x:auto; }
+        .sw-wt { font-size:17px; font-weight:800; color:#1e3a5f; margin-bottom:14px; }
+        .sw-f { margin-bottom:12px; }
+        .sw-f label { display:block; font-size:14px; font-weight:700; color:#374151; margin-bottom:5px; }
+        .sw-inp { width:100%; padding:9px; border:1.5px solid #cbd5e1; border-radius:7px; font-size:16px; box-sizing:border-box; font-family:inherit; }
+        .sw-chas { display:flex; gap:6px; margin-bottom:10px; }
+        .sw-cha { flex:1; border:1.5px solid #cbd5e1; border-radius:8px; padding:8px 4px; text-align:center; font-size:14px; font-weight:700; color:#475569; }
+        .sw-cha .bar { display:flex; gap:3px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+        .sw-cha .bar i { width:16px; height:16px; border-radius:4px; background:#fecaca; display:block; }
+        .sw-cha .bar i.fr { background:#9333ea; }
+        .sw-note { font-size:14px; color:#475569; line-height:1.6; background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:14px; }
+        .sw-note.blue { background:#eff6ff; color:#1e40af; font-weight:700; }
+        .sw-note.red { background:#fef2f2; color:#7f1d1d; }
+        .sw-btns { display:flex; gap:8px; }
+        .sw-btn { flex:1; padding:12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-weight:700; font-size:15px; cursor:pointer; font-family:inherit; }
+        .sw-btn.go { flex:1.5; border:none; background:#1e3a5f; color:#fff; font-weight:800; box-shadow:0 4px 10px rgba(30,58,95,.35); }
+        .sw-del { width:100%; margin-top:12px; padding:11px; border-radius:8px; border:1.5px solid #dc2626; background:#fef2f2; color:#b91c1c; font-weight:800; font-size:15px; cursor:pointer; font-family:inherit; }
+        .sw-tb { border-collapse:collapse; width:100%; font-size:14.5px; margin-bottom:12px; }
+        .sw-tb th, .sw-tb td { border:1px solid #cbd5e1; padding:8px 6px; text-align:center; }
+        .sw-tb th { background:#1e3a5f; color:#fff; font-weight:700; }
+        .sw-tb tr.off td { opacity:.45; }
+        .sw-tb input[type=checkbox] { width:19px; height:19px; accent-color:#1e3a5f; }
+        .sw-numin { width:64px; padding:7px 6px; border:1.5px solid #d4af37; background:#fffbeb; border-radius:6px; text-align:center; font-size:16px; font-weight:800; color:#92400e; font-family:inherit; }
+        .sw-numin.g { border-color:#cbd5e1; background:#fff; color:#334155; }
+        .sw-bars { display:flex; gap:8px; justify-content:center; }
+        .sw-bars .g { text-align:center; font-size:13.5px; color:#64748b; font-weight:700; }
+        .sw-bars .b { display:flex; gap:2px; margin-top:3px; justify-content:center; }
+        .sw-bars i { width:13px; height:13px; border-radius:3px; background:#fecaca; display:block; }
+        .sw-bars i.fr { background:#9333ea; }
+        .sd-ratio-tag { display:inline-block; margin-top:5px; font-size:12px; padding:3px 9px; border-radius:5px; background:#ede9fe; color:#6d28d9; font-weight:800; white-space:nowrap; }
+        .sd-ratio-hbtn { margin-left:6px; font-size:12px; padding:3px 9px; border-radius:5px; border:none; background:#fde68a; color:#1e3a5f; cursor:pointer; font-weight:800; white-space:nowrap; font-family:inherit; }
+        .sd-ratio-hbtn.on { background:#c4b5fd; color:#3b0764; }
+        .sw-money { width:92px; padding:6px 8px; border:1.5px solid #d4af37; background:#fffbeb; border-radius:6px; text-align:right; font-size:15px; font-weight:800; color:#92400e; font-family:inherit; }
+        .sw-where { display:inline-block; font-size:14px; font-weight:800; padding:3px 10px; border-radius:999px; }
+        .sw-where.cha { background:#dbeafe; color:#1e40af; }
+        .sw-where.all { background:#fef3c7; color:#92400e; }
+        .sw-total { display:flex; justify-content:space-between; align-items:center; background:#1e3a5f; color:#fff; border-radius:9px; padding:11px 14px; font-weight:800; font-size:16px; margin-bottom:10px; }
+        .sw-total b { color:#fde68a; font-size:18px; }
 
         .sd-cell { width: 70px; text-align: right; padding: 5px 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; background: #fff; color: #0f172a; outline: none; font-variant-numeric: tabular-nums; transition: 0.15s; }
         .sd-cell:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
@@ -1576,7 +1629,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.1</span>
+                <span class="brand-version">V20.2</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1777,6 +1830,17 @@
             </div>
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
+
+                <div style="background:linear-gradient(135deg, #fff7ed, #ffedd5); border:2.5px solid #c2410c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(194,65,12,0.22); word-break:keep-all;">
+                    <div style="margin-bottom:6px;"><span style="background:#c2410c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.2</span></div>
+                    <div style="font-size:20px; font-weight:900; color:#9a3412; line-height:1.3; margin-bottom:6px;">💸 지원금 전환 환불 · 지원 시작 시점 3단계</div>
+                    <div style="font-size:14px; color:#334155; line-height:1.75;">
+                        분기 중간에 자유수강자가 된 학생은 <b>수익자로 낸 돈을 돌려줘야</b> 하죠. 아동 상세창 <b>'과목명' 옆의 🍼 지원 시작 시점</b>이 3단계로 바뀌었어요. 그 분기 모든 과목을 한 번에 정해요.<br>
+                        <b>① 날짜·차시 → ② 앞 분기 수익자 전환 → ③ 환불 명단에 넣을 분기 고르기</b><br>
+                        환불 명단에는 <b>전환</b> 꼬리표가 붙고, 학생의 수강 금액은 그대로예요. 교재비·재료비는 바꿀 금액만 적으면 됩니다.<br>
+                        잘못 넣었다면 <b>🗑 지원 시작 시점 지우기</b> 버튼 한 번으로 되돌릴 수 있어요.
+                    </div>
+                </div>
 
                 <div style="background:linear-gradient(135deg, #eff6ff, #dbeafe); border:2.5px solid #1e3a5f; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(30,58,95,0.22); word-break:keep-all;">
                     <div style="margin-bottom:6px;"><span style="background:#1e3a5f; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.0</span></div>
@@ -6466,6 +6530,7 @@ function toggleStatusPanel() {
                                 s.rG = 0; s.rS = 0; s.rSu = 0; s.rGy = 0; s.rJ = 0;
                                 s.refundLog = []; s.manualAlloc = {}; s.rMonth = undefined; s.reasonManual = undefined;
                                 s.bogangLog = [];
+                                delete s.convRefund; // ✨ [v20.2]
                                 delete s.mG3Su; delete s.mG3Gy; delete s.mG3J;
                                 delete s.mFreeSu; delete s.mFreeGy; delete s.mFreeJ;
                                 delete s.mSuikSu; delete s.mSuikGy; delete s.mSuikJ;
@@ -7642,6 +7707,7 @@ function toggleStatusPanel() {
                                 ${mBadge}
                                 ${qOverHtml}
                                 ${hasRatioQ ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">🍼 중간부터 지원</div>` : ''}
+                                ${((r[`q${i}`] && r[`q${i}`].subs) || []).some(s => s.convRefund) ? `<div title="수익자로 낸 금액이 자유수강으로 바뀌어 환불 명단에 들어갑니다. 수강 금액은 그대로예요." style="color:#c2410c; font-size:11px; font-weight:800; line-height:1; margin-top:3px;">💸 전환 환불</div>` : ''}
                             </td>`;
                         }
 
@@ -7907,6 +7973,7 @@ function toggleStatusPanel() {
                                     <div style="line-height: 1.0;">${formatMoney(c[q].exp)}</div>
                                     ${((r.hasG3 || r.hasFree) && c[q].over > 0 && (c[q].usedG3 + c[q].usedFree) > 0) ? `<div style="color:#ef4444; font-size:11px; font-weight:bold; margin-top: 2px;">${c[q].status === '일부 수익자' ? '수익자부담' : '초과'}: ${formatMoney(c[q].over)}</div>` : ''}
                                     ${((r[q] && r[q].subs) || []).some(s => s.sessionRatioEnabled) ? `<div style="color:#2563eb; font-size:10.5px; font-weight:700; line-height:1; margin-top:3px;">🍼 중간부터 지원</div>` : ''}
+                                    ${((r[q] && r[q].subs) || []).some(s => s.convRefund) ? `<div title="수익자로 낸 금액이 자유수강으로 바뀌어 환불 명단에 들어갑니다. 수강 금액은 그대로예요." style="color:#c2410c; font-size:11px; font-weight:800; line-height:1; margin-top:3px;">💸 전환 환불</div>` : ''}
                                 </td>
                                 
                                 <td class="text-right" style="color:#b91c1c; font-weight:700;">${formatMoney(c[q].over)}</td>
@@ -8482,7 +8549,7 @@ function updateG3LimitTotal() {
 
                             let keepExtra = {};
                             // ✨ [v18.3] 개별 수정창으로 저장해도 환불 내역(사유·몇차·환불지원금 지정)과 수동 배분이 지워지지 않도록 그대로 유지
-                            if (oldSub) ['refundLog', 'bogangLog', 'manualAlloc', 'rMonth', 'reasonManual', 'reason', 'mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ', '_refundLogMigratedV2'].forEach(k => { if (oldSub[k] !== undefined) keepExtra[k] = JSON.parse(JSON.stringify(oldSub[k])); });
+                            if (oldSub) ['refundLog', 'bogangLog', 'convRefund', 'manualAlloc', 'rMonth', 'reasonManual', 'reason', 'mG3Su', 'mG3Gy', 'mG3J', 'mFreeSu', 'mFreeGy', 'mFreeJ', 'mSuikSu', 'mSuikGy', 'mSuikJ', '_refundLogMigratedV2'].forEach(k => { if (oldSub[k] !== undefined) keepExtra[k] = JSON.parse(JSON.stringify(oldSub[k])); });
                             subs.push(Object.assign(keepExtra, { name, g, s:acc, su, gy, j, burdenSu, burdenGy, burdenJ, rG, rS, rSu, rGy, rJ, isNew: isNewTime, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate }));
                             sumG += g; sumS += acc; sumSu += su; sumGy += gy; sumJ += j;
 
@@ -8908,7 +8975,8 @@ function updateG3LimitTotal() {
                             <div>
                                 <div class="nm">${s.name || '(과목명 미상)'}${tags}</div>
                                 ${(!G && hasGS) ? `<div class="meta">강사료 ${toNum(s.g).toLocaleString()} + 수용비 ${toNum(s.s).toLocaleString()}</div>` : ''}
-                                ${r.hasFree ? `<button type="button" class="sd-ratio-btn no-print${s.sessionRatioEnabled ? ' on' : ''}" title="분기 중간에 자유수강자로 선정된 경우 일부만 지원금액 자동 계산" onclick="setSessionRatio('${r.id}', ${q}, ${sIdx})">🍼 ${s.sessionRatioEnabled ? `${s.coveredSessions}/${s.totalSessions}회 지원중` : '지원 시작 시점'}</button>` : ''}
+                                ${(r.hasFree && s.sessionRatioEnabled) ? `<span class="sd-ratio-tag no-print" title="분기 중간부터 자유수강 지원. 고치려면 '과목명' 옆의 지원 시작 시점 버튼을 누르세요.">🍼 ${s.coveredSessions}/${s.totalSessions}회 지원</span>` : ''}
+                                ${s.convRefund ? `<button type="button" class="sd-conv-btn no-print" title="수익자로 낸 금액이 자유수강으로 바뀌어 환불 명단에 들어간 금액입니다. 수강 금액은 그대로예요. 누르면 고치거나 뺄 수 있어요." onclick="openConvRefund('${r.id}', ${q}, ${sIdx})">💸 전환 환불 ${formatMoney(swConvTotal(s))} · ${swConvWhere(s)}</button>` : ''}
                             </div>
                         </div>
                     </td>`;
@@ -9017,7 +9085,7 @@ function updateG3LimitTotal() {
                             </span>
                         </div>
                         <div class="sd-table-wrap" id="receiptScrollWrap_${q}">
-                            <table class="sd-table${SG ? ' sg' : ''}">${sdBuildHead(r, V, S, G)}<tbody>${rows}</tbody>${sdBuildFoot(r, V, S, G, sum, sa, fee)}</table>
+                            <table class="sd-table${SG ? ' sg' : ''}">${sdBuildHead(r, V, S, G, q)}<tbody>${rows}</tbody>${sdBuildFoot(r, V, S, G, sum, sa, fee)}</table>
                         </div>
                         ${ratioNotes.length ? `<div class="sd-ratio-notes">${ratioNotes.map(note => `<div>🍼 ${note}</div>`).join('')}</div>` : ''}
                         ${sdBuildRefundLog(r, c, q, subs, validSubs, refundHistoryItems)}
@@ -9040,8 +9108,16 @@ function updateG3LimitTotal() {
         }
 
         // ✨ [v19.0] 상세표 머리줄
-        function sdBuildHead(r, V, S, G) {
-            let row1 = `<th rowspan="2" class="sd-name">과목명</th>`, row2 = '';
+        function sdBuildHead(r, V, S, G, q) {
+            // ✨ [v20.2] 지원 시작 시점 버튼은 '과목명' 옆에 하나만 (그 분기 모든 과목을 한 창에서 설정)
+            let ratioBtn = '';
+            if (r.hasFree && q) {
+                let on = swSubs(r, q).filter(x => x.s.sessionRatioEnabled);
+                let d = (on.find(x => x.s.freeApplyDate) || { s: {} }).s.freeApplyDate, p = String(d || '').split('-');
+                let label = on.length ? ((p.length >= 3 ? `${Number(p[1])}월 ${Number(p[2])}일부터 지원` : '중간부터 지원') + ' · 고치기') : '지원 시작 시점';
+                ratioBtn = `<button type="button" class="sd-ratio-hbtn no-print${on.length ? ' on' : ''}" title="분기 중간에 자유수강자로 선정된 경우, 이 분기 모든 과목의 지원 차시를 한 번에 정합니다" onclick="setSessionRatio('${r.id}', ${q})">🍼 ${label}</button>`;
+            }
+            let row1 = `<th rowspan="2" class="sd-name">과목명${ratioBtn}</th>`, row2 = '';
             const sub = (cls, first) => {
                 let s = '';
                 if (G) s += `<th class="${cls} gs gstart">강사료</th><th class="${cls} gs">수용비</th>`;
@@ -10041,6 +10117,21 @@ function updateG3LimitTotal() {
                 r[qKey].subs.forEach((s, sIdx) => {
                     let subName = (s.name || '').trim();
                     if (!subName) return;
+                    // ✨ [v20.2] 지원금 전환 환불: 수익자로 낸 돈이 자유수강으로 바뀐 금액 (수강 금액은 그대로). 수익자 반환 명단에 '전환'으로 표시
+                    if (s.convRefund && s.convRefund.items) {
+                        let cv = { su: 0, gy: 0, j: 0 };
+                        s.convRefund.items.forEach(it => {
+                            if (month && it.month !== month) return;
+                            cv.su += toNum(it.su); cv.gy += toNum(it.gy); cv.j += toNum(it.j);
+                        });
+                        if (cv.su + cv.gy + cv.j > 0) items.push({
+                            id: itemId++, studentId: r.id, sIdx, category: 'sk', categoryLabel: '수익자',
+                            grade: r.grade, classNum: r.classNum, studentNum: r.studentNum, name: r.name,
+                            subject: subName, su: cv.su, gy: cv.gy, j: cv.j, amount: cv.su + cv.gy + cv.j,
+                            note: `자유수강 전환${s.convRefund.since ? `(${s.convRefund.since})` : ''}`,
+                            conv: true, checked: true
+                        });
+                    }
                     let rSu = toNum(s.rSu), rGy = toNum(s.rGy), rJ = toNum(s.rJ);
                     if (rSu <= 0 && rGy <= 0 && rJ <= 0) return;
 
@@ -10127,11 +10218,11 @@ function updateG3LimitTotal() {
             }
             let catColor = { sk: '#b91c1c', g3: '#0284c7', free: '#9333ea' };
             wrap.innerHTML = refundRosterItems.map(it => `
-                <label style="display:flex; align-items:center; gap:8px; padding:6px 4px; cursor:pointer; border-bottom:1px solid #f1f5f9; font-size:12.5px;">
+                <label style="display:flex; align-items:center; gap:8px; padding:6px 4px; cursor:pointer; border-bottom:1px solid #f1f5f9; font-size:12.5px;${it.conv ? ' background:#fff7ed;' : ''}">
                     <input type="checkbox" class="rr-item-chk" data-id="${it.id}" checked onchange="onRrItemToggle(${it.id}, this.checked)">
                     <span style="width:60px; flex-shrink:0;">${it.grade}-${it.classNum}-${it.studentNum}</span>
                     <span style="width:50px; flex-shrink:0; font-weight:600;">${it.name}</span>
-                    <span style="flex:1;">${it.subject}</span>
+                    <span style="flex:1;">${it.subject}${it.conv ? ` <span style="background:#ea580c; color:white; font-weight:800; font-size:11px; padding:1px 7px; border-radius:999px;">전환</span><br><span style="color:#ea580c; font-size:11.5px; font-weight:700;">수강료 변동 없음 · ${it.note}</span>` : ''}</span>
                     <span style="width:60px; flex-shrink:0; font-weight:700; color:${catColor[it.category]};">${it.categoryLabel}</span>
                     <span style="width:80px; flex-shrink:0; text-align:right; font-weight:700; color:#b91c1c;">${formatMoney(it.amount)}</span>
                 </label>
@@ -10152,7 +10243,8 @@ function updateG3LimitTotal() {
             let el = document.getElementById('rrCheckedCount');
             if (!el) return;
             let checked = refundRosterItems.filter(it => it.checked);
-            el.innerText = checked.length > 0 ? `${checked.length}건 선택됨 · 합계 ${formatMoney(checked.reduce((s,it)=>s+it.amount,0))}` : '';
+            let conv = checked.filter(it => it.conv); // ✨ [v20.2] 전환 환불 건수·금액을 따로 알려 줌
+            el.innerText = checked.length > 0 ? `${checked.length}건 선택됨 · 합계 ${formatMoney(checked.reduce((s,it)=>s+it.amount,0))}${conv.length ? ` (전환 ${conv.length}건 ${formatMoney(conv.reduce((s,it)=>s+it.amount,0))} 포함)` : ''}` : '';
         }
 
         async function generateRefundRoster() {
@@ -10219,11 +10311,12 @@ function updateG3LimitTotal() {
                 });
                 rows.sort((a,b) => (a.grade-b.grade)||(a.classNum-b.classNum)||(a.studentNum-b.studentNum));
                     rows.forEach(r => {
-                    let row = ws.addRow([r.subject, r.grade, r.classNum, r.studentNum, r.name, r.note, r.su, r.gy, r.j, r.amount, '']);
+                    let row = ws.addRow([r.subject, r.grade, r.classNum, r.studentNum, r.name, r.note, r.su, r.gy, r.j, r.amount, r.conv ? '수강 유지 · 지원금 전환' : '']);
                     [7,8,9,10].forEach(c => row.getCell(c).numFmt = '#,##0');
-                    row.eachCell(cell => {
+                    row.eachCell({ includeEmpty: true }, cell => {
                         cell.font = {name:'맑은 고딕', size:12};
-                        cell.alignment = {horizontal:'center', vertical:'middle'};
+                        cell.alignment = {horizontal:'center', vertical:'middle', wrapText: !!r.conv};
+                        if (r.conv) cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FFFDE9D9'}}; // ✨ [v20.2] 전환 환불 줄은 연한 주황
                         cell.border = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}};
                     });
                 });
@@ -10967,17 +11060,352 @@ function updateG3LimitTotal() {
             persistData();
         }
 
-        function setSessionRatio(id, q, sIdx) {
+        function setSessionRatio(id, q, sIdx, startStep) {
             let r = db.find(x => x.id == id);
             if(!r) return;
-            let s = r[`q${q}`].subs[sIdx];
-            
-            sessionRatioTarget = { id, q, sIdx };
-            document.getElementById('sr_freeApplyDate').value = s.freeApplyDate || '';
-            let srMaster = savedSubjects.find(x => x.name === s.name);
-            document.getElementById('sr_total').value = s.totalSessions || (srMaster ? getSubjectTotalSessions(srMaster, q) : '') || '';
-            document.getElementById('sr_covered').value = s.coveredSessions || '';
-            document.getElementById('sessionRatioModal').style.display = 'flex';
+            // ✨ [v20.2] 옛 작은 창 대신 3단계 마법사(날짜·차시 → 앞 분기 수익자 → 환불 명단)를 엶
+            //    분기 단위: 그 분기에 듣는 모든 과목의 지원 차시를 한 화면에서 정하고, 지원 시작일은 한 번만 고름 (sIdx는 쓰지 않음)
+            let list = swSubs(r, q);
+            if (!list.length) { alert('이 분기에 수강 과목이 없습니다.'); return; }
+            let wasOn = list.some(x => x.s.sessionRatioEnabled);
+            let dated = list.find(x => x.s.sessionRatioEnabled && x.s.freeApplyDate);
+            swState = {
+                id, q, step: 1, wasOn,
+                date: dated ? dated.s.freeApplyDate : '',
+                subs: list.map(x => {
+                    let m = savedSubjects.find(y => y.name === x.s.name);
+                    return {
+                        i: x.i, name: x.s.name, on: wasOn ? !!x.s.sessionRatioEnabled : true,
+                        total: x.s.totalSessions || (m ? getSubjectTotalSessions(m, q) : '') || '',
+                        covered: x.s.sessionRatioEnabled ? (x.s.coveredSessions == null ? '' : x.s.coveredSessions) : ''
+                    };
+                }),
+                early: [], rows: []
+            };
+            swRender();
+            if (startStep === 3 && swState.wasOn) swNext(true);
+        }
+
+        // ===== ✨ [v20.2] 지원 시작 시점 3단계 마법사 + 지원금 전환 환불 =====
+        //  · 전환 환불(s.convRefund): 수익자로 낸 돈이 자유수강으로 바뀌어 학부모에게 돌려줄 금액. 환불 명단에만 나오고
+        //    수강 금액·강사료·청구서 계산에는 쓰지 않음. { items:[{month, su, gy, j}], since, date } (month: 차 번호 또는 'pre'=분기 전체)
+        //  · 마지막 단계에서 '완료'를 눌러야 한꺼번에 저장. 그 전에는 학생 사본으로만 계산해 보여 줌
+        let swState = null;
+        function swNum(v) { return toNum(String(v == null ? '' : v).replace(/[^0-9]/g, '')); }
+        function swSubs(r, k) { return ((r['q' + k] && r['q' + k].subs) || []).map((s, i) => ({ s, i })).filter(o => o.s && String(o.s.name || '').trim()); }
+        function swSince(d) { let p = String(d || '').split('-'); return (p.length >= 2 && Number(p[1])) ? `${Number(p[1])}월~` : ''; }
+        function swConvTotal(s) { return ((s && s.convRefund && s.convRefund.items) || []).reduce((t, it) => t + toNum(it.su) + toNum(it.gy) + toNum(it.j), 0); }
+        function swConvWhere(s) {
+            let ms = ((s && s.convRefund && s.convRefund.items) || []).map(it => it.month);
+            if (!ms.length) return '';
+            return ms.every(m => m === 'pre') ? '분기 전체' : ms.filter(m => m !== 'pre').map(m => m + '차').join('·') + ' 명단';
+        }
+        function swIsSuikAll(s) { return s.mFreeSu === 0 && s.mFreeGy === 0 && s.mFreeJ === 0; }
+        // 과목의 자유수강 수강료가 어느 차에 얼마씩 들어가는지 (청구서와 같은 계산)
+        function swChaParts(r, k, s, a) {
+            let out = [];
+            try {
+                let f = computeSubChaFees(r, k, s, a);
+                if (f && f.ok) for (let m = 1; m <= getMonthsPerQuarter(); m++) {
+                    let v = f.net.m[m] ? toNum(f.net.m[m].fr) : 0;
+                    if (v > 0) out.push({ m, fr: v });
+                }
+            } catch (e) { out = []; }
+            return out;
+        }
+        function swMakeConv(r, k, sIdx, c, since) {
+            let s = r['q' + k].subs[sIdx];
+            let a = (c.allocs && c.allocs['q' + k] && c.allocs['q' + k][sIdx]) || {};
+            let su = toNum(a.frSu), gy = toNum(a.frGy), j = toNum(a.frJ);
+            if (su + gy + j <= 0) return null;
+            let items = [];
+            if (s.sessionRatioEnabled) {
+                let parts = swChaParts(r, k, s, a);
+                if (parts.length && parts.reduce((t, p) => t + p.fr, 0) === su) {
+                    parts.forEach(p => items.push({ month: p.m, su: p.fr, gy: 0, j: 0 }));
+                    items[items.length - 1].gy = gy; items[items.length - 1].j = j;
+                } else items.push({ month: getMonthsPerQuarter(), su, gy, j });
+            } else items.push({ month: 'pre', su, gy, j });
+            return { items, since: since || '', date: todayLocal() };
+        }
+        // 1단계에서 정한 과목별 지원 차시를 학생(또는 사본)에 넣음. 체크를 푼 과목은 지원 시작 시점을 풂(분기 전체 지원)
+        function swApplyStep1(r) {
+            let st = swState;
+            st.subs.forEach(o => {
+                let s = r['q' + st.q].subs[o.i]; if (!s) return;
+                if (o.on) { s.sessionRatioEnabled = true; s.totalSessions = swNum(o.total); s.coveredSessions = swNum(o.covered); s.freeApplyDate = st.date || undefined; }
+                else if (s.sessionRatioEnabled) { s.sessionRatioEnabled = false; s.totalSessions = undefined; s.coveredSessions = undefined; s.freeApplyDate = undefined; }
+            });
+        }
+        // 학생 사본에 1단계(날짜·차시)와 2단계(앞 분기 수익자) 선택을 미리 넣어 봄
+        function swPreview(withEarly) {
+            let st = swState, real = db.find(x => x.id == st.id);
+            let r = JSON.parse(JSON.stringify(real));
+            swApplyStep1(r);
+            if (withEarly) st.early.filter(o => o.on).forEach(o => swSubs(r, o.k).forEach(x => { x.s.mFreeSu = 0; x.s.mFreeGy = 0; x.s.mFreeJ = 0; }));
+            return { r, c: calcStudent(r) };
+        }
+        function swBuildEarly() {
+            let st = swState, p = swPreview(false), old = st.early || [], list = [];
+            for (let k = 1; k < st.q; k++) {
+                let used = p.c['q' + k] ? toNum(p.c['q' + k].usedFree) : 0;
+                if (used > 0) { let prev = old.find(o => o.k === k); list.push({ k, used, on: prev ? prev.on : true }); }
+            }
+            st.early = list;
+        }
+        function swBuildRows() {
+            let st = swState, p = swPreview(true), real = db.find(x => x.id == st.id), rows = [];
+            let anyConv = false;
+            for (let k = 1; k <= maxQuarter; k++) swSubs(real, k).forEach(x => { if (x.s.convRefund) anyConv = true; });
+            const add = (k, i, part) => {
+                let s = p.r['q' + k].subs[i], rs = real['q' + k].subs[i];
+                let a = (p.c.allocs && p.c.allocs['q' + k] && p.c.allocs['q' + k][i]) || {};
+                let su = toNum(a.frSu), gy = toNum(a.frGy), j = toNum(a.frJ);
+                let gyMax = Math.max(0, toNum(s.gy) - toNum(s.rGy)), jMax = Math.max(0, toNum(s.j) - toNum(s.rJ));
+                if (su + gy + j <= 0 && !rs.convRefund && !(part && (gyMax > 0 || jMax > 0))) return;
+                let where = '분기 전체', sub = '';
+                if (part) {
+                    let parts = swChaParts(p.r, k, s, a);
+                    where = parts.length ? parts.map(x => x.m + '차').join('·') : getMonthsPerQuarter() + '차';
+                    sub = `뒤 ${toNum(s.coveredSessions)}차시`;
+                }
+                rows.push({ k, sIdx: i, name: s.name, part, su, gy, j, gyIn: gy, jIn: j, gyMax, jMax, where, sub, on: rs.convRefund ? true : !anyConv });
+            };
+            for (let k = st.q; k <= maxQuarter; k++) swSubs(p.r, k).forEach(x => add(k, x.i, !!x.s.sessionRatioEnabled));
+            st.rows = rows;
+        }
+        function swClose() { let el = document.getElementById('swModal'); if (el) el.remove(); swState = null; }
+        function swNext(jumpTo3) {
+            let st = swState;
+            if (st.step === 1) {
+                let onSubs = st.subs.filter(o => o.on);
+                if (!onSubs.length) { alert(st.wasOn ? '적용할 과목을 하나 이상 체크해 주세요.\n모두 지우려면 아래 빨간 "지우기" 버튼을 눌러 주세요.' : '적용할 과목을 하나 이상 체크해 주세요.'); return; }
+                for (let o of onSubs) {
+                    let total = swNum(o.total), covered = swNum(o.covered);
+                    if (total <= 0) { alert(`${o.name}: 총 차시를 적어 주세요.`); return; }
+                    if (String(o.covered).trim() === '' || covered > total) { alert(`${o.name}: 지원 대상 차시를 0 이상, 총 차시(${total}) 이하로 적어 주세요.\n이 과목을 분기 전체로 지원하려면 앞의 체크를 풀어 주세요.`); return; }
+                }
+                swBuildEarly();
+                if (st.early.length && !jumpTo3) { st.step = 2; swRender(); return; }
+            }
+            swBuildRows(); st.step = 3; swRender();
+        }
+        function swPrev() {
+            let st = swState;
+            st.step = (st.step === 3 && st.early.length) ? 2 : 1;
+            swRender();
+        }
+        function swFinish() {
+            let st = swState, r = db.find(x => x.id == st.id);
+            if (!r) return swClose();
+            swApplyStep1(r);
+            st.early.filter(o => o.on).forEach(o => swSubs(r, o.k).forEach(x => { x.s.mFreeSu = 0; x.s.mFreeGy = 0; x.s.mFreeJ = 0; }));
+            st.rows.forEach(row => {
+                let t = r['q' + row.k].subs[row.sIdx];
+                if (!row.on) { delete t.convRefund; return; }
+                let gyIn = Math.min(row.gyMax, swNum(row.gyIn)), jIn = Math.min(row.jMax, swNum(row.jIn));
+                if (gyIn !== row.gy) t.mFreeGy = gyIn;
+                if (jIn !== row.j) t.mFreeJ = jIn;
+            });
+            let c = calcStudent(r), since = swSince(st.date), changed = [];
+            st.rows.filter(row => row.on).forEach(row => {
+                let t = r['q' + row.k].subs[row.sIdx];
+                let cv = swMakeConv(r, row.k, row.sIdx, c, since || (t.convRefund && t.convRefund.since) || '');
+                if (cv) { t.convRefund = cv; changed.push(`${row.k}분기 ${swConvWhere(t).replace(' 명단', '')}`); } else delete t.convRefund;
+            });
+            persistData();
+            let id = st.id;
+            st.step = 5; st.changed = [...new Set(changed)];
+            swRender();
+            showDetailModal(id);
+            renderGrid();
+        }
+        function swAskDelete() {
+            let st = swState, r = db.find(x => x.id == st.id), list = [];
+            let otherRatio = false;
+            for (let k = 1; k <= maxQuarter; k++) swSubs(r, k).forEach(x => { if (x.s.sessionRatioEnabled && k !== st.q) otherRatio = true; });
+            for (let k = st.q + 1; k <= maxQuarter; k++) {
+                let sum = swSubs(r, k).reduce((t, x) => t + swConvTotal(x.s), 0);
+                if (sum > 0) list.push({ type: 'conv', k, sum, on: !otherRatio });
+            }
+            let c = calcStudent(r);
+            for (let k = 1; k < st.q; k++) {
+                let subs = swSubs(r, k).filter(x => swIsSuikAll(x.s));
+                if (!subs.length) continue;
+                let a = (c.allocs && c.allocs['q' + k]) || [];
+                let sum = subs.reduce((t, x) => t + toNum(a[x.i] && a[x.i].skSu) + toNum(a[x.i] && a[x.i].skGy) + toNum(a[x.i] && a[x.i].skJ), 0);
+                list.push({ type: 'early', k, sum, on: !otherRatio });
+            }
+            st.del = list; st.step = 4; swRender();
+        }
+        function swDoDelete() {
+            let st = swState, r = db.find(x => x.id == st.id);
+            if (!r) return swClose();
+            swSubs(r, st.q).forEach(x => {
+                let s = x.s;
+                if (s.sessionRatioEnabled) { delete s.mFreeGy; delete s.mFreeJ; }
+                s.sessionRatioEnabled = false; s.totalSessions = undefined; s.coveredSessions = undefined; s.freeApplyDate = undefined;
+                delete s.convRefund;
+            });
+            (st.del || []).filter(o => o.on).forEach(o => {
+                if (o.type === 'conv') swSubs(r, o.k).forEach(x => { delete x.s.convRefund; });
+                else swSubs(r, o.k).forEach(x => { if (swIsSuikAll(x.s)) { delete x.s.mFreeSu; delete x.s.mFreeGy; delete x.s.mFreeJ; } });
+            });
+            persistData();
+            let id = st.id;
+            swClose();
+            showDetailModal(id);
+            renderGrid();
+        }
+        // 상세창의 '💸 전환 환불' 표시를 눌렀을 때: 지원 시작 시점이 걸린 과목의 마법사 3단계를 엶
+        function openConvRefund(id, q, sIdx) {
+            let r = db.find(x => x.id == id); if (!r) return;
+            let anchor = 0;
+            let s0 = r['q' + q] && r['q' + q].subs[sIdx];
+            for (let k = q; k >= 1 && !anchor; k--) if (swSubs(r, k).some(x => x.s.sessionRatioEnabled)) anchor = k;
+            if (anchor) return setSessionRatio(id, anchor, null, 3);
+            if (s0 && s0.convRefund && confirm(`${s0.name} ${q}분기 전환 환불 ${formatMoney(swConvTotal(s0))}을 환불 명단에서 뺄까요?`)) {
+                delete s0.convRefund; persistData(); showDetailModal(id); renderGrid();
+            }
+        }
+        // 1단계 표의 '어느 차가 지원되나' 칸: 과목 목록 관리의 차별 차시로 뒤에서부터 보라색 칸을 채움
+        function swBarHtml(o) {
+            let st = swState, months = getMonthsPerQuarter();
+            if (!o.on) return '<span style="color:#64748b; font-size:14px; font-weight:700;">분기 전체 지원</span>';
+            let total = swNum(o.total), cov = Math.min(swNum(o.covered), total);
+            let master = savedSubjects.find(x => x.name === o.name);
+            let per = [];
+            for (let m = 1; m <= months; m++) per.push((master && master.sessions && master.sessions[st.q]) ? toNum(master.sessions[st.q]['m' + m]) : 0);
+            if (total > 0 && per.reduce((a, b) => a + b, 0) === total) {
+                let left = cov, fr = [];
+                for (let m = months - 1; m >= 0; m--) { let t = Math.min(per[m], left); fr[m] = t; left -= t; }
+                return '<div class="sw-bars">' + per.map((n, m) => {
+                    let bar = ''; for (let k = 0; k < n; k++) bar += `<i class="${k >= n - fr[m] ? 'fr' : ''}"></i>`;
+                    return `<div class="g">${m + 1}차<div class="b">${bar}</div></div>`;
+                }).join('') + '</div>';
+            }
+            if (String(o.covered).trim() === '' || total <= 0) return '<span style="color:#9ca3af; font-size:14px;">차시를 적어 주세요</span>';
+            return `<span style="color:#1e40af; font-size:14px; font-weight:700;">뒤에서 ${cov}차시 지원</span>`;
+        }
+        function swSubField(i, key, val) {
+            let o = swState.subs[i]; o[key] = val;
+            let el = document.getElementById('swBar_' + i); if (el) el.innerHTML = swBarHtml(o);
+            if (key === 'on') {
+                let tr = document.getElementById('swSubRow_' + i); if (tr) tr.classList.toggle('off', !val);
+                ['swTot_', 'swCov_'].forEach(p => { let x = document.getElementById(p + i); if (x) x.disabled = !val; });
+            }
+        }
+        function swRowCalc() {
+            let st = swState, total = 0, cnt = 0;
+            st.rows.forEach((row, i) => {
+                let gyEl = document.getElementById('swGy_' + i), jEl = document.getElementById('swJ_' + i), tr = document.getElementById('swRow_' + i);
+                if (gyEl) { row.gyIn = Math.min(row.gyMax, swNum(gyEl.value)); gyEl.disabled = !row.on; }
+                if (jEl) { row.jIn = Math.min(row.jMax, swNum(jEl.value)); jEl.disabled = !row.on; }
+                let sum = row.su + swNum(row.gyIn) + swNum(row.jIn);
+                if (tr) tr.classList.toggle('off', !row.on);
+                let sub = document.getElementById('swSub_' + i); if (sub) sub.innerText = formatMoney(sum);
+                if (row.on) { total += sum; cnt++; }
+            });
+            let t = document.getElementById('swTotal'); if (t) t.innerText = formatMoney(total);
+        }
+        function swRender() {
+            let st = swState; if (!st) return;
+            let r = db.find(x => x.id == st.id); if (!r) return swClose();
+            let el = document.getElementById('swModal');
+            if (!el) {
+                el = document.createElement('div'); el.id = 'swModal';
+                el.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:100000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
+                document.body.appendChild(el);
+            }
+            let stepCls = n => {
+                if (st.step === 4) return '';
+                if (st.step === 5) return ' done';
+                if (n === 2 && st.step === 3 && !st.early.length) return ' skip';
+                return n === st.step ? ' on' : (n < st.step ? ' done' : '');
+            };
+            let head = `
+                <div class="sw-head">
+                    <div class="t">🍼 지원 시작 시점</div>
+                    <div class="s">${r.grade}-${r.classNum}-${r.studentNum} ${escHtmlAttr(r.name)} · ${st.q}분기 (${st.subs.length}과목)</div>
+                    <div class="sw-steps">
+                        <div class="sw-st${stepCls(1)}"><span class="n">1</span>날짜 · 차시</div><div class="ln"></div>
+                        <div class="sw-st${stepCls(2)}"><span class="n">2</span>앞 분기 수익자</div><div class="ln"></div>
+                        <div class="sw-st${stepCls(3)}"><span class="n">3</span>환불 명단</div>
+                    </div>
+                </div>`;
+            let body = '';
+            if (st.step === 1) {
+                body = `
+                    <div class="sw-wt">언제부터 자유수강으로 지원하나요?</div>
+                    <div class="sw-f"><label>📅 자유수강 지원 시작일 (모든 과목 공통)</label><input type="date" class="sw-inp" style="max-width:240px;" value="${escHtmlAttr(st.date)}" onchange="swState.date = this.value"></div>
+                    <table class="sw-tb">
+                        <tr><th>적용</th><th>과목</th><th>총 차시</th><th>지원 대상<br>차시 (뒤에서)</th><th>어느 차가 지원되나</th></tr>
+                        ${st.subs.map((o, i) => `<tr id="swSubRow_${i}" class="${o.on ? '' : 'off'}">
+                            <td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swSubField(${i}, 'on', this.checked)"></td>
+                            <td style="text-align:left;"><b>${escHtmlAttr(o.name || '')}</b></td>
+                            <td><input type="number" min="0" class="sw-numin g" id="swTot_${i}" value="${escHtmlAttr(String(o.total))}" ${o.on ? '' : 'disabled'} oninput="swSubField(${i}, 'total', this.value)"></td>
+                            <td><input type="number" min="0" class="sw-numin" id="swCov_${i}" value="${escHtmlAttr(String(o.covered))}" ${o.on ? '' : 'disabled'} oninput="swSubField(${i}, 'covered', this.value)"></td>
+                            <td id="swBar_${i}">${swBarHtml(o)}</td>
+                        </tr>`).join('')}
+                    </table>
+                    <div class="sw-note blue">🟪 보라색 = 자유수강 지원 · 🟥 분홍색 = 수익자 (과목 목록 관리의 차별 차시 기준)<br>체크를 푼 과목은 지원 시작 시점을 적용하지 않고 분기 전체를 지원합니다.</div>
+                    <div class="sw-btns"><button type="button" class="sw-btn" onclick="swClose()">취소</button><button type="button" class="sw-btn go" onclick="swNext()">다음 →</button></div>
+                    ${st.wasOn ? `<button type="button" class="sw-del" onclick="swAskDelete()">🗑 이 분기 지원 시작 시점 지우기 <span style="font-weight:600;">(설정 전으로 되돌리기)</span></button>` : ''}`;
+            } else if (st.step === 2) {
+                body = `
+                    <div class="sw-wt">앞 분기 자유수강 금액을 수익자로 바꿀까요?</div>
+                    <table class="sw-tb">
+                        <tr><th>바꾸기</th><th>분기</th><th>지금</th><th>바꾼 뒤</th></tr>
+                        ${st.early.map((o, i) => `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.early[${i}].on = this.checked"></td><td><b>${o.k}분기</b></td><td style="color:#9333ea; font-weight:800;">자유수강 ${formatMoney(o.used)}</td><td style="color:#b91c1c; font-weight:800;">수익자 ${formatMoney(o.used)}</td></tr>`).join('')}
+                    </table>
+                    <div class="sw-note">지원 시작 전 분기라서 자유수강으로 낸 금액만 수익자로 바뀌어요.${r.hasG3 ? ` ${escHtmlAttr(getG3LabelShort())}지원금으로 낸 금액은 그대로입니다.` : ''}<br>바꾸지 않을 분기는 체크를 풀어 주세요.</div>
+                    <div class="sw-btns"><button type="button" class="sw-btn" onclick="swPrev()">← 이전</button><button type="button" class="sw-btn go" onclick="swNext()">다음 →</button></div>`;
+            } else if (st.step === 3) {
+                body = `<div class="sw-wt">수익자로 낸 금액을 환불 명단에 넣을까요?</div>`;
+                if (!st.rows.length) {
+                    body += `<div class="sw-note">환불 명단에 넣을 금액이 없습니다. 완료를 누르면 지원 시작 시점만 저장됩니다.</div>`;
+                } else {
+                    body += `
+                    <table class="sw-tb">
+                        <tr><th>넣기</th><th>분기 · 과목</th><th>들어갈 명단</th><th>수강료</th><th>교재비</th><th>재료비</th><th>합계</th></tr>
+                        ${st.rows.map((row, i) => `<tr id="swRow_${i}">
+                            <td><input type="checkbox" ${row.on ? 'checked' : ''} onchange="swState.rows[${i}].on = this.checked; swRowCalc()"></td>
+                            <td style="text-align:left;"><b>${row.k}분기</b><br>${escHtmlAttr(row.name || '')}</td>
+                            <td><span class="sw-where ${row.part ? 'cha' : 'all'}">${row.where}</span>${row.sub ? `<div style="font-size:13.5px; color:#64748b; margin-top:3px;">${row.sub}</div>` : ''}</td>
+                            <td style="text-align:right;">${row.su.toLocaleString()}</td>
+                            <td>${row.gyMax > 0 ? `<input class="sw-money" id="swGy_${i}" value="${row.gyIn.toLocaleString()}" title="자유수강으로 바꿀 교재비 (최대 ${row.gyMax.toLocaleString()}원)" oninput="swRowCalc()">` : '<span style="color:#9ca3af;">-</span>'}</td>
+                            <td>${row.jMax > 0 ? `<input class="sw-money" id="swJ_${i}" value="${row.jIn.toLocaleString()}" title="자유수강으로 바꿀 재료비 (최대 ${row.jMax.toLocaleString()}원)" oninput="swRowCalc()">` : '<span style="color:#9ca3af;">-</span>'}</td>
+                            <td style="text-align:right; color:#b91c1c; font-weight:800;" id="swSub_${i}"></td>
+                        </tr>`).join('')}
+                    </table>
+                    <div class="sw-total"><span>환불 명단에 넣을 합계</span><b id="swTotal"></b></div>
+                    <div class="sw-note">학생의 수강 금액은 그대로이고, <b>수익자 → 자유수강</b>으로 바뀐 금액만 환불 명단에 들어가요.<br>
+                    <b>교재비·재료비</b>(노란 칸)는 자유수강으로 바꿀 금액만 적어 주세요. 적은 금액만큼 자유수강 지원금으로 바뀝니다.</div>`;
+                }
+                body += `<div class="sw-btns"><button type="button" class="sw-btn" onclick="swPrev()">← 이전</button><button type="button" class="sw-btn go" onclick="swFinish()">✔ 완료 (저장)</button></div>`;
+            } else if (st.step === 4) {
+                body = `
+                    <div class="sw-wt" style="color:#b91c1c;">🗑 지원 시작 시점을 지울까요?</div>
+                    <div class="sw-note red">날짜와 차시를 하나씩 지우지 않아도, 아래 버튼 한 번으로 <b>설정하기 전 상태</b>로 돌아갑니다.</div>
+                    <table class="sw-tb">
+                        <tr><th>되돌리기</th><th>무엇을</th><th>지금</th><th>지운 뒤</th></tr>
+                        ${swSubs(r, st.q).filter(x => x.s.sessionRatioEnabled).map(x => `<tr><td>✔<div style="font-size:13.5px; color:#64748b;">항상</div></td><td style="text-align:left;"><b>${st.q}분기 ${escHtmlAttr(x.s.name || '')}</b><br>지원 시작 시점</td><td>${x.s.coveredSessions}/${x.s.totalSessions}회 지원</td><td>설정 없음<br>(분기 전체 지원)</td></tr>`).join('')}
+                        ${swSubs(r, st.q).some(x => x.s.convRefund) ? `<tr><td>✔<div style="font-size:13.5px; color:#64748b;">항상</div></td><td style="text-align:left;"><b>${st.q}분기</b> 전환 환불</td><td>${formatMoney(swSubs(r, st.q).reduce((t, x) => t + swConvTotal(x.s), 0))}</td><td>명단에서 뺌</td></tr>` : ''}
+                        ${(st.del || []).map((o, i) => o.type === 'conv'
+                            ? `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.del[${i}].on = this.checked"></td><td style="text-align:left;"><b>${o.k}분기</b> 전환 환불</td><td>분기 전체 ${formatMoney(o.sum)}</td><td>명단에서 뺌</td></tr>`
+                            : `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.del[${i}].on = this.checked"></td><td style="text-align:left;"><b>${o.k}분기</b> 수익자 전환</td><td style="color:#b91c1c; font-weight:800;">수익자 ${formatMoney(o.sum)}</td><td style="color:#9333ea; font-weight:800;">자유수강으로<br>다시 계산</td></tr>`).join('')}
+                    </table>
+                    <div class="sw-note">같이 되돌리지 않을 것은 체크를 풀어 주세요. 학생의 수강 금액은 바뀌지 않습니다.</div>
+                    <div class="sw-btns"><button type="button" class="sw-btn" onclick="swState.step = 1; swRender()">← 돌아가기</button><button type="button" class="sw-btn go" style="background:#b91c1c; box-shadow:0 4px 10px rgba(185,28,28,0.35);" onclick="swDoDelete()">🗑 지우기</button></div>`;
+            } else {
+                body = `
+                    <div class="sw-wt">✅ 저장했어요</div>
+                    ${(st.changed && st.changed.length) ? `<div class="sw-note">환불 명단에 넣은 곳: <b>${st.changed.join(', ')}</b><br>위쪽 <b>환불 명단</b> 버튼에서 <span style="background:#ea580c; color:white; font-weight:800; padding:1px 8px; border-radius:999px;">전환</span> 꼬리표가 붙은 줄로 확인할 수 있어요.</div>` : ''}
+                    <div class="sw-note blue">청구서의 수익자·자유수강 금액이 바뀌었어요. 합계는 그대로입니다.<br><b>이미 낸 차의 청구서는 다시 뽑아 학교에 내 주세요.</b></div>
+                    <div class="sw-btns"><button type="button" class="sw-btn go" onclick="swClose()">닫기</button></div>`;
+            }
+            el.innerHTML = `<div class="sw-modal">${head}<div class="sw-body">${body}</div></div>`;
+            if (st.step === 3) swRowCalc();
         }
 
     function checkYukaMissingNeis() {
@@ -11924,6 +12352,7 @@ function updateG3LimitTotal() {
                                             rG:x.rG||0, rS:x.rS||0, rSu:x.rSu||0, rGy:x.rGy||0, rJ:x.rJ||0,
                                             refundLog: x.refundLog || [],
                                             bogangLog: x.bogangLog || [], // ✨ [v19.5] 보강 기록 백업 보존
+                                            convRefund: x.convRefund || undefined, // ✨ [v20.2] 지원금 전환 환불 기록 백업 보존
                                             isNew:x.isNew||null,
                                             // ✨ 수기 입력값 백업 보존
                                             mG3Su:x.mG3Su, mG3Gy:x.mG3Gy, mG3J:x.mG3J,
@@ -12326,6 +12755,7 @@ function updateG3LimitTotal() {
                                 let rG=0, rS=0, rSu=0, rGy=0, rJ=0;
                                 let refundLog = [];
                                 let bogangLog = []; // ✨ [v19.5] 보강 기록 복원용
+                                let convRefund; // ✨ [v20.2] 지원금 전환 환불 복원용
                                 let isNewTime = uploadTime;
                                 let mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ; // ✨ 수기입력 복원용 변수
                                 let sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate; // ✨ 차시 비율 적용 복원용 변수
@@ -12336,6 +12766,7 @@ function updateG3LimitTotal() {
                                     rG = bk.rG||0; rS = bk.rS||0; rSu = bk.rSu||0; rGy = bk.rGy||0; rJ = bk.rJ||0;
                                     refundLog = bk.refundLog || [];
                                     bogangLog = bk.bogangLog || [];
+                                    convRefund = bk.convRefund || undefined; // ✨ [v20.2]
                                     // ✨ 버그 수정: 백업에 isNew가 null(=이미 NEW 만료됨)로 저장된 과목까지
                                     // 복원 시각(uploadTime)으로 되살아나 NEW가 계속 뜨던 문제 수정.
                                     // 'isNew' 키 자체가 없는 구버전 백업일 때만 uploadTime으로 대체.
@@ -12353,7 +12784,7 @@ function updateG3LimitTotal() {
                                     freeApplyDate = bk.freeApplyDate || '';
                                 }
 
-                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, bogangLog, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate, _slotIdx: sIdx });
+                                currentStudent[`q${q}`].subs.push({ name, g, s, su, gy, j, burdenSu:bSu, burdenGy:bGy, burdenJ:bJ, rG, rS, rSu, rGy, rJ, refundLog, bogangLog, convRefund, isNew: isNewTime, mG3Su, mG3Gy, mG3J, mFreeSu, mFreeGy, mFreeJ, mSuikSu, mSuikGy, mSuikJ, sessionRatioEnabled, totalSessions, coveredSessions, freeApplyDate, _slotIdx: sIdx });
 
                               
                                 currentStudent[`q${q}`].g += g; currentStudent[`q${q}`].s += s; currentStudent[`q${q}`].su += su; currentStudent[`q${q}`].gy += gy; currentStudent[`q${q}`].j += j;
@@ -16952,7 +17383,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 <script>
 // ✨ 이번 버전에서 처음 접속했을 때만 '업데이트 보기' 버튼을 5초 동안 반짝이게
 (function () {
-    var KEY = 'edusync_update_glow_seen', VER = 'v20.0';
+    var KEY = 'edusync_update_glow_seen', VER = 'v20.2';
     var seen = null; try { seen = localStorage.getItem(KEY); } catch (e) {}
     if (seen === VER) return;
     function start() {
@@ -17304,6 +17735,20 @@ function showBackupNudge() {
     //  sel: 가리킬 곳(선택자), text: 말풍선 글, col: 표의 한 칸(열) 전체를 비춤, pos: 말풍선 위치(없으면 자동)
     var PE = function (fn) { return '#printExportModal button[onclick*="' + fn + '"]'; };
     var PE_FIRST = { sel: '#btn-print-export', text: '먼저 위쪽의 <b>업무,저장,인쇄</b> 버튼을 눌러 주세요.' };
+    // ✨ [v20.2] 1분기~마지막 분기 탭을 한 덩어리로 비추기 위한 가짜 대상 (전체관리 탭은 빼고, 보이는 분기 탭만)
+    var QTABS = (function () {
+        function tabs() { return [].slice.call(document.querySelectorAll('.tab-btn[onclick*="switchTab(\'q"]')).filter(function (b) { return b.getClientRects().length; }); }
+        return {
+            getClientRects: function () { return tabs(); },
+            getBoundingClientRect: function () {
+                var t = tabs(), a = t[0].getBoundingClientRect(), z = t[t.length - 1].getBoundingClientRect();
+                var top = Math.min(a.top, z.top), bottom = Math.max(a.bottom, z.bottom);
+                return { left: a.left, top: top, right: z.right, bottom: bottom, width: z.right - a.left, height: bottom - top };
+            },
+            contains: function (el) { return tabs().some(function (b) { return b.contains(el); }); },
+            scrollIntoView: function (o) { var t = tabs(); if (t[0]) t[0].scrollIntoView(o); }
+        };
+    })();
     var GUIDES = {
         sampleUpload: [
             { sel: '#btn-excel-upload', text: '여기 <b>4. 단체 명단 엑셀 업로드</b>를 눌러서 명단을 입력하면 돼요~' },
@@ -17342,6 +17787,12 @@ function showBackupNudge() {
         viewExcel: [PE_FIRST, { sel: PE('exportCurrentViewExcel'), text: '<b>현재화면 엑셀저장</b>을 누르면 지금 보이는 표가 그대로 엑셀로 저장돼요.<br>종이로 뽑으려면 맨 아래 <b>종이 인쇄</b>를 누르세요.' }],
         nameCol: [{ sel: '#th-name', col: true, text: '이 칸에서 <b>학생 이름</b>을 눌러 보세요.<br>분기별 수강 과목과 환불 내용을 보고 고칠 수 있는 상세창이 열려요.' }],
         editCol: [{ sel: '#th-manage', col: true, text: '이 칸의 <b>수정</b> 버튼을 누르면 그 학생의 정보와 지원금·수강 내용을 고칠 수 있어요.' }],
+        // ✨ [v20.2] 1차·2차·3차로 나눠 보기: 분기 탭 → (과목별 보기) → 전체·1차·2차·3차 버튼
+        chaView: [
+            { sel: function () { return QTABS; }, pos: 'bottom', text: '먼저 보고 싶은 <b>분기 탭</b>을 눌러 주세요.<br>(전체관리 탭에서는 1차·2차·3차가 잠겨 있어요)' },
+            { sel: '#btnViewMode', pos: 'bottom', text: '이번에는 <b>과목별 보기</b>를 눌러 주세요.<br>1차·2차·3차 버튼은 과목별 보기 화면에 있어요.', skipIf: function () { return typeof viewMode !== 'undefined' && viewMode === 'subject'; } },
+            { sel: '#tabBanner .cha-filter', pos: ['bottom', 'left'], text: '여기 <b>전체 · 1차 · 2차 · 3차</b> 버튼을 눌러 보세요.<br>누른 차의 금액만 나눠서 보여 줘요. <b>전체</b>를 누르면 분기 금액으로 돌아와요.' }
+        ],
         viewMode: [{ sel: '#btnViewMode', pos: 'bottom', text: '여기 <b>과목별 보기</b>를 누르면 학생마다 수강 과목이 펼쳐져요. 한 번 더 누르면 처음 화면으로 돌아와요.' }],
         filter: [{ sel: '#btnFilterView', pos: 'bottom', text: '여기 <b>필터</b>를 누르면 학년·지원금 종류 같은 조건으로 골라 볼 수 있어요.' }],
         status: [{ sel: '#btnStatusView', pos: 'bottom', text: '여기 <b>현황</b>을 누르면 지원금 사용 현황을 한눈에 볼 수 있어요.' }],
@@ -17368,6 +17819,9 @@ function showBackupNudge() {
           a: '왼쪽 <b>5. 과목 목록 관리</b>에서 우리 학교 방과후 과목 이름과 수강료(강사료·수용비)를 적어요. 신청 안내장에 나간 과목 이름과 금액 그대로 적어 주세요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'subject' }] },
         { id: 'year', q: '지원금 금액이나 분기 수는 어디서 바꿔?', kw: ['학년도', '분기제', '분기설정', '6분기', '4분기', '지원금금액', '지원금설정', '한도', '설정', '초3'],
           a: '왼쪽 <b>1. 학년도 지원금·분기제 설정</b>에서 학년도 지원금과 분기제를 정해요. 처음 쓸 때 가장 먼저 확인해 주세요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'yearSet' }] },
+        { id: 'convRefund', q: '분기 중간에 자유수강자가 된 학생은 어떻게 해?', kw: ['중간', '중간에', '분기중간', '도중', '뒤늦게', '나중에', '중간선정', '추가선정', '선정', '발표', '자유수강자추가', '자유수강추가', '자유수강자가추가', '추가되', '추가됐', '추가된', '추가로', '자유수강자가되', '자유수강자가됐', '자유수강자로', '자유수강으로', '수익자였', '수익자에서', '지원시작', '시작시점', '전환', '전환환불', '수익자환불', '자유수강전환', '지우기', '되돌리'],
+          opts: [{ label: '👉 자유수강자 등록은 어디서 해?', guide: 'neis' }],
+          a: '분기 중간에 자유수강자로 추가된 학생은, 먼저 <b>자유수강자로 등록</b>한 다음 <b>언제부터 지원하는지</b>를 알려 주면 돼요.<br><br>아동 이름을 눌러 상세창을 열고, 그 분기 표의 <b>과목명 글자 옆 🍼 지원 시작 시점</b>을 눌러요. 3단계로 진행돼요.<br>· <b>1단계</b>: 지원 시작일을 한 번 고르고, 그 분기 과목마다 지원 대상 차시(뒤에서부터)를 적어요.<br>· <b>2단계</b>: 앞 분기에 쓴 자유수강 금액을 수익자로 바꿀지 골라요.<br>· <b>3단계</b>: 수익자로 낸 돈을 <b>환불 명단</b>에 넣을 분기를 골라요. 교재비·재료비는 바꿀 금액만 적어요.<br>학생의 수강 금액은 그대로이고, 환불 명단에는 <b>전환</b> 꼬리표가 붙어요.<br>잘못 넣었으면 같은 창 1단계의 <b>🗑 지원 시작 시점 지우기</b>를 누르면 한 번에 되돌아가요.' },
         { id: 'refund', q: '환불은 어떻게 처리해?', kw: ['환불', '반환', '돌려', '중도포기', '취소', '그만'],
           a: '위쪽 <b>환불관리</b>에서 환불을 기록해요.<br>· <b>여러 명을 단체로</b> 환불: 왼쪽 <b>빠른 담기</b>에서 분기·차·과목을 골라요.<br>· <b>한 명씩 개별로</b> 환불: 오른쪽 <b>개별 담기</b>에 학생 이름을 적어요.<br>담은 뒤 맨 아래 <b>전체 적용</b>을 눌러야 반영돼요.<br>환불한 학생 명단은 <b>업무,저장,인쇄 → 환불 내역 행정실 제출 명단</b>으로 받을 수 있어요.',
           opts: [{ label: '🧭 환불하는 방법 따라하기', guide: 'refund' }, { label: '🧾 환불 내역 행정실 제출 명단 받기', guide: 'refundRoster' }] },
@@ -17391,8 +17845,10 @@ function showBackupNudge() {
         { id: 'search', q: '학생을 빨리 찾으려면?', kw: ['검색', '찾기', '찾으', '이름검색', '필터', '골라', '학년별'],
           a: '위쪽 <b>이름 검색</b> 칸에 이름을 적으면 바로 찾을 수 있어요. 조건으로 골라 보려면 <b>필터</b>를 쓰세요.',
           opts: [{ label: '👉 이름 검색 칸', guide: 'search' }, { label: '👉 필터 버튼', guide: 'filter' }] },
-        { id: 'viewMode', q: '과목별로 보고 싶어 / 1차·2차·3차 금액은 어디서 봐?', kw: ['과목별', '과목별보기', '1차', '2차', '3차', '차별', '월별', '펼쳐'],
-          a: '위쪽 보라색 <b>과목별 보기</b>를 누르면 학생마다 과목이 펼쳐져요.<br>1차·2차·3차 금액은 <b>1분기~4분기 탭을 먼저 고른 뒤</b> 볼 수 있어요. (전체관리 탭에서는 잠겨 있어요)', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'viewMode' }] },
+        { id: 'chaView', q: '1차·2차·3차로 나누어 보고 싶어', kw: ['1차', '2차', '3차', '차별', '월별', '차시금액', '차수', '나누어', '나눠', '나누', '차로', '차만', '차금액', '차별금액', '차별로', '차시별'],
+          a: '1차·2차·3차 금액은 <b>분기 탭 → 과목별 보기 → 전체·1차·2차·3차 버튼</b> 순서로 볼 수 있어요.<br>전체관리 탭에서는 잠겨 있으니 <b>분기 탭을 먼저</b> 골라 주세요.<br>아래 버튼을 누르면 누를 곳을 차례로 알려 드려요.', opts: [{ label: '🧭 따라하며 눌러 보기', guide: 'chaView' }] },
+        { id: 'viewMode', q: '과목별로 보고 싶어', kw: ['과목별', '과목별보기', '펼쳐'],
+          a: '위쪽 보라색 <b>과목별 보기</b>를 누르면 학생마다 과목이 펼쳐져요.<br>1차·2차·3차 금액은 <b>1분기~4분기 탭을 먼저 고른 뒤</b> 볼 수 있어요. (전체관리 탭에서는 잠겨 있어요)', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'viewMode' }, { label: '🧭 1차·2차·3차로 나눠 보기', guide: 'chaView' }] },
         { id: 'status', q: '지원금을 얼마나 썼는지 현황을 보려면?', kw: ['현황', '통계', '합계', '얼마나', '사용액', '잔액', '남은', '집행'],
           a: '위쪽 <b>현황</b>을 누르면 지원금 사용 현황을 한눈에 볼 수 있어요.', opts: [{ label: '👉 어디 있는지 알려줘', guide: 'status' }] },
         { id: 'eduOffice', q: '교육청 제출 서식(학생별 지원 내역)은 어떻게 만들어?', kw: ['교육청', '제출', '서식', '지원내역', '학생별지원', '보고'],
