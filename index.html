@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.3</title>
+    <title>방과후 지원금 돌보미 V20.4</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -38,16 +39,13 @@
         /* ✨ 브랜드 타이틀 3D 느낌 디자인 (이모티콘 제거, 밝은색상, 흰색 테두리, 스크롤 방지 사이즈 조절) */
         .brand { margin-bottom: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 0; white-space: nowrap; overflow: hidden; }
         .brand-title { 
-            font-size: 21px; 
-            font-weight: 900; 
+            font-family: 'Jua', 'Pretendard', -apple-system, sans-serif; /* ✨ [v20.4] 타이틀 글씨체: 주아체 */
+            font-size: 23px; 
+            font-weight: 400; 
             color: #ffffff; /* 브랜드 글자색 변경 */
            /* -webkit-text-stroke: 0.8px #ffffff;  하얀색 테두리 */
-            text-shadow: 
-                1px 1px 0px #1e3a8a,
-                2px 2px 0px #1e3a8a,
-                3px 3px 0px #172554,
-                4px 4px 6px rgba(0,0,0,0.6);
-            letter-spacing: -0.5px; 
+            text-shadow: none; /* ✨ [v20.4] 타이틀 그림자 제거 */
+            letter-spacing: 0; 
             line-height: 1.15;
         }
         .brand-version { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); background: none; padding: 0; margin: 0 0 1px 1px; line-height: 1; letter-spacing: 0.3px; } /* ✨ 제목 바로 위 작은 흰 글씨 */
@@ -712,14 +710,14 @@
         .rf-title { color: #fff; font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 9px; white-space: nowrap; margin-right: 12px; }
         .rf-title .ic { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #d4af37; background: rgba(212,175,55,0.15); display: flex; align-items: center; justify-content: center; font-size: 17px; color: #fde68a; }
         .rf-tabs { display: flex; gap: 4px; align-self: flex-end; }
-        .rf-tab { border: 0; background: rgba(255,255,255,0.10); color: #cbd5e1; font-size: 13px; font-weight: 700; padding: 11px 16px 12px; border-radius: 10px 10px 0 0; cursor: pointer; white-space: nowrap; }
-        .rf-tab:hover { background: rgba(255,255,255,0.2); color: #fff; }
-        .rf-tab.on { background: #fff; color: #1e3a5f; font-weight: 800; }
-        .rf-tab .n { font-size: 11px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: rgba(255,255,255,0.18); font-weight: 800; }
+        .rf-tab { border: 0; background: #3b6ea8; color: #ffffff; font-size: 13px; font-weight: 700; padding: 11px 16px 12px; border-radius: 10px 10px 0 0; cursor: pointer; white-space: nowrap; }
+        .rf-tab:hover { background: #4f86c6; color: #fff; }
+        .rf-tab.on { background: #fff; color: #1e3a5f; font-weight: 800; box-shadow: inset 0 3px 0 #d4af37; }
+        .rf-tab .n { font-size: 11px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #1e3a5f; color: #fde68a; font-weight: 800; }
         .rf-tab.on .n { background: #fee2e2; color: #b91c1c; }
         .rf-topbtn { height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.08); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .rf-topbtn:hover { background: rgba(255,255,255,0.2); }
-        .rf-topbtn.rf-gold { border: 2px solid #d4af37; background: rgba(212,175,55,0.16); color: #fde68a; font-weight: 800; box-shadow: 0 0 0 1px rgba(212,175,55,0.25), 0 2px 8px rgba(212,175,55,0.3); }
+        .rf-topbtn.rf-gold { border: 2px solid #d4af37; background: rgba(212,175,55,0.16); color: #fde68a; font-size: 13px; font-weight: 800; box-shadow: 0 0 0 1px rgba(212,175,55,0.25), 0 2px 8px rgba(212,175,55,0.3); }
         .rf-topbtn.rf-gold:hover { background: #d4af37; color: #0f172a; }
         .rf-chagrp { align-items: center; gap: 8px; }
         .rf-bar .rf-chip { padding: 6px 10px; }
@@ -733,7 +731,7 @@
         .rf-chk.pre.on { background: #fffbeb; border-color: #b45309; color: #92400e; }
         .rf-chk.all input { accent-color: #1e3a5f; }
         .rf-chk.all.on { background: #e2e8f0; border-color: #1e3a5f; color: #1e3a5f; }
-        .rf-topbtn.rf-close { background: #fff; color: #1e3a5f; border-color: #fff; font-weight: 800; }
+        .rf-topbtn.rf-close { background: #fff; color: #1e3a5f; border-color: #fff; font-size: 14px; font-weight: 800; }
         .rf-topbtn.rf-close:hover { background: #fde68a; }
         .rf-bar { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap; }
         .rf-barlb { font-size: 11.5px; color: #64748b; font-weight: 700; }
@@ -784,7 +782,7 @@
         .rf-act { border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
         .rf-act:hover { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
         .rf-empty { text-align: center; color: #94a3b8; font-size: 15px; padding: 70px 20px !important; line-height: 1.8; white-space: normal; }
-        .rf-side { width: 345px; flex-shrink: 0; border-left: 1px solid #cbd5e1; background: #f8fafc; overflow-y: auto; padding-bottom: 16px; }
+        .rf-side { width: 345px; flex-shrink: 0; border-left: 1px solid #c7d2fe; background: linear-gradient(180deg, #eef2ff 0%, #f3effe 55%, #e8f6fd 100%); overflow-y: auto; padding-bottom: 16px; }
         .rf-side-h { font-size: 14px; font-weight: 800; color: #1e3a5f; padding: 14px 16px 6px; }
         .rf-mode { display: flex; margin: 4px 16px 2px; border: 1px solid #1e3a5f; border-radius: 8px; overflow: hidden; }
         .rf-mode button { flex: 1; border: 0; background: #fff; height: 38px; font-size: 12.5px; font-weight: 700; color: #475569; cursor: pointer; }
@@ -818,18 +816,27 @@
         .rf-mf { width: 100%; margin-top: 10px; height: 36px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 11.5px; cursor: pointer; }
         .rf-add { width: 100%; margin-top: 10px; height: 46px; border: 0; border-radius: 8px; background: #1e3a5f; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
         .rf-add:hover { background: #0f172a; }
-        .rf-help { margin: 12px 16px 0; font-size: 11px; color: #64748b; line-height: 1.6; }
-        .rf-help details { margin-top: 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; color: #92400e; }
+        .rf-help { margin: 12px 16px 0; font-size: 12px; color: #64748b; line-height: 1.6; }
+        .rf-help details { margin-top: 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; color: #92400e; font-size: 12px; }
         .rf-help summary { cursor: pointer; font-weight: 800; }
         .rf-status { display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 16px; background: #fff; border-top: 1px solid #cbd5e1; font-size: 14px; color: #475569; flex-shrink: 0; white-space: nowrap; overflow-x: auto; }
         .rf-status b { color: #0f172a; font-weight: 800; }
         .rf-status .sep { width: 1px; height: 22px; background: #e2e8f0; flex-shrink: 0; }
         .rf-status .ok { color: #15803d; font-weight: 700; }
+        .rf-status .fs-free, .rf-status .fs-free b { color: #7c3aed; }
+        .rf-status .fs-g3, .rf-status .fs-g3 b { color: #0284c7; }
+        .rf-status .fs-sk, .rf-status .fs-sk b { color: #dc2626; }
+        .rf-status .fs-free, .rf-status .fs-g3, .rf-status .fs-sk { font-weight: 700; }
         .rf-apply { height: 38px; padding: 0 20px; border: 0; border-radius: 8px; background: #b91c1c; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 3px 8px rgba(185,28,28,0.3); }
         .rf-apply:disabled { background: #e2e8f0; color: #94a3b8; box-shadow: none; cursor: default; }
         .rf-clear { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; font-size: 13.5px; cursor: pointer; }
         @media (max-width: 1280px) { .rf-side { width: 320px; } .rf-search { width: 190px; } .rf-tab { padding: 11px 11px 12px; } }
         @media print { .rf-page { display: none !important; } }
+        /* ✨ [v20.4] 과목별 보기 - 제목 옆 과목 버튼 (여러 과목 체크) */
+        .subj-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-left: 8px; flex: 1; min-width: 0; }
+        .subj-chips.grade-chips { flex: 0 0 auto; margin-left: auto; }
+        #tabBanner .cha-badge { flex-shrink: 0; white-space: nowrap; margin-top: 4px; }
+        .subj-chips .rf-chk { font-size: 12px; }
         /* ✨ [v20.2] 전환 환불 표시 + 지원 시작 시점 3단계 마법사 */
         .sd-conv-btn { margin-top: 5px; font-size: 12px; padding: 3px 9px; border-radius: 5px; border: 1.5px solid #ea580c; background: #fff7ed; color: #c2410c; cursor: pointer; font-weight: 800; white-space: nowrap; display: block; }
         .sw-modal { background:#fff; border-radius:14px; overflow:hidden; width:94%; max-width:660px; max-height:92vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,.5); border:1px solid #cbd5e1; word-break:keep-all; font-size:15px; color:#1f2937; }
@@ -1760,7 +1767,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.3</span>
+                <span class="brand-version">V20.4</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1961,6 +1968,15 @@
             </div>
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
+
+                <div style="background:linear-gradient(135deg, #eff6ff, #dbeafe); border:2.5px solid #1d4ed8; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(29,78,216,0.22); word-break:keep-all;">
+                    <div style="margin-bottom:6px;"><span style="background:#1d4ed8; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.4</span></div>
+                    <div style="font-size:20px; font-weight:900; color:#1e3a8a; line-height:1.3; margin-bottom:6px;">📚 과목별 보기에서 과목을 바로 골라요</div>
+                    <div style="font-size:14px; color:#334155; line-height:1.75;">
+                        <b>과목별 보기</b> 제목 옆에 <b>과목 버튼</b>이 생겼어요. 필터 창을 열지 않아도 버튼만 누르면 그 과목만 보여요.<br>
+                        <b>여러 과목을 함께 체크</b>해서 한꺼번에 볼 수 있고, <b>전체</b>를 누르면 모든 과목으로 돌아와요.
+                    </div>
+                </div>
 
                 <div style="background:linear-gradient(135deg, #fef2f2, #fee2e2); border:2.5px solid #b91c1c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(185,28,28,0.22); word-break:keep-all;">
                     <div style="margin-bottom:6px;"><span style="background:#b91c1c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.3</span></div>
@@ -2168,7 +2184,7 @@
     <div class="stat-section">
         <div class="stat-title" style="color: #60a5fa;">📚 과목 필터 (과목별 보기 전용)</div>
         <div style="background: rgba(255, 255, 255, 0.05); padding: 14px; border-radius: 8px;">
-            <select id="filterSubject" onchange="renderGrid()" style="width:100%; padding:8px; border-radius:6px; border:2px solid #d4af37; background:#1f2937; color:white; font-size:13px;">
+            <select id="filterSubject" onchange="onFilterSubjectChange()" style="width:100%; padding:8px; border-radius:6px; border:2px solid #d4af37; background:#1f2937; color:white; font-size:13px;">
                 <option value="">모든 과목</option>
             </select>
         </div>
@@ -2965,30 +2981,18 @@
         // ✨ [v20.1] 분기 탭 위쪽의 인원 버튼 필터 - 'all': 전체, 'sk': 수익자 부담이 있는 학생, 'g3': 초3지원금 쓴 학생, 'fr': 자유수강권 쓴 학생
         let qFundFilter = 'all';
         function setQFundFilter(v) { qFundFilter = (qFundFilter === v) ? 'all' : v; renderGrid(); } // 켜진 버튼을 한 번 더 누르면 전체로
+        let subjChipSel = new Set(); // ✨ [v20.4] 과목별 보기 - 제목 옆 과목 버튼으로 고른 과목들 (비어 있으면 모든 과목)
+        let subjChipList = []; // ✨ [v20.4] 지금 화면에 그려진 과목 버튼 순서
         let chaViewFilter = 'all'; // ✨ [v19.2] 과목별 보기 금액 단위 - 'all': 분기금액(전체), 1·2·3: 그 차의 차시금액
         let chaMissingCount = 0; // ✨ [v19.2] 차시금액 보기에서 차시 미입력으로 제외된 줄 수
         let chaEvenCount = 0; // ✨ [v19.9] 차시 미입력이라 차마다 똑같이 나눠 보여준 과목 수
 
-        let isRefundViewOn = false;
+        let isRefundViewOn = false; // ✨ [v20.4] '환불금액 보기' 버튼을 없애서 항상 false (환불 명단은 환불 관리 화면에서 봄)
         let isG3RefundOn = false, isFreeRefundOn = false, isSkRefundOn = false; // ✨ 과목별 보기 - 지원금별 환불보기 토글
         function toggleG3Refund() { isG3RefundOn = !isG3RefundOn; renderGrid(); }
         function toggleFreeRefund() { isFreeRefundOn = !isFreeRefundOn; renderGrid(); }
         function toggleSkRefund() { isSkRefundOn = !isSkRefundOn; renderGrid(); }
         
-       window.toggleRefundView = function() {
-            isRefundViewOn = !isRefundViewOn;
-            
-            let isHeavyLoad = (db.length > 80);
-            if (isHeavyLoad) {
-                document.getElementById('loading-overlay').style.display = 'flex';
-                setTimeout(() => {
-                    renderGrid();
-                    document.getElementById('loading-overlay').style.display = 'none';
-                }, 30);
-            } else {
-                renderGrid();
-            }
-        };
         
         let isDarkMode = localStorage.getItem('edusync_darkmode') === 'true';
         let viewMode = 'summary'; 
@@ -5728,6 +5732,7 @@ function toggleStatusPanel() {
                     btn.style.color = 'white';
                     btn.style.borderColor = 'transparent';
                    if (filterSubj) { filterSubj.style.display = 'none'; filterSubj.value = ""; }
+                   subjChipSel.clear();
                 }
                 lucide.createIcons(); // ✨ 새로 넣은 아이콘 태그를 실제 아이콘으로 그려줌
                 renderGrid();
@@ -5972,6 +5977,50 @@ function toggleStatusPanel() {
             localStorage.setItem('edusync_subjects_v4', JSON.stringify(savedSubjects));
             stmtFeeCache = {}; // ✨ [v19.9] 과목 단가·차시가 바뀌었으니 청구서 강사료 다시 계산
             if (typeof scheduleCalcSnapshot === 'function') scheduleCalcSnapshot();
+        }
+
+        // ✨ [v20.4] 전체 현황 보기 제목 줄 오른쪽 학년 버튼 - 필터 창의 학년 체크와 같은 선택을 씀 (여러 학년 가능)
+        function gradeChipHtml() {
+            let boxes = Array.from(document.querySelectorAll('input[name="fltGrade"]'));
+            let any = boxes.some(el => el.checked);
+            return `<div class="subj-chips grade-chips no-print" title="학년을 체크하면 그 학년만 보여요. 여러 학년을 함께 체크할 수 있어요.">`
+                + `<label class="rf-chk all${any ? '' : ' on'}"><input type="checkbox" ${any ? '' : 'checked'} onchange="clearGradeChips()">전체</label>`
+                + boxes.map(el => `<label class="rf-chk${el.checked ? ' on' : ''}"><input type="checkbox" ${el.checked ? 'checked' : ''} onchange="toggleGradeChip('${el.value}')">${el.value}학년</label>`).join('')
+                + `</div>`;
+        }
+        function toggleGradeChip(g) {
+            let el = document.querySelector('input[name="fltGrade"][value="' + g + '"]');
+            if (el) el.checked = !el.checked;
+            renderGrid();
+        }
+        function clearGradeChips() {
+            document.querySelectorAll('input[name="fltGrade"]').forEach(el => el.checked = false);
+            renderGrid();
+        }
+
+        // ✨ [v20.4] 과목별 보기 제목 옆 과목 버튼 - 누를 때마다 그 과목을 넣었다 뺐다 함 (여러 과목 가능)
+        function syncFilterSubjectSelect() {
+            let sel = document.getElementById('filterSubject');
+            if (sel) sel.value = subjChipSel.size === 1 ? Array.from(subjChipSel)[0] : '';
+        }
+        function toggleSubjChip(i) {
+            let nm = subjChipList[i];
+            if (nm == null) return;
+            if (subjChipSel.has(nm)) subjChipSel.delete(nm); else subjChipSel.add(nm);
+            syncFilterSubjectSelect();
+            renderGrid();
+        }
+        function clearSubjChips() {
+            subjChipSel.clear();
+            syncFilterSubjectSelect();
+            renderGrid();
+        }
+        // 필터 창의 과목 고르기(한 과목)도 같은 선택을 씀
+        function onFilterSubjectChange() {
+            let sel = document.getElementById('filterSubject');
+            subjChipSel.clear();
+            if (sel && sel.value) subjChipSel.add(sel.value);
+            renderGrid();
         }
 
         function baseSubjectName(name) {
@@ -7289,8 +7338,7 @@ function toggleStatusPanel() {
 			
             const fStatusList = Array.from(document.querySelectorAll('input[name="fltStatus"]:checked')).map(el => el.value);
             const fFund = document.querySelector('input[name="fltFund"]:checked')?.value || "";
-            const fSubjectEl = document.getElementById('filterSubject');
-            const fSubject = fSubjectEl ? fSubjectEl.value : '';
+            let subjChipSeen = new Set(); // ✨ [v20.4] 지금 화면 조건에서 수강생이 있는 과목 (과목 버튼으로 표시)
 
             colGroup.innerHTML = ''; 
 
@@ -7387,7 +7435,9 @@ function toggleStatusPanel() {
                                 if (netSu === 0 && netGy === 0 && netJ === 0 && !subName) return;
                                 if (!subName) return;
 
-                                if (fSubject && baseSubjectName(subName) !== fSubject) return; 
+                                let subBase = baseSubjectName(subName);
+                                subjChipSeen.add(subBase);
+                                if (subjChipSel.size && !subjChipSel.has(subBase)) return; // ✨ [v20.4] 과목 버튼(여러 과목) 필터
 
                                   let alloc = c.allocs && c.allocs[q] && c.allocs[q][sIdx] ? c.allocs[q][sIdx] : {};
                                 
@@ -7505,14 +7555,23 @@ function toggleStatusPanel() {
                 if (chaLocked) chaViewFilter = 'all';
                 if (chaViewFilter !== 'all') subjectRows = expandSubjectRowsByCha(subjectRows);
 
+               // ✨ [v20.4] 제목 옆 과목 버튼: 과목 목록 순서대로, 지금 수강생이 있는 과목 + 골라 둔 과목
+                subjChipList = [];
+                savedSubjects.forEach(sv => { let b = baseSubjectName(sv.name); if (b && (subjChipSeen.has(b) || subjChipSel.has(b)) && !subjChipList.includes(b)) subjChipList.push(b); });
+                Array.from(subjChipSeen).concat(Array.from(subjChipSel)).sort((a, b) => a.localeCompare(b)).forEach(b => { if (!subjChipList.includes(b)) subjChipList.push(b); });
+                let subjChipHtml = `<div class="subj-chips no-print" title="과목을 체크하면 그 과목만 보여요. 여러 과목을 함께 체크할 수 있어요.">`
+                    + `<label class="rf-chk all${subjChipSel.size ? '' : ' on'}"><input type="checkbox" ${subjChipSel.size ? '' : 'checked'} onchange="clearSubjChips()">전체</label>`
+                    + subjChipList.map((nm, i) => `<label class="rf-chk${subjChipSel.has(nm) ? ' on' : ''}"><input type="checkbox" ${subjChipSel.has(nm) ? 'checked' : ''} onchange="toggleSubjChip(${i})">${rfEsc(nm)}</label>`).join('')
+                    + `</div>`;
+
                document.getElementById('tabBanner').innerHTML = `
-                    <div style="position:relative; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
-                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span style="font-weight:700; font-size:16px; color:#8b5cf6;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황${chaViewFilter !== 'all' ? ` <span style="color:#7c3aed;">· ${chaViewFilter}차 차시금액</span>` : ''}</span>
+                    <div style="position:relative; display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; margin-bottom: -11px;">
+                        <div style="display: flex; align-items: flex-start; flex-wrap: nowrap; gap: 8px; flex: 1; min-width: 0;">
+                            <span style="font-weight:700; font-size:16px; color:#8b5cf6; white-space:nowrap; flex-shrink:0; line-height:30px;">📋 ${currentTab === 'all' ? '전체 분기' : currentTab.replace('q','')+'분기'} 과목별 상세 현황${chaViewFilter !== 'all' ? ` <span style="color:#7c3aed;">· ${chaViewFilter}차 차시금액</span>` : ''}</span>
                             ${chaViewFilter !== 'all' && chaMissingCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 차별로 나눌 수 없어 '전체'에서만 보입니다.">⚠️차시 미입력 ${chaMissingCount}건 제외</span>` : ''}${chaViewFilter !== 'all' && chaEvenCount ? `<span class="cha-badge miss" title="과목 목록 관리에 이 분기 차시가 입력되지 않은 과목은 분기 수강료를 차마다 똑같이 나눠(10원 단위) 보여줘요. 이 과목들은 청구서에는 나오지 않아요. 차시를 입력하면 청구서와 같은 금액으로 바뀌어요.">⚠️차시 미입력 ${chaEvenCount}건: 똑같이 나눠 표시</span>` : ''}
-                            <span style="font-size:13px; font-weight:600; color:var(--text-gray); margin-left:12px;">※ 선택된 과목별로 지원금 사용 내역이 세분화되어 표시됩니다.</span>
+                            ${subjChipHtml}
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="display:flex; flex-direction:column-reverse; align-items:flex-end; gap:6px; flex-shrink:0;">
                           <div class="fee-toggle-wrap no-print" onclick="toggleFeeView()" title="수강료 / 강사료 전환">
                             <span class="fee-toggle-label" style="color:${isFeeViewOn ? '#94a3b8' : '#1e3a5f'};">수강료 보기</span>
                             <div class="fee-toggle-track ${isFeeViewOn ? 'on' : ''}"><div class="fee-toggle-knob"></div></div>
@@ -7780,6 +7839,7 @@ function toggleStatusPanel() {
                                 <span style="font-weight:700; font-size:16px; color:var(--text-dark);">📊 메인 홈 (전체 현황)</span>
                                 <span style="font-size:13px; font-weight:600; color:var(--sidebar-accent); margin-left:12px;">※상세하게 보거나 환불입력은 아동 이름을 클릭 하세요!</span>
                             </div>
+                            ${gradeChipHtml()}
                         </div>
                     `;
                     
@@ -8134,7 +8194,7 @@ function toggleStatusPanel() {
                         `);
                     });
 
-                    // ✨ 상단 배너에 환불 금액 보기 토글 버튼 추가
+                    // ✨ [v20.4] '환불금액 보기' 버튼 삭제 - 환불 명단은 환불 관리 화면에서 봄 (isRefundViewOn은 항상 false)
                   document.getElementById('tabBanner').innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px 16px; width: 100%; margin-bottom: 2px;">
                             <div style="display: flex; flex-direction: column; gap:3px;">
@@ -8158,12 +8218,7 @@ function toggleStatusPanel() {
                                 </div>
                                 
                             </div>
-                            <div style="display:flex; gap:8px; flex-shrink:0; align-items:center; margin-left:auto;">
-                                <button class="btn-tool no-print" style="background: ${isRefundViewOn ? 'white' : '#fee2e2'}; color: #ef4444; border-color: #fca5a5; padding: 6px 14px; font-size: 13px; white-space:nowrap;" onclick="toggleRefundView()">
-                                    ${isRefundViewOn ? '◀ 환불금액 닫기' : '▶ 환불금액 보기'}
-                                </button>
-
-                            </div>
+                            ${gradeChipHtml()}
                         </div>
                     `;
 
@@ -9782,7 +9837,7 @@ function updateG3LimitTotal() {
             // 아래 상태 줄
             let waits = rfRows.filter(x => x.st === 'wait'), dones = byQ.filter(x => x.st !== 'wait');
             const sumOf = arr => arr.reduce((t, x) => t + x.su + x.gy + x.j, 0);
-            let fundSum = defs.map(d => `${d.sum} <b>${dones.reduce((t, x) => t + rfFundAmt(x, d.k), 0).toLocaleString()}</b>`).join(' · ');
+            let fundSum = defs.map(d => `<span class="fs-${d.k}">${d.sum} <b>${dones.reduce((t, x) => t + rfFundAmt(x, d.k), 0).toLocaleString()}</b></span>`).join(' · ');
             document.getElementById('rfStatus').innerHTML =
                 `<span>적용 전 <b>${waits.length}</b>건 · <b>${sumOf(waits).toLocaleString()}</b>원</span>`
                 + `<button type="button" class="rf-apply" id="rfApplyBtn" onclick="applyRefundCart()"${refundCart.length ? '' : ' disabled'}>전체 적용</button>`
@@ -15784,6 +15839,7 @@ function updateG3LimitTotal() {
 		// 필터창 스르륵 열기/닫기 함수
 function resetAllFilters() {
     document.getElementById('filterSubject').value = '';
+    subjChipSel.clear(); // ✨ [v20.4] 과목 버튼 선택도 함께 해제
     document.querySelectorAll('input[name="fltGrade"]').forEach(el => el.checked = false);
     document.querySelectorAll('input[name="fltStatus"]').forEach(el => el.checked = false);
     let fundAll = document.querySelector('input[name="fltFund"][value=""]');
@@ -17783,7 +17839,7 @@ async function buildSmartAttendanceWorkbook(ExcelJS, tplBuffer, job) {
 <script>
 // ✨ 이번 버전에서 처음 접속했을 때만 '업데이트 보기' 버튼을 5초 동안 반짝이게
 (function () {
-    var KEY = 'edusync_update_glow_seen', VER = 'v20.3';
+    var KEY = 'edusync_update_glow_seen', VER = 'v20.4';
     var seen = null; try { seen = localStorage.getItem(KEY); } catch (e) {}
     if (seen === VER) return;
     function start() {
