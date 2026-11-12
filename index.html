@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.0</title>
+    <title>방과후 지원금 돌보미 V20.1</title>
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -1576,7 +1576,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.0</span>
+                <span class="brand-version">V20.1</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -2756,6 +2756,9 @@
         let isTimeTravelMode = false; // ✨ 현재 과거 여행 중인지 체크하는 보호장치
         let isSuikViewOn = true; // ✨ 수익자 관리 프로그램이라 항상 켜진 상태로 고정
         let isFeeViewOn = false; // ✨ 과목별 보기 - false: 수강료 보기, true: 강사료 보기(강사료·수용비로 분할)
+        // ✨ [v20.1] 분기 탭 위쪽의 인원 버튼 필터 - 'all': 전체, 'sk': 수익자 부담이 있는 학생, 'g3': 초3지원금 쓴 학생, 'fr': 자유수강권 쓴 학생
+        let qFundFilter = 'all';
+        function setQFundFilter(v) { qFundFilter = (qFundFilter === v) ? 'all' : v; renderGrid(); } // 켜진 버튼을 한 번 더 누르면 전체로
         let chaViewFilter = 'all'; // ✨ [v19.2] 과목별 보기 금액 단위 - 'all': 분기금액(전체), 1·2·3: 그 차의 차시금액
         let chaMissingCount = 0; // ✨ [v19.2] 차시금액 보기에서 차시 미입력으로 제외된 줄 수
         let chaEvenCount = 0; // ✨ [v19.9] 차시 미입력이라 차마다 똑같이 나눠 보여준 과목 수
@@ -7034,6 +7037,7 @@ function toggleStatusPanel() {
             let evtTarget = window.event ? window.event.target : null;
             
             currentTab = tab;
+            qFundFilter = 'all'; // ✨ [v20.1] 탭을 옮기면 분기 인원 필터(수익자·초3·자유)는 풀림
             isRefundViewOn = false; // ✨ 탭 이동 시 환불 아코디언 무조건 닫기
 			isSuikViewOn = true; // ✨ 항상 켜진 상태로 유지
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -7748,7 +7752,16 @@ function toggleStatusPanel() {
 				
               let q = currentTab;
                     let qText = q.replace('q','') + '분기';
-                    
+
+                    // ✨ [v20.1] 인원 버튼의 숫자는 버튼 필터를 걸기 전 명단으로 세고(버튼을 눌러도 숫자가 안 바뀜), 그다음에 고른 버튼대로 명단을 거름
+                    let qfCnt = { all: 0, sk: 0, g3: 0, fr: 0 };
+                    viewData.forEach(({c}) => { if (c[q].exp > 0) qfCnt.all++; if (c[q].over > 0) qfCnt.sk++; if (c[q].usedG3 > 0) qfCnt.g3++; if (c[q].usedFree > 0) qfCnt.fr++; });
+                    if (qFundFilter !== 'all') {
+                        viewData = viewData.filter(({c}) => qFundFilter === 'sk' ? c[q].over > 0 : qFundFilter === 'g3' ? c[q].usedG3 > 0 : c[q].usedFree > 0);
+                        currentViewData = viewData; count = viewData.length;
+                    }
+                    const qfBtn = (key, color, label, n, tip) => `<button type="button" class="qf-btn${qFundFilter === key ? ' on' : ''}" style="--qf:${color};" onclick="setQFundFilter('${key}')" title="${tip}">${key === 'all' ? '' : '<i class="qf-dot"></i>'}${label} <b>${n}명</b></button>`;
+
                     // ✨ 아코디언 토글 상태에 따른 열(Column) 추가
                     let refundCols = isRefundViewOn ? `
                         <col style="width: 80px;"> <col style="width: 80px;"> <col style="width: 85px;">
@@ -7918,9 +7931,8 @@ function toggleStatusPanel() {
                             <div style="display: flex; flex-direction: column; gap:3px;">
                                 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                                     <span style="color:var(--text-dark); font-weight:700; font-size:16px;">${qText} 상세 현황</span>
-                                    <span style="font-size:13px; font-weight:600; color:var(--text-gray);">
-                                        사용인원: ${qUsers}명 (<span style="color:#b91c1c;">수익자: ${beneficiaryUsers}명</span>, <span style="color:var(--color-g3);">${getG3LabelShort()}: ${g3Users}명</span>, <span style="color:var(--color-free);">자유: ${freeUsers}명</span>),
-                                    
+                                    <span class="qf-wrap">
+                                        ${qfBtn('all', '#64748b', '전체인원', qfCnt.all, '모든 학생 보기 (필터 풀기)')}${qfBtn('sk', '#b91c1c', '수익자', qfCnt.sk, '수익자 부담금이 있는 학생만 보기')}${qfBtn('g3', 'var(--color-g3)', getG3LabelShort(), qfCnt.g3, getG3LabelShort() + ' 지원금을 쓴 학생만 보기')}${qfBtn('fr', 'var(--color-free)', '자유', qfCnt.fr, '자유수강권을 쓴 학생만 보기')}
 									</span>
 									<div style="font-size:14px;">
                                     <span style="font-weight:bold; color:var(--sidebar-accent);">총액: ${formatMoney(sumExp)}</span>
@@ -17175,13 +17187,23 @@ function showBackupNudge() {
 }
 </script>
 
+<!-- ✨ [v20.1] 분기 탭 인원 필터 버튼 (얇은 테두리 알약 + 색 점) -->
+<style>
+    .qf-wrap { display:inline-flex; align-items:center; flex-wrap:wrap; gap:4px; }
+    .qf-btn { display:inline-flex; align-items:center; gap:5px; height:30px; padding:0 10px; border:1px solid #cbd5e1; border-radius:15px; background:transparent; color:var(--text-gray); font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; font-family:inherit; transition:background 0.15s, border-color 0.15s; }
+    .qf-btn b { font-weight:800; color:var(--qf); }
+    .qf-btn .qf-dot { width:8px; height:8px; border-radius:50%; background:var(--qf); flex-shrink:0; }
+    .qf-btn:hover { background:rgba(148,163,184,0.16); }
+    .qf-btn.on { border-color:var(--qf); background:rgba(148,163,184,0.16); background:color-mix(in srgb, var(--qf) 13%, transparent); color:var(--text-dark); }
+</style>
+
 <!-- ===== ✨ [v20.0] 돌보미 챗봇: 질문을 적으면 비슷한 질문을 보여 주고, 고르면 설명 + 말풍선 따라하기 안내 ===== -->
 <style>
     #dbChatFab { position:fixed; right:18px; bottom:14px; z-index:900; width:92px; height:86px; padding:0; border:none; background:none; cursor:pointer; font-family:inherit; }
     #dbChatFab .dbc-face { position:absolute; left:14px; top:0; width:64px; height:64px; border-radius:50%; background:#eaf2ff; border:3px solid #d4af37; box-shadow:0 6px 16px rgba(15,23,42,0.35); overflow:hidden; transition:transform 0.18s; }
     #dbChatFab:hover .dbc-face { transform:translateY(-3px) scale(1.05); }
     #dbChatFab .dbc-face svg { width:100%; height:100%; display:block; }
-    #dbChatFab .dbc-tag { position:absolute; right:0; bottom:0; background:#1e3a5f; color:#fff; border:1.5px solid #d4af37; border-radius:11px; padding:3px 9px; font-size:12px; font-weight:800; letter-spacing:-0.3px; white-space:nowrap; box-shadow:0 2px 6px rgba(15,23,42,0.3); }
+    #dbChatFab .dbc-tag { position:absolute; left:50%; transform:translateX(-50%); bottom:0; background:#1e3a5f; color:#fff; border:1.5px solid #d4af37; border-radius:11px; padding:3px 9px; font-size:12px; font-weight:800; letter-spacing:-0.3px; white-space:nowrap; box-shadow:0 2px 6px rgba(15,23,42,0.3); }
     #dbChatFab.open .dbc-tag { background:#d4af37; color:#0f172a; }
 
     #dbChatWin { display:none; position:fixed; right:18px; bottom:108px; z-index:900; width:390px; max-width:calc(100vw - 24px); height:600px; max-height:calc(100vh - 124px); background:#f8fafc; border-radius:16px; border:1px solid #cbd5e1; box-shadow:0 20px 50px rgba(15,23,42,0.4); flex-direction:column; overflow:hidden; color:#1f2937; font-size:15px; line-height:1.6; word-break:keep-all; }
@@ -17250,23 +17272,30 @@ function showBackupNudge() {
 </div>
 <script>
 (function () {
-    // ---------- 캐릭터 (헤드셋을 낀 안내원) ----------
+    // ---------- 캐릭터 (안내원 헤드셋을 쓴 곰) ----------
     var AVATAR = '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
         '<circle cx="32" cy="32" r="32" fill="#eaf2ff"/>' +
-        '<path d="M14 64 Q14 51 32 51 Q50 51 50 64Z" fill="#1e3a5f"/>' +
-        '<path d="M27 51 L32 57 L37 51Z" fill="#fff"/>' +
-        '<circle cx="32" cy="30" r="19" fill="#4a3426"/>' +
-        '<circle cx="32" cy="34" r="15.5" fill="#ffe2c6"/>' +
-        '<path d="M16.500 32 Q19 17.500 32 17.500 Q45 17.500 47.500 32 Q40 23.500 32 24.500 Q24 23.500 16.500 32Z" fill="#4a3426"/>' +
-        '<circle cx="26" cy="35" r="2.300" fill="#2b2118"/><circle cx="38" cy="35" r="2.300" fill="#2b2118"/>' +
-        '<circle cx="26.800" cy="34.200" r="0.800" fill="#fff"/><circle cx="38.800" cy="34.200" r="0.800" fill="#fff"/>' +
-        '<ellipse cx="22" cy="40" rx="3" ry="1.700" fill="#ffaaaa" opacity="0.75"/><ellipse cx="42" cy="40" rx="3" ry="1.700" fill="#ffaaaa" opacity="0.75"/>' +
-        '<path d="M27.500 40.500 Q32 45.500 36.500 40.500" stroke="#c2410c" stroke-width="1.800" fill="none" stroke-linecap="round"/>' +
-        '<path d="M13 33 A19 19 0 0 1 51 33" stroke="#1e3a5f" stroke-width="3.400" fill="none" stroke-linecap="round"/>' +
-        '<rect x="8.500" y="29" width="8" height="13" rx="4" fill="#1e3a5f"/><rect x="47.500" y="29" width="8" height="13" rx="4" fill="#1e3a5f"/>' +
-        '<circle cx="12.500" cy="35.500" r="1.600" fill="#d4af37"/><circle cx="51.500" cy="35.500" r="1.600" fill="#d4af37"/>' +
-        '<path d="M12.500 42 Q12.500 50.500 23 49.500" stroke="#1e3a5f" stroke-width="2.200" fill="none" stroke-linecap="round"/>' +
-        '<ellipse cx="25.500" cy="49.200" rx="3.400" ry="2.400" fill="#d4af37"/>' +
+        // 귀
+        '<circle cx="15" cy="17.500" r="8.500" fill="#b97f4c"/><circle cx="49" cy="17.500" r="8.500" fill="#b97f4c"/>' +
+        '<circle cx="15" cy="17.500" r="4.600" fill="#f6cfa8"/><circle cx="49" cy="17.500" r="4.600" fill="#f6cfa8"/>' +
+        // 얼굴
+        '<ellipse cx="32" cy="36" rx="21.500" ry="19.500" fill="#cf9560"/>' +
+        '<ellipse cx="32" cy="43.500" rx="10" ry="7.800" fill="#fdebd6"/>' +
+        // 눈 (반짝임 두 개)
+        '<circle cx="23.500" cy="35" r="3.200" fill="#2b2118"/><circle cx="40.500" cy="35" r="3.200" fill="#2b2118"/>' +
+        '<circle cx="24.700" cy="33.800" r="1.200" fill="#fff"/><circle cx="41.700" cy="33.800" r="1.200" fill="#fff"/>' +
+        '<circle cx="22.600" cy="36.300" r="0.600" fill="#fff"/><circle cx="39.600" cy="36.300" r="0.600" fill="#fff"/>' +
+        // 볼터치
+        '<ellipse cx="17.500" cy="42" rx="3.600" ry="2.200" fill="#ff9c9c" opacity="0.75"/><ellipse cx="46.500" cy="42" rx="3.600" ry="2.200" fill="#ff9c9c" opacity="0.75"/>' +
+        // 코·입
+        '<ellipse cx="32" cy="40" rx="3.300" ry="2.300" fill="#3a2a20"/>' +
+        '<path d="M32 42.300 V44.200 M32 44.200 Q29.600 47.200 27.400 44.800 M32 44.200 Q34.400 47.200 36.600 44.800" stroke="#3a2a20" stroke-width="1.500" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+        // 헤드셋
+        '<path d="M10.500 34 A21.500 21.500 0 0 1 53.500 34" stroke="#1e3a5f" stroke-width="3.600" fill="none" stroke-linecap="round"/>' +
+        '<rect x="5.500" y="29.500" width="9" height="14.500" rx="4.500" fill="#1e3a5f"/><rect x="49.500" y="29.500" width="9" height="14.500" rx="4.500" fill="#1e3a5f"/>' +
+        '<circle cx="10" cy="36.700" r="1.800" fill="#d4af37"/><circle cx="54" cy="36.700" r="1.800" fill="#d4af37"/>' +
+        '<path d="M10 44 Q10 55 21 54.500" stroke="#1e3a5f" stroke-width="2.300" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="23.500" cy="54.200" rx="3.800" ry="2.700" fill="#d4af37"/>' +
         '</svg>';
     function $(id) { return document.getElementById(id); }
     function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
