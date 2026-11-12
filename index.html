@@ -752,6 +752,8 @@
         .sd-ratio-tag { display:inline-block; margin-top:5px; font-size:12px; padding:3px 9px; border-radius:5px; background:#ede9fe; color:#6d28d9; font-weight:800; white-space:nowrap; }
         .sd-ratio-hbtn { margin-left:6px; font-size:12px; padding:3px 9px; border-radius:5px; border:none; background:#fde68a; color:#1e3a5f; cursor:pointer; font-weight:800; white-space:nowrap; font-family:inherit; }
         .sd-ratio-hbtn.on { background:#c4b5fd; color:#3b0764; }
+        .sw-pick { padding:6px 4px; border:1.5px solid #cbd5e1; border-radius:6px; font-size:14.5px; font-weight:800; color:#1e3a5f; background:#fff; font-family:inherit; }
+        .sw-pick.need { border-color:#dc2626; background:#fef2f2; color:#b91c1c; }
         .sw-money { width:92px; padding:6px 8px; border:1.5px solid #d4af37; background:#fffbeb; border-radius:6px; text-align:right; font-size:15px; font-weight:800; color:#92400e; font-family:inherit; }
         .sw-where { display:inline-block; font-size:14px; font-weight:800; padding:3px 10px; border-radius:999px; }
         .sw-where.cha { background:#dbeafe; color:#1e40af; }
@@ -11098,7 +11100,7 @@ function updateG3LimitTotal() {
         function swConvWhere(s) {
             let ms = ((s && s.convRefund && s.convRefund.items) || []).map(it => it.month);
             if (!ms.length) return '';
-            return ms.every(m => m === 'pre') ? '분기 전체' : ms.filter(m => m !== 'pre').map(m => m + '차').join('·') + ' 명단';
+            return ms.every(m => m === 'pre') ? '수강전취소 명단' : ms.filter(m => m !== 'pre').map(m => m + '차').join('·') + ' 명단';
         }
         function swIsSuikAll(s) { return s.mFreeSu === 0 && s.mFreeGy === 0 && s.mFreeJ === 0; }
         // 과목의 자유수강 수강료가 어느 차에 얼마씩 들어가는지 (청구서와 같은 계산)
@@ -11113,7 +11115,7 @@ function updateG3LimitTotal() {
             } catch (e) { out = []; }
             return out;
         }
-        function swMakeConv(r, k, sIdx, c, since) {
+        function swMakeConv(r, k, sIdx, c, since, pick) {
             let s = r['q' + k].subs[sIdx];
             let a = (c.allocs && c.allocs['q' + k] && c.allocs['q' + k][sIdx]) || {};
             let su = toNum(a.frSu), gy = toNum(a.frGy), j = toNum(a.frJ);
@@ -11125,7 +11127,7 @@ function updateG3LimitTotal() {
                     parts.forEach(p => items.push({ month: p.m, su: p.fr, gy: 0, j: 0 }));
                     items[items.length - 1].gy = gy; items[items.length - 1].j = j;
                 } else items.push({ month: getMonthsPerQuarter(), su, gy, j });
-            } else items.push({ month: 'pre', su, gy, j });
+            } else items.push({ month: (pick === 'pre' || !pick) ? 'pre' : Number(pick), su, gy, j, whole: true });
             return { items, since: since || '', date: todayLocal() };
         }
         // 1단계에서 정한 과목별 지원 차시를 학생(또는 사본)에 넣음. 체크를 푼 과목은 지원 시작 시점을 풂(분기 전체 지원)
@@ -11169,7 +11171,10 @@ function updateG3LimitTotal() {
                     where = parts.length ? parts.map(x => x.m + '차').join('·') : getMonthsPerQuarter() + '차';
                     sub = `뒤 ${toNum(s.coveredSessions)}차시`;
                 }
-                rows.push({ k, sIdx: i, name: s.name, part, su, gy, j, gyIn: gy, jIn: j, gyMax, jMax, where, sub, on: rs.convRefund ? true : !anyConv });
+                // 분기 전체가 바뀌는 과목은 몇 차 환불 명단에 넣을지 사용자가 고름 (전에 고른 값이 있으면 그대로)
+                let pick = '';
+                if (!part && rs.convRefund && rs.convRefund.items && rs.convRefund.items.length === 1) pick = rs.convRefund.items[0].month;
+                rows.push({ k, sIdx: i, name: s.name, part, pick, su, gy, j, gyIn: gy, jIn: j, gyMax, jMax, where, sub, on: rs.convRefund ? true : !anyConv });
             };
             for (let k = st.q; k <= maxQuarter; k++) swSubs(p.r, k).forEach(x => add(k, x.i, !!x.s.sessionRatioEnabled));
             st.rows = rows;
@@ -11198,6 +11203,8 @@ function updateG3LimitTotal() {
         function swFinish() {
             let st = swState, r = db.find(x => x.id == st.id);
             if (!r) return swClose();
+            let noPick = st.rows.find(row => row.on && !row.part && !row.pick);
+            if (noPick) { alert(`${noPick.k}분기 ${noPick.name}: 몇 차 환불 명단에 넣을지 골라 주세요.\n(환불 명단에 넣지 않으려면 앞의 체크를 풀어 주세요)`); return; }
             swApplyStep1(r);
             st.early.filter(o => o.on).forEach(o => swSubs(r, o.k).forEach(x => { x.s.mFreeSu = 0; x.s.mFreeGy = 0; x.s.mFreeJ = 0; }));
             st.rows.forEach(row => {
@@ -11210,7 +11217,7 @@ function updateG3LimitTotal() {
             let c = calcStudent(r), since = swSince(st.date), changed = [];
             st.rows.filter(row => row.on).forEach(row => {
                 let t = r['q' + row.k].subs[row.sIdx];
-                let cv = swMakeConv(r, row.k, row.sIdx, c, since || (t.convRefund && t.convRefund.since) || '');
+                let cv = swMakeConv(r, row.k, row.sIdx, c, since || (t.convRefund && t.convRefund.since) || '', row.pick);
                 if (cv) { t.convRefund = cv; changed.push(`${row.k}분기 ${swConvWhere(t).replace(' 명단', '')}`); } else delete t.convRefund;
             });
             persistData();
@@ -11303,6 +11310,7 @@ function updateG3LimitTotal() {
                 if (jEl) { row.jIn = Math.min(row.jMax, swNum(jEl.value)); jEl.disabled = !row.on; }
                 let sum = row.su + swNum(row.gyIn) + swNum(row.jIn);
                 if (tr) tr.classList.toggle('off', !row.on);
+                let pk = document.getElementById('swPick_' + i); if (pk) pk.disabled = !row.on;
                 let sub = document.getElementById('swSub_' + i); if (sub) sub.innerText = formatMoney(sum);
                 if (row.on) { total += sum; cnt++; }
             });
@@ -11371,7 +11379,13 @@ function updateG3LimitTotal() {
                         ${st.rows.map((row, i) => `<tr id="swRow_${i}">
                             <td><input type="checkbox" ${row.on ? 'checked' : ''} onchange="swState.rows[${i}].on = this.checked; swRowCalc()"></td>
                             <td style="text-align:left;"><b>${row.k}분기</b><br>${escHtmlAttr(row.name || '')}</td>
-                            <td><span class="sw-where ${row.part ? 'cha' : 'all'}">${row.where}</span>${row.sub ? `<div style="font-size:13.5px; color:#64748b; margin-top:3px;">${row.sub}</div>` : ''}</td>
+                            <td>${row.part
+                                ? `<span class="sw-where cha">${row.where}</span>${row.sub ? `<div style="font-size:13.5px; color:#64748b; margin-top:3px;">${row.sub}</div>` : ''}`
+                                : `<select class="sw-pick${row.pick ? '' : ' need'}" id="swPick_${i}" title="이 금액을 몇 차 환불 명단에 넣을지 골라 주세요" onchange="swState.rows[${i}].pick = this.value; this.classList.toggle('need', !this.value)">
+                                        <option value="">👉 고르기</option>
+                                        ${Array.from({ length: getMonthsPerQuarter() }, (_, m) => `<option value="${m + 1}"${String(row.pick) === String(m + 1) ? ' selected' : ''}>${m + 1}차 명단</option>`).join('')}
+                                        <option value="pre"${row.pick === 'pre' ? ' selected' : ''}>수강전취소</option>
+                                   </select><div style="font-size:13.5px; color:#92400e; margin-top:3px; font-weight:700;">분기 전체 금액</div>`}</td>
                             <td style="text-align:right;">${row.su.toLocaleString()}</td>
                             <td>${row.gyMax > 0 ? `<input class="sw-money" id="swGy_${i}" value="${row.gyIn.toLocaleString()}" title="자유수강으로 바꿀 교재비 (최대 ${row.gyMax.toLocaleString()}원)" oninput="swRowCalc()">` : '<span style="color:#9ca3af;">-</span>'}</td>
                             <td>${row.jMax > 0 ? `<input class="sw-money" id="swJ_${i}" value="${row.jIn.toLocaleString()}" title="자유수강으로 바꿀 재료비 (최대 ${row.jMax.toLocaleString()}원)" oninput="swRowCalc()">` : '<span style="color:#9ca3af;">-</span>'}</td>
@@ -11380,6 +11394,7 @@ function updateG3LimitTotal() {
                     </table>
                     <div class="sw-total"><span>환불 명단에 넣을 합계</span><b id="swTotal"></b></div>
                     <div class="sw-note">학생의 수강 금액은 그대로이고, <b>수익자 → 자유수강</b>으로 바뀐 금액만 환불 명단에 들어가요.<br>
+분기 전체가 바뀌는 과목은 <b>몇 차 환불 명단에 넣을지</b> 골라 주세요. (지금 행정실에 내는 차를 고르면 그 차 명단에 나와요)<br>
                     <b>교재비·재료비</b>(노란 칸)는 자유수강으로 바꿀 금액만 적어 주세요. 적은 금액만큼 자유수강 지원금으로 바뀝니다.</div>`;
                 }
                 body += `<div class="sw-btns"><button type="button" class="sw-btn" onclick="swPrev()">← 이전</button><button type="button" class="sw-btn go" onclick="swFinish()">✔ 완료 (저장)</button></div>`;
@@ -11392,7 +11407,7 @@ function updateG3LimitTotal() {
                         ${swSubs(r, st.q).filter(x => x.s.sessionRatioEnabled).map(x => `<tr><td>✔<div style="font-size:13.5px; color:#64748b;">항상</div></td><td style="text-align:left;"><b>${st.q}분기 ${escHtmlAttr(x.s.name || '')}</b><br>지원 시작 시점</td><td>${x.s.coveredSessions}/${x.s.totalSessions}회 지원</td><td>설정 없음<br>(분기 전체 지원)</td></tr>`).join('')}
                         ${swSubs(r, st.q).some(x => x.s.convRefund) ? `<tr><td>✔<div style="font-size:13.5px; color:#64748b;">항상</div></td><td style="text-align:left;"><b>${st.q}분기</b> 전환 환불</td><td>${formatMoney(swSubs(r, st.q).reduce((t, x) => t + swConvTotal(x.s), 0))}</td><td>명단에서 뺌</td></tr>` : ''}
                         ${(st.del || []).map((o, i) => o.type === 'conv'
-                            ? `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.del[${i}].on = this.checked"></td><td style="text-align:left;"><b>${o.k}분기</b> 전환 환불</td><td>분기 전체 ${formatMoney(o.sum)}</td><td>명단에서 뺌</td></tr>`
+                            ? `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.del[${i}].on = this.checked"></td><td style="text-align:left;"><b>${o.k}분기</b> 전환 환불</td><td>${formatMoney(o.sum)}</td><td>명단에서 뺌</td></tr>`
                             : `<tr><td><input type="checkbox" ${o.on ? 'checked' : ''} onchange="swState.del[${i}].on = this.checked"></td><td style="text-align:left;"><b>${o.k}분기</b> 수익자 전환</td><td style="color:#b91c1c; font-weight:800;">수익자 ${formatMoney(o.sum)}</td><td style="color:#9333ea; font-weight:800;">자유수강으로<br>다시 계산</td></tr>`).join('')}
                     </table>
                     <div class="sw-note">같이 되돌리지 않을 것은 체크를 풀어 주세요. 학생의 수강 금액은 바뀌지 않습니다.</div>
