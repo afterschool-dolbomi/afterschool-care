@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.4</title>
+    <title>방과후 지원금 돌보미 V20.5</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -264,6 +264,9 @@
             --border-color: #374151;
             --sidebar-bg: #030712;
         }
+        /* ✨ [v20.4] 표 왼쪽 고정 머리글(No.·학번·이름)도 다크모드 색을 따르게 (인쇄할 때는 밝게) */
+        body.dark-mode { --th-stick-bg: #374151; --th-stick-fg: #f9fafb; }
+        @media print { body.dark-mode { --th-stick-bg: #f3f4f6; --th-stick-fg: #334155; } }
         body.dark-mode thead { background: #374151 !important; }
         body.dark-mode th { background: #374151 !important; color: #f9fafb; border-color: #4b5563; }
         body.dark-mode td { background: #1f2937; color: #e5e7eb; border-color: #4b5563; }
@@ -832,6 +835,84 @@
         .rf-clear { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; font-size: 13.5px; cursor: pointer; }
         @media (max-width: 1280px) { .rf-side { width: 320px; } .rf-search { width: 190px; } .rf-tab { padding: 11px 11px 12px; } }
         @media print { .rf-page { display: none !important; } }
+        /* ✨ [v20.5] 환불 관리 다크모드: 밝은 바탕이 섞여 눈부시던 곳과 안 보이던 글씨를 어두운 색 한 벌로 맞춤 */
+        body.dark-mode .rf-page { background: #111827; color: #e5e7eb; }
+        body.dark-mode .rf-tab.on { background: #1f2937; color: #f9fafb; }
+        body.dark-mode .rf-tab.on .n { background: #7f1d1d; color: #fecaca; }
+        body.dark-mode .rf-topbtn.rf-close { background: #374151; color: #f9fafb; border-color: #6b7280; }
+        body.dark-mode .rf-topbtn.rf-close:hover { background: #4b5563; }
+        body.dark-mode .rf-bar { background: #1f2937; border-bottom-color: #374151; }
+        body.dark-mode .rf-barlb { color: #9ca3af; }
+        body.dark-mode .rf-bardiv { background: #4b5563; }
+        body.dark-mode .rf-chip, body.dark-mode .rf-chk { background: #374151; border-color: #4b5563; color: #e5e7eb; }
+        body.dark-mode .rf-chip:hover, body.dark-mode .rf-chk:hover { background: #4b5563; }
+        body.dark-mode .rf-chip.on { background: #2563eb; border-color: #3b82f6; color: #fff; }
+        body.dark-mode .rf-chip.f-free.on { background: #7c3aed; border-color: #8b5cf6; }
+        body.dark-mode .rf-chip.f-g3.on { background: #0284c7; border-color: #38bdf8; }
+        body.dark-mode .rf-chip.f-sk.on { background: #b45309; border-color: #d97706; }
+        body.dark-mode .rf-chk.on { background: #1e3a8a; border-color: #60a5fa; color: #dbeafe; }
+        body.dark-mode .rf-chk.pre.on { background: #78350f; border-color: #f59e0b; color: #fde68a; }
+        body.dark-mode .rf-chk.all.on { background: #475569; border-color: #94a3b8; color: #fff; }
+        body.dark-mode .rf-search, body.dark-mode .rf-in, body.dark-mode .rf-cin { background: #111827; border-color: #4b5563; color: #f9fafb; }
+        body.dark-mode .rf-grid { background: #1f2937; }
+        body.dark-mode .rf-tbl th { background: #374151 !important; color: #f9fafb; border-bottom-color: #4b5563; border-right-color: #4b5563; }
+        body.dark-mode .rf-tbl td { background: #1f2937; color: #e5e7eb; border-bottom-color: #374151; border-right-color: #2b3544; }
+        body.dark-mode .rf-tbl td.rn, body.dark-mode .rf-tbl th.rn { background: #273244 !important; color: #9ca3af; }
+        body.dark-mode .rf-tbl .zero { color: #6b7280; }
+        body.dark-mode .rf-tbl th.rfh { background: #7f1d1d !important; color: #fecaca; }
+        body.dark-mode .rf-tbl td.rfc { background: #3b1d24; color: #fca5a5; }
+        body.dark-mode .rf-tbl tr.wait td { background: #3a3118; }
+        body.dark-mode .rf-tbl tr.wait td.rfc { background: #4a3a12; color: #fcd34d; }
+        body.dark-mode .rf-tbl tr.conv td { background: #3b2a1a; }
+        body.dark-mode .rf-tbl tbody tr:hover td { background: #334155 !important; }
+        body.dark-mode .rf-tbl tbody tr:hover td.rfc { background: #4a2530 !important; }
+        body.dark-mode .rf-tbl tr.tot td, body.dark-mode .rf-tbl tbody tr.tot:hover td { background: #0f172a !important; color: #f9fafb; border-top-color: #6b7280; }
+        body.dark-mode .rf-tbl tr.tot td.rfc, body.dark-mode .rf-tbl tbody tr.tot:hover td.rfc { background: #7f1d1d !important; color: #fecaca; }
+        body.dark-mode .rf-name { color: #93c5fd; }
+        body.dark-mode .rf-st-wait { background: #92400e; color: #fde68a; }
+        body.dark-mode .rf-st-done { background: #14532d; color: #86efac; }
+        body.dark-mode .rf-st-conv { background: #7c2d12; color: #fed7aa; }
+        body.dark-mode .rf-src.s-free { background: #4c1d95; color: #ddd6fe; }
+        body.dark-mode .rf-src.s-g3 { background: #0c4a6e; color: #bae6fd; }
+        body.dark-mode .rf-src.s-sk { background: #78350f; color: #fde68a; }
+        body.dark-mode .rf-src.s-none { background: #374151; color: #d1d5db; }
+        body.dark-mode .rf-note.r { color: #f87171; } body.dark-mode .rf-note.b { color: #93c5fd; } body.dark-mode .rf-note.o { color: #fdba74; }
+        body.dark-mode .rf-act, body.dark-mode .rf-clear { background: #374151; border-color: #4b5563; color: #e5e7eb; }
+        body.dark-mode .rf-act:hover { background: #7f1d1d; border-color: #b91c1c; color: #fecaca; }
+        body.dark-mode .rf-empty, body.dark-mode .rf-empty-s { color: #9ca3af; }
+        body.dark-mode .rf-side { background: #18212f; border-left-color: #374151; }
+        body.dark-mode .rf-side-h { color: #f9fafb; }
+        body.dark-mode .rf-mode { border-color: #4b5563; }
+        body.dark-mode .rf-mode button { background: #374151; color: #d1d5db; }
+        body.dark-mode .rf-mode button.on { background: #2563eb; color: #fff; }
+        body.dark-mode .rf-lb { color: #cbd5e1; }
+        body.dark-mode .rf-req { color: #f87171; }
+        body.dark-mode .rf-link { color: #93c5fd; } body.dark-mode .rf-link-g { color: #9ca3af; }
+        body.dark-mode .rf-seg { background: #374151; border-color: #4b5563; }
+        body.dark-mode .rf-seg button { background: #374151; color: #e5e7eb; border-right-color: #4b5563; }
+        body.dark-mode .rf-seg button:hover { background: #4b5563; }
+        body.dark-mode .rf-seg button.on { background: #2563eb; color: #fff; }
+        body.dark-mode .rf-seg button.pre.on { background: #b45309; }
+        body.dark-mode .rf-stu { background: #111827; border-color: #4b5563; color: #e5e7eb; }
+        body.dark-mode .rf-stu label { border-bottom-color: #374151; }
+        body.dark-mode .rf-stu .tg.free { background: #4c1d95; color: #ddd6fe; } body.dark-mode .rf-stu .tg.g3 { background: #0c4a6e; color: #bae6fd; } body.dark-mode .rf-stu .tg.mid { background: #1e3a8a; color: #bfdbfe; }
+        body.dark-mode .rf-results { background: #1f2937; border-color: #4b5563; }
+        body.dark-mode .rf-results div { background: #1f2937 !important; color: #e5e7eb !important; border-bottom-color: #374151 !important; }
+        body.dark-mode .rf-results div:hover { background: #374151 !important; }
+        body.dark-mode .rf-prev[style*="30, 58, 95"] { color: #93c5fd !important; }
+        body.dark-mode .rf-mf[style*="background: white"] { background: #374151 !important; color: #e5e7eb !important; border-color: #4b5563 !important; }
+        body.dark-mode .rf-add { background: #2563eb; }
+        body.dark-mode .rf-add:hover { background: #1d4ed8; }
+        body.dark-mode .rf-help { color: #9ca3af; }
+        body.dark-mode .rf-help details { background: #3a3118; border-color: #92400e; color: #fde68a; }
+        body.dark-mode .rf-status { background: #1f2937; border-top-color: #374151; color: #cbd5e1; }
+        body.dark-mode .rf-status b { color: #f9fafb; }
+        body.dark-mode .rf-status .sep { background: #4b5563; }
+        body.dark-mode .rf-status .ok { color: #4ade80; }
+        body.dark-mode .rf-status .fs-free, body.dark-mode .rf-status .fs-free b { color: #c4b5fd; }
+        body.dark-mode .rf-status .fs-g3, body.dark-mode .rf-status .fs-g3 b { color: #7dd3fc; }
+        body.dark-mode .rf-status .fs-sk, body.dark-mode .rf-status .fs-sk b { color: #fca5a5; }
+        body.dark-mode .rf-apply:disabled { background: #374151; color: #6b7280; }
         /* ✨ [v20.4] 과목별 보기 - 제목 옆 과목 버튼 (여러 과목 체크) */
         .subj-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-left: 8px; flex: 1; min-width: 0; }
         .subj-chips.grade-chips { flex: 0 0 auto; margin-left: auto; }
@@ -1767,7 +1848,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.4</span>
+                <span class="brand-version">V20.5</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -1968,26 +2049,6 @@
             </div>
 
             <div style="padding:24px 26px 8px; display:flex; flex-direction:column; gap:16px;">
-
-                <div style="background:linear-gradient(135deg, #eff6ff, #dbeafe); border:2.5px solid #1d4ed8; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(29,78,216,0.22); word-break:keep-all;">
-                    <div style="margin-bottom:6px;"><span style="background:#1d4ed8; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.4</span></div>
-                    <div style="font-size:20px; font-weight:900; color:#1e3a8a; line-height:1.3; margin-bottom:6px;">📚 과목별 보기에서 과목을 바로 골라요</div>
-                    <div style="font-size:14px; color:#334155; line-height:1.75;">
-                        <b>과목별 보기</b> 제목 옆에 <b>과목 버튼</b>이 생겼어요. 필터 창을 열지 않아도 버튼만 누르면 그 과목만 보여요.<br>
-                        <b>여러 과목을 함께 체크</b>해서 한꺼번에 볼 수 있고, <b>전체</b>를 누르면 모든 과목으로 돌아와요.
-                    </div>
-                </div>
-
-                <div style="background:linear-gradient(135deg, #fef2f2, #fee2e2); border:2.5px solid #b91c1c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(185,28,28,0.22); word-break:keep-all;">
-                    <div style="margin-bottom:6px;"><span style="background:#b91c1c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.3</span></div>
-                    <div style="font-size:20px; font-weight:900; color:#991b1b; line-height:1.3; margin-bottom:6px;">↩ 환불 관리가 큰 화면으로 바뀌었어요</div>
-                    <div style="font-size:14px; color:#334155; line-height:1.75;">
-                        위쪽 <b>환불관리</b>를 누르면 화면 가득 새 창이 열려요.<br>
-                        <b>왼쪽 표</b>에서 지금까지 환불한 학생을 한눈에 보고, <b>분기 탭</b>(전체·1~4분기)과 <b>자유수강·초3·수익자 환불</b> 버튼으로 골라 볼 수 있어요.<br>
-                        <b>오른쪽 환불 담기</b>에서 <b>같은 과목 여러 명</b> 또는 <b>한 명씩 환불</b> 담으면 표 맨 위에 <b>적용 전</b>으로 쌓이고, 아래 빨간 <b>전체 적용</b>을 누르면 반영돼요.<br>
-                        잘못 넣은 환불은 그 줄의 <b>↩ 되돌리기</b>로 바로 취소할 수 있어요.
-                    </div>
-                </div>
 
                 <div style="background:linear-gradient(135deg, #fff7ed, #ffedd5); border:2.5px solid #c2410c; border-radius:16px; padding:18px; box-shadow:0 6px 18px rgba(194,65,12,0.22); word-break:keep-all;">
                     <div style="margin-bottom:6px;"><span style="background:#c2410c; color:white; font-size:11px; font-weight:900; padding:2px 9px; border-radius:10px; letter-spacing:0.5px;">🎉 NEW 신기능 · V20.2</span></div>
@@ -7325,7 +7386,7 @@ function toggleStatusPanel() {
 		
 		     let subjectGridSortType = 'subject'; // ✨ 과목별 보기 정렬 필터 기본값 (과목순)
 		     let subjectGridSortDir = 1; // ✨ 1=오름차순, -1=내림차순
-		     let mainGridSortDir = 1; // ✨ 메인 홈 학번/이름 정렬방향
+		     let mainGridSortDir = 1; // ✨ 메인 홈(전체현황 보기)은 늘 학번 오름차순 — 머리글 눌러 정렬 바꾸는 기능은 v20.4에서 없앰
         function renderGrid() {
             const tHead = document.getElementById('tHead');
             const tBodyEl = document.getElementById('tBody');
@@ -7635,11 +7696,11 @@ function toggleStatusPanel() {
 
                     tHead.innerHTML = `
                     <tr>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
-                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
-                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
-                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 205 : 150}px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; border-right:2px solid var(--border-color);" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">No.</th>
+                        ${currentTab === 'all' ? `<th rowspan="2" class="text-center" style="${br} vertical-align:middle; padding:10px 4px; cursor:pointer; position:sticky !important; top:0 !important; left:40px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);" onclick="subjectGridSortDir = (subjectGridSortType==='quarter') ? -subjectGridSortDir : 1; subjectGridSortType='quarter'; renderGrid();">분기 <span style="font-size:11px; color:${subjectGridSortType === 'quarter' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'quarter' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>` : ''}
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 95 : 40}px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);" id="th-id" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">학번 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
+                       <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 150 : 95}px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);" id="th-name" onclick="subjectGridSortDir = (subjectGridSortType==='student') ? -subjectGridSortDir : 1; subjectGridSortType='student'; renderGrid();">이름 <span style="font-size:11px; color:${subjectGridSortType === 'student' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'student' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></span></th>
+                        <th rowspan="2" class="text-center" style="${br} vertical-align:middle; cursor:pointer; position:sticky !important; top:0 !important; left:${currentTab === 'all' ? 205 : 150}px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155); border-right:2px solid var(--border-color);" onclick="subjectGridSortDir = (subjectGridSortType==='subject') ? -subjectGridSortDir : 1; subjectGridSortType='subject'; renderGrid();">과목명 <span style="font-size:11px; color:${subjectGridSortType === 'subject' ? '#8b5cf6' : '#d1d5db'};">${(subjectGridSortType === 'subject' && subjectGridSortDir === -1) ? '▲' : '▼'}</span></th>
                         <th rowspan="2" class="text-center" style="${br} vertical-align:middle; width:52px; max-width:52px;">지원유형</th>
                        <th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:var(--color-g3); font-size:14px;">${getG3Label()} <button onclick="toggleG3Refund()" class="no-print" style="font-size:11px; padding:3px 8px; border-radius:10px; border:1px solid var(--color-g3); background:white; color:var(--color-g3); cursor:pointer; margin-left:4px; vertical-align:middle;">${isG3RefundOn ? '◀닫기' : '환불보기▶'}</button></th>
                         ${isG3RefundOn ? `<th colspan="${isFeeViewOn ? 5 : 4}" class="text-center" style="${br} color:#dc2626; font-size:14px; background:#fef2f2;">${getG3LabelShort()} 환불내역</th>` : ''}
@@ -7861,9 +7922,9 @@ function toggleStatusPanel() {
                     colGroup.innerHTML = colHtml;
 
                     let thHtml = `<tr>
-                        <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
-                        <th class="text-center" id="th-id" style="cursor:pointer; position:sticky !important; top:0 !important; left:50px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">학번 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
-                        <th class="text-center" id="th-name" style="cursor:pointer; position:sticky !important; top:0 !important; left:105px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;" onclick="mainGridSortDir = -mainGridSortDir; renderGrid();">이름 <span style="font-size:11px; color:#8b5cf6;">${mainGridSortDir === -1 ? '▲' : '▼'}</span></th>
+                        <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">No.</th>
+                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:50px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">학번</th>
+                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:105px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">이름</th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>`;
                     for(let i=1; i<=maxQuarter; i++) thHtml += `<th class="text-right">${i}분기</th>`;
@@ -8058,9 +8119,9 @@ function toggleStatusPanel() {
                     ` : '';
 
                   tHead.innerHTML = `<tr>
-                       <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">No.</th>
-                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:45px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">학번</th>
-                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:95px !important; z-index:20 !important; background:#f3f4f6 !important; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155; color:#334155;">이름</th>
+                       <th class="text-center" style="position:sticky !important; top:0 !important; left:0 !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">No.</th>
+                        <th class="text-center" id="th-id" style="position:sticky !important; top:0 !important; left:45px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">학번</th>
+                        <th class="text-center" id="th-name" style="position:sticky !important; top:0 !important; left:95px !important; z-index:20 !important; background:var(--th-stick-bg, #f3f4f6) !important; color:var(--th-stick-fg, #334155);">이름</th>
                         <th class="text-center">지원유형</th>
                         <th class="text-center">상태</th>
                         <th class="text-right">${qText} 강사료</th>
