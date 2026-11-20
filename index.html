@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.6</title>
+    <title>방과후 지원금 돌보미 V20.7</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -1848,7 +1848,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.6</span>
+                <span class="brand-version">V20.7</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -4936,7 +4936,10 @@
             ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:12,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:10,style:{numFmt:'#,##0'}},{width:20},{width:16}];
         }
 
-function addRosterDataRows(ws, rows, themeColor) {
+        // ✨ [v20.7] 엑셀 수식용 도우미: 시트 이름을 수식에 쓸 때 '...' 로 감싸고, 이름 속 ' 는 '' 로 바꿈
+        function xlQ(name) { return "'" + String(name).replace(/'/g, "''") + "'"; }
+
+        function addRosterDataRows(ws, rows, themeColor) {
             rows = [...rows].sort((a, b) => {
                 if (a.subject !== b.subject) return a.subject.localeCompare(b.subject); // ✨ 1순위: 과목명
                 return (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum); // ✨ 2순위: 학번
@@ -4947,7 +4950,10 @@ function addRosterDataRows(ws, rows, themeColor) {
 
             rows.forEach((r, i) => {
                 let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.g || 0, r.s || 0, r.gy, r.j, r.subject, r.note]);
-                              let isSubjectEnd = (i === rows.length - 1) || (baseSubjectName(rows[i+1].subject) !== baseSubjectName(r.subject)); // ✨ N부끼리는 구분선 없이, 진짜 과목이 바뀔 때만 구분선
+                r._xr = row.number; // ✨ [v20.7] 이 학생이 엑셀 몇 번째 줄에 들어갔는지 (과목별 상세 시트 연결용)
+                // ✨ [v20.7] 대상금액 = 수강료 + 교재비 + 재료비 (수식) → 금액을 고치면 대상금액도 같이 바뀜
+                row.getCell(6).value = { formula: `G${row.number}+J${row.number}+K${row.number}`, result: r.amount };
+                let isSubjectEnd = (i === rows.length - 1) || (baseSubjectName(rows[i+1].subject) !== baseSubjectName(r.subject)); // ✨ N부끼리는 구분선 없이, 진짜 과목이 바뀔 때만 구분선
                 row.eachCell(cell => {
                     cell.border = {
                         top:{style:'thin', color:{argb:'FFE5E7EB'}},
@@ -4958,25 +4964,34 @@ function addRosterDataRows(ws, rows, themeColor) {
                 });
             });
 
-            let totalAmount = rows.reduce((a,b)=>a+b.amount,0);
-            let totalSu = rows.reduce((a,b)=>a+b.su,0);
-            let totalGy = rows.reduce((a,b)=>a+b.gy,0);
-            let totalJ = rows.reduce((a,b)=>a+b.j,0);
-            let totalG = rows.reduce((a,b)=>a+(b.g||0),0);
-            let totalS = rows.reduce((a,b)=>a+(b.s||0),0);
-            let totalRow = ws.addRow(['', '', '', '', '총 합계', totalAmount, totalSu, totalG, totalS, totalGy, totalJ, '', '']);
+            // ✨ [v20.7] 총 합계 = SUM 수식 (학생을 중간에 넣거나 지우면 자동으로 합계가 바뀜)
+            let first = 4, last = 3 + rows.length;
+            let totalRow = ws.addRow(['', '', '', '', '총 합계', 0, 0, 0, 0, 0, 0, '', '']);
+            [[6,'F','amount'],[7,'G','su'],[8,'H','g'],[9,'I','s'],[10,'J','gy'],[11,'K','j']].forEach(([ci, col, key]) => {
+                let result = rows.reduce((a, b) => a + (b[key] || 0), 0);
+                let cell = totalRow.getCell(ci);
+                cell.value = rows.length ? { formula: `SUM(${col}${first}:${col}${last})`, result } : 0;
+                cell.numFmt = '#,##0';
+            });
             totalRow.eachCell(cell => {
                 cell.font = { bold: true };
                 cell.fill = { type:'pattern', pattern:'solid', fgColor: { argb: themeColor } };
                 cell.border = { top:{style:'double'}, bottom:{style:'double'}, left:{style:'thin'}, right:{style:'thin'} };
             });
+            return { rows, first, last, totalRow: totalRow.number };
         }
 
+        // ✨ [v20.7] 강좌별 인원 표 - 인원수는 COUNTIF, 합계는 SUM 수식
+        //   opts.mode: 'subject'(강좌별 명단: 강좌 칸 한 줄에 과목 1개) / 'student'(학생별 명단: 강좌명 칸에 과목들이 쭉 적힘)
+        //   opts.refs: { sk, free, g3 } = { sheet(null이면 같은 시트), col, first, end } 인원을 세어올 명단 범위
         function addCourseCountTable(ws, courseCounts, opts) {
             opts = opts || {};
             let startCol = opts.startCol || 15; // 기본: O열부터 (과목별 명단, M열 비고 다음 한 칸 띄움)
             let titleRow = opts.titleRow || 2;
             let headerRow = opts.headerRow || 4;
+            let mode = opts.mode || 'subject';
+            let refs = opts.refs || null;
+            let colL = n => ws.getColumn(n).letter;
             ws.mergeCells(titleRow, startCol, titleRow, startCol+4);
             ws.getCell(titleRow, startCol).value = '강좌별 인원';
             ws.getCell(titleRow, startCol).font = { bold: true, size: 12 };
@@ -4993,7 +5008,19 @@ function addRosterDataRows(ws, rows, themeColor) {
                 cell.alignment = { horizontal: 'center' };
             });
 
+            // 강좌명 칸(예: 댄스)을 보고 해당 명단에서 인원을 세는 COUNTIF 수식
+            let countFormula = (ref, keyCell) => {
+                let rng = (ref.sheet ? xlQ(ref.sheet) + '!' : '') + `$${ref.col}$${ref.first}:$${ref.col}$${ref.end}`;
+                if (mode === 'student') {
+                    // 학생별 명단: " 댄스2부(목)(76900/0/0/0) , 요리1부(수)(...) " 처럼 과목이 한 칸에 적혀 있음
+                    return `COUNTIF(${rng},"* "&${keyCell}&"(*")+COUNTIF(${rng},"* "&${keyCell}&"?부(*")+COUNTIF(${rng},"* "&${keyCell}&"??부(*")`;
+                }
+                // 강좌별 명단: 강좌 칸이 "댄스" / "댄스2부(목)" / "댄스12부(목)" 인 줄을 셈 (N부 합산, 비슷한 이름의 다른 과목은 제외)
+                return `COUNTIF(${rng},${keyCell})+COUNTIF(${rng},${keyCell}&"?부*")+COUNTIF(${rng},${keyCell}&"??부*")`;
+            };
+
             let rIdx = headerRow + 1;
+            let firstDataRow = rIdx;
             let totSk=0, totFree=0, totG3=0;
             let displayIdx = 0; // ✨ 표시되는 행 기준으로 지그재그 배경색
             let shownCourseNames = new Set(); // ✨ 배드민턴 1부/2부가 중복으로 표시/집계되지 않게
@@ -5004,10 +5031,21 @@ function addRosterDataRows(ws, rows, themeColor) {
                 let c = courseCounts[courseKey] || { sk: 0, free: 0, g3: 0 };
                 totSk += c.sk; totFree += c.free; totG3 += c.g3;
                 if (c.sk + c.free + c.g3 === 0) return; // ✨ 수익자/초3/자유수강 모두 0명인 과목은 표에서 제외
-                let row = ws.getRow(rIdx++);
+                let rn = rIdx++;
+                let row = ws.getRow(rn);
                 let zebra = displayIdx % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
                 displayIdx++;
-                let vals = [courseKey, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
+                let keyCell = `$${colL(startCol)}${rn}`;
+                let vals;
+                if (refs) {
+                    vals = [courseKey,
+                        { formula: countFormula(refs.sk, keyCell), result: c.sk },
+                        { formula: countFormula(refs.free, keyCell), result: c.free },
+                        { formula: countFormula(refs.g3, keyCell), result: c.g3 },
+                        { formula: `SUM(${colL(startCol+1)}${rn}:${colL(startCol+3)}${rn})`, result: c.sk + c.free + c.g3 }];
+                } else {
+                    vals = [courseKey, c.sk, c.free, c.g3, c.sk+c.free+c.g3];
+                }
                 vals.forEach((v, i) => {
                     let cell = row.getCell(startCol+i);
                     cell.value = v;
@@ -5018,7 +5056,16 @@ function addRosterDataRows(ws, rows, themeColor) {
             });
 
             let totRow = ws.getRow(rIdx);
-            let totVals = ['총합계', totSk, totFree, totG3, totSk+totFree+totG3];
+            let lastDataRow = rIdx - 1;
+            let totVals;
+            if (refs && lastDataRow >= firstDataRow) {
+                let sumCol = i => ({ formula: `SUM(${colL(startCol+i)}${firstDataRow}:${colL(startCol+i)}${lastDataRow})` });
+                totVals = ['총합계',
+                    { ...sumCol(1), result: totSk }, { ...sumCol(2), result: totFree }, { ...sumCol(3), result: totG3 },
+                    { formula: `SUM(${colL(startCol+1)}${rIdx}:${colL(startCol+3)}${rIdx})`, result: totSk+totFree+totG3 }];
+            } else {
+                totVals = ['총합계', totSk, totFree, totG3, totSk+totFree+totG3];
+            }
             totVals.forEach((v, i) => {
                 let cell = totRow.getCell(startCol+i);
                 cell.value = v;
@@ -5031,10 +5078,19 @@ function addRosterDataRows(ws, rows, themeColor) {
         }
 
         // ✨ 과목별 수익자 상세 시트 (과목별·학생별 CMS 명단 공통)
-        function addSubjectDetailSheets(wb, subjectSkDetail, q) {
+        //   link = { sheet, rows } 이면 (강좌별 명단 저장) 상세 시트가 '강좌별 전체 수익자 명단'에서 학생을 자동으로 가져옴 (FILTER 대신 SMALL+IF 배열수식 사용 → 엑셀 어느 버전에서나 동작)
+        //   link = null 이면 (학생별 명단 저장) 학생 줄은 값, 인원수·합계만 수식
+        function addSubjectDetailSheets(wb, subjectSkDetail, q, link) {
            // ✨ 과목별 수익자 상세 시트 공통 생성 함수 (캡처해주신 디자인 그대로)
-            function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q) {
+            const BUF = 60;      // 명단 아래에 미리 만들어 두는 여유 줄 (학생이 늘어도 자동으로 채워짐)
+            const MAXR = 3000;   // 원본 명단에서 찾아볼 마지막 줄
+            function buildSubjectDetailSheet(wb, subName, feeLabel, rows, q, feeKey) {
                 let ws = wb.addWorksheet(safeSheetName(`${subName}-${feeLabel}`));
+                let sortedRows = [...rows].sort((a, b) => (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum));
+                let n = sortedRows.length;
+                let linked = !!link;
+                let endR = 5 + n + (linked ? BUF : 100); // 합계·인원수를 세는 마지막 줄 (여유 포함)
+                let totalAmt = rows.reduce((a,b)=>a+b.amount,0);
 
                 // 제목: 병합 + 가운데 정렬
                 ws.mergeCells('A2:H2');
@@ -5044,14 +5100,15 @@ function addRosterDataRows(ws, rows, themeColor) {
                 ws.getCell('A2').border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
                 ws.getRow(2).height = 22;
 
-                // 4행: 과목명 / 값 / 인원수 / 총 합계 요약 줄
-                let totalAmt = rows.reduce((a,b)=>a+b.amount,0);
+                // 4행: 과목명 / 값 / 인원수 / 총 합계 요약 줄 (인원수·총 합계는 수식)
                 let r4 = ws.getRow(4);
                 r4.getCell(1).value = '과목명';
                 r4.getCell(2).value = subName;
-                r4.getCell(3).value = `${rows.length}명`;
+                r4.getCell(3).value = linked
+                    ? { formula: `COUNT(F6:F${endR})&"명"`, result: `${n}명` }
+                    : { formula: `COUNTA(E6:E${endR})&"명"`, result: `${n}명` };
                 r4.getCell(4).value = '총 합계';
-                r4.getCell(5).value = totalAmt;
+                r4.getCell(5).value = { formula: `SUM(F6:F${endR})`, result: totalAmt };
                 r4.getCell(5).numFmt = '#,##0';
                 ws.mergeCells(4, 5, 4, 8); // E4:H4 합계 금액 칸 병합
 
@@ -5083,19 +5140,57 @@ function addRosterDataRows(ws, rows, themeColor) {
                     cell.alignment = { horizontal: 'center' };
                 });
 
-                                // 학생 목록: 학번순 정렬 후 테두리 + 지원금 부족 학생 빨간 글씨
-                let sortedRows = [...rows].sort((a, b) => (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum));
-                sortedRows.forEach(r => {
-                    let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
-                    row.getCell(6).numFmt = '#,##0';
-                    let isShort = r.note === '지원금부족';
-                    row.eachCell(cell => {
-                        cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
-                        if (isShort) cell.font = { color: { argb: 'FFDC2626' } };
+                if (linked) {
+                    // ===== 수식으로 원본 명단에서 자동으로 가져오기 =====
+                    // 원본(강좌별 전체 수익자 명단)의 강좌 칸(L)이 이 과목(B4)이고, 해당 금액(G/J/K)이 0보다 큰 줄을 위에서부터 차례로 찾음
+                    const M = xlQ(link.sheet);
+                    const amtCol = { su: 'G', gy: 'J', j: 'K' }[feeKey];
+                    const Lr = `${M}!$L$4:$L$${MAXR}`;
+                    const Vr = `${M}!$${amtCol}$4:$${amtCol}$${MAXR}`;
+                    const nx = `MID(${Lr},LEN($B$4)+1,1)`;
+                    const cond = `((${Lr}=$B$4)+(LEFT(${Lr},LEN($B$4))=$B$4)*(${nx}>="0")*(${nx}<="9"))*(${Vr}>0)`;
+                    let matched = link.rows.filter(r => baseSubjectName(r.subject) === subName && (r[feeKey] || 0) > 0);
+                    // 사용자가 직접 한 줄 더 적거나 지워도 되도록 여유 줄까지 같은 수식을 채움
+                    for (let k = 0; k < n + BUF; k++) {
+                        let rn = 6 + k;
+                        let m = matched[k] || null;
+                        let row = ws.getRow(rn);
+                        let pick = (col, res) => ({ formula: `IF($J${rn}="","",INDEX(${M}!$${col}:$${col},$J${rn}))`, result: m ? res : '' });
+                        row.getCell(1).value = pick('A', '주간');
+                        row.getCell(2).value = pick('B', m ? m.grade : '');
+                        row.getCell(3).value = pick('C', m ? m.classNum : '');
+                        row.getCell(4).value = pick('D', m ? m.studentNum : '');
+                        row.getCell(5).value = pick('E', m ? m.name : '');
+                        row.getCell(6).value = pick(amtCol, m ? m[feeKey] : '');
+                        row.getCell(7).value = pick('L', m ? m.subject : '');
+                        row.getCell(8).value = { formula: `IF($J${rn}="","",INDEX(${M}!$M:$M,$J${rn})&"")`, result: m ? (m.note || '') : '' };
+                        // 숨김 도우미 칸(J): 원본 명단에서 k번째로 찾은 줄 번호 (배열수식)
+                        row.getCell(10).value = { formula: `IFERROR(SMALL(IF(${cond},ROW(${Lr})),ROWS(J$6:J${rn})),"")`, shareType: 'array', ref: `J${rn}`, result: m ? m._xr : '' };
+                        row.getCell(6).numFmt = '#,##0';
+                    }
+                    // 학생이 있는 줄만 테두리, 지원금 부족 학생은 빨간 글씨 (조건부 서식)
+                    ws.addConditionalFormatting({
+                        ref: `A6:H${endR}`,
+                        rules: [
+                            { type: 'expression', priority: 1, formulae: ['$H6="지원금부족"'], style: { font: { color: { argb: 'FFDC2626' } }, border: { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} } } },
+                            { type: 'expression', priority: 2, formulae: ['$E6<>""'], style: { border: { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} } } }
+                        ]
                     });
-                });
+                } else {
+                    // 학생 목록: 학번순 정렬 후 테두리 + 지원금 부족 학생 빨간 글씨
+                    sortedRows.forEach(r => {
+                        let row = ws.addRow(['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.subject, r.note || '']);
+                        row.getCell(6).numFmt = '#,##0';
+                        let isShort = r.note === '지원금부족';
+                        row.eachCell(cell => {
+                            cell.border = { top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'} };
+                            if (isShort) cell.font = { color: { argb: 'FFDC2626' } };
+                        });
+                    });
+                }
 
-                ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:16},{width:14}];
+                ws.columns = [{width:8},{width:8},{width:6},{width:6},{width:10},{width:12},{width:16},{width:14},{width:3},{width:8}];
+                if (linked) ws.getColumn(10).hidden = true; // 도우미 칸은 숨김
             }
 
             // 4. 과목별 수익자 상세 시트
@@ -5103,40 +5198,50 @@ function addRosterDataRows(ws, rows, themeColor) {
                 let detail = subjectSkDetail[subName];
 
                 if (detail.eduRows.length > 0) {
-                    buildSubjectDetailSheet(wb, subName, '교육비', detail.eduRows, q);
+                    buildSubjectDetailSheet(wb, subName, '교육비', detail.eduRows, q, 'su');
                 }
 
                 let feeType = detail.jRows.length > 0 ? 'j' : (detail.gyRows.length > 0 ? 'gy' : null);
                 if (feeType) {
                     let feeRows = feeType === 'j' ? detail.jRows : detail.gyRows;
                     let feeLabel = feeType === 'j' ? '재료비' : '교재비';
-                    buildSubjectDetailSheet(wb, subName, feeLabel, feeRows, q);
+                    buildSubjectDetailSheet(wb, subName, feeLabel, feeRows, q, feeType);
                 }
             });
         }
 
         async function generateAdminRoster(q) {
             const wb = new ExcelJS.Workbook();
+            wb.calcProperties = { fullCalcOnLoad: true }; // ✨ [v20.7] 열자마자 모든 수식을 다시 계산
             let { g3Rows, freeRows, skRows, courseCounts, subjectSkDetail } = computeAdminRosterData(q);
 
             // 1. 수익자 명단 (붉은 계열)
             let wsSk = wb.addWorksheet('강좌별 전체 수익자 명단');
             addRosterHeaderRow(wsSk, `${q}분기 (수익자) 목록`, 'FFFECACA');
-            addRosterDataRows(wsSk, skRows, 'FFFECACA');
-            addCourseCountTable(wsSk, courseCounts);
+            let rSk = addRosterDataRows(wsSk, skRows, 'FFFECACA');
 
          // 2. 지원대상자 명단 (하늘색 계열)
             let wsG3 = wb.addWorksheet(safeSheetName(`강좌별 전체 ${getG3LabelShort()}대상자 명단`));
             addRosterHeaderRow(wsG3, `${q}분기 (${getG3Label()}대상자) 목록`, 'FFBAE6FD');
-            addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
+            let rG3 = addRosterDataRows(wsG3, g3Rows, 'FFBAE6FD');
 
             // 3. 자유수강자 명단 (보라색 계열)
             let wsFree = wb.addWorksheet('강좌별 전체 자유수강자 명단');
             addRosterHeaderRow(wsFree, `${q}분기 (자유수강대상자) 목록`, 'FFE9D5FF');
-            addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
+            let rFree = addRosterDataRows(wsFree, freeRows, 'FFE9D5FF');
 
-            // 4. 과목별 수익자 상세 시트 (수강료/교재비/재료비)
-            addSubjectDetailSheets(wb, subjectSkDetail, q);
+            // ✨ [v20.7] 수익자 시트 오른쪽 '강좌별 인원' 표: 세 명단에서 COUNTIF로 인원을 세어옴 (총 합계 줄까지 범위에 넣어서, 줄을 끼워 넣어도 범위가 같이 늘어남)
+            addCourseCountTable(wsSk, courseCounts, {
+                mode: 'subject',
+                refs: {
+                    sk:   { sheet: null,        col: 'L', first: 4, end: rSk.totalRow },
+                    free: { sheet: wsFree.name, col: 'L', first: 4, end: rFree.totalRow },
+                    g3:   { sheet: wsG3.name,   col: 'L', first: 4, end: rG3.totalRow }
+                }
+            });
+
+            // 4. 과목별 수익자 상세 시트 (수강료/교재비/재료비) - 수익자 명단에서 자동으로 학생을 가져옴
+            addSubjectDetailSheets(wb, subjectSkDetail, q, { sheet: wsSk.name, rows: rSk.rows });
 
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -5255,6 +5360,7 @@ function addRosterDataRows(ws, rows, themeColor) {
             let sorted = [...rows].sort((a, b) => (a.grade - b.grade) || (a.classNum - b.classNum) || (a.studentNum - b.studentNum));
             let rIdx = 4;
             sorted.forEach(r => {
+                let rn = rIdx;
                 let row = ws.getRow(rIdx++);
                 let vals = ['주간', r.grade, r.classNum, r.studentNum, r.name, r.amount, r.su, r.g, r.s, r.gy, r.j, r.count, r.note || null, r.courses];
                 vals.forEach((v, i) => {
@@ -5263,6 +5369,8 @@ function addRosterDataRows(ws, rows, themeColor) {
                     cell.font = { name: FONT, size: 11 };
                     if (i !== 12) cell.alignment = { vertical: 'middle' };
                 });
+                // ✨ [v20.7] 대상금액 = 수강료 + 교재비 + 재료비 (수식) → 금액을 고치면 대상금액도 같이 바뀜
+                row.getCell(6).value = { formula: `G${rn}+J${rn}+K${rn}`, result: r.amount };
                 // ✨ 강좌명 칸: 지원금 부족으로 나뉜 과목은 빨간 글씨
                 if (r.courseParts && r.courseParts.some(p => p.red)) {
                     row.getCell(14).value = {
@@ -5314,17 +5422,32 @@ function addRosterDataRows(ws, rows, themeColor) {
                 ws.getColumn(col).width = Math.max(baseWidths[col], maxLen + 2);
             });
             ws._totalRowIdx = rIdx; // 총 합계 행 번호
+            ws._dataFirst = first; ws._dataLast = last;
             return ws;
         }
 
         async function generateAdminRosterByStudent(q) {
             const wb = new ExcelJS.Workbook();
+            wb.calcProperties = { fullCalcOnLoad: true }; // ✨ [v20.7] 열자마자 모든 수식을 다시 계산
             let { g3Rows, freeRows, skRows, courseCounts } = computeAdminRosterByStudent(q);
 
-            // 1. 수익자 (붉은 계열) + 맨 아래 강좌별 인원 표
+            // 1. 수익자 (붉은 계열)
             let wsSk = buildStudentRosterSheet(wb, '학생별 전체 수익자 명단', `${q}분기 (수익자) 목록`, skRows, 'FFFECACA');
+            // 2. 지원대상자 (하늘색 계열)
+            let wsG3 = buildStudentRosterSheet(wb, `학생별 전체 ${getG3LabelShort()}대상자 명단`, `${q}분기 (${getG3Label()} 대상자) 목록`, g3Rows, 'FFBAE6FD');
+            // 3. 자유수강자 (보라색 계열)
+            let wsFree = buildStudentRosterSheet(wb, '학생별 전체 자유수강자 명단', `${q}분기 (자유수강) 목록`, freeRows, 'FFE8D1FF');
+
+            // ✨ [v20.7] 수익자 탭 맨 아래 '강좌별 인원' 표: 세 명단의 강좌명 칸(N열)에서 COUNTIF로 인원을 세어옴
             let tblTitleRow = wsSk._totalRowIdx + 2;
-            addCourseCountTable(wsSk, courseCounts, { startCol: 10, titleRow: tblTitleRow, headerRow: tblTitleRow + 2 }); // J~N열
+            addCourseCountTable(wsSk, courseCounts, {
+                startCol: 10, titleRow: tblTitleRow, headerRow: tblTitleRow + 2, mode: 'student', // J~N열
+                refs: {
+                    sk:   { sheet: null,        col: 'N', first: 4, end: wsSk._totalRowIdx },
+                    free: { sheet: wsFree.name, col: 'N', first: 4, end: wsFree._totalRowIdx },
+                    g3:   { sheet: wsG3.name,   col: 'N', first: 4, end: wsG3._totalRowIdx }
+                }
+            });
             // 강좌명(J열)이 잘리지 않게 너비 보정
             let longestCourse = Object.keys(courseCounts).reduce((m, k) => {
                 let len = 0; for (let ch of k) len += /[ㄱ-힝]/.test(ch) ? 2 : 1;
@@ -5332,13 +5455,9 @@ function addRosterDataRows(ws, rows, themeColor) {
             }, 0);
             wsSk.getColumn('J').width = Math.max(wsSk.getColumn('J').width || 10.625, longestCourse + 2);
             ['K', 'L', 'M', 'N'].forEach(col => { wsSk.getColumn(col).width = Math.max(wsSk.getColumn(col).width || 9, 11); });
-            // 2. 지원대상자 (하늘색 계열)
-            buildStudentRosterSheet(wb, `학생별 전체 ${getG3LabelShort()}대상자 명단`, `${q}분기 (${getG3Label()} 대상자) 목록`, g3Rows, 'FFBAE6FD');
-            // 3. 자유수강자 (보라색 계열)
-            buildStudentRosterSheet(wb, '학생별 전체 자유수강자 명단', `${q}분기 (자유수강) 목록`, freeRows, 'FFE8D1FF');
 
-            // 4. 과목별 수익자 상세 시트 (과목별 명단과 똑같이: 수강료, 교재비 또는 재료비)
-            addSubjectDetailSheets(wb, computeAdminRosterData(q).subjectSkDetail, q);
+            // 4. 과목별 수익자 상세 시트 (과목별 명단과 똑같이: 수강료, 교재비 또는 재료비) - 학생별 명단은 과목이 한 칸에 묶여 있어서 학생 줄은 값, 인원수·합계만 수식
+            addSubjectDetailSheets(wb, computeAdminRosterData(q).subjectSkDetail, q, null);
 
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
