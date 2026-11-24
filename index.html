@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방과후 지원금 돌보미 V20.7</title>
+    <title>방과후 지원금 돌보미 V20.8</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
    <script src="https://unpkg.com/lucide@1.67.0/dist/umd/lucide.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -778,6 +778,21 @@
         .rf-src.s-g3 { background: #e0f2fe; color: #0369a1; }
         .rf-src.s-sk { background: #fef3c7; color: #b45309; }
         .rf-src.s-none { background: #f1f5f9; color: #64748b; }
+        /* ✨ [v20.8] 돌려받는 곳을 눌러서 다른 지원금으로 바꾸기 */
+        .rf-src-pick { cursor: pointer; display: inline-block; border-radius: 8px; padding: 1px 2px; border: 1px dashed transparent; }
+        .rf-src-pick:hover { border-color: #94a3b8; background: rgba(148,163,184,0.12); }
+        .rf-src-pick .rf-caret { font-size: 11px; color: #64748b; margin-left: 1px; }
+        .rf-src-pick .rf-pin { font-size: 12px; margin-right: 2px; }
+        #rfFundMenu { position: fixed; z-index: 100000; min-width: 230px; background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 28px rgba(15,23,42,0.28); padding: 6px; display: none; }
+        #rfFundMenu .rfm-h { font-size: 11.5px; color: #64748b; font-weight: 700; padding: 4px 8px 6px; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px; }
+        #rfFundMenu button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: 7px; font-size: 13.5px; font-weight: 700; cursor: pointer; color: #1e293b; }
+        #rfFundMenu button:hover { background: #f1f5f9; }
+        #rfFundMenu button.on { background: #fffbeb; color: #92400e; box-shadow: inset 0 0 0 1.5px #d4af37; }
+        #rfFundMenu button.m-free { color: #7c3aed; } #rfFundMenu button.m-g3 { color: #0369a1; } #rfFundMenu button.m-sk { color: #b45309; }
+        body.dark-mode #rfFundMenu { background: #1f2937; border-color: #475569; }
+        body.dark-mode #rfFundMenu button { color: #e5e7eb; } body.dark-mode #rfFundMenu button:hover { background: #374151; }
+        body.dark-mode #rfFundMenu button.m-free { color: #ddd6fe; } body.dark-mode #rfFundMenu button.m-g3 { color: #bae6fd; } body.dark-mode #rfFundMenu button.m-sk { color: #fde68a; }
+        body.dark-mode #rfFundMenu button.on { background: #422006; color: #fde68a; }
         .rf-note { font-size: 12.5px; font-weight: 700; margin-top: 2px; white-space: normal; }
         .rf-note.r { color: #dc2626; } .rf-note.b { color: #2563eb; } .rf-note.o { color: #c2410c; }
         .rf-cin { width: 64px; height: 30px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 6px; font-size: 14px; text-align: right; background: #fff; }
@@ -1848,7 +1863,7 @@
         </button>
         <div>
             <div class="brand">
-                <span class="brand-version">V20.7</span>
+                <span class="brand-version">V20.8</span>
                 <div class="brand-title">방과후 지원금 돌보미</div>
             </div>
     </div>
@@ -9877,7 +9892,7 @@ function updateG3LimitTotal() {
                     cs.rG = toNum(cs.rG) + p.row.fg; cs.rS = toNum(cs.rS) + p.row.fs; cs.rSu = toNum(cs.rSu) + p.row.su;
                     cs.rGy = toNum(cs.rGy) + p.row.gy; cs.rJ = toNum(cs.rJ) + p.row.j;
                     if (!Array.isArray(cs.refundLog)) cs.refundLog = [];
-                    cs.refundLog.push({ sessions: p.row.sessions, amount: p.row.su, month: it.month, g: p.row.fg, s: p.row.fs, gy: p.row.gy, j: p.row.j, source: 'cart', monthFirst: !!it.monthFirst });
+                    cs.refundLog.push({ sessions: p.row.sessions, amount: p.row.su, month: it.month, g: p.row.fg, s: p.row.fs, gy: p.row.gy, j: p.row.j, source: 'cart', monthFirst: !!it.monthFirst, fund: it.fund || undefined });
                     cl.list.push({ p, cs, li: cs.refundLog.length - 1 });
                 } catch (e) {}
             });
@@ -10012,6 +10027,11 @@ function updateG3LimitTotal() {
                 let srcList = defs.filter(d => rfFundAmt(x, d.k) > 0 && (S.fund === 'all' || S.fund === d.k));
                 let src = srcList.map(d => `<span class="rf-src s-${d.k}">${wait ? '예상 · ' : ''}${d.label}${srcList.length > 1 ? ' ' + rfFundAmt(x, d.k).toLocaleString() : ''}</span>`).join('');
                 if (!src) src = wait ? '<span class="rf-src s-none">적용하면 정해져요</span>' : '<span class="zero">—</span>';
+                // ✨ [v20.8] 지원금이 2개 이상(수익자 + 자유수강/초3)인 학생은 '돌려받는 곳'을 눌러 다른 지원금으로 바꿀 수 있음
+                if ((r.hasFree || r.hasG3) && (wait || (x.st === 'done' && x.li >= 0))) {
+                    let curFund = wait ? ((refundCart[x.idx] || {}).fund || '') : (((x.sub.refundLog || [])[x.li] || {}).fund || '');
+                    src = `<span class="rf-src-pick" onclick="rfFundMenu(event, '${r.id}', ${x.q}, ${x.sIdx}, ${wait ? -1 : x.li}, ${wait ? x.idx : -1})" title="눌러서 다른 지원금(예산)으로 바꾸기">${curFund ? '<span class="rf-pin">📌</span>' : ''}${src}<span class="rf-caret">▾</span></span>`;
+                }
                 let sess = wait ? `<input type="number" class="rf-cin" style="width:56px;" value="${x.sessions || ''}" onchange="updateRefundCartSessionCount(${x.idx}, this.value)" title="환불 차시 고치기"> 차시` : (x.sessions ? x.sessions + '차시' : '<span class="zero">—</span>');
                 let gyCell = wait ? `<input type="number" class="rf-cin" value="${x.gy || ''}" placeholder="0" onchange="updateRefundCartGy(${x.idx}, this.value)">` : num(v.gy);
                 let jCell = wait ? `<input type="number" class="rf-cin" value="${x.j || ''}" placeholder="0" onchange="updateRefundCartJ(${x.idx}, this.value)">` : num(v.j);
@@ -10045,6 +10065,58 @@ function updateG3LimitTotal() {
                 + (refundCart.length ? '<button type="button" class="rf-clear" onclick="clearRefundCart()">🧹 담은 것 비우기</button>' : '')
                 + `<span class="sep"></span><span>${S.q === 'all' ? '전체 분기' : S.q + '분기' + (S.cha.length ? ' ' + S.cha.slice().sort((a, b) => String(a === 'pre' ? 0 : (a === 'none' ? 9 : a)).localeCompare(String(b === 'pre' ? 0 : (b === 'none' ? 9 : b)))).map(k => k === 'pre' ? '수강전취소' : (k === 'none' ? '차 미지정' : k + '차')).join('·') : '')} 적용됨 <b>${dones.length}</b>건 · <b>${sumOf(dones).toLocaleString()}</b>원</span>`
                 + `<span>${fundSum}</span><div class="rf-sp"></div><span class="ok">● 자동 저장됨</span>`;
+        }
+        // ===== ✨ [v20.8] '돌려받는 곳'을 눌러 다른 지원금으로 바꾸기 =====
+        function rfCloseFundMenu() { let m = document.getElementById('rfFundMenu'); if (m) m.style.display = 'none'; }
+        function rfFundMenu(ev, id, q, sIdx, li, cartIdx) {
+            ev.stopPropagation();
+            let r = db.find(x => x.id == id);
+            if (!r) return;
+            let cur = '';
+            if (cartIdx >= 0) cur = (refundCart[cartIdx] || {}).fund || '';
+            else { let s = r[`q${q}`] && r[`q${q}`].subs[sIdx]; cur = ((s && s.refundLog && s.refundLog[li]) || {}).fund || ''; }
+            let m = document.getElementById('rfFundMenu');
+            if (!m) { m = document.createElement('div'); m.id = 'rfFundMenu'; document.body.appendChild(m); }
+            let opts = [['sk', '수익자 · 학부모 반환']];
+            if (r.hasFree) opts.push(['free', '자유수강권으로 복원']);
+            if (r.hasG3) opts.push(['g3', getG3Label() + '으로 복원']);
+            opts.push(['', '⚙️ 자동 (앞 차부터 수익자 → 자유수강 → ' + getG3LabelShort() + ')']);
+            m.innerHTML = `<div class="rfm-h">${rfEsc(r.name)} · 어디로 돌려받을까요?</div>`
+                + opts.map(o => `<button type="button" class="${o[0] ? 'm-' + o[0] : ''}${o[0] === cur ? ' on' : ''}" onclick="rfSetFund('${id}', ${q}, ${sIdx}, ${li}, ${cartIdx}, '${o[0]}')">${o[0] ? '📌 ' : ''}${rfEsc(o[1])}${o[0] === cur ? ' ✔' : ''}</button>`).join('');
+            m.style.display = 'block';
+            let b = ev.currentTarget.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+            let left = Math.min(Math.max(8, b.left), window.innerWidth - mw - 8);
+            let top = (b.bottom + mh + 8 > window.innerHeight) ? Math.max(8, b.top - mh - 4) : b.bottom + 4;
+            m.style.left = left + 'px'; m.style.top = top + 'px';
+        }
+        document.addEventListener('click', function (e) { let m = document.getElementById('rfFundMenu'); if (m && m.style.display !== 'none' && !m.contains(e.target)) rfCloseFundMenu(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') rfCloseFundMenu(); });
+        function rfToast(msg) {
+            let el = document.getElementById('refundToast');
+            if (!el) { alert(msg); return; }
+            el.innerText = msg; el.style.transition = ''; el.style.display = 'block'; el.style.opacity = '1';
+            clearTimeout(window._refundToastTimer);
+            window._refundToastTimer = setTimeout(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0'; setTimeout(() => { el.style.display = 'none'; }, 400); }, 2600);
+        }
+        function rfSetFund(id, q, sIdx, li, cartIdx, val) {
+            rfCloseFundMenu();
+            if (cartIdx >= 0) {
+                let it = refundCart[cartIdx];
+                if (!it) return;
+                if (val) it.fund = val; else delete it.fund;
+                rfRefresh();
+            } else {
+                window._rfNoDetail = true;
+                try { setRefundLogFund(id, q, sIdx, li, val); } finally { window._rfNoDetail = false; }
+                if (rfIsOpen()) rfRefresh();
+            }
+            // 고른 지원금에서 다 돌려받지 못하면 알려 줌 (그 지원금으로 낸 금액이 모자라는 경우)
+            if (!val) return;
+            let row = rfRows.find(x => x.r.id == id && x.q == q && x.sIdx == sIdx && (cartIdx >= 0 ? (x.st === 'wait' && x.idx === cartIdx) : (x.st === 'done' && x.li === li)));
+            if (!row || !row.parts) return;
+            let d = rfFundDefs().find(z => z.k === val), got = rfFundAmt(row, val), total = row.su + row.gy + row.j;
+            if (got <= 0) rfToast(`${d.chip}에서는 돌려받을 수 있는 금액이 없어서 바뀌지 않았어요.\n(그 지원금으로 낸 금액이 없어요)`);
+            else if (got < total) rfToast(`${d.chip}에서는 ${got.toLocaleString()}원만 돌려받을 수 있어요.\n나머지는 다른 곳으로 나가요.`);
         }
         // 적용된 환불 한 건 되돌리기 (학생 상세창의 🗑️ 와 같은 처리)
         function rfUndo(id, q, sIdx, li) {
@@ -11497,7 +11569,7 @@ function updateG3LimitTotal() {
                 s.rJ = toNum(s.rJ) + addJ;
 
                  if (!s.refundLog) s.refundLog = [];
-                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '', g: addG, s: addS, gy: addGy, j: addJ, source: 'cart', monthFirst: !!item.monthFirst });
+                s.refundLog.push({ date: today, sessions: item.sessionCount, amount: preview.amount, month: item.month, reason: item.reason || '', g: addG, s: addS, gy: addGy, j: addJ, source: 'cart', monthFirst: !!item.monthFirst, ...(item.fund ? { fund: item.fund } : {}) }); // ✨ [v20.8] 담을 때 정한 '돌려받는 곳' 유지
 
                 appliedCount++;
             });
@@ -11686,12 +11758,14 @@ function updateG3LimitTotal() {
             if (!s || !s.refundLog || !s.refundLog[li]) return;
             if (val) s.refundLog[li].fund = val; else delete s.refundLog[li].fund;
             persistData();
-            let modal = document.getElementById('detailModal');
-            let bodyEl = modal ? modal.querySelector('.detail-body') : null;
-            let keep = bodyEl ? bodyEl.scrollTop : 0;
-            showDetailModal(id);
-            let bodyEl2 = modal ? modal.querySelector('.detail-body') : null;
-            if (bodyEl2) bodyEl2.scrollTop = keep;
+            if (!window._rfNoDetail) { // ✨ [v20.8] 환불 관리 화면에서 바꿀 때는 학생 상세창을 띄우지 않음
+                let modal = document.getElementById('detailModal');
+                let bodyEl = modal ? modal.querySelector('.detail-body') : null;
+                let keep = bodyEl ? bodyEl.scrollTop : 0;
+                showDetailModal(id);
+                let bodyEl2 = modal ? modal.querySelector('.detail-body') : null;
+                if (bodyEl2) bodyEl2.scrollTop = keep;
+            }
             if (typeof renderGrid === 'function') renderGrid();
         }
         function updateRefundLogReason(id, q, sIdx, li, val) {
